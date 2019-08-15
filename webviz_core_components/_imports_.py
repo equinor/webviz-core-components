@@ -1,5 +1,5 @@
-from .WebvizCoreComponents import WebvizCoreComponents
+from .WebvizContainerPlaceholder import WebvizContainerPlaceholder
 
 __all__ = [
-    "WebvizCoreComponents"
+    "WebvizContainerPlaceholder"
 ]

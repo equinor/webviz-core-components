@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import WebvizCoreComponents from './components/WebvizCoreComponents.react';
+import WebvizContainerPlaceholder from './components/WebvizContainerPlaceholder.react';
 
 export {
-    WebvizCoreComponents
+    WebvizContainerPlaceholder
 };

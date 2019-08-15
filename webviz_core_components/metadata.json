@@ -1,0 +1,63 @@
+{
+  "src/lib/components/WebvizContainerPlaceholder.react.js": {
+    "description": "WebvizContainerPlaceholder is a fundamental webviz dash component.\nIt takes a property, `label`, and displays it.\nIt renders an input with the property `value` which is editable by the user.",
+    "displayName": "WebvizContainerPlaceholder",
+    "methods": [],
+    "props": {
+      "id": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The ID used to identify this component in Dash callbacks"
+      },
+      "children": {
+        "type": {
+          "name": "node"
+        },
+        "required": false,
+        "description": "The children of this component"
+      },
+      "buttons": {
+        "type": {
+          "name": "array"
+        },
+        "required": false,
+        "description": "",
+        "defaultValue": {
+          "value": "[]",
+          "computed": false
+        }
+      },
+      "csv_data": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "",
+        "defaultValue": {
+          "value": "''",
+          "computed": false
+        }
+      },
+      "csv_requested": {
+        "type": {
+          "name": "number"
+        },
+        "required": false,
+        "description": "An integer that represents the number of times\nthat the csv download button has been clicked.",
+        "defaultValue": {
+          "value": "0",
+          "computed": false
+        }
+      },
+      "setProps": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "Dash-assigned callback that should be called whenever any of the\nproperties change"
+      }
+    }
+  }
+}

@@ -1,20 +1,10 @@
-import json
-import os
 from setuptools import setup
 
-
-with open(os.path.join('webviz_core_components', 'package.json')) as f:
-    package = json.load(f)
-
-package_name = package["name"].replace(" ", "_").replace("-", "_")
-
 setup(
-    name=package_name,
-    version=package["version"],
-    author=package['author'],
-    packages=[package_name],
+    name="webviz_core_components",
+    author="R&T Equinor",
+    packages=["webviz_core_components"],
     include_package_data=True,
-    license=package['license'],
-    description=package.get('description', package_name),
+    license="LGPLv3",
     install_requires=[]
 )

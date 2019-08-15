@@ -1,7 +1,7 @@
 /* eslint no-magic-numbers: 0 */
 import React, {Component} from 'react';
 
-import { WebvizCoreComponents } from '../lib';
+import { WebvizContainerPlaceholder } from '../lib';
 
 class App extends Component {
 
@@ -20,10 +20,15 @@ class App extends Component {
     render() {
         return (
             <div>
-                <WebvizCoreComponents
+                <WebvizContainerPlaceholder
                     setProps={this.setProps}
                     {...this.state}
                 />
+                <WebvizContainerPlaceholder
+                    setProps={this.setProps}
+                    {...this.state}
+                />
+
             </div>
         )
     }
