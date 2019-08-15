@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileCsv, faAddressCard, faQuestionCircle, faCameraRetro } from '@fortawesome/free-solid-svg-icons'
 
+import htmlToImage from 'html-to-image';
+import { saveAs } from 'file-saver';
+
 import './webviz_container_component.css'
-
-
-
 
 
 class WebvizToolbarButton extends Component {
@@ -25,6 +25,16 @@ class WebvizToolbarButton extends Component {
 }
 
 
+function download_file(blob, filename){
+    const link = document.createElement("a");
+
+    link.setAttribute("href", URL.createObjectURL(blob));
+    link.setAttribute("download", filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 /**
  * WebvizContainerPlaceholder is a fundamental webviz dash component.
@@ -35,17 +45,9 @@ export default class WebvizContainerPlaceholder extends Component {
 
     componentDidUpdate(prevProps) {
         if (this.props.csv_data !== '') {
-            const blob = new Blob([this.props.csv_data], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-
-            link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", "webviz-data-download.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            this.props.setProps({csv_data: ''});
+            const blob = new Blob([this.props.csv_data], { type: 'text/csv;charset=utf-8;' })
+            download_file(blob, 'webviz-data.csv')
+            this.props.setProps({csv_data: ''})
         }
     }
 
@@ -53,8 +55,8 @@ export default class WebvizContainerPlaceholder extends Component {
         const { id } = this.props;
 
         return (
-            <div id={id} className='webviz-config-container-wrapper'>
-                <div style={{paddingRight: '15px'}}>
+            <div className='webviz-config-container-wrapper'>
+                <div id={id} style={{paddingRight: '15px'}}>
                     {this.props.children}
                 </div>
                 <div className='webviz-config-container-buttonbar'>
@@ -68,13 +70,14 @@ export default class WebvizContainerPlaceholder extends Component {
                         <WebvizToolbarButton icon={faQuestionCircle} tooltip='Guided tour' />
                     }
                     { this.props.buttons.includes('screenshot') &&
-                        <WebvizToolbarButton icon={faCameraRetro} tooltip="Take screenshot" />
+                        <WebvizToolbarButton icon={faCameraRetro} tooltip="Take screenshot" onClick={() => htmlToImage.toBlob(document.getElementById(this.props.id)).then(function (blob) {download_file(blob, 'webviz-screenshot-hei.png')}) }/>
                     }
                 </div>
             </div>
         );
     }
 }
+
             
 WebvizContainerPlaceholder.defaultProps = {
     csv_requested: 0,

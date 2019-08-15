@@ -12,8 +12,9 @@ It renders an input with the property `value` which is editable by the user.
 Keyword arguments:
 - children (a list of or a singular dash component, string or number; optional): The children of this component
 - id (string; optional): The ID used to identify this component in Dash callbacks
-- buttons (list; optional)
-- csv_data (string; default '')
+- buttons (list; optional): Array of strings, representing which buttons to render. Full set is
+['csv_file', 'contact_person', 'guided_tour', 'screenshot']
+- csv_data (string; default ''): The csv data to download (when user clicks on the download csv file icon.
 - csv_requested (number; default 0): An integer that represents the number of times
 that the csv download button has been clicked."""
     @_explicitize_args

@@ -23,7 +23,7 @@
           "name": "array"
         },
         "required": false,
-        "description": "",
+        "description": "Array of strings, representing which buttons to render. Full set is\n['csv_file', 'contact_person', 'guided_tour', 'screenshot']",
         "defaultValue": {
           "value": "[]",
           "computed": false
@@ -34,7 +34,7 @@
           "name": "string"
         },
         "required": false,
-        "description": "",
+        "description": "The csv data to download (when user clicks on the download csv file icon.",
         "defaultValue": {
           "value": "''",
           "computed": false
