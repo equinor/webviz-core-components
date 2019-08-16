@@ -11,19 +11,21 @@ It renders an input with the property `value` which is editable by the user.
 
 Keyword arguments:
 - children (a list of or a singular dash component, string or number; optional): The children of this component
-- id (string; optional): The ID used to identify this component in Dash callbacks
-- buttons (list; optional): Array of strings, representing which buttons to render. Full set is
-['csv_file', 'contact_person', 'guided_tour', 'screenshot']
-- csv_data (string; default ''): The csv data to download (when user clicks on the download csv file icon.
+- id (string; default 'some-id'): The ID used to identify this component in Dash callbacks
+- buttons (list; default ['screenshot', 'contact_person', 'expand']): Array of strings, representing which buttons to render. Full set is
+['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']
+- contact_person (dict with strings as keys and values of type string; default {'name': 'Kari Normann', 'phone': '0249'}): A dictionary of information regarding contact person for the data content.
+Valid keys are 'name', 'email' and 'phone'.
+- csv_string (string; default ''): The csv data to download (when user clicks on the download csv file icon.
 - csv_requested (number; default 0): An integer that represents the number of times
 that the csv download button has been clicked."""
     @_explicitize_args
-    def __init__(self, children=None, id=Component.UNDEFINED, buttons=Component.UNDEFINED, csv_data=Component.UNDEFINED, csv_requested=Component.UNDEFINED, **kwargs):
-        self._prop_names = ['children', 'id', 'buttons', 'csv_data', 'csv_requested']
+    def __init__(self, children=None, id=Component.UNDEFINED, buttons=Component.UNDEFINED, contact_person=Component.UNDEFINED, csv_string=Component.UNDEFINED, csv_requested=Component.UNDEFINED, **kwargs):
+        self._prop_names = ['children', 'id', 'buttons', 'contact_person', 'csv_string', 'csv_requested']
         self._type = 'WebvizContainerPlaceholder'
         self._namespace = 'webviz_core_components'
         self._valid_wildcard_attributes =            []
-        self.available_properties = ['children', 'id', 'buttons', 'csv_data', 'csv_requested']
+        self.available_properties = ['children', 'id', 'buttons', 'contact_person', 'csv_string', 'csv_requested']
         self.available_wildcard_properties =            []
 
         _explicit_args = kwargs.pop('_explicit_args')

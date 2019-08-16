@@ -9,7 +9,11 @@
           "name": "string"
         },
         "required": false,
-        "description": "The ID used to identify this component in Dash callbacks"
+        "description": "The ID used to identify this component in Dash callbacks",
+        "defaultValue": {
+          "value": "'some-id'",
+          "computed": false
+        }
       },
       "children": {
         "type": {
@@ -23,13 +27,27 @@
           "name": "array"
         },
         "required": false,
-        "description": "Array of strings, representing which buttons to render. Full set is\n['csv_file', 'contact_person', 'guided_tour', 'screenshot']",
+        "description": "Array of strings, representing which buttons to render. Full set is\n['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']",
         "defaultValue": {
-          "value": "[]",
+          "value": "['screenshot', 'contact_person', 'expand']",
           "computed": false
         }
       },
-      "csv_data": {
+      "contact_person": {
+        "type": {
+          "name": "objectOf",
+          "value": {
+            "name": "string"
+          }
+        },
+        "required": false,
+        "description": "A dictionary of information regarding contact person for the data content.\nValid keys are 'name', 'email' and 'phone'.",
+        "defaultValue": {
+          "value": "{'name': 'Kari Normann', 'phone': '0249'}",
+          "computed": false
+        }
+      },
+      "csv_string": {
         "type": {
           "name": "string"
         },

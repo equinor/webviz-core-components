@@ -25,7 +25,6 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.21",
     "@fortawesome/free-solid-svg-icons": "^5.10.1",
     "@fortawesome/react-fontawesome": "^0.1.4",
-    "file-saver": "^2.0.2",
     "html-to-image": "^0.1.1",
     "ramda": "^0.26.1"
   },
