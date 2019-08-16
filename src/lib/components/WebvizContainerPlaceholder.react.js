@@ -69,10 +69,10 @@ export default class WebvizContainerPlaceholder extends Component {
             
 WebvizContainerPlaceholder.defaultProps = {
     id: 'some-id',
+    buttons: ['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand'],
+    contact_person: {},
     csv_requested: 0,
-    buttons: ['screenshot', 'contact_person', 'expand'],
-    csv_string: '',
-    contact_person: {'name': 'Kari Normann', 'phone': '0249'}
+    csv_string: ''
 };
 
 WebvizContainerPlaceholder.propTypes = {
