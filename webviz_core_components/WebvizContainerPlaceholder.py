@@ -12,9 +12,9 @@ It renders an input with the property `value` which is editable by the user.
 Keyword arguments:
 - children (a list of or a singular dash component, string or number; optional): The children of this component
 - id (string; default 'some-id'): The ID used to identify this component in Dash callbacks
-- buttons (list; default ['screenshot', 'contact_person', 'expand']): Array of strings, representing which buttons to render. Full set is
+- buttons (list; default ['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']): Array of strings, representing which buttons to render. Full set is
 ['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']
-- contact_person (dict with strings as keys and values of type string; default {'name': 'Kari Normann', 'phone': '0249'}): A dictionary of information regarding contact person for the data content.
+- contact_person (dict with strings as keys and values of type string; optional): A dictionary of information regarding contact person for the data content.
 Valid keys are 'name', 'email' and 'phone'.
 - csv_string (string; default ''): The csv data to download (when user clicks on the download csv file icon.
 - csv_requested (number; default 0): An integer that represents the number of times

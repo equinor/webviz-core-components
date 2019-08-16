@@ -29,7 +29,7 @@
         "required": false,
         "description": "Array of strings, representing which buttons to render. Full set is\n['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']",
         "defaultValue": {
-          "value": "['screenshot', 'contact_person', 'expand']",
+          "value": "['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']",
           "computed": false
         }
       },
@@ -43,7 +43,7 @@
         "required": false,
         "description": "A dictionary of information regarding contact person for the data content.\nValid keys are 'name', 'email' and 'phone'.",
         "defaultValue": {
-          "value": "{'name': 'Kari Normann', 'phone': '0249'}",
+          "value": "{}",
           "computed": false
         }
       },

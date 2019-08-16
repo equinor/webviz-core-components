@@ -18,9 +18,9 @@ app.layout = html.Div([
     html.Div(id='output')
 ])
 
-@app.callback(Output('container', 'csv_data'),
+@app.callback(Output('container', 'csv_string'),
               [Input('container', 'csv_requested')])
-def display_output(csv_requested):
+def return_csv_string(csv_requested):
     if not csv_requested:
         return ''
     else:
