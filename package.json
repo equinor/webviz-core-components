@@ -13,9 +13,10 @@
   "scripts": {
     "start": "webpack-serve ./webpack.serve.config.js --open",
     "build:js": "webpack --mode production",
+    "build:js-dev": "webpack --mode development",
     "build:py_and_r": "dash-generate-components ./src/lib/components webviz_core_components -p package-info.json --r-prefix ''",
     "build:py_and_r-activated": "(. venv/bin/activate || venv\\scripts\\activate && npm run build:py_and_r)",
-    "build": "npm run build:js && npm run build:py_and_r",
+    "build": "npm run build:js && npm run build:js-dev && npm run build:py_and_r",
     "build:activated": "npm run build:js && npm run build:py_and_r-activated"
   },
   "author": "R&T Equinor <akia@equinor.com>",

@@ -18,3 +18,20 @@ export default class WebvizToolbarButton extends Component {
         );
     }
 }
+
+WebvizToolbarButton.propTypes = {
+    /**
+     * The ID used to identify this component in Dash callbacks
+     */
+    id: PropTypes.string,
+
+    /**
+     * If the button should append the selected button css class
+     */
+    selected: PropTypes.bool,
+
+    /**
+     * The tooltip string to show on hover.
+     */
+    tooltip: PropTypes.string,
+};

@@ -29,7 +29,7 @@ export default class WebvizContainerPlaceholder extends Component {
         }
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate() {
         if (this.props.zip_base64 !== '') {
             const now = new Date()
             const filename = `webviz-data-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}.zip`;

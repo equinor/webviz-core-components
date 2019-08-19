@@ -3,6 +3,8 @@ NAMESPACE
 
 R/
 man/
+inst/
+
 # Created by .ignore support plugin (hsz.mobi)
 ### VisualStudioCode template
 .vscode/*
