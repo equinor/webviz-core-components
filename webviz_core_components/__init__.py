@@ -43,7 +43,7 @@ _js_dist = [
         'namespace': package_name
     },
     {
-        'relative_package_path': 'webviz_core_components.min.js.map',
+        'relative_package_path': 'webviz_core_components.dev.js',
         
         'namespace': package_name
     }
