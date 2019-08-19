@@ -30,10 +30,12 @@ export default class WebvizContainerPlaceholder extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.csv_string !== '') {
-            const blob = new Blob([this.props.csv_string], { type: 'text/csv;charset=utf-8;' })
-            download_file(blob, 'webviz-data.csv')
-            this.props.setProps({csv_string: ''})
+        if (this.props.zip_base64 !== '') {
+            const now = new Date()
+            const filename = `webviz-data-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}.zip`;
+
+            download_file(filename, this.props.zip_base64)
+            this.props.setProps({zip_base64: ''})
         }
     }
 
@@ -47,7 +49,7 @@ export default class WebvizContainerPlaceholder extends Component {
                 </div>
                 <div className='webviz-config-container-buttonbar'>
                     { this.props.buttons.includes('csv_file') &&
-                        <WebvizToolbarButton icon={faFileCsv} tooltip='Download data' onClick={() => this.props.setProps({csv_requested: this.props.csv_requested + 1})} />
+                        <WebvizToolbarButton icon={faFileCsv} tooltip='Download data' onClick={() => this.props.setProps({data_requested: this.props.data_requested + 1})} />
                     }
                     { this.props.buttons.includes('contact_person') && Object.keys(this.props.contact_person).length > 0 &&
                         <WebvizToolbarButton icon={faAddressCard} tooltip='Contact person' selected={this.state.showOverlay} onClick={() => this.setState({showOverlay: !this.state.showOverlay})} />
@@ -71,8 +73,8 @@ WebvizContainerPlaceholder.defaultProps = {
     id: 'some-id',
     buttons: ['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand'],
     contact_person: {},
-    csv_requested: 0,
-    csv_string: ''
+    data_requested: 0,
+    zip_base64: ''
 };
 
 WebvizContainerPlaceholder.propTypes = {
@@ -99,15 +101,15 @@ WebvizContainerPlaceholder.propTypes = {
     contact_person: PropTypes.objectOf(PropTypes.string),
 
     /**
-     * The csv data to download (when user clicks on the download csv file icon.
+     * The zip archive to download encoded as base64 (when user clicks on the download csv file icon).
      */
-    csv_string: PropTypes.string,
+    zip_base64: PropTypes.string,
 
     /**
      * An integer that represents the number of times
-     * that the csv download button has been clicked.
+     * that the data download button has been clicked.
      */
-    csv_requested: PropTypes.number,
+    data_requested: PropTypes.number,
 
     /**
      * Dash-assigned callback that should be called whenever any of the

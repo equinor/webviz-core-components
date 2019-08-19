@@ -47,23 +47,23 @@
           "computed": false
         }
       },
-      "csv_string": {
+      "zip_base64": {
         "type": {
           "name": "string"
         },
         "required": false,
-        "description": "The csv data to download (when user clicks on the download csv file icon.",
+        "description": "The zip archive to download encoded as base64 (when user clicks on the download csv file icon).",
         "defaultValue": {
           "value": "''",
           "computed": false
         }
       },
-      "csv_requested": {
+      "data_requested": {
         "type": {
           "name": "number"
         },
         "required": false,
-        "description": "An integer that represents the number of times\nthat the csv download button has been clicked.",
+        "description": "An integer that represents the number of times\nthat the data download button has been clicked.",
         "defaultValue": {
           "value": "0",
           "computed": false
