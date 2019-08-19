@@ -22,3 +22,21 @@ export default class WebvizContentOverlay extends Component {
         );
     }
 }
+
+WebvizContentOverlay.propTypes = {
+    /**
+     * The ID used to identify this component in Dash callbacks
+     */
+    id: PropTypes.string,
+
+    /**
+     * If the overlay should be visible or not.
+     */
+    showOverlay: PropTypes.bool,
+
+    /**
+     * A dictionary of information regarding contact person for the data content.
+     * Valid keys are 'name', 'email' and 'phone'.
+     */
+    contact_person: PropTypes.objectOf(PropTypes.string)
+};
