@@ -1,5 +1,7 @@
 # webviz-core-components
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/990fbfacad65467783e8babe792d565b)](https://app.codacy.com/app/anders-kiaer/webviz-core-components?utm_source=github.com&utm_medium=referral&utm_content=equinor/webviz-core-components&utm_campaign=Badge_Grade_Dashboard)
+
 webviz-core-components is a Dash component library.
 
 Get started with:
