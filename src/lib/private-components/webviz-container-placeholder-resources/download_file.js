@@ -1,7 +1,12 @@
-export default function download_file(filename, data){
+export default function download_file(filename, data, binary=false){
     const link = document.createElement('a');
 
-    link.setAttribute('href', 'data:text/plain;base64,' + data);
+    if(binary){
+        link.setAttribute('href', URL.createObjectURL(data));
+    } else {
+        link.setAttribute('href', 'data:text/plain;base64,' + data);
+    }
+
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
 

@@ -27,9 +27,9 @@
           "name": "array"
         },
         "required": false,
-        "description": "Array of strings, representing which buttons to render. Full set is\n['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']",
+        "description": "Array of strings, representing which buttons to render. Full set is\n['download_zip', 'contact_person', 'guided_tour', 'screenshot', 'expand']",
         "defaultValue": {
-          "value": "['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']",
+          "value": "['screenshot', 'expand', 'download_zip', 'guided_tour', 'contact_person']",
           "computed": false
         }
       },

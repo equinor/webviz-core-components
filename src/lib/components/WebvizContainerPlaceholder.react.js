@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import htmlToImage from 'html-to-image';
 
-import { faFileCsv,
+import { faFileArchive,
          faAddressCard,
          faQuestionCircle,
          faCameraRetro,
@@ -48,20 +48,20 @@ export default class WebvizContainerPlaceholder extends Component {
                     <WebvizContentOverlay id={'overlay'.concat(this.props.id)} contactPerson={this.props.contact_person} showOverlay={this.state.showOverlay} />
                 </div>
                 <div className='webviz-config-container-buttonbar'>
-                    { this.props.buttons.includes('csv_file') &&
-                        <WebvizToolbarButton icon={faFileCsv} tooltip='Download data' onClick={() => this.props.setProps({data_requested: this.props.data_requested + 1})} />
+                    { this.props.buttons.includes('screenshot') &&
+                        <WebvizToolbarButton icon={faCameraRetro} tooltip="Take screenshot" onClick={() => htmlToImage.toBlob(document.getElementById(this.props.id)).then(function (blob) {download_file('webviz-screenshot.png', blob, true)}) }/>
                     }
-                    { this.props.buttons.includes('contact_person') && Object.keys(this.props.contact_person).length > 0 &&
-                        <WebvizToolbarButton icon={faAddressCard} tooltip='Contact person' selected={this.state.showOverlay} onClick={() => this.setState({showOverlay: !this.state.showOverlay})} />
+                    { this.props.buttons.includes('expand') &&
+                        <WebvizToolbarButton icon={faExpand} tooltip="Expand container" selected={this.state.expanded} onClick={() => this.setState({expanded: !this.state.expanded})} />
+                    }
+                    { this.props.buttons.includes('download_zip') &&
+                        <WebvizToolbarButton icon={faFileArchive} tooltip='Download data' onClick={() => this.props.setProps({data_requested: this.props.data_requested + 1})} />
                     }
                     { this.props.buttons.includes('guided_tour') &&
                         <WebvizToolbarButton icon={faQuestionCircle} tooltip='Guided tour' />
                     }
-                    { this.props.buttons.includes('screenshot') &&
-                        <WebvizToolbarButton icon={faCameraRetro} tooltip="Take screenshot" onClick={() => htmlToImage.toBlob(document.getElementById(this.props.id)).then(function (blob) {download_file(blob, 'webviz-screenshot-hei.png')}) }/>
-                    }
-                    { this.props.buttons.includes('expand') &&
-                        <WebvizToolbarButton icon={faExpand} tooltip="Expand container" selected={this.state.expanded} onClick={() => this.setState({expanded: !this.state.expanded})} />
+                    { this.props.buttons.includes('contact_person') && Object.keys(this.props.contact_person).length > 0 &&
+                        <WebvizToolbarButton icon={faAddressCard} tooltip='Contact person' selected={this.state.showOverlay} onClick={() => this.setState({showOverlay: !this.state.showOverlay})} />
                     }
                 </div>
             </div>
@@ -71,7 +71,7 @@ export default class WebvizContainerPlaceholder extends Component {
             
 WebvizContainerPlaceholder.defaultProps = {
     id: 'some-id',
-    buttons: ['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand'],
+    buttons: ['screenshot', 'expand', 'download_zip', 'guided_tour', 'contact_person'],
     contact_person: {},
     data_requested: 0,
     zip_base64: ''
@@ -90,7 +90,7 @@ WebvizContainerPlaceholder.propTypes = {
 
     /**
      * Array of strings, representing which buttons to render. Full set is
-     * ['csv_file', 'contact_person', 'guided_tour', 'screenshot', 'expand']
+     * ['download_zip', 'contact_person', 'guided_tour', 'screenshot', 'expand']
      */
     buttons: PropTypes.array,
 
