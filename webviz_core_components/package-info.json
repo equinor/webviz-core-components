@@ -1,6 +1,5 @@
 {
   "name": "webviz_core_components",
-  "version": "0.0.1",
   "description": "Core components for webviz config",
   "repository": {
     "type": "git",
