@@ -10,9 +10,6 @@ services:
 python:
   - "3.6"
 
-matrix:
-  fast_finish: true
-
 before_install:
   - sudo apt-get -qq update
   - pip freeze | grep -vw "pip" | xargs pip uninstall -y
@@ -29,7 +26,7 @@ install:
 
 script:
   - npm run test
-  - npm run build:all
+  - npm run build
   - pip install .
   - pytest
 
