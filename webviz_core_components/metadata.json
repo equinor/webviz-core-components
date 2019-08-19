@@ -1,0 +1,81 @@
+{
+  "src/lib/components/WebvizContainerPlaceholder.react.js": {
+    "description": "WebvizContainerPlaceholder is a fundamental webviz dash component.\nIt takes a property, `label`, and displays it.\nIt renders an input with the property `value` which is editable by the user.",
+    "displayName": "WebvizContainerPlaceholder",
+    "methods": [],
+    "props": {
+      "id": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The ID used to identify this component in Dash callbacks",
+        "defaultValue": {
+          "value": "'some-id'",
+          "computed": false
+        }
+      },
+      "children": {
+        "type": {
+          "name": "node"
+        },
+        "required": false,
+        "description": "The children of this component"
+      },
+      "buttons": {
+        "type": {
+          "name": "array"
+        },
+        "required": false,
+        "description": "Array of strings, representing which buttons to render. Full set is\n['download_zip', 'contact_person', 'guided_tour', 'screenshot', 'expand']",
+        "defaultValue": {
+          "value": "['screenshot', 'expand', 'download_zip', 'guided_tour', 'contact_person']",
+          "computed": false
+        }
+      },
+      "contact_person": {
+        "type": {
+          "name": "objectOf",
+          "value": {
+            "name": "string"
+          }
+        },
+        "required": false,
+        "description": "A dictionary of information regarding contact person for the data content.\nValid keys are 'name', 'email' and 'phone'.",
+        "defaultValue": {
+          "value": "{}",
+          "computed": false
+        }
+      },
+      "zip_base64": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The zip archive to download encoded as base64 (when user clicks on the download csv file icon).",
+        "defaultValue": {
+          "value": "''",
+          "computed": false
+        }
+      },
+      "data_requested": {
+        "type": {
+          "name": "number"
+        },
+        "required": false,
+        "description": "An integer that represents the number of times\nthat the data download button has been clicked.",
+        "defaultValue": {
+          "value": "0",
+          "computed": false
+        }
+      },
+      "setProps": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "Dash-assigned callback that should be called whenever any of the\nproperties change"
+      }
+    }
+  }
+}

@@ -1,0 +1,101 @@
+.webviz-config-container-wrapper { 
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+
+.webviz-config-container-expand { 
+    position: fixed;
+    padding: 10px;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    z-index: 1001;
+}
+
+.webviz-config-container-wrapper:hover { 
+    box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.06);
+}
+
+.webviz-container-content {
+    position: relative;
+    padding-right: 15px;
+    transition: 1.0s;
+}
+
+.webviz-container-content-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.0));
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.webviz-container-data-owner {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 5px;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    text-align: center;
+}
+
+.webviz-config-container-buttonbar {
+    text-align: center;
+    user-select: none;
+    padding: 5px;
+}
+
+.webviz-config-container-button {
+    color: grey;
+    margin-bottom: 5px;
+    opacity: 0.2;
+    transition: 0.3s;
+}
+
+.webviz-config-container-button-selected {
+    color: black;
+    opacity: 1.0;
+}
+
+.webviz-config-container-button:hover {
+    opacity: 0.9;
+}
+
+.webviz-config-tooltip-wrapper {
+    position: relative;
+}
+
+.webviz-config-tooltip-wrapper .webviz-config-tooltip {
+    position: absolute;
+    top: -10px;
+    right: 180%;
+    padding: 5px 5px;
+    white-space: nowrap;
+    visibility: hidden;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+}
+
+.webviz-config-tooltip-wrapper .webviz-config-tooltip::after {
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    content: '';
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(0, 0, 0, 0.5);
+}
+
+.webviz-config-tooltip-wrapper:hover .webviz-config-tooltip {
+    visibility: visible;
+}
