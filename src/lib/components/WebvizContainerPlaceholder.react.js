@@ -52,7 +52,7 @@ export default class WebvizContainerPlaceholder extends Component {
                         <WebvizToolbarButton icon={faCameraRetro} tooltip="Take screenshot" onClick={() => htmlToImage.toBlob(document.getElementById(this.props.id)).then(function (blob) {download_file('webviz-screenshot.png', blob, true)}) }/>
                     }
                     { this.props.buttons.includes('expand') &&
-                        <WebvizToolbarButton icon={faExpand} tooltip="Expand container" selected={this.state.expanded} onClick={() => this.setState({expanded: !this.state.expanded})} />
+                        <WebvizToolbarButton icon={faExpand} tooltip="Expand container" selected={this.state.expanded} onClick={() => this.setState({expanded: !this.state.expanded}, () => {window.dispatchEvent(new Event('resize'))})} />
                     }
                     { this.props.buttons.includes('download_zip') &&
                         <WebvizToolbarButton icon={faFileArchive} tooltip='Download data' onClick={() => this.props.setProps({data_requested: this.props.data_requested + 1})} />
