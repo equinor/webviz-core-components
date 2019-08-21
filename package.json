@@ -12,6 +12,7 @@
   "main": "build/index.js",
   "scripts": {
     "start": "webpack-serve ./webpack.serve.config.js --open",
+    "copyplotly": "cp ./node_modules/plotly.js-cartesian-dist/plotly-cartesian.js ./webviz_core_components",
     "postinstall": "cp ./package.json webviz_core_components/package-info.json",
     "build:js": "webpack --mode production",
     "build:js-dev": "webpack --mode development",
@@ -25,6 +26,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.10.1",
     "@fortawesome/react-fontawesome": "^0.1.4",
     "html-to-image": "^0.1.1",
+    "plotly.js-cartesian-dist": "^1.49.3",
     "ramda": "^0.26.1"
   },
   "devDependencies": {
