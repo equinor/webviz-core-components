@@ -5,7 +5,6 @@ webviz_core_components/**/*
 DESCRIPTION
 NAMESPACE
 R/
-R/
 man/
 inst/
 
