@@ -1,10 +1,15 @@
+# Dash built code
+
+webviz_core_components/**/*
+!webviz_core_components/__init__.py
 DESCRIPTION
 NAMESPACE
-
+R/
 R/
 man/
 inst/
 
+###
 # Created by .ignore support plugin (hsz.mobi)
 ### VisualStudioCode template
 .vscode/*
