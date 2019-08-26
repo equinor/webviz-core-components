@@ -9,8 +9,14 @@ from pkg_resources import get_distribution, DistributionNotFound
 import dash as _dash
 
 # noinspection PyUnresolvedReferences
-from ._imports_ import *
-from ._imports_ import __all__
+try:
+    from ._imports_ import *
+    from ._imports_ import __all__
+except:
+    # The _imports_ file does not exist before dash-generate-components
+    # has been called.
+    pass
+    
 
 try:
     __version__ = get_distribution(__name__).version
