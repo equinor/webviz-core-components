@@ -1,6 +1,9 @@
+# Dash built code
+
+webviz_core_components/**/*
+!webviz_core_components/__init__.py
 DESCRIPTION
 NAMESPACE
-
 R/
 man/
 inst/
