@@ -12,8 +12,7 @@
   "main": "build/index.js",
   "scripts": {
     "start": "webpack-serve ./webpack.serve.config.js --open",
-    "copyplotly": "cp ./node_modules/plotly.js-cartesian-dist/plotly-cartesian.js ./webviz_core_components",
-    "postinstall": "cp ./package.json webviz_core_components/package-info.json",
+    "postinstall": "cp ./package.json webviz_core_components/package-info.json && cp ./node_modules/plotly.js-cartesian-dist/plotly-cartesian.js ./webviz_core_components",
     "build:js": "webpack --mode production",
     "build:js-dev": "webpack --mode development",
     "build:py_and_r": "dash-generate-components ./src/lib/components webviz_core_components -p package-info.json --r-prefix ''",
