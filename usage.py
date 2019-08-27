@@ -9,7 +9,7 @@ app.layout = html.Div([
         id='container',
         children=['Hello world']
     ),
-   webviz_core_components.Graph(
+    webviz_core_components.Graph(
         id='example-graph',
         figure={
             'data': [
