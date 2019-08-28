@@ -44,7 +44,7 @@ setup(
         'tests': tests_require,
         'dependencies': install_requires
     },
-    setup_requires=['setuptools_scm>=3.2.0'],
+    setup_requires=['setuptools_scm~=3.2'],
     use_scm_version=True,
     classifiers=[
         'Programming Language :: Python :: 3',
