@@ -22,7 +22,9 @@ More specifically it changes from `plotly-full` to `plotly-cartesian` bundle. Th
 necessary in order to enforce a strong CSP configuration as long as
 [this `plotly` issue](https://github.com/plotly/plotly.js/issues/897) and
 [this `dash-core-components` issue](https://github.com/plotly/dash-core-components/issues/462)
-both are open.
+both are open. Note that this side-effect only takes place if `dash-core-components`
+is installed, which is a requirement if the `Graph` component from this repository
+is going to be used.
 
 ## Contributing
 
