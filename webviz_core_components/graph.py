@@ -2,6 +2,18 @@ import inspect
 import dash_core_components as dcc
 
 
+# dash-core-components provide their own plotly javascript bundle,
+# which is not needed since webviz-core-components does the same
+# (however a smaller plotly bundle without the `eval` function)
+#
+# The whole webviz_core_components.Graph component is only necessary as 
+# long as https://github.com/plotly/dash-core-components/issues/462 is
+# open. When that is closed, changing default plotly variables can be
+# done purely in Python by inheriting from `dcc.Graph`.
+
+dcc._js_dist = [js for js in dcc._js_dist if not js['relative_package_path'].startswith('plotly-')]
+
+
 class Graph(dcc.Graph):
 
     def __init__(self, *args, **kwargs):
