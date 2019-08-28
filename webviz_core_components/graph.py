@@ -22,7 +22,7 @@ class Graph(dcc.Graph):
 
         if len(args) > config_arg_index:  # config given as positional argument
             args = args[:config_arg_index] + \
-                [Graph.populate_config(args[config_arg_index])] + \
+                (Graph.populate_config(args[config_arg_index]),) + \
                 args[config_arg_index + 1:]
 
         elif 'config' in kwargs:  # config given as keyword argument
@@ -35,12 +35,14 @@ class Graph(dcc.Graph):
 
 
     @staticmethod
-    def populate_config(config=None):
+    def populate_config(input_config=None):
         '''Populates an optionally given plotly config with default values
         '''
 
-        if config is None:
+        if input_config is None:
             config = {}
+        else:
+            config = input_config.copy()
 
         if 'modeBarButtonsToRemove' not in config:
             config['modeBarButtonsToRemove'] = ['sendDataToCloud', 'toImage']

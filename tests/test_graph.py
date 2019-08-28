@@ -17,6 +17,9 @@ def test_container_placeholder(dash_duo):
                 'layout': {
                     'title': 'Dash Data Visualization'
                 }
+            },
+            config={
+                'displaylogo': False
             }
         )
     ])
