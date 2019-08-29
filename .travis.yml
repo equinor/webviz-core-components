@@ -16,7 +16,6 @@ before_install:
   - pip install --upgrade pip
 
 install:
-  - export GIT_TAG=$(git describe --tags)
   - npm install
   - pip install .[dependencies]
   - pip install dash[dev]
