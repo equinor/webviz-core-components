@@ -12,11 +12,13 @@ import dash as _dash
 try:
     from ._imports_ import *
     from ._imports_ import __all__
-except:
+
+    from .graph import Graph
+    __all__.append('Graph')
+except ModuleNotFoundError:
     # The _imports_ file does not exist before dash-generate-components
     # has been called.
     pass
-    
 
 try:
     __version__ = get_distribution(__name__).version
@@ -45,12 +47,14 @@ _this_module = _sys.modules[__name__]
 _js_dist = [
     {
         'relative_package_path': 'webviz_core_components.min.js',
-        
         'namespace': package_name
     },
     {
         'relative_package_path': 'webviz_core_components.dev.js',
-        
+        'namespace': package_name
+    },
+    {
+        'relative_package_path': 'plotly-cartesian.js',
         'namespace': package_name
     }
 ]

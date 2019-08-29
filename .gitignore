@@ -2,6 +2,7 @@
 
 webviz_core_components/**/*
 !webviz_core_components/__init__.py
+!webviz_core_components/graph.py
 DESCRIPTION
 NAMESPACE
 R/
