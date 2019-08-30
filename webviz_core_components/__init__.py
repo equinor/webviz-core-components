@@ -47,10 +47,7 @@ _this_module = _sys.modules[__name__]
 _js_dist = [
     {
         'relative_package_path': 'webviz_core_components.min.js',
-        'namespace': package_name
-    },
-    {
-        'relative_package_path': 'webviz_core_components.dev.js',
+        'dev_package_path': 'webviz_core_components.dev.js',
         'namespace': package_name
     },
     {
