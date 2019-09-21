@@ -18,7 +18,7 @@ class Graph(dcc.Graph):
 
     def __init__(self, *args, **kwargs):
 
-        config_arg_index = inspect.getargspec(dcc.Graph).args.index('config')
+        config_arg_index = inspect.getfullargspec(dcc.Graph).args.index('config')
 
         if len(args) > config_arg_index:  # config given as positional argument
             args = args[:config_arg_index] + \
