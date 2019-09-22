@@ -26,11 +26,11 @@ install:
   - export PATH=$PATH:$PWD
 
 script:
+  - black --check webviz_core_components setup.py
   - npm run test
   - npm run build
   - pip install .
   - pytest
-  - black --check webviz_core_components setup.py
 
 before_deploy:
   # Set the version back to what was sent from the git release.
