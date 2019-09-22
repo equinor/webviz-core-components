@@ -3,6 +3,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e5f81735a1a9423eb7be3fee8e2d30ee)](https://www.codacy.com/app/anders-kiaer/webviz-core-components?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=equinor/webviz-core-components&amp;utm_campaign=Badge_Grade)
 [![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 # Webviz core components
 
