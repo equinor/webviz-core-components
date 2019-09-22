@@ -30,7 +30,7 @@ script:
   - npm run build
   - pip install .
   - pytest
-  - black --check webviz_core_components
+  - black --check webviz_core_components setup.py
 
 before_deploy:
   # Set the version back to what was sent from the git release.
