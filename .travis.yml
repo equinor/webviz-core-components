@@ -28,6 +28,7 @@ install:
 script:
   - black --check webviz_core_components setup.py
   - npm run test
+  - npm run linting
   - npm run build
   - pip install .
   - pytest
