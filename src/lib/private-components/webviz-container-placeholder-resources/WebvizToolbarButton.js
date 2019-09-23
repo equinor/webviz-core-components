@@ -39,4 +39,14 @@ WebvizToolbarButton.propTypes = {
      * The tooltip string to show on hover.
      */
     tooltip: PropTypes.string,
+
+    /**
+     * The font awesome icon to show.
+     */
+    icon: PropTypes.object,
+
+    /**
+     * The callback function to triger when button is clicked.
+     */
+    onClick: PropTypes.func,
 };

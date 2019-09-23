@@ -62,5 +62,5 @@ WebvizContentOverlay.propTypes = {
      * A dictionary of information regarding contact person for the data content.
      * Valid keys are 'name', 'email' and 'phone'.
      */
-    contact_person: PropTypes.objectOf(PropTypes.string),
+    contactPerson: PropTypes.objectOf(PropTypes.string),
 };
