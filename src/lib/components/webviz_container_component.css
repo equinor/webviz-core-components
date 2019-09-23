@@ -1,4 +1,4 @@
-.webviz-config-container-wrapper { 
+.webviz-config-container-wrapper {
     width: 100%;
     box-sizing: border-box;
     padding: 0;
@@ -6,7 +6,7 @@
     grid-template-columns: 1fr auto;
 }
 
-.webviz-config-container-expand { 
+.webviz-config-container-expand {
     position: fixed;
     padding: 10px;
     top: 0;
@@ -17,14 +17,14 @@
     z-index: 1001;
 }
 
-.webviz-config-container-wrapper:hover { 
+.webviz-config-container-wrapper:hover {
     box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.06);
 }
 
 .webviz-container-content {
     position: relative;
     padding-right: 15px;
-    transition: 1.0s;
+    transition: 1s;
 }
 
 .webviz-container-content-overlay {
@@ -33,7 +33,11 @@
     left: 0;
     height: 100%;
     width: 100%;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.0));
+    background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.1) 60%,
+        rgba(0, 0, 0, 0)
+    );
     display: none;
     align-items: center;
     justify-content: center;
@@ -62,7 +66,7 @@
 
 .webviz-config-container-button-selected {
     color: black;
-    opacity: 1.0;
+    opacity: 1;
 }
 
 .webviz-config-container-button:hover {
@@ -89,7 +93,7 @@
     position: absolute;
     top: 50%;
     left: 100%;
-    content: '';
+    content: "";
     margin-top: -5px;
     border-width: 5px;
     border-style: solid;

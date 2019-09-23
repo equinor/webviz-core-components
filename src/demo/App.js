@@ -1,14 +1,13 @@
 /* eslint no-magic-numbers: 0 */
-import React, {Component} from 'react';
+import React, { Component } from "react";
 
-import { WebvizContainerPlaceholder } from '../lib';
+import { WebvizContainerPlaceholder } from "../lib";
 
 class App extends Component {
-
     constructor() {
         super();
         this.state = {
-            value: ''
+            value: "",
         };
         this.setProps = this.setProps.bind(this);
     }
@@ -28,9 +27,8 @@ class App extends Component {
                     setProps={this.setProps}
                     {...this.state}
                 />
-
             </div>
-        )
+        );
     }
 }
 
