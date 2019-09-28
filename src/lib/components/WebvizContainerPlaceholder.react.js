@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import htmlToImage from "html-to-image";
+import Tour from "reactour";
 
 import {
     faFileArchive,
@@ -27,6 +28,7 @@ export default class WebvizContainerPlaceholder extends Component {
         this.state = {
             expanded: false,
             showOverlay: false,
+            tourIsOpen: false,
         };
     }
 
@@ -42,94 +44,124 @@ export default class WebvizContainerPlaceholder extends Component {
     }
 
     render() {
-        return (
-            <div
-                className={
-                    "webviz-config-container-wrapper" +
-                    (this.state.expanded
-                        ? " webviz-config-container-expand"
-                        : "")
-                }
-            >
-                <div id={this.props.id} className="webviz-container-content">
-                    {this.props.children}
+        const showTour =
+            this.props.buttons.includes("guided_tour") && this.props.tour_steps;
 
-                    <WebvizContentOverlay
-                        id={"overlay".concat(this.props.id)}
-                        contactPerson={this.props.contact_person}
-                        showOverlay={this.state.showOverlay}
-                    />
-                </div>
-                <div className="webviz-config-container-buttonbar">
-                    {this.props.buttons.includes("screenshot") && (
-                        <WebvizToolbarButton
-                            icon={faCameraRetro}
-                            tooltip="Take screenshot"
-                            onClick={() =>
-                                htmlToImage
-                                    .toBlob(
-                                        document.getElementById(this.props.id)
-                                    )
-                                    .then(function(blob) {
-                                        download_file(
-                                            "webviz-screenshot.png",
-                                            blob,
-                                            true
-                                        );
-                                    })
-                            }
+        return (
+            <>
+                <div
+                    className={
+                        "webviz-config-container-wrapper" +
+                        (this.state.expanded
+                            ? " webviz-config-container-expand"
+                            : "")
+                    }
+                >
+                    <div
+                        id={this.props.id}
+                        className="webviz-container-content"
+                    >
+                        {this.props.children}
+
+                        <WebvizContentOverlay
+                            id={"overlay".concat(this.props.id)}
+                            contactPerson={this.props.contact_person}
+                            showOverlay={this.state.showOverlay}
                         />
-                    )}
-                    {this.props.buttons.includes("expand") && (
-                        <WebvizToolbarButton
-                            icon={faExpand}
-                            tooltip="Expand container"
-                            selected={this.state.expanded}
-                            onClick={() =>
-                                this.setState(
-                                    { expanded: !this.state.expanded },
-                                    () => {
-                                        window.dispatchEvent(
-                                            new Event("resize")
-                                        );
-                                    }
-                                )
-                            }
-                        />
-                    )}
-                    {this.props.buttons.includes("download_zip") && (
-                        <WebvizToolbarButton
-                            icon={faFileArchive}
-                            tooltip="Download data"
-                            onClick={() =>
-                                this.props.setProps({
-                                    data_requested:
-                                        this.props.data_requested + 1,
-                                })
-                            }
-                        />
-                    )}
-                    {this.props.buttons.includes("guided_tour") && (
-                        <WebvizToolbarButton
-                            icon={faQuestionCircle}
-                            tooltip="Guided tour"
-                        />
-                    )}
-                    {this.props.buttons.includes("contact_person") &&
-                        Object.keys(this.props.contact_person).length > 0 && (
+                    </div>
+                    <div
+                        className="webviz-config-container-buttonbar"
+                        id="camerabutton"
+                    >
+                        {this.props.buttons.includes("screenshot") && (
                             <WebvizToolbarButton
-                                icon={faAddressCard}
-                                tooltip="Contact person"
-                                selected={this.state.showOverlay}
+                                icon={faCameraRetro}
+                                tooltip="Take screenshot"
                                 onClick={() =>
-                                    this.setState({
-                                        showOverlay: !this.state.showOverlay,
+                                    htmlToImage
+                                        .toBlob(
+                                            document.getElementById(
+                                                this.props.id
+                                            )
+                                        )
+                                        .then(function(blob) {
+                                            download_file(
+                                                "webviz-screenshot.png",
+                                                blob,
+                                                true
+                                            );
+                                        })
+                                }
+                            />
+                        )}
+                        {this.props.buttons.includes("expand") && (
+                            <WebvizToolbarButton
+                                icon={faExpand}
+                                tooltip="Expand container"
+                                selected={this.state.expanded}
+                                onClick={() =>
+                                    this.setState(
+                                        { expanded: !this.state.expanded },
+                                        () => {
+                                            window.dispatchEvent(
+                                                new Event("resize")
+                                            );
+                                        }
+                                    )
+                                }
+                            />
+                        )}
+                        {this.props.buttons.includes("download_zip") && (
+                            <WebvizToolbarButton
+                                icon={faFileArchive}
+                                tooltip="Download data"
+                                onClick={() =>
+                                    this.props.setProps({
+                                        data_requested:
+                                            this.props.data_requested + 1,
                                     })
                                 }
                             />
                         )}
+                        {showTour && (
+                            <WebvizToolbarButton
+                                icon={faQuestionCircle}
+                                tooltip="Guided tour"
+                                onClick={() =>
+                                    this.setState({ tourIsOpen: true })
+                                }
+                            />
+                        )}
+                        {this.props.buttons.includes("contact_person") &&
+                            Object.keys(this.props.contact_person).length >
+                                0 && (
+                                <WebvizToolbarButton
+                                    icon={faAddressCard}
+                                    tooltip="Contact person"
+                                    selected={this.state.showOverlay}
+                                    onClick={() =>
+                                        this.setState({
+                                            showOverlay: !this.state
+                                                .showOverlay,
+                                        })
+                                    }
+                                />
+                            )}
+                    </div>
                 </div>
-            </div>
+                {showTour && (
+                    <Tour
+                        steps={this.props.tour_steps}
+                        isOpen={this.state.tourIsOpen}
+                        onRequestClose={() =>
+                            this.setState({ tourIsOpen: false })
+                        }
+                        showNumber={false}
+                        rounded={5}
+                        accentColor="red"
+                    />
+                )}
+            </>
         );
     }
 }
@@ -175,6 +207,11 @@ WebvizContainerPlaceholder.propTypes = {
      * The zip archive to download encoded as base64 (when user clicks on the download csv file icon).
      */
     zip_base64: PropTypes.string,
+
+    /**
+     * Tour steps. List of dictionaries, each with two keys ('selector' and 'content').
+     */
+    tour_steps: PropTypes.array,
 
     /**
      * An integer that represents the number of times
