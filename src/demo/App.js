@@ -5,18 +5,12 @@ import { WebvizContainerPlaceholder } from "../lib";
 
 const steps = [
     {
-        target: "#green-rect",
-        content: "This is my awesome feature!",
-        disableBeacon: true,
-        placement: "auto",
-        title: "Some title1",
+        selector: "#blue-rect",
+        content: "This is my first step",
     },
     {
-        target: "#blue-rect",
-        content: "This is another awesome feature!",
-        disableBeacon: true,
-        placement: "auto",
-        title: "Some title2",
+        selector: "#green-rect",
+        content: "This is my second step",
     },
 ];
 

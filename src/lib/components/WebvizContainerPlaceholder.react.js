@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import htmlToImage from "html-to-image";
-import Joyride from "react-joyride";
+import Tour from "reactour";
 
 import {
     faFileArchive,
@@ -28,7 +28,7 @@ export default class WebvizContainerPlaceholder extends Component {
         this.state = {
             expanded: false,
             showOverlay: false,
-            runTour: false,
+            tourIsOpen: false,
         };
     }
 
@@ -127,7 +127,9 @@ export default class WebvizContainerPlaceholder extends Component {
                             <WebvizToolbarButton
                                 icon={faQuestionCircle}
                                 tooltip="Guided tour"
-                                onClick={() => this.setState({ runTour: true })}
+                                onClick={() =>
+                                    this.setState({ tourIsOpen: true })
+                                }
                             />
                         )}
                         {this.props.buttons.includes("contact_person") &&
@@ -148,10 +150,15 @@ export default class WebvizContainerPlaceholder extends Component {
                     </div>
                 </div>
                 {showTour && (
-                    <Joyride
+                    <Tour
                         steps={this.props.tour_steps}
-                        run={this.state.runTour}
-                        continuous={true}
+                        isOpen={this.state.tourIsOpen}
+                        onRequestClose={() =>
+                            this.setState({ tourIsOpen: false })
+                        }
+                        showNumber={false}
+                        rounded={5}
+                        accentColor="red"
                     />
                 )}
             </>
