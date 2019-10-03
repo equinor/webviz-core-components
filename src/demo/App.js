@@ -3,12 +3,21 @@ import React, { Component } from "react";
 
 import { WebvizContainerPlaceholder } from "../lib";
 
+const steps = [
+    {
+        selector: "#blue-rect",
+        content: "This is my first step",
+    },
+    {
+        selector: "#green-rect",
+        content: "This is my second step",
+    },
+];
+
 class App extends Component {
     constructor() {
         super();
-        this.state = {
-            value: "",
-        };
+
         this.setProps = this.setProps.bind(this);
     }
 
@@ -21,11 +30,7 @@ class App extends Component {
             <div>
                 <WebvizContainerPlaceholder
                     setProps={this.setProps}
-                    {...this.state}
-                />
-                <WebvizContainerPlaceholder
-                    setProps={this.setProps}
-                    {...this.state}
+                    tour_steps={steps}
                 />
             </div>
         );
