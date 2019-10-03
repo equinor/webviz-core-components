@@ -45,7 +45,7 @@ export default class WebvizContainerPlaceholder extends Component {
 
     render() {
         const showTour =
-            this.props.buttons.includes("guided_tour") && this.props.tour_steps;
+            this.props.buttons.includes("guided_tour") && this.props.tour_steps.length > 0;
 
         return (
             <>
@@ -176,6 +176,7 @@ WebvizContainerPlaceholder.defaultProps = {
         "contact_person",
     ],
     contact_person: {},
+    tour_steps: [],
     data_requested: 0,
     zip_base64: "",
 };
