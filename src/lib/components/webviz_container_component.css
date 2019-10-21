@@ -75,6 +75,7 @@
 
 .webviz-config-tooltip-wrapper {
     position: relative;
+    z-index: 1000;
 }
 
 .webviz-config-tooltip-wrapper .webviz-config-tooltip {
