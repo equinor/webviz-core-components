@@ -22,7 +22,11 @@ except ModuleNotFoundError:
     pass
 
 try:
-    __version__ = get_distribution(__name__).version
+    # Dash fingerprint system does not work with +. E.g. a development version tag like
+    # 0.0.10.dev11+abcd1234.d20191103 will break Dash's fingerprint system.
+    # Need to replace + with some supported character as long as
+    # https://github.com/plotly/dash/issues/995 is open.
+    __version__ = get_distribution(__name__).version.replace("+", ".")
 except DistributionNotFound:
     # package is not installed
     pass
