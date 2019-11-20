@@ -9,6 +9,13 @@ services:
 
 python:
   - "3.6"
+  - "3.7"
+  - "3.8"
+
+jobs:
+  fast_finish: true
+  allow_failures:
+    - python: "3.8"
 
 before_install:
   - sudo apt-get -qq update
@@ -45,4 +52,5 @@ deploy:
     password:
       secure: "O35ATzdM5i5dEQQksZIi5JJEmgTWU4bHQBRLZiLosLZ4oDbOF6E+QlOISymJizw2EGu02vYr0b0mIDOT21hO9T0R1snq7Gl9zQMJoZyR5FV9ZD2jFZNOODVmuCZGjUZkyblnGMQD93c9Q1Mi+iFHRaokYN3qD8Jgm8MVap1qBIJgcNLwzB6qng0K8Dj1BJRlccuAIqxa01cxBoRAgjtugXSYmrUgmO8GAiMGCQBQgnk2LWMhIgZ3c8O4rDwjNfEEg1vr34t66XuO6p17oSVBt+ncE0UjAR0PEuxVayQ1M9KCV7Awgb5MQcQMcC5I6jvdiIqzLkH8A71ORtgohd9vhy3OlnersR3sLXdRumekWy+JkD1JL2KgzJoUrlQ/asOphMJhmv6Pbg8BmJTGKWDWF12zqNX9Q9b+WN2cjmXbwBSADM9K5qsQb2Bjw+tlhDBzAQPVl89hBYodVY5yhk+soMgJqRQEDcn30t7cJUCEJEoEkQUbkTPGtZberWqKzRDFYC8cr3lwYTenzm8ARVEFOslQx8AadW2bq0Nz49osYB/AXFkF5voBf3eVthplsU5JPDiik7zTgl3Ee11Tth/NMAdxoF3dtGs4F87n6zs2e369CD8EtkaFkDaPv7htb1/6fjYGF/rbYye9CmRhJARQYcjoZnj4ekLmJVFu+k+VzN0="
     on:
+      python: "3.6"
       tags: true
