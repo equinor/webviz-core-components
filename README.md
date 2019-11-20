@@ -1,7 +1,7 @@
 [![PyPI version](https://badge.fury.io/py/webviz-core-components.svg)](https://badge.fury.io/py/webviz-core-components)
 [![Build Status](https://travis-ci.org/equinor/webviz-core-components.svg?branch=master)](https://travis-ci.org/equinor/webviz-core-components)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e5f81735a1a9423eb7be3fee8e2d30ee)](https://www.codacy.com/manual/webviz/webviz-core-components?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=equinor/webviz-core-components&amp;utm_campaign=Badge_Grade)
-[![Python 3.6 | 3.7](https://img.shields.io/badge/python-3.6%20|%203.7-blue.svg)](https://www.python.org/)
+[![Python 3.6 | 3.7 | 3.8](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black%20%28Python%29-000000.svg)](https://github.com/psf/black)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier%20%28JavaScript%29-ff69b4.svg)](https://github.com/prettier/prettier)
 
