@@ -29,6 +29,7 @@
         "html-to-image": "^0.1.1",
         "plotly.js-cartesian-dist": "^1.49.3",
         "ramda": "^0.26.1",
+        "react-colorscales": "^0.7.3",
         "reactour": "^1.15.2",
         "styled-components": "^4.4.0"
     },
