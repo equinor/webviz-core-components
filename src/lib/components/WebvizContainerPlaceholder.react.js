@@ -111,7 +111,9 @@ export default class WebvizContainerPlaceholder extends Component {
                                     this.setState({
                                         expanded: !this.state.expanded,
                                     });
-                                    // Trigger resize events of content in container:
+                                    // Trigger resize events of content in container,
+                                    // relevant as long as this issue is open:
+                                    // https://github.com/plotly/plotly.js/issues/3984
                                     window.dispatchEvent(new Event("resize"));
                                 }}
                             />
