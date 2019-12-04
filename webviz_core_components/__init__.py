@@ -62,10 +62,7 @@ _js_dist = [
 ]
 
 _css_dist = [
-    {
-        "relative_package_path": "webviz_core_components.css",
-        "namespace": package_name,
-    }
+    {"relative_package_path": "webviz_core_components.css", "namespace": package_name,}
 ]
 
 
