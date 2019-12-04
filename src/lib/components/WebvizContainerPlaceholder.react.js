@@ -32,7 +32,7 @@ export default class WebvizContainerPlaceholder extends Component {
         };
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(_, prevState) {
         if (this.props.zip_base64 !== "") {
             const now = new Date();
             const filename = `webviz-data-${now.getFullYear()}-${now.getMonth() +
@@ -40,6 +40,13 @@ export default class WebvizContainerPlaceholder extends Component {
 
             download_file(filename, this.props.zip_base64);
             this.props.setProps({ zip_base64: "" });
+        }
+
+        // Hide/show body scrollbar depending on container going in/out of full screen mode.
+        if (this.state.expanded !== prevState.expanded) {
+            document.body.style.overflow = this.state.expanded
+                ? "hidden"
+                : null;
         }
     }
 
@@ -100,16 +107,13 @@ export default class WebvizContainerPlaceholder extends Component {
                                 icon={faExpand}
                                 tooltip="Expand container"
                                 selected={this.state.expanded}
-                                onClick={() =>
-                                    this.setState(
-                                        { expanded: !this.state.expanded },
-                                        () => {
-                                            window.dispatchEvent(
-                                                new Event("resize")
-                                            );
-                                        }
-                                    )
-                                }
+                                onClick={() => {
+                                    this.setState({
+                                        expanded: !this.state.expanded,
+                                    });
+                                    // Trigger resize events of content in container:
+                                    window.dispatchEvent(new Event("resize"));
+                                }}
                             />
                         )}
                         {this.props.buttons.includes("download_zip") && (
