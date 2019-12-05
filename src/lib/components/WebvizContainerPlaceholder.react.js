@@ -88,15 +88,15 @@ export default class WebvizContainerPlaceholder extends Component {
                                 onClick={() =>
                                     html2canvas(
                                         document.getElementById(this.props.id)
-                                    ).then(function(canvas) {
-                                        canvas.toBlob(function(blob) {
+                                    ).then(canvas =>
+                                        canvas.toBlob(blob =>
                                             download_file(
                                                 "webviz-screenshot.png",
                                                 blob,
                                                 true
-                                            );
-                                        });
-                                    })
+                                            )
+                                        )
+                                    )
                                 }
                             />
                         )}
