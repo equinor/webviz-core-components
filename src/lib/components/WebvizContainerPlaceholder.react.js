@@ -89,11 +89,9 @@ export default class WebvizContainerPlaceholder extends Component {
                                     html2canvas(
                                         document.getElementById(this.props.id)
                                     ).then(function(canvas) {
-                                        // Export canvas as a blob
                                         canvas.toBlob(function(blob) {
-                                            // Generate file download
                                             download_file(
-                                                "webviz_screenshot.png",
+                                                "webviz-screenshot.png",
                                                 blob,
                                                 true
                                             );
