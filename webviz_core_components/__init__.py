@@ -61,7 +61,9 @@ _js_dist = [
     {"relative_package_path": "plotly-cartesian.js", "namespace": package_name},
 ]
 
-_css_dist = []
+_css_dist = [
+    {"relative_package_path": "webviz_core_components.css", "namespace": package_name,}
+]
 
 
 for _component in __all__:
