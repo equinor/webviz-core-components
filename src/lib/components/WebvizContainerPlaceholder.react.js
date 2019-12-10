@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import htmlToImage from "html-to-image";
+import html2canvas from "html2canvas";
 import Tour from "reactour";
 
 import {
@@ -86,19 +86,17 @@ export default class WebvizContainerPlaceholder extends Component {
                                 icon={faCameraRetro}
                                 tooltip="Take screenshot"
                                 onClick={() =>
-                                    htmlToImage
-                                        .toBlob(
-                                            document.getElementById(
-                                                this.props.id
-                                            )
-                                        )
-                                        .then(function(blob) {
+                                    html2canvas(
+                                        document.getElementById(this.props.id)
+                                    ).then(canvas =>
+                                        canvas.toBlob(blob =>
                                             download_file(
                                                 "webviz-screenshot.png",
                                                 blob,
                                                 true
-                                            );
-                                        })
+                                            )
+                                        )
+                                    )
                                 }
                             />
                         )}
