@@ -1,7 +1,7 @@
 /* eslint no-magic-numbers: 0 */
 import React, { Component } from "react";
 
-import { WebvizContainerPlaceholder } from "../lib";
+import { WebvizPluginPlaceholder } from "../lib";
 
 const steps = [
     {
@@ -28,7 +28,7 @@ class App extends Component {
     render() {
         return (
             <div>
-                <WebvizContainerPlaceholder
+                <WebvizPluginPlaceholder
                     setProps={this.setProps}
                     tour_steps={steps}
                 />

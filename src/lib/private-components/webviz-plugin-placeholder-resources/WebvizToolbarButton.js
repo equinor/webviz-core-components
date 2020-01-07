@@ -9,9 +9,9 @@ export default class WebvizToolbarButton extends Component {
                 <FontAwesomeIcon
                     icon={this.props.icon}
                     className={
-                        "webviz-config-container-button" +
+                        "webviz-config-plugin-button" +
                         (this.props.selected
-                            ? " webviz-config-container-button-selected"
+                            ? " webviz-config-plugin-button-selected"
                             : "")
                     }
                     onClick={this.props.onClick}

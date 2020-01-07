@@ -2,13 +2,13 @@ import dash
 import dash_html_components as html
 import webviz_core_components
 
-def test_container_placeholder(dash_duo):
+def test_plugin_placeholder(dash_duo):
 
     app = dash.Dash(__name__)
 
     app.layout = html.Div([
-        webviz_core_components.WebvizContainerPlaceholder(
-            id='container',
+        webviz_core_components.WebvizPluginPlaceholder(
+            id='plugin',
             children=['Hello world']
         ),
         html.Div(id='output')

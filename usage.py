@@ -7,11 +7,11 @@ app = dash.Dash(__name__)
 
 app.layout = html.Div(
     [
-        webviz_core_components.WebvizContainerPlaceholder(
-            id="container", children=["Hello world"]
+        webviz_core_components.WebvizPluginPlaceholder(
+            id="plugin", children=["Hello world"]
         ),
-        webviz_core_components.WebvizContainerPlaceholder(
-            id="some-other-container",
+        webviz_core_components.WebvizPluginPlaceholder(
+            id="some-other-plugin",
             children=[
                 webviz_core_components.ColorScales(id="colorscale"),
                 webviz_core_components.Graph(

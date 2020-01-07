@@ -8,10 +8,10 @@ export default class WebvizContentOverlay extends Component {
         return (
             <div
                 id={this.props.id}
-                className="webviz-container-content-overlay"
+                className="webviz-plugin-content-overlay"
                 style={{ display: this.props.showOverlay ? "flex" : "none" }}
             >
-                <div className="webviz-container-data-owner">
+                <div className="webviz-plugin-data-owner">
                     {"name" in this.props.contactPerson && (
                         <p>
                             <FontAwesomeIcon
