@@ -1,20 +1,52 @@
 import dash
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
-import webviz_core_components
+import webviz_core_components as wcc
 
 app = dash.Dash(__name__)
 
 app.layout = html.Div(
     [
-        webviz_core_components.WebvizPluginPlaceholder(
-            id="plugin", children=["Hello world"]
+        wcc.WebvizPluginPlaceholder(id="plugin", children=["Hello world"]),
+        wcc.WebvizPluginPlaceholder(
+            children=[
+                wcc.FlexBox(
+                    children=[
+                        html.Div(
+                            "First element (before break)",
+                            style={"background-color": "rgba(0, 255, 255, 0.2)"},
+                        ),
+                        html.Div(style={"height": "0px", "width": "100%"}),
+                        html.Div(
+                            "Second",
+                            style={
+                                "width": "20%",
+                                "background-color": "rgba(255, 0, 0, 0.2)",
+                            },
+                        ),
+                        html.Div(
+                            "Third",
+                            style={
+                                "width": "40%",
+                                "background-color": "rgba(0, 255, 0, 0.2)",
+                            },
+                        ),
+                        html.Div(
+                            "Fourth",
+                            style={
+                                "width": "40%",
+                                "background-color": "rgba(0, 0, 255, 0.2)",
+                            },
+                        ),
+                    ]
+                )
+            ]
         ),
-        webviz_core_components.WebvizPluginPlaceholder(
+        wcc.WebvizPluginPlaceholder(
             id="some-other-plugin",
             children=[
-                webviz_core_components.ColorScales(id="colorscale"),
-                webviz_core_components.Graph(
+                wcc.ColorScales(id="colorscale"),
+                wcc.Graph(
                     id="example-graph",
                     figure={
                         "data": [

@@ -1,6 +1,8 @@
 import inspect
+
 import dash_core_components as dcc
 
+from ._argument_modifier import argument_modifier
 
 # dash-core-components provide their own plotly javascript bundle,
 # which is not needed since webviz-core-components does the same
@@ -14,21 +16,9 @@ dcc._js_dist = [
 class Graph(dcc.Graph):
     def __init__(self, *args, **kwargs):
 
-        config_arg_index = inspect.getfullargspec(dcc.Graph).args.index("config")
-
-        if len(args) > config_arg_index:  # config given as positional argument
-            args = (
-                args[:config_arg_index]
-                + (Graph.populate_config(args[config_arg_index]),)
-                + args[config_arg_index + 1 :]
-            )
-
-        elif "config" in kwargs:  # config given as keyword argument
-            kwargs["config"] = Graph.populate_config(kwargs["config"])
-
-        else:  # config not given - give with only default values
-            kwargs["config"] = Graph.populate_config()
-
+        args, kwargs = argument_modifier(
+            dcc.Graph, "config", Graph.populate_config, args, kwargs
+        )
         super().__init__(*args, **kwargs)
 
     @staticmethod

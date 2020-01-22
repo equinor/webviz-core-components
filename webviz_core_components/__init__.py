@@ -14,8 +14,10 @@ try:
     from ._imports_ import __all__
 
     from .graph import Graph
+    from .flexbox import FlexBox
 
-    __all__.append("Graph")
+    __all__ += ["Graph", "FlexBox"]
+
 except ModuleNotFoundError:
     # The _imports_ file does not exist before dash-generate-components
     # has been called.
