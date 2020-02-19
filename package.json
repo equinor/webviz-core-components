@@ -12,7 +12,7 @@
     "main": "build/index.js",
     "scripts": {
         "start": "webpack-serve ./webpack.serve.config.js --open",
-        "postinstall": "cp ./package.json webviz_core_components/package-info.json && cp ./node_modules/plotly.js-cartesian-dist/plotly-cartesian.js ./webviz_core_components",
+        "postinstall": "cp ./package.json webviz_core_components/package-info.json",
         "build:js": "webpack --mode production",
         "build:js-dev": "webpack --mode development",
         "build:py_and_r": "dash-generate-components ./src/lib/components webviz_core_components -p package-info.json --r-prefix ''",
@@ -27,7 +27,6 @@
         "@fortawesome/free-solid-svg-icons": "^5.10.1",
         "@fortawesome/react-fontawesome": "^0.1.4",
         "html2canvas": "^1.0.0-rc.5",
-        "plotly.js-cartesian-dist": "^1.49.3",
         "ramda": "^0.26.1",
         "react-colorscales": "^0.7.3",
         "reactour": "^1.15.2",

@@ -4,14 +4,6 @@ import dash_core_components as dcc
 
 from ._argument_modifier import argument_modifier
 
-# dash-core-components provide their own plotly javascript bundle,
-# which is not needed since webviz-core-components does the same
-# (however a smaller plotly bundle without the `eval` function)
-
-dcc._js_dist = [
-    js for js in dcc._js_dist if not js["relative_package_path"].startswith("plotly-")
-]
-
 
 class Graph(dcc.Graph):
     def __init__(self, *args, **kwargs):
