@@ -56,7 +56,6 @@ _js_dist = [
         "dev_package_path": "webviz_core_components.dev.js",
         "namespace": package_name,
     },
-    {"relative_package_path": "plotly-cartesian.js", "namespace": package_name},
 ]
 
 _css_dist = [
