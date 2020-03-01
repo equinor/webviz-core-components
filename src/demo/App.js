@@ -1,18 +1,7 @@
 /* eslint no-magic-numbers: 0 */
 import React, { Component } from "react";
 
-import { WebvizPluginPlaceholder } from "../lib";
-
-const steps = [
-    {
-        selector: "#blue-rect",
-        content: "This is my first step",
-    },
-    {
-        selector: "#green-rect",
-        content: "This is my second step",
-    },
-];
+import { Draggable } from "../lib";
 
 class App extends Component {
     constructor() {
@@ -28,10 +17,7 @@ class App extends Component {
     render() {
         return (
             <div>
-                <WebvizPluginPlaceholder
-                    setProps={this.setProps}
-                    tour_steps={steps}
-                />
+                <Draggable id={"test"} children={"Drag me"} />
             </div>
         );
     }
