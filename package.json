@@ -29,6 +29,7 @@
         "html2canvas": "^1.0.0-rc.5",
         "ramda": "^0.26.1",
         "react-colorscales": "^0.7.3",
+        "react-draggable": "^4.2.0",
         "reactour": "^1.15.2",
         "styled-components": "^4.4.0"
     },
