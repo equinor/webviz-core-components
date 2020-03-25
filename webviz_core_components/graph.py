@@ -1,5 +1,3 @@
-import inspect
-
 import dash_core_components as dcc
 
 from ._argument_modifier import argument_modifier
