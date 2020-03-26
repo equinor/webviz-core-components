@@ -8,7 +8,6 @@ from pkg_resources import get_distribution, DistributionNotFound
 
 import dash as _dash
 
-# noinspection PyUnresolvedReferences
 try:
     from ._imports_ import *
     from ._imports_ import __all__
