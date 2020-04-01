@@ -21,7 +21,7 @@
         "linting": "prettier --check *.js *.json 'src/**/*.+(js|jsx|json|css)' && eslint src/"
     },
     "author": "R&T Equinor <akia@equinor.com>",
-    "license": "LGPL-3.0",
+    "license": "MIT",
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.21",
         "@fortawesome/free-solid-svg-icons": "^5.10.1",
