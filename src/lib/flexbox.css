@@ -1,0 +1,12 @@
+div.webviz-core-components-flexbox {
+    display: flex; 
+    flex-wrap: wrap;
+    max-width: 90vw;
+}
+
+/* Select direct children of a flexbox instance,
+   and set e.g. default min-width on them */
+div.webviz-core-components-flexbox > * {
+    flex: auto;
+    min-width: 300px;
+} 
