@@ -13,6 +13,20 @@ app.layout = html.Div(
                 wcc.FlexBox(
                     children=[
                         html.Div(
+                            style={"width": "100%"},
+                            children=[
+                                wcc.Select(
+                                    id="select-test",
+                                    size=2,
+                                    value=["el1"],
+                                    options=[
+                                        {"value": "el1", "label": "List element 1"},
+                                        {"value": "el2", "label": "List element 2"},
+                                    ],
+                                )
+                            ],
+                        ),
+                        html.Div(
                             "First element (before break)",
                             style={"background-color": "rgba(0, 255, 255, 0.2)"},
                         ),
