@@ -88,7 +88,7 @@ export default class WebvizPluginPlaceholder extends Component {
                                     ).then(canvas =>
                                         canvas.toBlob(blob =>
                                             download_file(
-                                                "webviz-screenshot.png",
+                                                this.props.screenshot_filename,
                                                 blob,
                                                 true
                                             )
@@ -181,6 +181,7 @@ WebvizPluginPlaceholder.defaultProps = {
     tour_steps: [],
     data_requested: 0,
     zip_base64: "",
+    screenshot_filename: "webviz-screenshot.png",
 };
 
 WebvizPluginPlaceholder.propTypes = {
@@ -210,6 +211,11 @@ WebvizPluginPlaceholder.propTypes = {
      * The zip archive to download encoded as base64 (when user clicks on the download csv file icon).
      */
     zip_base64: PropTypes.string,
+
+    /**
+     *  File name used when saving a screenshot of the plugin.
+     */
+    screenshot_filename: PropTypes.string,
 
     /**
      * Tour steps. List of dictionaries, each with two keys ('selector' and 'content').

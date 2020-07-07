@@ -7,7 +7,7 @@ app = dash.Dash(__name__)
 
 app.layout = html.Div(
     [
-        wcc.WebvizPluginPlaceholder(id="plugin", children=["Hello world"]),
+        wcc.WebvizPluginPlaceholder(id="plugin", children=["Hello world"], screenshot_filename="hello.png"),
         wcc.WebvizPluginPlaceholder(
             children=[
                 wcc.FlexBox(
