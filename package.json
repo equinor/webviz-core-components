@@ -47,7 +47,6 @@
         "eslint-plugin-import": "^2.18.0",
         "eslint-plugin-react": "^7.14.2",
         "mini-css-extract-plugin": "^0.8.0",
-        "npm": "^6.14.3",
         "optimize-css-assets-webpack-plugin": "^5.0.3",
         "prettier": "^1.18.2",
         "prop-types": "^15.7.2",
@@ -62,6 +61,6 @@
     },
     "engines": {
         "node": ">=12.14.0",
-        "npm": ">=6.13.4"
+        "npm": ">=6.14.6"
     }
 }
