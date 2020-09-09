@@ -62,17 +62,12 @@
     color: grey;
     margin-bottom: 5px;
     opacity: 0.2;
-    transition: 0.3s;
+    transition: 1.0s;
 }
 
-.webviz-config-plugin-button-selected {
-    color: black;
-    opacity: 1;
-}
-
-.webviz-config-plugin-button:hover {
+.webviz-config-plugin-wrapper:hover .webviz-config-plugin-button {
     opacity: 0.9;
-}
+}​
 
 .webviz-config-tooltip-wrapper {
     position: relative;
@@ -104,4 +99,12 @@
 
 .webviz-config-tooltip-wrapper:hover .webviz-config-tooltip {
     visibility: visible;
+}
+
+.webviz-config-plugin-button:hover,
+.webviz-config-tooltip-wrapper:hover .webviz-config-plugin-button,
+.webviz-config-plugin-button-selected
+{
+    opacity: 1.0;
+    color: black;
 }
