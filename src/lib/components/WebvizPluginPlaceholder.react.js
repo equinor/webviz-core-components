@@ -76,7 +76,6 @@ export default class WebvizPluginPlaceholder extends Component {
                     </div>
                     <div
                         className="webviz-config-plugin-buttonbar"
-                        id="camerabutton"
                     >
                         {this.props.buttons.includes("screenshot") && (
                             <WebvizToolbarButton
