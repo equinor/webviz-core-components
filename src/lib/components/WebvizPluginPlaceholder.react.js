@@ -4,11 +4,11 @@ import html2canvas from "html2canvas";
 import Tour from "reactour";
 
 import {
-    faFileArchive,
     faAddressCard,
     faQuestionCircle,
     faCameraRetro,
     faExpand,
+    faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 
 import WebvizToolbarButton from "../private-components/webviz-plugin-placeholder-resources/WebvizToolbarButton";
@@ -33,13 +33,13 @@ export default class WebvizPluginPlaceholder extends Component {
     }
 
     componentDidUpdate(_, prevState) {
-        if (this.props.zip_base64 !== "") {
-            const now = new Date();
-            const filename = `webviz-data-${now.getFullYear()}-${now.getMonth() +
-                1}-${now.getDate()}.zip`;
-
-            download_file(filename, this.props.zip_base64);
-            this.props.setProps({ zip_base64: "" });
+        if (this.props.download !== null && this.props.download !== "") {
+            download_file({
+                filename: this.props.download.filename,
+                data: this.props.download.content,
+                mimeType: this.props.download.mime_type
+            });
+            this.props.setProps({ download: null });
         }
 
         // Hide/show body scrollbar depending on plugin going in/out of full screen mode.
@@ -86,11 +86,11 @@ export default class WebvizPluginPlaceholder extends Component {
                                         document.getElementById(this.props.id)
                                     ).then(canvas =>
                                         canvas.toBlob(blob =>
-                                            download_file(
-                                                this.props.screenshot_filename,
-                                                blob,
-                                                true
-                                            )
+                                            download_file({
+                                                filename: this.props.screenshot_filename,
+                                                data: blob,
+                                            }),
+                                            "image/png"
                                         )
                                     )
                                 }
@@ -112,9 +112,9 @@ export default class WebvizPluginPlaceholder extends Component {
                                 }}
                             />
                         )}
-                        {this.props.buttons.includes("download_zip") && (
+                        {this.props.buttons.includes("download") && (
                             <WebvizToolbarButton
-                                icon={faFileArchive}
+                                icon={faDownload}
                                 tooltip="Download data"
                                 onClick={() =>
                                     this.props.setProps({
@@ -172,14 +172,14 @@ WebvizPluginPlaceholder.defaultProps = {
     buttons: [
         "screenshot",
         "expand",
-        "download_zip",
+        "download",
         "guided_tour",
         "contact_person",
     ],
     contact_person: {},
     tour_steps: [],
     data_requested: 0,
-    zip_base64: "",
+    download: null,
     screenshot_filename: "webviz-screenshot.png",
 };
 
@@ -196,7 +196,7 @@ WebvizPluginPlaceholder.propTypes = {
 
     /**
      * Array of strings, representing which buttons to render. Full set is
-     * ['download_zip', 'contact_person', 'guided_tour', 'screenshot', 'expand']
+     * ['download', 'contact_person', 'guided_tour', 'screenshot', 'expand']
      */
     buttons: PropTypes.array,
 
@@ -207,9 +207,11 @@ WebvizPluginPlaceholder.propTypes = {
     contact_person: PropTypes.objectOf(PropTypes.string),
 
     /**
-     * The zip archive to download encoded as base64 (when user clicks on the download csv file icon).
+     * A dictionary with information regarding the resource file the plugin requested.
+     * Dictionary keys are 'filename', 'content' and 'mime_type'.
+     * The 'content' value should be a base64 encoded ASCII string.
      */
-    zip_base64: PropTypes.string,
+    download: PropTypes.objectOf(PropTypes.string),
 
     /**
      *  File name used when saving a screenshot of the plugin.
