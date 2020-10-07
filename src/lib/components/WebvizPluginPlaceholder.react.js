@@ -83,7 +83,11 @@ export default class WebvizPluginPlaceholder extends Component {
                                 tooltip="Take screenshot"
                                 onClick={() =>
                                     html2canvas(
-                                        document.getElementById(this.props.id)
+                                        document.getElementById(this.props.id),
+                                        {
+                                            scrollX: -window.scrollX,
+                                            scrollY: -window.scrollY,
+                                        }                                        
                                     ).then(canvas =>
                                         canvas.toBlob(blob =>
                                             download_file({
