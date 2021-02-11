@@ -1,0 +1,32 @@
+.Suggestions {
+    position: absolute;
+    z-index: 99;
+    top: 100%;
+    left: -1px;
+    right: -1px;
+    border: 1px #ccc solid;
+    border-radius: 0px 0px 4px 4px;
+    background-color: white;
+    overflow-y: auto;
+}
+
+.Suggestions__Suggestion {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.Suggestions__Suggestion--Selected {
+    background-color: #d5eaf4;
+}
+
+.Suggestions__Suggestions i {
+    padding: 10px;
+    display: inline-block;
+}
+
+.Suggestions__Icon {
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    background-position: 5px center;
+    padding-left: 30px;
+}

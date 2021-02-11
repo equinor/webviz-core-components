@@ -2,7 +2,8 @@
 import WebvizPluginPlaceholder from "./components/WebvizPluginPlaceholder.react";
 import ColorScales from "./components/ColorScales.react";
 import Select from "./components/Select.react";
+import TagTreeSelector from "/.components/TagTreeSelector"
 
 import "./flexbox.css"
 
-export { WebvizPluginPlaceholder, ColorScales, Select };
+export { WebvizPluginPlaceholder, ColorScales, Select, TagTreeSelector };

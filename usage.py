@@ -112,6 +112,87 @@ app.layout = html.Div(
                 ),
             ],
         ),
+        wcc.WebvizPluginPlaceholder(
+            id="tree-tag-plugin",
+            children=[
+                wcc.TagTreeSelector(
+                    id="input",
+                    label="Vector Selector",
+                    maxTags=3,
+                    delimiter=":",
+                    numMetaData=2,
+                    data={
+                        "iter-0": {
+                            "description": "Iteration 0",
+                            "color": "#326dcf",
+                            "data": {
+                                "well": {
+                                    "description": "Oil well",
+                                    "icon": "Well",
+                                    "data": {
+                                        "WOBP": {
+                                            "description": "...",
+                                            "data": {
+                                                "OP_1": {"data": {}},
+                                                "OP_2": {"data": {}},
+                                                "OP_3": {"data": {}},
+                                                "OP_4": {"data": {}},
+                                                "OP_5": {"data": {}},
+                                                "OP_6": {"data": {}},
+                                                "OP_7": {"data": {}},
+                                                "OP_8": {"data": {}},
+                                                "OP_9": {"data": {}},
+                                                "OP_10": {"data": {}},
+                                            },
+                                        },
+                                        "FOBP": {
+                                            "type": "field",
+                                            "description": "...",
+                                            "selectorDescripton": "Select a subgroup...",
+                                            "data": {},
+                                        },
+                                    },
+                                }
+                            },
+                        },
+                        "iter-1": {
+                            "description": "Iteration 1",
+                            "color": "#458906",
+                            "data": {
+                                "well": {
+                                    "description": "Oil well",
+                                    "icon": "Well",
+                                    "data": {
+                                        "WOBP": {
+                                            "description": "...",
+                                            "data": {
+                                                "OP_1": {"data": {}},
+                                                "OP_2": {"data": {}},
+                                                "OP_3": {"data": {}},
+                                                "OP_4": {"data": {}},
+                                                "OP_5": {"data": {}},
+                                                "OP_6": {"data": {}},
+                                                "OP_7": {"data": {}},
+                                                "OP_8": {"data": {}},
+                                                "OP_9": {"data": {}},
+                                                "OP_10": {"data": {}},
+                                            },
+                                        },
+                                        "FOBP": {
+                                            "type": "field",
+                                            "description": "...",
+                                            "selectorDescripton": "Select a subgroup...",
+                                            "data": {},
+                                        },
+                                    },
+                                }
+                            },
+                        },
+                    },
+                ),
+                html.Div(id="output"),
+            ]
+        )
     ]
 )
 
@@ -125,6 +206,10 @@ def update_colors(colorscale, figure):
     figure["layout"]["colorway"] = colorscale
     return figure
 
+@app.callback(Output("output", "children"), [Input("input", "value")])
+def display_output(value):
+    return "You have selected {}".format(value)
+
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)

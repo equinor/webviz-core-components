@@ -1,0 +1,258 @@
+.TagTreeSelector *,
+.TagTreeSelector__Ruler {
+    font-family: sans-serif;
+}
+.TagTreeSelector__unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.TagTreeSelector {
+    border: 1px #dcdcdc solid;
+    border-radius: 4px;
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    cursor: text;
+    position: relative;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.TagTreeSelector--Invalid {
+    border: 1px #eb0000 solid !IMPORTANT;
+}
+
+.TagTreeSelector--SuggestionsActive {
+    border-radius: 4px 4px 0px 0px;
+}
+
+.TagTreeSelector__ClearAll {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    margin-top: -16px;
+}
+
+.TagTreeSelector__ClearAll button {
+    align-items: center;
+    appearance: none;
+    background: #eaeaea;
+    border: 1px #dcdcdc solid;
+    border-radius: 50%;
+    color: #000;
+    cursor: pointer;
+    font-size: 24px;
+    height: 32px;
+    justify-content: center;
+    line-height: 0;
+    margin-left: 8px;
+    padding: 0;
+    transform: rotate(45deg);
+    width: 32px;
+    display: inline-block;
+    outline: none;
+    position: relative;
+}
+
+.TagTreeSelector__BrowseSubgroup {
+    align-items: center;
+    appearance: none;
+    background: #999999;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    height: 20px;
+    justify-content: center;
+    line-height: 20px;
+    margin-left: 8px;
+    padding: 0;
+    width: 20px;
+    display: flex;
+    outline: none;
+    position: relative;
+    transform: rotate(90deg);
+    top: -1px;
+}
+
+.TagTreeSelector__BrowseSubgroup:disabled,
+.TagTreeSelector__ClearAll button:disabled {
+    background: #eaeaea;
+    cursor: default;
+}
+
+.TagTreeSelector__BrowseSubgroup:hover:enabled,
+.TagTreeSelector__ClearAll button:hover:enabled {
+    background: #007079;
+    color: #fff;
+}
+
+.TagTreeSelector input {
+    border: none;
+    background: none;
+    outline: none;
+    padding: 0px;
+    font-size: 12pt;
+    width: 50px;
+    color: #565656;
+}
+
+.TagTreeSelector ul {
+    display: inline-flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.TagTreeSelector__Tag {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 4px;
+    background-color: #fefefe;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-right: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    color: #565656;
+}
+
+.TagTreeSelector__InnerTag {
+    display: flex;
+    border-radius: 4px;
+    background-color: #fefefe;
+    font-size: 12pt;
+    white-space: nowrap;
+    padding: 8px;
+    color: #565656;
+    border: 1px transparent solid;
+}
+
+.TagTreeSelector__InnerTag > * {
+    display: inline-block;
+}
+
+.TagTreeSelector__Border {
+    border: 1px #ccc solid;
+}
+
+.TagTreeSelector__Ruler {
+    visibility: hidden;
+    white-space: nowrap;
+    font-size: 12pt;
+}
+
+.TagTreeSelector__TagSelected {
+    background-color: #d5eaf4;
+    opacity: 0.5;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 10;
+}
+
+.TagTreeSelector__NumberOfTags {
+    align-items: right;
+    display: block;
+    text-align: right;
+    position: relative;
+    width: 100%;
+    margin-top: 8px;
+    color: #6f6f6f;
+}
+
+.TagTreeSelector__Warning {
+    color: #ff9200;
+}
+
+.TagTreeSelector__Error {
+    color: #eb0000;
+}
+
+.TagTreeSelector__MatchCounter {
+    align-items: center;
+    background: rgb(245, 245, 245);
+    border: 1px #ccc solid;
+    border-radius: 50%;
+    color: #565656;
+    font-size: 12px;
+    height: 20px;
+    justify-content: center;
+    margin-right: 8px;
+    padding: 0;
+    width: 20px;
+    display: inline-block;
+    outline: none;
+    position: relative;
+    text-align: center;
+    line-height: 20px;
+}
+
+.TagTreeSelector__RemoveButton {
+    align-items: center;
+    appearance: none;
+    background: #eb0000;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    height: 20px;
+    justify-content: center;
+    line-height: 20px;
+    margin-left: 8px;
+    padding: 0;
+    transform: rotate(45deg);
+    width: 20px;
+    display: flex;
+    outline: none;
+    position: relative;
+    top: -1px;
+}
+
+.TagTreeSelector__Icon {
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    background-position: 5px center;
+    padding-left: 30px;
+    text-transform: capitalize;
+}
+
+.TagTreeSelector__Invalid, 
+.TagTreeSelector__MissingSubgroup {
+    background-image: url('./images/invalid.svg');
+    background-color: #ffc1c1 !IMPORTANT;
+    border: 1px #eb0000 solid !IMPORTANT;
+}
+
+.TagTreeSelector__Invalid input, 
+.TagTreeSelector__MissingSubgroup input {
+    background-color: #ffc1c1 !IMPORTANT;
+}
+
+.TagTreeSelector__Duplicate {
+    background-image: url('./images/duplicate.svg');
+    background-color: #ffe7d6 !IMPORTANT;
+    border: 1px #ff9200 solid !IMPORTANT;
+}
+
+.TagTreeSelector__Duplicate input {
+    background-color: #ffe7d6 !IMPORTANT;
+}
+
+.TagTreeSelector__Unknown {
+    background-image: url('./images/unknown.svg');
+}
