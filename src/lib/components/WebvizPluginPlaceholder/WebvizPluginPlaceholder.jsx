@@ -11,9 +11,9 @@ import {
     faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 
-import WebvizToolbarButton from "../private-components/webviz-plugin-placeholder-resources/WebvizToolbarButton";
-import WebvizContentOverlay from "../private-components/webviz-plugin-placeholder-resources/WebvizContentOverlay";
-import download_file from "../private-components/webviz-plugin-placeholder-resources/download_file";
+import WebvizToolbarButton from "./utils/WebvizToolbarButton";
+import WebvizContentOverlay from "./utils/WebvizContentOverlay";
+import download_file from "./utils/download_file";
 
 import "./webviz_plugin_component.css";
 
