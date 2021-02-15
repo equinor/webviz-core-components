@@ -17,9 +17,9 @@ export default class Suggestions extends Component {
         super();
 
         this.props = props;
-        this.suggestionsList = React.createRef();
-        this.mouseMoved = false;
-        this.currentlySelectedSuggestionIndex = 0;
+        this.__suggestionsList = React.createRef();
+        this.__mouseMoved = false;
+        this.__currentlySelectedSuggestionIndex = 0;
     }
 
     componentDidMount() {
@@ -33,17 +33,17 @@ export default class Suggestions extends Component {
     }
 
     maybeMarkSuggestionAsHovered(index) {
-        if (this.mouseMoved) {
+        if (this.__mouseMoved) {
             this.markSuggestionAsHovered(index);
         }
     }
 
     mouseMove(e) {
-        this.mouseMoved = true;
+        this.__mouseMoved = true;
     }
 
     markSuggestionAsHovered(index) {
-        this.currentlySelectedSuggestionIndex = index;
+        this.__currentlySelectedSuggestionIndex = index;
         let newSelectedSuggestion = this.currentlySelectedSuggestion();
         let selectedSuggestions = document.getElementsByClassName("Suggestions__Suggestion--Selected");
         for (var i = 0; i < selectedSuggestions.length; i++) {
@@ -53,12 +53,13 @@ export default class Suggestions extends Component {
     }
 
     useSuggestion(e, suggestion) {
+        this.__currentlySelectedSuggestionIndex = 0;
         this.props.useSuggestion(e, suggestion);
     }
 
     scrollSuggestionsToMakeElementVisible(element) {
-        this.mouseMoved = false;
-        const suggestions = this.suggestionsList.current;
+        this.__mouseMoved = false;
+        const suggestions = this.__suggestionsList.current;
         if (!suggestions) return;
 
         const elementBoundingRect = element.getBoundingClientRect();
@@ -71,20 +72,20 @@ export default class Suggestions extends Component {
     }
 
     currentlySelectedSuggestion() {
-        return document.getElementsByClassName("Suggestions__Suggestion")[this.currentlySelectedSuggestionIndex];
+        return document.getElementsByClassName("Suggestions__Suggestion")[this.__currentlySelectedSuggestionIndex];
     }
 
     handleGlobalKeyDown(e) {
         if (this.props.visible) {
             if (e.key === "ArrowUp") {
-                this.markSuggestionAsHovered(Math.max(0, this.currentlySelectedSuggestionIndex - 1));
+                this.markSuggestionAsHovered(Math.max(0, this.__currentlySelectedSuggestionIndex - 1));
                 this.scrollSuggestionsToMakeElementVisible(this.currentlySelectedSuggestion());
             }
             if (e.key === "ArrowDown") {
                 this.markSuggestionAsHovered(
                     Math.min(
                         document.getElementsByClassName("Suggestions__Suggestion").length - 1,
-                        this.currentlySelectedSuggestionIndex + 1
+                        this.__currentlySelectedSuggestionIndex + 1
                     )
                 );
                 this.scrollSuggestionsToMakeElementVisible(this.currentlySelectedSuggestion());
@@ -101,7 +102,7 @@ export default class Suggestions extends Component {
     render() {
         const { visible, tagFieldRef } = this.props;
         return (
-            <div ref={this.suggestionsList} className="Suggestions" style={
+            <div ref={this.__suggestionsList} className="Suggestions" style={
                 {
                     maxHeight: (
                         window.innerHeight - (
@@ -119,7 +120,7 @@ export default class Suggestions extends Component {
     }
 
     maybeMarkSuggestionAsHovered(index) {
-        if (this.mouseMoved) {
+        if (this.__mouseMoved) {
             this.markSuggestionAsHovered(index);
         }
     }
@@ -142,7 +143,7 @@ export default class Suggestions extends Component {
                                     {
                                         "Suggestions__Suggestion": true,
                                         "Suggestions__Icon": option.icon !== undefined,
-                                        "Suggestions__Suggestion--Selected": i == this.currentlySelectedSuggestionIndex
+                                        "Suggestions__Suggestion--Selected": i == this.__currentlySelectedSuggestionIndex
                                     }
                                 )
                             }

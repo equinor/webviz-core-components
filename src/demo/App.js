@@ -35,10 +35,11 @@ class App extends Component {
                 <TagTreeSelector
                     id="TagTreeSelector"
                     key="TagTreeSelector_0"
-                    maxTags={3}
+                    maxNumTags={3}
                     numMetaData={2}
                     delimiter=":"
-                    value={[]}
+                    values={[]}
+                    tags={[]}
                     setProps={this.setProps}
                     label="Vector Selector"
                     data={

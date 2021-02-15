@@ -118,7 +118,7 @@ app.layout = html.Div(
                 wcc.TagTreeSelector(
                     id="input",
                     label="Vector Selector",
-                    maxTags=3,
+                    maxNumTags=3,
                     delimiter=":",
                     numMetaData=2,
                     data={
@@ -206,9 +206,9 @@ def update_colors(colorscale, figure):
     figure["layout"]["colorway"] = colorscale
     return figure
 
-@app.callback(Output("output", "children"), [Input("input", "value")])
-def display_output(value):
-    return "You have selected {}".format(value)
+@app.callback(Output("output", "children"), [Input("input", "values"), Input("input", "tags")])
+def display_output(values, tags):
+    return "By using the tags '{}' you have selected the values '{}'".format(tags, values)
 
 
 if __name__ == "__main__":

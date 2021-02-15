@@ -24,26 +24,26 @@ export default class TagTreeSelector extends Component {
     constructor(props) {
         super();
 
-        this.suggestionTimer = undefined;
-        this.suggestions = React.createRef();
-        this.refNumberOfTags = React.createRef();
-        this.tagFieldRef = React.createRef();
-        this.mouseButtonDown = false;
-        this.mouseDownPosition = [0, 0];
-        this.selectionHasStarted = false;
-        this.firstSelectedTagIndex = -1;
-        this.lastSelectedTagIndex = -1;
-        this.currentSelectionDirection = 0;
-        this.mouseMoved = false;
-        this.clipboardData = undefined;
-        this.noUserInputSelect = false;
-        this.mouseDownElement = undefined;
+        this.__suggestionTimer = undefined;
+        this.__suggestions = React.createRef();
+        this.__refNumberOfTags = React.createRef();
+        this.__tagFieldRef = React.createRef();
+        this.__mouseButtonDown = false;
+        this.__mouseDownPosition = [0, 0];
+        this.__selectionHasStarted = false;
+        this.__firstSelectedTagIndex = -1;
+        this.__lastSelectedTagIndex = -1;
+        this.__currentSelectionDirection = 0;
+        this.__mouseMoved = false;
+        this.__clipboardData = undefined;
+        this.__noUserInputSelect = false;
+        this.__mouseDownElement = undefined;
         this.props = props;
 
         let tags = [];
-        if (props.value !== undefined) {
-            for (let tag of props.value) {
-                let data = tag.split(this.props.delimiter);
+        if (props.tags !== undefined) {
+            for (let tag of props.tags) {
+                let data = tags.split(this.props.delimiter);
                 tags.push(new TagDataObject({
                     data: data,
                     activeDataIndex: data.length - 1,
@@ -51,11 +51,11 @@ export default class TagTreeSelector extends Component {
                 }));
             }
         }
-        if (tags.length < props.maxTags)
+        if (tags.length < props.maxNumTags)
             tags.push(this.createNewTag());
 
         this.state = {
-            tags: tags,
+            tags,
             currentTagIndex: 0,
             suggestionsVisible: false
         };
@@ -83,21 +83,6 @@ export default class TagTreeSelector extends Component {
         return new TagDataObject({ props: this.props });
     }
 
-    letMaxTagsBlink() {
-        var numBlinks = 0;
-        var blinkTimer = setInterval(() => {
-            numBlinks++;
-            if (numBlinks % 2 == 0) {
-                this.refNumberOfTags.current.classList.add("TagTreeSelector__Warning");
-            } else {
-                this.refNumberOfTags.current.classList.remove("TagTreeSelector__Warning");
-            }
-            if (numBlinks === 7) {
-                clearInterval(blinkTimer);
-            }
-        }, 200)
-    }
-
     updateState({
         tags = undefined,
         currentTagIndex = undefined,
@@ -108,30 +93,41 @@ export default class TagTreeSelector extends Component {
         const newTagIndex = currentTagIndex === undefined ? this.state.currentTagIndex : currentTagIndex;
         const newSuggestionsVisible = suggestionsVisible === undefined ? this.state.suggestionsVisible : suggestionsVisible;
         this.setState({ tags: newTags, currentTagIndex: newTagIndex, suggestionsVisible: newSuggestionsVisible }, callback);
-        this.makeValues();
-    }
-
-    isCurrentTagValid() {
-        return (this.currentTagIndex() >= 0 && this.currentTag().isValid());
+        this.updateOutputTagsAndValues();
     }
 
     maybeShowSuggestions() {
-        if (this.suggestionTimer)
-            clearTimeout(this.suggestionTimer);
-        if (!this.isCurrentTagValid()) {
-            this.suggestionTimer = setTimeout(() => this.showSuggestions(), 1500);
+        if (this.__suggestionTimer)
+            clearTimeout(this.__suggestionTimer);
+        if (this.currentTag() !== undefined && !this.currentTag().isValid()) {
+            this.__suggestionTimer = setTimeout(() => this.showSuggestions(), 1500);
         }
-    }
-
-    hideSuggestions() {
-        clearTimeout(this.suggestionTimer);
-        this.updateState({ suggestionsVisible: false });
     }
 
     showSuggestions() {
         if (!document.activeElement || this.currentTagIndex() < 0) return;
         if (this.currentTag().ref() === document.activeElement)
             this.updateState({ suggestionsVisible: true });
+    }
+
+    hideSuggestions() {
+        clearTimeout(this.__suggestionTimer);
+        this.updateState({ suggestionsVisible: false });
+    }
+
+    letMaxNumValuesBlink() {
+        var numBlinks = 0;
+        var blinkTimer = setInterval(() => {
+            numBlinks++;
+            if (numBlinks % 2 == 0) {
+                this.__refNumberOfTags.current.classList.add("TagTreeSelector__Warning");
+            } else {
+                this.__refNumberOfTags.current.classList.remove("TagTreeSelector__Warning");
+            }
+            if (numBlinks === 7) {
+                clearInterval(blinkTimer);
+            }
+        }, 200)
     }
 
     unselectAllTags({
@@ -151,7 +147,7 @@ export default class TagTreeSelector extends Component {
         });
     }
 
-    checkIfDuplicate(tag, index) {
+    checkIfTagIsDuplicate(tag, index) {
         let duplicateTags = this.state.tags.filter((entry, i) =>
             (i < index && entry.contains(tag))
         );
@@ -163,17 +159,17 @@ export default class TagTreeSelector extends Component {
 
         if (!domNode || !domNode.contains(event.target)) {
             this.hideSuggestions();
-            if (!this.selectionHasStarted) {
+            if (!this.__selectionHasStarted) {
                 this.unselectAllTags({});
 
                 this.updateState({ currentTagIndex: -1 });
             }
-            this.selectionHasStarted = false;
+            this.__selectionHasStarted = false;
         }
     }
 
     mouseUp(e) {
-        this.mouseButtonDown = false;
+        this.__mouseButtonDown = false;
         document.body.classList.remove("TagTreeSelector__unselectable");
         if (this.countSelectedTags() > 0) {
             this.hideSuggestions();
@@ -186,14 +182,14 @@ export default class TagTreeSelector extends Component {
     }
 
     mouseDown(e) {
-        this.mouseDownElement = e.target;
-        this.mouseDownPosition = [e.clientX, e.clientY];
+        this.__mouseDownElement = e.target;
+        this.__mouseDownPosition = [e.clientX, e.clientY];
         if (this.countSelectedTags() > 0) {
             this.unselectAllTags({});
             e.stopPropagation();
         }
         else {
-            this.mouseButtonDown = true;
+            this.__mouseButtonDown = true;
         }
     }
 
@@ -217,27 +213,27 @@ export default class TagTreeSelector extends Component {
 
     copyAllSelectedTags() {
         const selectedTags = this.selectedTags();
-        this.clipboardData = selectedTags;
+        this.__clipboardData = selectedTags;
     }
 
     canAddTag() {
-        return this.countValidTags() < this.props.maxTags || this.props.maxTags == -1;
+        return this.countValidTags() < this.props.maxNumTags || this.props.maxNumTags == -1;
     }
 
     pasteTags(e) {
-        if (this.clipboardData === undefined) return;
-        let tags = this.clipboardData;
+        if (this.__clipboardData === undefined) return;
+        let tags = this.__clipboardData;
         if (tags && tags.length > 0) {
             let newTags = this.state.tags;
             if (this.lastTag().isEmpty()) {
                 newTags.pop();
             }
             for (let tag of tags) {
-                if (newTags.length < this.props.maxTags) {
+                if (newTags.length < this.props.maxNumTags) {
                     newTags.push(tag.clone());
                 }
             }
-            if (newTags.length < this.props.maxTags)
+            if (newTags.length < this.props.maxNumTags)
                 newTags.push(this.createNewTag());
             this.updateState({
                 tags: newTags, currentTagIndex: newTags.length - 1, suggestionsVisible: false, callback: () => {
@@ -252,7 +248,7 @@ export default class TagTreeSelector extends Component {
         let newTags = this.state.tags.filter((tag) => !tag.selected());
         const numRemovedTags = this.countTags() - newTags.length;
         let newTagIndex = this.currentTagIndex();
-        if (newTagIndex >= this.firstSelectedTagIndex) {
+        if (newTagIndex >= this.__firstSelectedTagIndex) {
             newTagIndex = Math.max(0, newTagIndex - numRemovedTags);
         }
         if (newTags.length == 0 || !this.hasLastEmptyTag()) {
@@ -266,25 +262,25 @@ export default class TagTreeSelector extends Component {
             if (this.countSelectedTags() > 0) {
                 let selectionChanged = false;
                 if (e.key === "ArrowLeft") {
-                    if (this.currentSelectionDirection == DirectionEnums.Left) {
-                        this.firstSelectedTagIndex = Math.max(0, this.firstSelectedTagIndex - 1);
+                    if (this.__currentSelectionDirection == DirectionEnums.Left) {
+                        this.__firstSelectedTagIndex = Math.max(0, this.__firstSelectedTagIndex - 1);
                     } else {
-                        this.lastSelectedTagIndex = this.lastSelectedTagIndex - 1;
+                        this.__lastSelectedTagIndex = this.__lastSelectedTagIndex - 1;
                     }
                     selectionChanged = true;
                 }
                 else if (e.key === "ArrowRight") {
-                    if (this.currentSelectionDirection == DirectionEnums.Left) {
-                        this.firstSelectedTagIndex = this.firstSelectedTagIndex + 1;
+                    if (this.__currentSelectionDirection == DirectionEnums.Left) {
+                        this.__firstSelectedTagIndex = this.__firstSelectedTagIndex + 1;
                     } else {
-                        this.lastSelectedTagIndex = Math.min(this.countTags() - 1, this.lastSelectedTagIndex + 1);
+                        this.__lastSelectedTagIndex = Math.min(this.countTags() - 1, this.__lastSelectedTagIndex + 1);
                     }
                     selectionChanged = true;
                 }
                 if (selectionChanged) {
-                    this.markTagsAsSelected(this.firstSelectedTagIndex, this.lastSelectedTagIndex);
+                    this.markTagsAsSelected(this.__firstSelectedTagIndex, this.__lastSelectedTagIndex);
                 }
-                if (this.firstSelectedTagIndex > this.lastSelectedTagIndex) {
+                if (this.__firstSelectedTagIndex > this.__lastSelectedTagIndex) {
                     this.focusCurrentTag();
                 }
             }
@@ -292,16 +288,16 @@ export default class TagTreeSelector extends Component {
     }
 
     mouseMove(e) {
-        this.mouseMoved = true;
+        this.__mouseMoved = true;
 
-        if (!this.mouseButtonDown) return;
+        if (!this.__mouseButtonDown) return;
 
-        let manhattanLength = Math.abs(this.mouseDownPosition[0] - e.clientX) + Math.abs(this.mouseDownPosition[1] - e.clientY);
+        let manhattanLength = Math.abs(this.__mouseDownPosition[0] - e.clientX) + Math.abs(this.__mouseDownPosition[1] - e.clientY);
 
         if (manhattanLength <= 3) return;
 
         // Still allow selection within input elements
-        if (e.target == this.mouseDownElement && e.target.nodeName === "INPUT") return;
+        if (e.target == this.__mouseDownElement && e.target.nodeName === "INPUT") return;
 
         // Hide any suggestions and blur any focus
         this.hideSuggestions();
@@ -311,11 +307,11 @@ export default class TagTreeSelector extends Component {
 
         // This is somewhat buggy
         //const domNode = ReactDOM.findDOMNode(this);
-        const domNode = this.tagFieldRef.current;
+        const domNode = this.__tagFieldRef.current;
         if (!domNode)
             return;
 
-        this.selectionHasStarted = true;
+        this.__selectionHasStarted = true;
 
         document.body.classList.add("TagTreeSelector__unselectable");
 
@@ -323,13 +319,13 @@ export default class TagTreeSelector extends Component {
         let inputFieldBoundingRect = domNode.getBoundingClientRect();
 
         // Define key coordinates
-        let top = Math.min(this.mouseDownPosition[1], e.clientY);
-        let bottom = Math.max(this.mouseDownPosition[1], e.clientY);
-        let left = (this.mouseDownPosition[1] == top ? this.mouseDownPosition[0] : e.clientX);
-        let right = (this.mouseDownPosition[1] == top ? e.clientX : this.mouseDownPosition[0]);
+        let top = Math.min(this.__mouseDownPosition[1], e.clientY);
+        let bottom = Math.max(this.__mouseDownPosition[1], e.clientY);
+        let left = (this.__mouseDownPosition[1] == top ? this.__mouseDownPosition[0] : e.clientX);
+        let right = (this.__mouseDownPosition[1] == top ? e.clientX : this.__mouseDownPosition[0]);
         if (Math.abs(top - bottom) < 30) {
-            left = Math.min(this.mouseDownPosition[0], e.clientX);
-            right = Math.max(this.mouseDownPosition[0], e.clientX);
+            left = Math.min(this.__mouseDownPosition[0], e.clientX);
+            right = Math.max(this.__mouseDownPosition[0], e.clientX);
         }
 
         // Find first and last touched tag fields
@@ -381,19 +377,22 @@ export default class TagTreeSelector extends Component {
         this.updateState({});
     }
 
-    makeValues() {
+    updateOutputTagsAndValues() {
         const { setProps } = this.props;
-        let selection = [];
+        let outputTags = [];
+        let outputValues = [];
         for (let i = 0; i < this.countTags(); i++) {
             const tag = this.tag(i);
-            if (tag.isValid() && !this.checkIfDuplicate(tag, i))
-                selection.push(tag.value());
+            if (tag.isValid() && !this.checkIfTagIsDuplicate(tag, i)) {
+                outputTags.push(tag.completeName());
+                outputValues.push(...tag.matchedTags());
+            }
         }
-        setProps({ value: selection });
+        setProps({ tags: outputTags, values: outputValues });
     }
 
     render() {
-        const { id, label, maxTags } = this.props;
+        const { id, label, maxNumTags } = this.props;
         const { tags, suggestionsVisible } = this.state;
 
         return (
@@ -402,12 +401,12 @@ export default class TagTreeSelector extends Component {
                 <div className={classNames({
                     "TagTreeSelector": true,
                     "TagTreeSelector--SuggestionsActive": suggestionsVisible,
-                    "TagTreeSelector--Invalid": (this.props.maxTags > 0 && this.countValidTags() > this.props.maxTags)
+                    "TagTreeSelector--Invalid": (maxNumTags > 0 && this.countValidTags() > maxNumTags)
                 })}
                     onClick={(e) => this.selectLastInput(e)}
                     onMouseDown={(e) => this.mouseDown(e)}
                 >
-                    <ul className="TagTreeSelector__Tags" ref={this.tagFieldRef}>
+                    <ul className="TagTreeSelector__Tags" ref={this.__tagFieldRef}>
                         {tags.map((tag, index) => (
                             <Tag
                                 key={index}
@@ -415,7 +414,7 @@ export default class TagTreeSelector extends Component {
                                 tag={tag}
                                 countTags={this.countTags()}
                                 currentTag={index === this.currentTagIndex()}
-                                checkIfDuplicate={(tag, index) => this.checkIfDuplicate(tag, index)}
+                                checkIfDuplicate={(tag, index) => this.checkIfTagIsDuplicate(tag, index)}
                                 inputKeyDown={(e) => this.inputKeyDown(e)}
                                 inputKeyUp={(e) => this.inputKeyUp(e)}
                                 inputChange={(e) => this.inputChange(e)}
@@ -426,37 +425,27 @@ export default class TagTreeSelector extends Component {
                         ))}
                     </ul>
                     <div className="TagTreeSelector__ClearAll">
-                        <button type="button" title="Clear all" onClick={(e) => this.clearAll(e)} disabled={(this.countTags() <= 1 && this.hasLastEmptyTag())}>+</button>
+                        <button type="button" title="Clear all" onClick={(e) => this.clearAllTags(e)} disabled={(this.countTags() <= 1 && this.hasLastEmptyTag())}>+</button>
                     </div>
-                    {this.currentTagIndex() >= 0 && <Suggestions ref={this.suggestions} tagFieldRef={this.tagFieldRef} visible={suggestionsVisible} useSuggestion={(e, suggestion) => this.useSuggestion(e, suggestion)} tag={this.currentTag()}></Suggestions>}
+                    {this.currentTagIndex() >= 0 &&
+                        <Suggestions
+                            ref={this.__suggestions}
+                            tagFieldRef={this.__tagFieldRef}
+                            visible={suggestionsVisible}
+                            useSuggestion={(e, suggestion) => this.useSuggestion(e, suggestion)}
+                            tag={this.currentTag()}>
+                        </Suggestions>
+                    }
                 </div>
-                {maxTags > 0 && <div className={classNames({
+                {maxNumTags > 0 && <div className={classNames({
                     "TagTreeSelector__NumberOfTags": true,
-                    "TagTreeSelector__Error": this.countValidTags() > maxTags
-                })} ref={this.refNumberOfTags}>Selected {this.countValidTags()} of {maxTags}</div>}
+                    "TagTreeSelector__Error": this.countValidTags() > maxNumTags
+                })} ref={this.__refNumberOfTags}>Selected {this.countValidTags()} of {maxNumTags}</div>}
             </div >
         );
     }
 
-    tagTitle(tag, index) {
-        if (index === this.countTags() - 1 && this.hasLastEmptyTag()) {
-            return "Enter a new name";
-        }
-        else if (!tag.isValid()) {
-            return "Invalid";
-        }
-        else if (this.checkIfDuplicate(tag, index)) {
-            return "Duplicate";
-        }
-        else if (tag.isComplete()) {
-            return "Incomplete";
-        }
-        else {
-            this.tagText(tag);
-        }
-    }
-
-    clearAll(e) {
+    clearAllTags(e) {
         this.updateState({
             tags: [
                 this.createNewTag(),
@@ -477,7 +466,7 @@ export default class TagTreeSelector extends Component {
 
     useSuggestion(e, suggestion) {
         var tag = this.currentTag();
-        this.noUserInputSelect = true;
+        this.__noUserInputSelect = true;
 
         tag.setData(suggestion);
         tag.incrementDataIndex();
@@ -500,11 +489,11 @@ export default class TagTreeSelector extends Component {
     }
 
     selectLastInput(e) {
-        if (!this.selectionHasStarted) {
+        if (!this.__selectionHasStarted) {
             this.setFocusOnTagInput(this.countTags() - 1);
             e.preventDefault();
         }
-        this.selectionHasStarted = false;
+        this.__selectionHasStarted = false;
     }
 
     debugCurrentTag() {
@@ -565,14 +554,7 @@ export default class TagTreeSelector extends Component {
     }
 
     focusCurrentTag() {
-        this.setFocusOnTagInput(this.state.currentTagIndex);
-    }
-
-    setCurrentTagState(state) {
-        let tag = this.currentTag();
-        if (tag.state === state) return;
-        tag.state = state;
-        this.updateState({ tags: this.state.tags.map((v, i) => i == this.currentTagIndex() ? tag : v) });
+        this.setFocusOnTagInput(this.currentTagIndex());
     }
 
     removeTag(e, index) {
@@ -594,8 +576,8 @@ export default class TagTreeSelector extends Component {
     }
 
     inputSelect(e, index) {
-        if (this.noUserInputSelect) {
-            this.noUserInputSelect = false;
+        if (this.__noUserInputSelect) {
+            this.__noUserInputSelect = false;
             return;
         }
         const val = e.target.value;
@@ -675,8 +657,7 @@ export default class TagTreeSelector extends Component {
     }
 
     currentTag() {
-        var tag = this.state.tags[this.state.currentTagIndex];
-        return tag;
+        return this.state.tags[this.state.currentTagIndex];
     }
 
     inputChange(e) {
@@ -710,8 +691,8 @@ export default class TagTreeSelector extends Component {
         if (this.tag(index).isEmpty())
             index--;
 
-        this.lastSelectedTagIndex = index;
-        this.firstSelectedTagIndex = index;
+        this.__lastSelectedTagIndex = index;
+        this.__firstSelectedTagIndex = index;
         this.state.tags.map((tag, i) => {
             if (i == index) {
                 tag.select();
@@ -728,14 +709,14 @@ export default class TagTreeSelector extends Component {
                 });
             }
             else {
-                this.letMaxTagsBlink();
+                this.letMaxNumValuesBlink();
             }
         }
         else if ((e.key === "ArrowRight" && e.target.selectionEnd == e.target.value.length) && val) {
             if (e.shiftKey) {
                 if (this.currentTagIndex() < this.countTags() - 1) {
                     this.selectTag(this.currentTagIndex());
-                    this.currentSelectionDirection = DirectionEnums.Right;
+                    this.__currentSelectionDirection = DirectionEnums.Right;
                 }
 
             } else {
@@ -757,7 +738,7 @@ export default class TagTreeSelector extends Component {
                 else {
                     this.selectTag(this.currentTagIndex());
                 }
-                this.currentSelectionDirection = DirectionEnums.Left;
+                this.__currentSelectionDirection = DirectionEnums.Left;
             }
             else {
                 this.decrementCurrentTagIndex();
@@ -787,10 +768,11 @@ export default class TagTreeSelector extends Component {
 }
 
 TagTreeSelector.defaultProps = {
-    maxTags: -1,
+    maxNumTags: -1,
     delimiter: ":",
     numMetaData: 0,
-    value: []
+    values: [],
+    tags: []
 };
 
 TagTreeSelector.propTypes = {
@@ -802,7 +784,7 @@ TagTreeSelector.propTypes = {
     /**
      * The max number of tags that can be selected.
      */
-    maxTags: PropTypes.number,
+    maxNumTags: PropTypes.number,
 
     /**
      * The delimiter used to separate input levels.
@@ -832,7 +814,12 @@ TagTreeSelector.propTypes = {
     setProps: PropTypes.func,
 
     /**
+     * Selected values - readonly.
+     */
+    values: PropTypes.arrayOf(PropTypes.string),
+
+    /**
      * Selected tags.
      */
-    value: PropTypes.arrayOf(PropTypes.string),
+    tags: PropTypes.arrayOf(PropTypes.string)
 };

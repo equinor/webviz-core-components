@@ -6,76 +6,99 @@ export default class TagDataObject {
         selected = false,
         props
     }) {
-        // Private members
-        var activeDataIndex = activeDataIndex;
-        var data = data;
-        var ref = ref;
-        var selected = selected;
+        this.__activeDataIndex = activeDataIndex;
+        this.__data = data;
+        this.__ref = ref;
+        this.__selected = selected;
+        this.__ref = ref;
 
-        // Public members
         this.delimiter = props.delimiter;
         this.props = props;
         this.numMatchedTags = 0;
-
-        // Getters
-        this.data = (index = undefined) => {
-            if (index === undefined) {
-                return data;
-            }
-            if (index >= 0 && index < data.length)
-                return data[index];
-            else
-                throw "The given index is out of bounds";
-        }
-        this.activeData = () => data[activeDataIndex];
-        this.ref = () => ref;
-        this.activeDataIndex = () => activeDataIndex;
-        this.selected = () => selected;
-        this.countData = () => data.length;
-        this.numMetaData = () => this.props.numMetaData;
-
-        // Setters
-        this.setActiveDataIndex = (index, global = true) => {
-            if (!global && activeDataIndex >= this.numMetaData()) {
-                activeDataIndex = index + this.numMetaData();
-            }
-            else {
-                activeDataIndex = index;
-            }
-            this.tidy();
-        }
-        this.incrementDataIndex = () => {
-            if (activeDataIndex < this.countData() - 1) {
-                activeDataIndex++;
-            }
-            else if (!this.isValid()) {
-                activeDataIndex++;
-                data[activeDataIndex] = "";
-            }
-        }
-        this.decrementDataIndex = () => {
-            activeDataIndex--;
-            this.tidy();
-        };
-        this.setData = (d, index = undefined) => {
-            if (index !== undefined) {
-                data[index] = d;
-            }
-            else {
-                data[activeDataIndex] = d;
-            }
-        };
-        this.setDataArray = (dataArray) => {
-            data = dataArray;
-        }
-        this.unselect = () => selected = false;
-        this.select = () => selected = true;
-        this.setActive = (active) => this.active = active;
-        this.setRef = (r) => ref = r;
     }
 
-    value() {
-        return this.data().join(this.delimiter);
+    data(index = undefined) {
+        if (index === undefined) {
+            return this.__data;
+        }
+        if (index >= 0 && index < this.countData())
+            return this.__data[index];
+        else
+            throw "The given index is out of bounds";
+    }
+
+    activeData() {
+        return this.__data[this.__activeDataIndex];
+    }
+
+    setData(data, index = undefined) {
+        if (index !== undefined) {
+            this.__data[index] = data;
+        }
+        else {
+            this.__data[this.__activeDataIndex] = data;
+        }
+    }
+
+    setDataArray(dataArray) {
+        this.__data = dataArray;
+    }
+
+    ref() {
+        return this.__ref;
+    }
+
+    setRef(reference) {
+        this.__ref = reference;
+    }
+
+    activeDataIndex() {
+        return this.__activeDataIndex;
+    }
+
+    setActiveDataIndex(index, includeMetaData = true) {
+        if (!includeMetaData && this.__activeDataIndex >= this.numMetaData()) {
+            this.__activeDataIndex = index + this.numMetaData();
+        }
+        else {
+            this.__activeDataIndex = index;
+        }
+        this.tidy();
+    }
+
+    incrementDataIndex() {
+        if (this.__activeDataIndex < this.countData() - 1) {
+            this.__activeDataIndex++;
+        }
+        else if (!this.isValid()) {
+            this.__activeDataIndex++;
+            this.__data[this.__activeDataIndex] = "";
+        }
+    }
+
+    decrementDataIndex() {
+        this.__activeDataIndex--;
+        this.tidy();
+    }
+
+    selected() {
+        return this.__selected;
+    }
+
+    select() {
+        this.__selected = true;
+    }
+
+    unselect() {
+        this.__selected = false;
+    }
+
+    countData() {
+        return this.__data.length;
+    }
+
+    numMetaData() {
+        return this.props.numMetaData;
     }
 
     colors() {
@@ -114,19 +137,20 @@ export default class TagDataObject {
         return JSON.stringify(this.data()) == JSON.stringify(other.data());
     }
 
-    contains(other) {
-        if (this.containsWildcard() && !other.containsWildcard()) {
-            return this.matchedTags().includes(other.completeName());
+    // TODO: Make name clearer - maybe remove second check?
+    contains(otherTagDataObject) {
+        if (this.containsWildcard() && !otherTagDataObject.containsWildcard()) {
+            return this.matchedTags().includes(otherTagDataObject.completeName());
         }
-        else if (!this.containsWildcard() && other.containsWildcard()) {
-            return other.matchedTags().includes(this.completeName());
+        else if (!this.containsWildcard() && otherTagDataObject.containsWildcard()) {
+            return otherTagDataObject.matchedTags().includes(this.completeName());
         }
-        else if (this.containsWildcard() && other.containsWildCard()) {
-            const otherMatchedTags = other.matchedTags();
+        else if (this.containsWildcard() && otherTagDataObject.containsWildcard()) {
+            const otherMatchedTags = otherTagDataObject.matchedTags();
             return this.matchedTags.some((el) => otherMatchedTags.contains(el));
         }
         else {
-            return this.equals(other);
+            return this.equals(otherTagDataObject);
         }
     }
 
@@ -155,12 +179,7 @@ export default class TagDataObject {
     }
 
     completeName() {
-        let text = "";
-        for (let i = 0; i < this.data().length; i++) {
-            const el = this.data(i);
-            text += text == "" ? el : this.delimiter + el;
-        }
-        return text;
+        return this.data().join(this.delimiter);
     }
 
     debugOutput() {
@@ -171,6 +190,10 @@ export default class TagDataObject {
         this.numberOfMatches() > 0;
     }
 
+    escapeRegExp(string) {
+        return string.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+    }
+
     testExpression(expression, str, startsWith = false, strict = false) {
         if (strict) {
             if (startsWith) {
@@ -179,7 +202,7 @@ export default class TagDataObject {
                 return str === expression;
             }
         }
-        let re = new RegExp("^" + expression.replaceAll("*", ".*").replaceAll("?", ".") + (startsWith ? "" : "$"));
+        let re = new RegExp("^" + this.escapeRegExp(expression).replaceAll("*", ".*").replaceAll("?", ".") + (startsWith ? "" : "$"));
         return re.test(str);
     }
 
