@@ -2,31 +2,13 @@ import React, { ChangeEvent } from "react";
 import PropTypes from "prop-types";
 import "./Select.css";
 
-type SelectType = {
-    id: string,
-    size?: number,
-    options?: Array<{
-        label: number | string,
-        value: number | string
-    }>,
-    value?: number | string | Array<string>,
-    multi?: boolean,
-    className?: string,
-    style?: object,
-    parentClassName?: string,
-    parentStyle?: object,
-    setProps: (props: object) => void,
-    persistence?: boolean | string | number,
-    persistedProps?: Array<string>,
-    persistenceType?: "local" | "session" | "memory"
-};
 /**
  * Select is a dash wrapper for the html select tag.
  */
-const Select: React.FC<SelectType> = ({ id, size, options, value, multi, className, style, parentClassName, parentStyle, setProps, persistence, persistedProps, persistenceType }) => {
-    const handleChange = (e: ChangeEvent) => {
-        const options = (e.target as HTMLSelectElement).selectedOptions;
-        let values: Array<string | number> = [];
+const Select = ({ id, size, options, value, multi, class_name, style, parent_class_name, parent_style, setProps, persistence, persisted_props, persistence_type }) => {
+    const handleChange = () => {
+        const options = e.target.selectedOptions;
+        let values = [];
         for (let i = 0; i < options.length; i++) {
             values.push(options[i].value);
         }
@@ -36,15 +18,15 @@ const Select: React.FC<SelectType> = ({ id, size, options, value, multi, classNa
     return (
         <div
             id={id}
-            className={parentClassName}
-            style={parentStyle}
+            className={parent_class_name}
+            style={parent_style}
         >
             <select
                 defaultValue={value}
                 multiple={multi}
                 size={size}
                 onChange={handleChange}
-                className={"webviz-config-select " + className}
+                className={"webviz-config-select " + class_name}
                 style={style}
             >
                 {options !== undefined && options.map((opt, idx) => {
@@ -66,10 +48,10 @@ Select.defaultProps = {
     size: 4,
     value: [],
     multi: true,
-    className: "",
-    parentClassName: "",
-    persistedProps: ["value"],
-    persistenceType: "local",
+    class_name: "",
+    parent_class_name: "",
+    persisted_props: ["value"],
+    persistence_type: "local",
 };
 
 Select.propTypes = {
@@ -122,7 +104,7 @@ Select.propTypes = {
     /**
      * Appends a class to the select tag
      */
-    className: PropTypes.string,
+    class_name: PropTypes.string,
     /**
      * Appends styles to the select tag
      */
@@ -130,15 +112,15 @@ Select.propTypes = {
     /**
      * Appends a class to the wrapping div
      */
-    parentClassName: PropTypes.string,
+    parent_class_name: PropTypes.string,
     /**
      * Appends inline styles to the wrapping div
      */
-    parentStyle: PropTypes.object,
+    parent_style: PropTypes.object,
     /**
      * Dash-assigned callback that gets fired when the input changes
      */
-    setProps: PropTypes.func.isRequired,
+    setProps: PropTypes.func,
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
@@ -158,7 +140,7 @@ Select.propTypes = {
      * component or the page. Since only `value` is allowed this prop can
      * normally be ignored.
      */
-    persistedProps: PropTypes.arrayOf(PropTypes.oneOf(["value"]).isRequired),
+    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(["value"]).isRequired),
 
     /**
      * Where persisted user changes will be stored:
@@ -166,5 +148,5 @@ Select.propTypes = {
      * local: window.localStorage, data is kept after the browser quit.
      * session: window.sessionStorage, data is cleared once the browser quit.
      */
-    persistenceType: PropTypes.oneOf(["local", "session", "memory"]),
+    persistence_type: PropTypes.oneOf(["local", "session", "memory"]),
 };

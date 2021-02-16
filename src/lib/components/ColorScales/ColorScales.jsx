@@ -15,22 +15,14 @@ const DEFAULT_SCALE = [
     "#2a4858",
 ];
 
-type ColorScalesType = {
-    id: string,
-    setProps?: (props: object) => void,
-    initialColorScale?: Array<string>,
-    numSwatches?: number,
-    fixSwatches?: boolean
-}
-
 /**
  * ColorScales is a Dash wrapper for `react-colorscales`.
  * It takes an array of colors, `colorscale`, and
  * displays a UI for modifying it or choosing a new scale.
  */
-const ColorScales: React.FC<ColorScalesType> = ({ id, setProps, initialColorScale, numSwatches, fixSwatches }) => {
+const ColorScales = ({ id, setProps, initial_color_scale, num_swatches, fix_swatches }) => {
     const [showColorScalePicker, setShowColorScalePicker] = useState(false);
-    const [colorScale, setColorScale] = useState(initialColorScale || DEFAULT_SCALE);
+    const [colorScale, setColorScale] = useState(initial_color_scale || DEFAULT_SCALE);
 
     return (
         <div id={id}>
@@ -48,8 +40,8 @@ const ColorScales: React.FC<ColorScalesType> = ({ id, setProps, initialColorScal
             {showColorScalePicker && (
                 <ColorscalePicker
                     colorscale={colorScale || DEFAULT_SCALE}
-                    nSwatches={numSwatches || DEFAULT_SCALE.length}
-                    fixSwatches={fixSwatches}
+                    nSwatches={num_swatches || DEFAULT_SCALE.length}
+                    fixSwatches={fix_swatches}
                     onChange={newColorScale => {
                         /*
                          * Send the new value to the parent component.
@@ -69,7 +61,7 @@ const ColorScales: React.FC<ColorScalesType> = ({ id, setProps, initialColorScal
     );
 };
 
-export default ColorScalesType;
+export default ColorScales;
 
 ColorScales.propTypes = {
     /**
@@ -80,17 +72,17 @@ ColorScales.propTypes = {
     /**
      * Optional: Initial colorscale to display. Default is Viridis.
      */
-    initialColorScale: PropTypes.array,
+    initial_color_scale: PropTypes.array,
 
     /**
      * Optional: Initial number of colors in scale to display.
      */
-    numSwatches: PropTypes.number,
+    num_swatches: PropTypes.number,
 
     /**
      * Optional: Set to `True` to fix the number of colors in the scale.
      */
-    fixSwatches: PropTypes.bool,
+    fix_swatches: PropTypes.bool,
 
     /**
      * Dash-assigned callback that should be called whenever any of the

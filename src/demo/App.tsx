@@ -31,7 +31,7 @@ class App extends Component {
                 <WebvizPluginPlaceholder
                     id={"placeholder"}
                     setProps={this.setProps}
-                    tourSteps={steps}
+                    tour_steps={steps}
                 />
             </div>
         );

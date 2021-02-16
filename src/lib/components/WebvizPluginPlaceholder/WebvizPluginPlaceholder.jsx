@@ -17,38 +17,18 @@ import download_file from "./utils/download_file";
 
 import "./webviz_plugin_component.css";
 
-type WebvizPluginPlaceholderType = {
-    id: string,
-    children?: PropTypes.ReactNodeLike,
-    buttons?: Array<string>,
-    contactPerson?: {
-        name: string,
-        email: string,
-        phone: string
-    },
-    download?: {
-        filename: string,
-        content: string,
-        mime_type: string
-    },
-    screenshotFilename?: string,
-    tourSteps?: Array<{ selector: string, content: string }>,
-    dataRequested?: number,
-    setProps: (props: object) => void
-};
-
 /**
  * WebvizPluginPlaceholder is a fundamental webviz dash component.
  * It takes a property, `label`, and displays it.
  * It renders an input with the property `value` which is editable by the user.
  */
-const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderType> = ({ id, children, buttons, contactPerson, download, screenshotFilename, tourSteps, dataRequested, setProps }) => {
+const WebvizPluginPlaceholder = ({ id, children, buttons, contact_person, download, screenshot_filename, tour_steps, data_requested, setProps }) => {
 
     const [expanded, setExpanded] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
     const [tourIsOpen, setTourIsOpen] = useState(false);
 
-    const prevExpandedRef = useRef<boolean>();
+    const prevExpandedRef = useRef();
 
     useEffect(() => {
         if (download !== null && download !== undefined) {
@@ -71,9 +51,9 @@ const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderType> = ({ id, ch
 
     const showTour =
         buttons && buttons.includes("guided_tour") &&
-        tourSteps && tourSteps.length > 0;
+        tour_steps && tour_steps.length > 0;
 
-    const ref = React.createRef<HTMLDivElement>();
+    const ref = React.createRef();
 
     return (
         <>
@@ -90,7 +70,7 @@ const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderType> = ({ id, ch
 
                     <WebvizContentOverlay
                         id={"overlay".concat(id)}
-                        contactPerson={contactPerson}
+                        contactPerson={contact_person}
                         showOverlay={showOverlay}
                     />
                 </div>
@@ -112,7 +92,7 @@ const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderType> = ({ id, ch
                                     ).then(canvas =>
                                         canvas.toBlob(blob =>
                                             download_file({
-                                                filename: screenshotFilename,
+                                                filename: screenshot_filename,
                                                 data: blob,
                                                 mimeType: "image/png"
                                             })
@@ -141,10 +121,10 @@ const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderType> = ({ id, ch
                             icon={faDownload}
                             tooltip="Download data"
                             onClick={() =>
-                                dataRequested &&
+                                data_requested &&
                                 setProps({
-                                    dataRequested:
-                                        dataRequested + 1,
+                                    data_requested:
+                                        data_requested + 1,
                                 })
                             }
                         />
@@ -159,7 +139,7 @@ const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderType> = ({ id, ch
                         />
                     )}
                     {buttons && buttons.includes("contact_person") &&
-                        (contactPerson && Object.keys(contactPerson).length > 0)
+                        (contact_person && Object.keys(contact_person).length > 0)
                         && (
                             <WebvizToolbarButton
                                 icon={faAddressCard}
@@ -174,7 +154,7 @@ const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderType> = ({ id, ch
             </div>
             {showTour && (
                 <Tour
-                    steps={tourSteps}
+                    steps={tour_steps}
                     isOpen={tourIsOpen}
                     onRequestClose={() =>
                         setTourIsOpen(false)
@@ -199,11 +179,11 @@ WebvizPluginPlaceholder.defaultProps = {
         "guided_tour",
         "contact_person",
     ],
-    contactPerson: undefined,
-    tourSteps: [],
-    dataRequested: 0,
+    contact_person: undefined,
+    tour_steps: [],
+    data_requested: 0,
     download: undefined,
-    screenshotFilename: "webviz-screenshot.png",
+    screenshot_filename: "webviz-screenshot.png",
 };
 
 WebvizPluginPlaceholder.propTypes = {
@@ -227,7 +207,7 @@ WebvizPluginPlaceholder.propTypes = {
      * A dictionary of information regarding contact person for the data content.
      * Valid keys are 'name', 'email' and 'phone'.
      */
-    contactPerson: PropTypes.shape({
+    contact_person: PropTypes.shape({
         name: PropTypes.string.isRequired,
         email: PropTypes.string.isRequired,
         phone: PropTypes.string.isRequired
@@ -247,22 +227,22 @@ WebvizPluginPlaceholder.propTypes = {
     /**
      *  File name used when saving a screenshot of the plugin.
      */
-    screenshotFilename: PropTypes.string,
+    screenshot_filename: PropTypes.string,
 
     /**
      * Tour steps. List of dictionaries, each with two keys ('selector' and 'content').
      */
-    tourSteps: PropTypes.array,
+    tour_steps: PropTypes.array,
 
     /**
      * An integer that represents the number of times
      * that the data download button has been clicked.
      */
-    dataRequested: PropTypes.number,
+    data_requested: PropTypes.number,
 
     /**
      * Dash-assigned callback that should be called whenever any of the
      * properties change
      */
-    setProps: PropTypes.func.isRequired,
+    setProps: PropTypes.func,
 };
