@@ -15,8 +15,8 @@ const steps = [
 ];
 
 class App extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.setProps = this.setProps.bind(this);
     }
@@ -29,8 +29,9 @@ class App extends Component {
         return (
             <div>
                 <WebvizPluginPlaceholder
+                    id={"placeholder"}
                     setProps={this.setProps}
-                    tour_steps={steps}
+                    tourSteps={steps}
                 />
             </div>
         );

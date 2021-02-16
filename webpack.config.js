@@ -27,26 +27,24 @@ module.exports = (env, argv) => {
         mode = "production";
     }
 
-    let filename = (overrides.output || {}).filename;
-    if (!filename) {
-        const modeSuffix = mode === "development" ? "dev" : "min";
-        filename = `${dashLibraryName}.${modeSuffix}.js`;
-    }
+    const entry = overrides.entry || { main: "./src/lib/index.ts" };
+    const demo = entry.main !== "./src/lib/index.tsx";
 
-    const entry = overrides.entry || { main: "./src/lib/index.js" };
+    const filename_js = demo
+        ? "output.js"
+        : `${dashLibraryName}.${mode === "development" ? "dev" : "min"}.js`;
+    const filename_css = demo ? "output.css" : `${dashLibraryName}.css`;
 
     const devtool =
-        overrides.devtool ||
-        (mode === "development" ? "eval-source-map" : "none");
+        argv.devtool || (mode === "development" ? "eval-source-map" : "none");
 
-    const externals =
-        "externals" in overrides
-            ? overrides.externals
-            : {
-                  react: "React",
-                  "react-dom": "ReactDOM",
-                  "plotly.js": "Plotly",
-              };
+    const externals = demo
+        ? undefined
+        : {
+            react: "React",
+            "react-dom": "ReactDOM",
+            "plotly.js": "Plotly",
+        };
 
     return {
         mode,
@@ -55,8 +53,8 @@ module.exports = (env, argv) => {
             extensions: [".ts", ".tsx", ".js", ".jsx"],
         },
         output: {
-            path: path.resolve(__dirname, dashLibraryName),
-            filename,
+            path: demo ? __dirname : path.resolve(__dirname, dashLibraryName),
+            filename: filename_js,
             library: dashLibraryName,
             libraryTarget: "window",
         },
@@ -77,11 +75,14 @@ module.exports = (env, argv) => {
         module: {
             rules: [
                 {
-                    test: /\.(ts|js)x?$/,
+                    test: /\.jsx?$/,
                     exclude: /node_modules/,
-                    use: {
-                        loader: "babel-loader",
-                    },
+                    use: "babel-loader"
+                },
+                {
+                    test: /\.tsx?$/,
+                    exclude: /node_modules/,
+                    use: ["babel-loader", "awesome-typescript-loader"],
                 },
                 {
                     test: /\.css$/,
@@ -96,11 +97,11 @@ module.exports = (env, argv) => {
                     ],
                 },
                 {
-		    test: /\.(png|svg|jpg|jpeg|gif)$/i,
-		    use: {
-          	        loader: 'url-loader',
-                   },
-	        },
+                    test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                    use: {
+                        loader: 'url-loader',
+                    },
+                },
             ],
         },
         devtool,

@@ -1,55 +1,75 @@
-import React, { Component } from "react";
+import React, { ChangeEvent } from "react";
 import PropTypes from "prop-types";
 import "./Select.css";
+
+type SelectType = {
+    id: string,
+    size?: number,
+    options?: Array<{
+        label: number | string,
+        value: number | string
+    }>,
+    value?: number | string | Array<string>,
+    multi?: boolean,
+    className?: string,
+    style?: object,
+    parentClassName?: string,
+    parentStyle?: object,
+    setProps: (props: object) => void,
+    persistence?: boolean | string | number,
+    persistedProps?: Array<string>,
+    persistenceType?: "local" | "session" | "memory"
+};
 /**
  * Select is a dash wrapper for the html select tag.
  */
-export default class Select extends Component {
-    handleChange(e) {
-        const options = e.target.selectedOptions;
-        const values = [];
+const Select: React.FC<SelectType> = ({ id, size, options, value, multi, className, style, parentClassName, parentStyle, setProps, persistence, persistedProps, persistenceType }) => {
+    const handleChange = (e: ChangeEvent) => {
+        const options = (e.target as HTMLSelectElement).selectedOptions;
+        let values: Array<string | number> = [];
         for (let i = 0; i < options.length; i++) {
             values.push(options[i].value);
         }
-        this.props.setProps({ value: values });
+        setProps({ value: values });
     }
-    render() {
-        return (
-            <div
-                id={this.props.id}
-                className={this.props.parent_className}
-                style={this.props.parent_style}
+
+    return (
+        <div
+            id={id}
+            className={parentClassName}
+            style={parentStyle}
+        >
+            <select
+                defaultValue={value}
+                multiple={multi}
+                size={size}
+                onChange={handleChange}
+                className={"webviz-config-select " + className}
+                style={style}
             >
-                <select
-                    defaultValue={this.props.value}
-                    multiple={this.props.multi}
-                    size={this.props.size}
-                    onChange={this.handleChange.bind(this)}
-                    className={"webviz-config-select " + this.props.className}
-                    style={this.props.style}
-                >
-                    {this.props.options.map((opt, idx) => {
-                        return (
-                            <option key={idx + opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        );
-                    })}
-                </select>
-            </div>
-        );
-    }
+                {options !== undefined && options.map((opt, idx) => {
+                    return (
+                        <option key={idx.toString() + opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    );
+                })}
+            </select>
+        </div>
+    );
 }
 
+export default Select;
+
 Select.defaultProps = {
-    options: [{}],
+    options: [],
     size: 4,
     value: [],
     multi: true,
     className: "",
-    parent_className: "",
-    persisted_props: ["value"],
-    persistence_type: "local",
+    parentClassName: "",
+    persistedProps: ["value"],
+    persistenceType: "local",
 };
 
 Select.propTypes = {
@@ -70,17 +90,15 @@ Select.propTypes = {
             /**
              * The dropdown's label
              */
-            label: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-                .isRequired,
+            label: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]).isRequired,
 
             /**
              * The value of the dropdown. This value
              * corresponds to the items specified in the
              * `value` property.
              */
-            value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-                .isRequired,
-        })
+            value: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]).isRequired,
+        }).isRequired
     ),
     /**
      * The value of the input. If `multi` is false
@@ -91,10 +109,10 @@ Select.propTypes = {
      * `options` prop.
      */
     value: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
+        PropTypes.string.isRequired,
+        PropTypes.number.isRequired,
         PropTypes.arrayOf(
-            PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+            PropTypes.string.isRequired
         ),
     ]),
     /**
@@ -112,15 +130,15 @@ Select.propTypes = {
     /**
      * Appends a class to the wrapping div
      */
-    parent_className: PropTypes.string,
+    parentClassName: PropTypes.string,
     /**
      * Appends inline styles to the wrapping div
      */
-    parent_style: PropTypes.object,
+    parentStyle: PropTypes.object,
     /**
      * Dash-assigned callback that gets fired when the input changes
      */
-    setProps: PropTypes.func,
+    setProps: PropTypes.func.isRequired,
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
@@ -140,7 +158,7 @@ Select.propTypes = {
      * component or the page. Since only `value` is allowed this prop can
      * normally be ignored.
      */
-    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(["value"])),
+    persistedProps: PropTypes.arrayOf(PropTypes.oneOf(["value"]).isRequired),
 
     /**
      * Where persisted user changes will be stored:
@@ -148,5 +166,5 @@ Select.propTypes = {
      * local: window.localStorage, data is kept after the browser quit.
      * session: window.sessionStorage, data is cleared once the browser quit.
      */
-    persistence_type: PropTypes.oneOf(["local", "session", "memory"]),
+    persistenceType: PropTypes.oneOf(["local", "session", "memory"]),
 };
