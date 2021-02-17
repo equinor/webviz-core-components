@@ -1,5 +1,6 @@
 {
     "name": "webviz_core_components",
+    "version": "0.0.1",
     "description": "Core components for webviz config",
     "repository": {
         "type": "git",
@@ -15,7 +16,7 @@
         "postinstall": "cp ./package.json webviz_core_components/package-info.json",
         "build:js": "webpack --mode production",
         "build:js-dev": "webpack --mode development",
-        "build:py_and_r": "dash-generate-components ./src/lib/components webviz_core_components -p package-info.json --r-prefix ''",
+        "build:py_and_r": "dash-generate-components ./src/lib/components webviz_core_components -p package-info.json --r-prefix '' --ignore .*.js$",
         "build": "npm run build:js && npm run build:js-dev && npm run build:py_and_r",
         "format": "prettier --write *.js *.json 'src/**/*.+(js|jsx|json|css)'",
         "linting": "prettier --check *.js *.json 'src/**/*.+(js|jsx|json|css)' && eslint src/"
@@ -42,6 +43,7 @@
         "babel-loader": "^8.0.6",
         "copyfiles": "^2.1.1",
         "css-loader": "^3.0.0",
+        "url-loader": "^4.1.1",
         "eslint": "^6.0.1",
         "eslint-config-prettier": "^6.0.0",
         "eslint-plugin-import": "^2.18.0",
