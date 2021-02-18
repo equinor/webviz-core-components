@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import './TagTreeSelector.css';
-import TagDataObject from './utils/TagDataObject';
+import TreeNodeSelection from './utils/TreeNodeSelection';
 import Suggestions from './sub-components/Suggestions.react'
 import Tag from './sub-components/Tag.react'
 
@@ -11,10 +11,6 @@ var DirectionEnums = Object.freeze({
     "Left": 0,
     "Right": 1
 });
-
-String.prototype.capitalize = function () {
-    return this.charAt(0).toUpperCase() + this.slice(1)
-}
 
 /**
  * TagTreeSelector is a component that allows to create tags by selecting data from a tree structure.
@@ -80,7 +76,7 @@ export default class TagTreeSelector extends Component {
     }
 
     createNewTag() {
-        return new TagDataObject({ props: this.props });
+        return new TreeNodeSelection({ props: this.props });
     }
 
     updateState({

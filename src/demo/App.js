@@ -36,82 +36,119 @@ class App extends Component {
                     id="TagTreeSelector"
                     key="TagTreeSelector_0"
                     maxNumTags={3}
-                    numMetaData={2}
+                    numMetaNodes={2}
                     delimiter=":"
                     values={[]}
                     tags={[]}
                     setProps={this.setProps}
                     label="Vector Selector"
-                    data={
+                    data={[
                         {
-                            "iter-0": {
-                                "description": "Iteration 0",
-                                "color": "#326dcf",
-                                "data": {
-                                    "well": {
-                                        "description": "Oil well",
-                                        "icon": "Well",
-                                        "data": {
-                                            "WOBP": {
-                                                "description": "...",
-                                                "data": {
-                                                    "OP_1": { "data": {} },
-                                                    "OP_2": { "data": {} },
-                                                    "OP_3": { "data": {} },
-                                                    "OP_4": { "data": {} },
-                                                    "OP_5": { "data": {} },
-                                                    "OP_6": { "data": {} },
-                                                    "OP_7": { "data": {} },
-                                                    "OP_8": { "data": {} },
-                                                    "OP_9": { "data": {} },
-                                                    "OP_10": { "data": {} },
+                            id: "1",
+                            name: "Metadata 1",
+                            description: "A first data source",
+                            color: "#0095FF",
+                            children: [
+                                {
+                                    id: "1.1",
+                                    name: "Submetadata 1",
+                                    description: "A data category",
+                                    icon: "https://raw.githubusercontent.com/feathericons/feather/master/icons/anchor.svg",
+                                    children: [
+                                        {
+                                            id: "1.1.1",
+                                            name: "Node 1",
+                                            description: "A first data node",
+                                            children: [
+                                                {
+                                                    id: "1.1.1.1",
+                                                    name: "Subnode 1",
+                                                    description: "A first sub node",
+                                                },
+                                                {
+                                                    id: "1.1.1.2",
+                                                    name: "Subnode 2",
+                                                    description: "A second sub node",
+                                                },
+                                                {
+                                                    id: "1.1.1.3",
+                                                    name: "Subnode 3",
+                                                    description: "A third sub node",
+                                                },
+                                                {
+                                                    id: "1.1.1.4",
+                                                    name: "Subnode 4",
+                                                    description: "A fourth sub node",
                                                 }
-                                            },
-                                            "FOBP": {
-                                                "type": "field",
-                                                "description": "...",
-                                                "selectorDescripton": "Select a subgroup...",
-                                                "data": {}
-                                            }
+                                            ],
+                                        },
+                                        {
+                                            id: "1.1.2",
+                                            name: "Node 2",
+                                            description: "A second data node",
                                         }
-                                    }
+                                    ],
+                                    id: "1.2",
+                                    name: "Submetadata 2",
+                                    description: "Another data category",
+                                    icon: "https://raw.githubusercontent.com/feathericons/feather/master/icons/activity.svg",
                                 }
-                            },
-                            "iter-1": {
-                                "description": "Iteration 1",
-                                "color": "#e76777",
-                                "data": {
-                                    "well": {
-                                        "description": "Oil well",
-                                        "icon": "Well",
-                                        "data": {
-                                            "WOBP": {
-                                                "description": "...",
-                                                "data": {
-                                                    "OP_1": { "data": {} },
-                                                    "OP_2": { "data": {} },
-                                                    "OP_3": { "data": {} },
-                                                    "OP_4": { "data": {} },
-                                                    "OP_5": { "data": {} },
-                                                    "OP_6": { "data": {} },
-                                                    "OP_7": { "data": {} },
-                                                    "OP_8": { "data": {} },
-                                                    "OP_9": { "data": {} },
-                                                    "OP_10": { "data": {} },
+                            ]
+                        },
+                        {
+                            id: "2",
+                            name: "Metadata 2",
+                            description: "A second data source",
+                            color: "#FF5555",
+                            children: [
+                                {
+                                    id: "2.1",
+                                    name: "Submetadata 1",
+                                    description: "A data category",
+                                    icon: "https://raw.githubusercontent.com/feathericons/feather/master/icons/anchor.svg",
+                                    children: [
+                                        {
+                                            id: "2.1.1",
+                                            name: "Node 1",
+                                            description: "A first data node",
+                                            children: [
+                                                {
+                                                    id: "2.1.1.1",
+                                                    name: "Subnode 1",
+                                                    description: "A first sub node",
+                                                },
+                                                {
+                                                    id: "2.1.1.2",
+                                                    name: "Subnode 2",
+                                                    description: "A second sub node",
+                                                },
+                                                {
+                                                    id: "2.1.1.3",
+                                                    name: "Subnode 3",
+                                                    description: "A third sub node",
+                                                },
+                                                {
+                                                    id: "2.1.1.4",
+                                                    name: "Subnode 4",
+                                                    description: "A fourth sub node",
                                                 }
-                                            },
-                                            "FOBP": {
-                                                "type": "field",
-                                                "description": "...",
-                                                "selectorDescripton": "Select a subgroup...",
-                                                "data": {}
-                                            }
+                                            ],
+                                        },
+                                        {
+                                            id: "2.1.2",
+                                            name: "Node 2",
+                                            description: "A second data node",
                                         }
-                                    }
+                                    ],
+                                    id: "2.2",
+                                    name: "Submetadata 2",
+                                    description: "Another data category",
+                                    icon: "https://raw.githubusercontent.com/feathericons/feather/master/icons/activity.svg",
                                 }
-                            }
+                            ]
                         }
-                    }
+                    ]}
+
                     {...this.state}
                 />
             </div>

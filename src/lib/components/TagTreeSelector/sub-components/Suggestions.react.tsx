@@ -1,49 +1,60 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, MouseEvent } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import TagDataObject from '../utils/TagDataObject';
+import TagDataObject from '../utils/TreeNodeSelection';
 import './Suggestions.css';
 import '../TagTreeSelector.css';
+import TreeNodeSelection from '../utils/TreeNodeSelection';
 
-String.prototype.capitalize = function () {
-    return this.charAt(0).toUpperCase() + this.slice(1)
-}
+type SuggestionsProps = {
+    tagInputFieldRef: React.RefObject<HTMLInputElement>,
+    visible: boolean,
+    useSuggestion: (e: globalThis.KeyboardEvent | MouseEvent<HTMLDivElement>, option: string) => void,
+    treeNodeSelection: TreeNodeSelection
+};
 
 /**
  * A component for showing a list of suggestions.
  */
 export default class Suggestions extends Component {
-    constructor(props) {
-        super();
+    public props: SuggestionsProps;
+    public static propTypes: object;
+    public static defaultProps: object;
+
+    private suggestionsList = React.createRef<HTMLDivElement>();
+    private mouseMoved: boolean;
+    private currentlySelectedSuggestionIndex: number;
+
+    constructor(props: SuggestionsProps) {
+        super(props);
 
         this.props = props;
-        this.__suggestionsList = React.createRef();
-        this.__mouseMoved = false;
-        this.__currentlySelectedSuggestionIndex = 0;
+        this.mouseMoved = false;
+        this.currentlySelectedSuggestionIndex = 0;
     }
 
-    componentDidMount() {
+    componentDidMount(): void {
         document.addEventListener('mousemove', (e) => this.mouseMove(e), true);
         document.addEventListener('keydown', (e) => this.handleGlobalKeyDown(e), true);
     }
 
-    componentWillUnmount() {
+    componentWillUnmount(): void {
         document.removeEventListener('mousemove', (e) => this.mouseMove(e), true);
         document.removeEventListener('keydown', (e) => this.handleGlobalKeyDown(e), true);
     }
 
-    maybeMarkSuggestionAsHovered(index) {
-        if (this.__mouseMoved) {
+    private maybeMarkSuggestionAsHovered(index: number): void {
+        if (this.mouseMoved) {
             this.markSuggestionAsHovered(index);
         }
     }
 
-    mouseMove(e) {
-        this.__mouseMoved = true;
+    private mouseMove(e: globalThis.MouseEvent): void {
+        this.mouseMoved = true;
     }
 
-    markSuggestionAsHovered(index) {
-        this.__currentlySelectedSuggestionIndex = index;
+    private markSuggestionAsHovered(index: number): void {
+        this.currentlySelectedSuggestionIndex = index;
         let newSelectedSuggestion = this.currentlySelectedSuggestion();
         let selectedSuggestions = document.getElementsByClassName("Suggestions__Suggestion--Selected");
         for (var i = 0; i < selectedSuggestions.length; i++) {
@@ -52,14 +63,14 @@ export default class Suggestions extends Component {
         newSelectedSuggestion.classList.add("Suggestions__Suggestion--Selected");
     }
 
-    useSuggestion(e, suggestion) {
-        this.__currentlySelectedSuggestionIndex = 0;
+    private useSuggestion(e: globalThis.KeyboardEvent | React.MouseEvent<HTMLDivElement>, suggestion: string): void {
+        this.currentlySelectedSuggestionIndex = 0;
         this.props.useSuggestion(e, suggestion);
     }
 
-    scrollSuggestionsToMakeElementVisible(element) {
-        this.__mouseMoved = false;
-        const suggestions = this.__suggestionsList.current;
+    private scrollSuggestionsToMakeElementVisible(element: Element): void {
+        this.mouseMoved = false;
+        const suggestions = this.suggestionsList.current;
         if (!suggestions) return;
 
         const elementBoundingRect = element.getBoundingClientRect();
@@ -71,21 +82,21 @@ export default class Suggestions extends Component {
             suggestions.scroll(0, suggestions.scrollTop + elementBoundingRect.top - suggestionsBoundingRect.top);
     }
 
-    currentlySelectedSuggestion() {
-        return document.getElementsByClassName("Suggestions__Suggestion")[this.__currentlySelectedSuggestionIndex];
+    currentlySelectedSuggestion(): Element {
+        return document.getElementsByClassName("Suggestions__Suggestion")[this.currentlySelectedSuggestionIndex];
     }
 
-    handleGlobalKeyDown(e) {
+    private handleGlobalKeyDown(e: globalThis.KeyboardEvent) {
         if (this.props.visible) {
             if (e.key === "ArrowUp") {
-                this.markSuggestionAsHovered(Math.max(0, this.__currentlySelectedSuggestionIndex - 1));
+                this.markSuggestionAsHovered(Math.max(0, this.currentlySelectedSuggestionIndex - 1));
                 this.scrollSuggestionsToMakeElementVisible(this.currentlySelectedSuggestion());
             }
             if (e.key === "ArrowDown") {
                 this.markSuggestionAsHovered(
                     Math.min(
                         document.getElementsByClassName("Suggestions__Suggestion").length - 1,
-                        this.__currentlySelectedSuggestionIndex + 1
+                        this.currentlySelectedSuggestionIndex + 1
                     )
                 );
                 this.scrollSuggestionsToMakeElementVisible(this.currentlySelectedSuggestion());
@@ -99,15 +110,15 @@ export default class Suggestions extends Component {
         }
     }
 
-    render() {
-        const { visible, tagFieldRef } = this.props;
+    render(): React.ReactNode {
+        const { visible, tagInputFieldRef } = this.props;
         return (
-            <div ref={this.__suggestionsList} className="Suggestions" style={
+            <div ref={this.suggestionsList} className="Suggestions" style={
                 {
                     maxHeight: (
                         window.innerHeight - (
-                            tagFieldRef.current ?
-                                (tagFieldRef.current.getBoundingClientRect().bottom + 10)
+                            tagInputFieldRef.current ?
+                                (tagInputFieldRef.current.getBoundingClientRect().bottom + 10)
                                 : 200
                         )
                     ),
@@ -119,18 +130,15 @@ export default class Suggestions extends Component {
         );
     }
 
-    maybeMarkSuggestionAsHovered(index) {
-        if (this.__mouseMoved) {
-            this.markSuggestionAsHovered(index);
-        }
-    }
-
-    createSuggestionsForCurrentTag() {
-        var tag = this.props.tag;
-        if (tag === undefined)
+    createSuggestionsForCurrentTag(): React.ReactFragment | null {
+        const { treeNodeSelection } = this.props;
+        if (treeNodeSelection === undefined)
             return "";
-        if (!tag.currentValueContainsWildcard()) {
-            let allOptions = tag.availableData(true, true);
+        if (!treeNodeSelection.focussedNodeNameContainsWildcard()) {
+            let allOptions = treeNodeSelection.availableChildNodes({
+                filtered: true,
+                openEnd: true
+            });
             return (<Fragment>
                 {
                     allOptions.map((option, i) => (
@@ -143,7 +151,7 @@ export default class Suggestions extends Component {
                                     {
                                         "Suggestions__Suggestion": true,
                                         "Suggestions__Icon": option.icon !== undefined,
-                                        "Suggestions__Suggestion--Selected": i == this.__currentlySelectedSuggestionIndex
+                                        "Suggestions__Suggestion--Selected": i == this.currentlySelectedSuggestionIndex
                                     }
                                 )
                             }
@@ -157,7 +165,7 @@ export default class Suggestions extends Component {
                     ))
                 }</Fragment>);
         }
-        return "";
+        return null;
     }
 }
 
