@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2021- Equinor ASA
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import html2canvas from "html2canvas";
@@ -11,9 +19,9 @@ import {
     faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 
-import WebvizToolbarButton from "../private-components/webviz-plugin-placeholder-resources/WebvizToolbarButton";
-import WebvizContentOverlay from "../private-components/webviz-plugin-placeholder-resources/WebvizContentOverlay";
-import download_file from "../private-components/webviz-plugin-placeholder-resources/download_file";
+import WebvizToolbarButton from "./utils/WebvizToolbarButton";
+import WebvizContentOverlay from "./utils/WebvizContentOverlay";
+import download_file from "./utils/download_file";
 
 import "./webviz_plugin_component.css";
 
@@ -87,7 +95,7 @@ export default class WebvizPluginPlaceholder extends Component {
                                         {
                                             scrollX: -window.scrollX,
                                             scrollY: -window.scrollY,
-                                        }                                        
+                                        }
                                     ).then(canvas =>
                                         canvas.toBlob(blob =>
                                             download_file({
@@ -139,7 +147,7 @@ export default class WebvizPluginPlaceholder extends Component {
                         )}
                         {this.props.buttons.includes("contact_person") &&
                             Object.keys(this.props.contact_person).length >
-                                0 && (
+                            0 && (
                                 <WebvizToolbarButton
                                     icon={faAddressCard}
                                     tooltip="Contact person"

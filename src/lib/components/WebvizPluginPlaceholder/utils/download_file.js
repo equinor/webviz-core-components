@@ -1,4 +1,11 @@
-export default function download_file({filename, data, mimeType}) {
+/**
+ * Copyright (c) 2021- Equinor ASA
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+export default function download_file({ filename, data, mimeType }) {
     const link = document.createElement("a");
 
     if (data instanceof Blob) {
