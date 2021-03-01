@@ -1,0 +1,24 @@
+name: check changelog
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  check-changelog:
+    if: "!contains(github.event.head_commit.message, '[skip changelog]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 📖 Verify changelog updates
+        uses: dorny/paths-filter@v2
+        id: changed_files
+        with:
+          filters: |
+            changelog:
+              - 'CHANGELOG.md'
+      - name: 📖 Let job fail if changelog not updated
+        if: steps.changed_files.outputs.changelog == 'false'
+        run: |
+          exit 1
