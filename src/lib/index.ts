@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-/* eslint-disable import/prefer-default-export */
 import WebvizPluginPlaceholder from "./components/WebvizPluginPlaceholder";
 import ColorScales from "./components/ColorScales";
 import Select from "./components/Select";

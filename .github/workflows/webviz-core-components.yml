@@ -59,6 +59,7 @@ jobs:
 
       - name: 🕵️ Check code style & linting
         run: |
+          npm run validate
           black --check webviz_core_components tests setup.py
           bandit -r -c ./bandit.yml webviz_core_components tests setup.py
 

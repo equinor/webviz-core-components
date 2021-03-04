@@ -5,51 +5,55 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import "./Select.css";
+
 /**
  * Select is a dash wrapper for the html select tag.
  */
-export default class Select extends Component {
-    handleChange(e) {
+const Select = (props) => {
+    const { id, parent_className, parent_style, value, multi, size, className, style, options, setProps } = props;
+
+    const handleChange = (e) => {
         const options = e.target.selectedOptions;
-        const values = [];
+        let values = [];
         for (let i = 0; i < options.length; i++) {
             values.push(options[i].value);
         }
-        this.props.setProps({ value: values });
+        setProps({ value: values });
     }
-    render() {
-        return (
-            <div
-                id={this.props.id}
-                className={this.props.parent_className}
-                style={this.props.parent_style}
+
+    return (
+        <div
+            id={id}
+            className={parent_className}
+            style={parent_style}
+        >
+            <select
+                defaultValue={value}
+                multiple={multi}
+                size={size}
+                onChange={(e) => handleChange(e)}
+                className={"webviz-config-select " + className}
+                style={style}
             >
-                <select
-                    defaultValue={this.props.value}
-                    multiple={this.props.multi}
-                    size={this.props.size}
-                    onChange={this.handleChange.bind(this)}
-                    className={"webviz-config-select " + this.props.className}
-                    style={this.props.style}
-                >
-                    {this.props.options.map((opt, idx) => {
-                        return (
-                            <option key={idx + opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        );
-                    })}
-                </select>
-            </div>
-        );
-    }
+                {options !== undefined && options.map((opt, idx) => {
+                    return (
+                        <option key={idx.toString() + opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    );
+                })}
+            </select>
+        </div>
+    );
 }
 
+export default Select;
+
 Select.defaultProps = {
-    options: [{}],
+    options: [],
     size: 4,
     value: [],
     multi: true,
@@ -77,17 +81,15 @@ Select.propTypes = {
             /**
              * The dropdown's label
              */
-            label: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-                .isRequired,
+            label: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]).isRequired,
 
             /**
              * The value of the dropdown. This value
              * corresponds to the items specified in the
              * `value` property.
              */
-            value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-                .isRequired,
-        })
+            value: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]).isRequired,
+        }).isRequired
     ),
     /**
      * The value of the input. If `multi` is false
@@ -98,10 +100,10 @@ Select.propTypes = {
      * `options` prop.
      */
     value: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
+        PropTypes.string.isRequired,
+        PropTypes.number.isRequired,
         PropTypes.arrayOf(
-            PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+            PropTypes.string.isRequired
         ),
     ]),
     /**
@@ -147,7 +149,7 @@ Select.propTypes = {
      * component or the page. Since only `value` is allowed this prop can
      * normally be ignored.
      */
-    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(["value"])),
+    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(["value"]).isRequired),
 
     /**
      * Where persisted user changes will be stored:

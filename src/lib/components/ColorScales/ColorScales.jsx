@@ -1,6 +1,6 @@
 // Adapted from https://github.com/plotly/dash-colorscales
 
-import React, { Component } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 
 import ColorscalePicker, { Colorscale } from "react-colorscales";
@@ -20,65 +20,56 @@ const DEFAULT_SCALE = [
  * It takes an array of colors, `colorscale`, and
  * displays a UI for modifying it or choosing a new scale.
  */
+const ColorScales = (props) => {
+    const { id, setProps, colorscale, nSwatches, fixSwatches } = props;
 
-export default class ColorScales extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            showColorscalePicker: false,
-            colorscale: this.props.colorscale || DEFAULT_SCALE,
-        };
-    }
+    const [showColorScalePicker, setShowColorScalePicker] = useState(false);
+    const [colorScale, setColorScale] = useState(colorscale || DEFAULT_SCALE);
 
-    render() {
-        const { id, setProps, colorscale, nSwatches, fixSwatches } = this.props;
-        return (
-            <div id={id}>
-                <div
-                    onClick={() =>
-                        this.setState({
-                            showColorscalePicker: !this.state
-                                .showColorscalePicker,
-                        })
-                    }
-                >
-                    <Colorscale
-                        colorscale={this.state.colorscale}
-                        onClick={() => {}}
-                        width={150}
-                    />
-                </div>
-                {this.state.showColorscalePicker && (
-                    <ColorscalePicker
-                        colorscale={colorscale || DEFAULT_SCALE}
-                        nSwatches={nSwatches || DEFAULT_SCALE.length}
-                        fixSwatches={fixSwatches}
-                        onChange={newColorscale => {
-                            /*
-                             * Send the new value to the parent component.
-                             * In a Dash app, this will send the data back to the
-                             * Python Dash app server.
-                             */
-                            if (setProps) {
-                                setProps({
-                                    colorscale: newColorscale,
-                                });
-                            }
-
-                            this.setState({ colorscale: newColorscale });
-                        }}
-                    />
-                )}
+    return (
+        <div id={id}>
+            <div
+                onClick={() =>
+                    setShowColorScalePicker(!showColorScalePicker)
+                }
+            >
+                <Colorscale
+                    colorscale={colorScale}
+                    onClick={() => { }}
+                    width={150}
+                />
             </div>
-        );
-    }
-}
+            {showColorScalePicker && (
+                <ColorscalePicker
+                    colorscale={colorScale || DEFAULT_SCALE}
+                    nSwatches={nSwatches || DEFAULT_SCALE.length}
+                    fixSwatches={fixSwatches}
+                    onChange={newColorScale => {
+                        /*
+                         * Send the new value to the parent component.
+                         * In a Dash app, this will send the data back to the
+                         * Python Dash app server.
+                         */
+                        if (setProps) {
+                            setProps({
+                                colorscale: newColorScale,
+                            });
+                        }
+                        setColorScale(newColorScale);
+                    }}
+                />
+            )}
+        </div>
+    );
+};
+
+export default ColorScales;
 
 ColorScales.propTypes = {
     /**
-     * The ID used to identify this compnent in Dash callbacks
+     * The ID used to identify this component in Dash callbacks
      */
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
 
     /**
      * Optional: Initial colorscale to display. Default is Viridis.
