@@ -23,20 +23,21 @@ const steps = [
 ];
 
 class App extends Component {
-    constructor() {
-        super();
+    constructor(props: object) {
+        super(props);
 
         this.setProps = this.setProps.bind(this);
     }
 
-    setProps(newProps) {
+    setProps(newProps: object): void {
         this.setState(newProps);
     }
 
-    render() {
+    render(): React.ReactNode {
         return (
             <div>
                 <WebvizPluginPlaceholder
+                    id={"placeholder"}
                     setProps={this.setProps}
                     tour_steps={steps}
                 />
