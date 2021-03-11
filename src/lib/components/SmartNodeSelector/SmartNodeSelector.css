@@ -1,0 +1,286 @@
+/**
+ * Copyright (c) 2021- Equinor ASA
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+ 
+.SmartNodeSelector *,
+.SmartNodeSelector__Ruler {
+    font-family: sans-serif;
+}
+.SmartNodeSelector__unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.SmartNodeSelector {
+    border: 1px #dcdcdc solid;
+    border-radius: 4px;
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    cursor: text;
+    position: relative;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    min-height: 50px;
+    min-width: 200px;
+}
+
+.SmartNodeSelector--Invalid {
+    border: 1px #eb0000 solid !IMPORTANT;
+}
+
+.SmartNodeSelector--SuggestionsActive {
+    border-radius: 4px 4px 0px 0px;
+}
+
+.SmartNodeSelector__ClearAll {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    margin-top: -16px;
+}
+
+.SmartNodeSelector__ClearAll button {
+    appearance: none;
+    background-color: #007079;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    height: 32px;
+    margin-left: 8px;
+    width: 32px;
+    display: flex;
+    outline: none;
+    position: relative;
+    padding: 0;
+    background-image: url('./images/x.svg');
+    background-size: 18px 18px;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.SmartNodeSelector__ShiftNode {
+    appearance: none;
+    background: #007079;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    height: 20px;
+    margin-right: 8px;
+    width: 20px;
+    display: inline-block;
+    outline: none;
+    top: -1px;
+    padding: 0;
+    background-size: 16px 16px;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.SmartNodeSelector__ShiftUp {
+    background-image: url('./images/chevron-up.svg');
+}
+
+.SmartNodeSelector__ShiftDown {
+    background-image: url('./images/chevron-down.svg');
+}
+
+.SmartNodeSelector__ShiftNode:disabled,
+.SmartNodeSelector__ClearAll button:disabled {
+    background-color: #eaeaea;
+    cursor: default;
+}
+
+.SmartNodeSelector__ShiftNode:hover:enabled,
+.SmartNodeSelector__ClearAll button:hover:enabled {
+    background-color: #004F55;
+    color: #fff;
+}
+
+.SmartNodeSelector input {
+    border: none;
+    background: none;
+    outline: none;
+    padding: 0px;
+    font-size: 12pt;
+    width: 50px;
+    color: #565656;
+    display: inline-block;
+}
+
+.SmartNodeSelector ul {
+    display: inline-flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.SmartNodeSelector__Tag {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 4px;
+    background-color: #fefefe;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+    position: relative;
+    margin-right: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    color: #565656;
+    border: 2px transparent solid;
+}
+
+.SmartNodeSelector__InnerTag {
+    display: flex;
+    border-radius: 4px;
+    background-color: #fefefe;
+    font-size: 12pt;
+    white-space: nowrap;
+    padding: 8px;
+    color: #565656;
+}
+
+.SmartNodeSelector__InputContainer {
+    display: flex;
+    white-space: nowrap;
+    position: relative;
+}
+
+.SmartNodeSelector__Border {
+    border: 2px #ccc solid;
+}
+
+.SmartNodeSelector__Ruler {
+    visibility: hidden;
+    white-space: nowrap;
+    font-size: 12pt;
+}
+
+.SmartNodeSelector__TagSelected {
+    background-color: #d5eaf4;
+    opacity: 0.5;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 10;
+}
+
+.SmartNodeSelector__NumberOfTags {
+    align-items: right;
+    display: block;
+    text-align: right;
+    position: relative;
+    width: 100%;
+    margin-top: 8px;
+    color: #6f6f6f;
+}
+
+.SmartNodeSelector__Warning {
+    color: #ff9200;
+}
+
+.SmartNodeSelector__Error {
+    color: #eb0000;
+}
+
+.SmartNodeSelector__MatchCounter {
+    align-items: center;
+    background: rgb(245, 245, 245);
+    border: 1px #ccc solid;
+    border-radius: 11px;
+    color: #565656;
+    font-size: 12px;
+    height: 20px;
+    justify-content: center;
+    margin-right: 8px;
+    padding: 0;
+    padding-left: 3px;
+    padding-right: 3px;
+    min-width: 20px;
+    display: inline-block;
+    outline: none;
+    position: relative;
+    text-align: center;
+    line-height: 20px;
+}
+
+.SmartNodeSelector__RemoveButton {
+    align-items: center;
+    appearance: none;
+    background: #eb0000;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    height: 22px;
+    margin-left: 8px;
+    width: 22px;
+    padding: 0;
+    display: inline-block;
+    outline: none;
+    top: -1px;
+    background-image: url('./images/x.svg');
+    background-position: center center;
+    background-size: 16px 16px;
+    background-repeat: no-repeat;
+}
+
+.SmartNodeSelector__RemoveButton:hover {
+    color: white;
+    background-color: #bb0000; 
+}
+
+.SmartNodeSelector__Icon {
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    background-position: 5px center;
+    padding-left: 30px;
+    text-transform: capitalize;
+}
+
+.SmartNodeSelector__FocusOverlay {
+    border-bottom: 1px #007079 dashed;
+    position: absolute;
+    height: 2px;
+    bottom: 0px;
+}
+
+
+.SmartNodeSelector__Invalid, 
+.SmartNodeSelector__MissingSubgroup {
+    background-color: #ffc1c1 !IMPORTANT;
+    border: 2px #eb0000 solid !IMPORTANT;
+}
+
+.SmartNodeSelector__Duplicate {
+    background-color: #ffe7d6 !IMPORTANT;
+    border: 2px #ff9200 solid !IMPORTANT;
+}
+
+.SmartNodeSelector__InnerInvalid, 
+.SmartNodeSelector__InnerMissingSubgroup {
+    background-color: #ffc1c1 !IMPORTANT;
+    background-image: url('./images/invalid.svg');
+}
+
+.SmartNodeSelector__InnerDuplicate {
+    background-color: #ffe7d6 !IMPORTANT;
+    background-image: url('./images/duplicate.svg');
+}
+
+.SmartNodeSelector__Unknown {
+    background-image: url('./images/unknown.svg');
+}

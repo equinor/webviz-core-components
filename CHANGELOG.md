@@ -7,3 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED] - YYYY-MM-DD
 ### Changed
 - [#86](https://github.com/equinor/webviz-core-components/pull/86) - Refactored and converted code to TypeScript (main component files to JSX), adjusted build environment accordingly and added validation of JS/TS to GitHub workflow
+
+### Added
+- [#87](https://github.com/equinor/webviz-core-components/pull/87) - Added new SmartNodeSelector component and Jest testing framework

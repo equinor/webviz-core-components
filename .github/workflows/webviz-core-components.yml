@@ -60,12 +60,13 @@ jobs:
       - name: 🕵️ Check code style & linting
         run: |
           npm run validate
-          black --check webviz_core_components tests setup.py
+          black --check webviz_core_components tests setup.py usage.py
           bandit -r -c ./bandit.yml webviz_core_components tests setup.py
 
       - name: 🤖 Run tests
         run: |
-          pytest ./tests --headless
+          npm run test
+          pytest ./tests/py --headless
         
       - name: 🚢 Build and deploy Python package
         if: github.event_name == 'release' && matrix.python-version == '3.6'
