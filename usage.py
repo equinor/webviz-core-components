@@ -7,7 +7,9 @@ app = dash.Dash(__name__)
 
 app.layout = html.Div(
     [
-        wcc.WebvizPluginPlaceholder(id="plugin", children=["Hello world"], screenshot_filename="hello.png"),
+        wcc.WebvizPluginPlaceholder(
+            id="plugin", children=["Hello world"], screenshot_filename="hello.png"
+        ),
         wcc.WebvizPluginPlaceholder(
             children=[
                 wcc.FlexBox(
@@ -112,6 +114,127 @@ app.layout = html.Div(
                 ),
             ],
         ),
+        wcc.WebvizPluginPlaceholder(
+            id="smart-node-selector-plugin",
+            children=[
+                wcc.SmartNodeSelector(
+                    id="SmartNodeSelector",
+                    maxNumSelectedNodes=3,
+                    numMetaNodes=2,
+                    delimiter=":",
+                    selectedNodes=[],
+                    selectedTags=[],
+                    label="Smart Node Selector",
+                    data=[
+                        {
+                            "id": "1",
+                            "name": "Metadata 1",
+                            "description": "A first data source",
+                            "color": "#0095FF",
+                            "children": [
+                                {
+                                    "id": "1.1",
+                                    "name": "Submetadata 1",
+                                    "description": "A data category",
+                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/anchor.svg",
+                                    "children": [
+                                        {
+                                            "id": "1.1.1",
+                                            "name": "Node 1",
+                                            "description": "A first data node",
+                                            "children": [
+                                                {
+                                                    "id": "1.1.1.1",
+                                                    "name": "Subnode 1",
+                                                    "description": "A first sub node",
+                                                },
+                                                {
+                                                    "id": "1.1.1.2",
+                                                    "name": "Subnode 2",
+                                                    "description": "A second sub node",
+                                                },
+                                                {
+                                                    "id": "1.1.1.3",
+                                                    "name": "Subnode 3",
+                                                    "description": "A third sub node",
+                                                },
+                                                {
+                                                    "id": "1.1.1.4",
+                                                    "name": "Subnode 4",
+                                                    "description": "A fourth sub node",
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            "id": "1.1.2",
+                                            "name": "Node 2",
+                                            "description": "A second data node",
+                                        },
+                                    ],
+                                    "id": "1.2",
+                                    "name": "Submetadata 2",
+                                    "description": "Another data category",
+                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/activity.svg",
+                                }
+                            ],
+                        },
+                        {
+                            "id": "2",
+                            "name": "Metadata 2",
+                            "description": "A second data source",
+                            "color": "#FF5555",
+                            "children": [
+                                {
+                                    "id": "2.1",
+                                    "name": "Submetadata 1",
+                                    "description": "A data category",
+                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/anchor.svg",
+                                    "children": [
+                                        {
+                                            "id": "2.1.1",
+                                            "name": "Node 1",
+                                            "description": "A first data node",
+                                            "children": [
+                                                {
+                                                    "id": "2.1.1.1",
+                                                    "name": "Subnode 1",
+                                                    "description": "A first sub node",
+                                                },
+                                                {
+                                                    "id": "2.1.1.2",
+                                                    "name": "Subnode 2",
+                                                    "description": "A second sub node",
+                                                },
+                                                {
+                                                    "id": "2.1.1.3",
+                                                    "name": "Subnode 3",
+                                                    "description": "A third sub node",
+                                                },
+                                                {
+                                                    "id": "2.1.1.4",
+                                                    "name": "Subnode 4",
+                                                    "description": "A fourth sub node",
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            "id": "2.1.2",
+                                            "name": "Node 2",
+                                            "description": "A second data node",
+                                        },
+                                    ],
+                                    "id": "2.2",
+                                    "name": "Submetadata 2",
+                                    "description": "Another data category",
+                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/activity.svg",
+                                }
+                            ],
+                        },
+                    ],
+                ),
+                html.Div(id="output"),
+            ],
+        ),
     ]
 )
 
@@ -126,5 +249,19 @@ def update_colors(colorscale, figure):
     return figure
 
 
+@app.callback(
+    Output("output", "children"),
+    [
+        Input("SmartNodeSelector", "selectedNodes"),
+        Input("SmartNodeSelector", "selectedTags"),
+        Input("SmartNodeSelector", "selectedIds"),
+    ],
+)
+def display_output(nodes, tags, ids):
+    return "By using the tags '{}' you have selected the nodes with the paths '{}' with the ids '{}'".format(
+        tags, nodes, ids
+    )
+
+
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)

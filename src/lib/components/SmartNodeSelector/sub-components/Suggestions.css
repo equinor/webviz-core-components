@@ -1,0 +1,57 @@
+/**
+ * Copyright (c) 2021- Equinor ASA
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+ 
+.Suggestions {
+    position: absolute;
+    z-index: 99;
+    top: 100%;
+    left: -1px;
+    right: -1px;
+    border: 1px #ccc solid;
+    border-radius: 0px 0px 4px 4px;
+    background-color: white;
+    overflow-y: auto;
+    -webkit-box-shadow: 0px 4px 5px -1px rgba(0,0,0,0.2); 
+    box-shadow: 0px 4px 5px -1px rgba(0,0,0,0.2);
+}
+
+.Suggestions__Ruler {
+    visibility: hidden;
+    height: 34px;
+}
+
+.Suggestions__Suggestion {
+    padding: 8px;
+    cursor: pointer;
+    box-sizing: border-box;
+    height: 34px;
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.Suggestions__Suggestion--Selected {
+    background-color: #d5eaf4;
+}
+
+.Suggestions__Suggestions i {
+    padding: 10px;
+    display: inline-block;
+}
+
+.Suggestions__Icon {
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    background-position: 5px center;
+    padding-left: 30px;
+}
+
+.Suggestions__Match {
+    font-weight: bold;
+    text-decoration: underline;
+}

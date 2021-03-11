@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapshots__/SmartNodeSelector.test.tsx.snap) 1`] = `
+<div>
+  <div
+    id="SmartNodeSelector"
+  >
+    <label>
+      Smart Node Selector
+    </label>
+    <div
+      class="SmartNodeSelector"
+    >
+      <ul
+        class="SmartNodeSelector__Tags"
+      >
+        <li
+          class="SmartNodeSelector__Tag "
+          title="Enter a new name"
+        >
+          <div
+            class="SmartNodeSelector__InnerTag"
+          >
+            <div
+              class="SmartNodeSelector__InputContainer"
+            >
+              <input
+                placeholder="Add new tag..."
+                spellcheck="false"
+                style="width: 100px;"
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div
+        class="SmartNodeSelector__ClearAll"
+      >
+        <button
+          disabled=""
+          title="Clear all"
+          type="button"
+        />
+      </div>
+      <div
+        class="Suggestions"
+        style="max-height: 568px; display: none;"
+      >
+        <div
+          class="Suggestions__Spacer"
+          style="height: 0px;"
+        />
+        <div
+          class="Suggestions__Suggestion Suggestions__Suggestion--Selected"
+          data-index="0"
+          data-use="Data"
+          style="background-image: none; height: 34px;"
+        >
+          <span
+            class="Suggestions__Match"
+          />
+          Data
+           - Description
+        </div>
+        <div
+          class="Suggestions__Spacer"
+          style="height: 0px;"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

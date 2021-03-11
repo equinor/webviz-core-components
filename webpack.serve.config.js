@@ -3,7 +3,7 @@ const path = require("path");
 
 config.entry = { main: "./src/demo/index.ts" };
 config.output = {
-    filename: "./output.js",
+    filename: "./output.ts",
     path: path.resolve(__dirname),
 };
 config.mode = "development";
