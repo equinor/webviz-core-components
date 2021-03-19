@@ -10,3 +10,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - [#87](https://github.com/equinor/webviz-core-components/pull/87) - Added new SmartNodeSelector component and Jest testing framework
+- [#76](https://github.com/equinor/webviz-core-components/pull/76) - Python 3.9 support formally added (through CI).
