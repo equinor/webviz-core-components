@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - [#99](https://github.com/equinor/webviz-core-components/pull/99) - Fixed bug which prevented using the download button in `WebvizPluginPlaceholder` and started to download when component was mounting. 
 
+### Added
+- [#96](https://github.com/equinor/webviz-core-components/pull/96) - Added publishing of npm package to Github Workflow
+
 ### Changed
 - [#100](https://github.com/equinor/webviz-core-components/pull/100) - Adjusted build environment in order to be able to write 
 components in TypeScript and to publish to npm. Also changed all components to TypeScript.
