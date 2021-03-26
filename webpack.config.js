@@ -1,44 +1,49 @@
 const path = require("path");
-const TerserJSPlugin = require("terser-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 const packagejson = require("./package.json");
 
-const dashLibraryName = packagejson.name.replace(/-/g, "_");
+const dashLibraryName = "webviz_" + packagejson.name.replace(/-/g, "_");
 
 module.exports = (env, argv) => {
-    let mode;
-
     const overrides = module.exports || {};
 
-    // if user specified mode flag take that value
+    // Mode
+
+    let mode;
     if (argv && argv.mode) {
         mode = argv.mode;
     }
-
-    // else if configuration object is already set (module.exports) use that value
     else if (overrides.mode) {
         mode = overrides.mode;
     }
-
-    // else take webpack default (production)
     else {
         mode = "production";
     }
 
-    const entry = {
-        main: argv && argv.entry ? argv.entry : "./src/lib/index.ts",
-    };
-    const demo = entry.main != "./src/lib/index.ts";
+    // Entry
 
-    const filename_js = demo
+    const entry = {
+        main: argv && argv.entry ? argv.entry : "./dist/index.js",
+    };
+
+    // Output
+
+    const demo = entry.main != "./dist/index.js";
+
+    const filenameJs = demo
         ? "output.js"
         : `${dashLibraryName}.${mode === "development" ? "dev" : "min"}.js`;
-    const filename_css = demo ? "output.css" : `${dashLibraryName}.css`;
+
+    const filenameCss = demo ? "output.css" : `${dashLibraryName}.css`;
+
+    // Devtool
 
     const devtool =
-        argv.devtool || (mode === "development" ? "eval-source-map" : "none");
+        argv.devtool || (mode === "development" ? "eval-source-map" : false);
+
+    // Externals
 
     const externals = demo
         ? undefined
@@ -48,30 +53,20 @@ module.exports = (env, argv) => {
             "plotly.js": "Plotly",
         };
 
+    // NOTE: Keep order of the following configuration output
+    // See: https://webpack.js.org/configuration/
+
     return {
-        mode,
+        mode: mode,
         entry,
-        resolve: {
-            extensions: [".ts", ".tsx", ".js", ".jsx"],
-        },
         output: {
             path: demo ? __dirname : path.resolve(__dirname, dashLibraryName),
-            filename: filename_js,
-            library: dashLibraryName,
-            libraryTarget: "window",
+            filename: filenameJs,
+            library: {
+                type: "window",
+                name: dashLibraryName,
+            },
         },
-        optimization: {
-            minimizer: [
-                new TerserJSPlugin({}),
-                new OptimizeCSSAssetsPlugin({}),
-            ],
-        },
-        externals,
-        plugins: [
-            new MiniCssExtractPlugin({
-                filename: filename_css,
-            }),
-        ],
         module: {
             rules: [
                 {
@@ -104,6 +99,27 @@ module.exports = (env, argv) => {
                 },
             ],
         },
-        devtool,
+        resolve: {
+            extensions: [".ts", ".tsx", ".js", ".jsx"],
+        },
+        devtool: devtool,
+        externals: externals,
+        plugins: [
+            new MiniCssExtractPlugin({
+                filename: filenameCss,
+            }),
+        ],
+        optimization: {
+            minimizer: [
+                () => {
+                    return () => {
+                        return {
+                            terserOptions: {}
+                        }
+                    }
+                },
+                new CssMinimizerPlugin({}),
+            ],
+        },
     };
 };
