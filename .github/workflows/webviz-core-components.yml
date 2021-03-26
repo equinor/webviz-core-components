@@ -67,6 +67,14 @@ jobs:
         run: |
           npm run test
           pytest ./tests/py --headless
+
+      - name: 🔼 Build and publish Node.js package
+        if: github.event_name == 'release' && matrix.python-version == '3.6'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm version ${GITHUB_REF//refs\/tags\//}
+          npm publish --access public
         
       - name: 🚢 Build and deploy Python package
         if: github.event_name == 'release' && matrix.python-version == '3.6'
@@ -78,16 +86,3 @@ jobs:
           python -m pip install --upgrade setuptools wheel twine
           python setup.py sdist bdist_wheel
           twine upload dist/*
-
-      - name: 🗄️ Setup .npmrc file to publish to npm
-        if: github.event_name == 'release' && matrix.python-version == '3.6'
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12.x'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: 🔼 Build and publish Node.js package
-        if: github.event_name == 'release' && matrix.python-version == '3.6'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm install && npm publish --access public

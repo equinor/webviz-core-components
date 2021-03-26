@@ -1,5 +1,5 @@
 {
-    "name": "core-components",
+    "name": "@webviz/core-components",
     "version": "0.0.1",
     "description": "Core components for webviz config",
     "repository": {
