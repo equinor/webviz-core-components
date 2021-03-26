@@ -9,11 +9,12 @@ import React, { Component, Fragment, ReactFragment } from 'react'
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import TreeNodeSelection from '../utils/TreeNodeSelection';
-import '../SmartNodeSelector.css';
+import './SmartNodeSelector.css';
 
 type TagProps = {
     key: string;
     index: number;
+    placeholder: string,
     treeNodeSelection: TreeNodeSelection;
     countTags: number;
     currentTag: boolean;
@@ -64,7 +65,7 @@ export default class Tag extends Component {
                 [
                     invalid ? "SmartNodeSelector__InnerInvalid"
                         : duplicate ? "SmartNodeSelector__InnerDuplicate"
-                            : icons.length > 1 ? "SmartNodeSelector_Unknown"
+                            : icons.length > 1 ? "SmartNodeSelector__Unknown"
                                 : ""
                 ]: true
             });
@@ -86,11 +87,19 @@ export default class Tag extends Component {
     }
 
     private calculateTextWidth(text: string, padding = 10, minWidth = 50): number {
+        const { treeNodeSelection } = this.props;
         const span = document.createElement("span");
         if (text === undefined) {
             text = "";
         }
         span.classList.add("SmartNodeSelector__Ruler");
+        const input = (
+            treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
+        ).current as HTMLInputElement;
+        if (input) {
+            const fontSize = window.getComputedStyle(input).fontSize;
+            span.style.fontSize = fontSize;
+        }
         const textNode = document.createTextNode(text.replace(/ /g, "\u00A0"));
         span.appendChild(textNode);
         document.body.appendChild(span);
@@ -131,7 +140,7 @@ export default class Tag extends Component {
                 position = 0;
             }
             return (
-                <Fragment key={"TagBrowseButton_" + index}>
+                <div key={"TagBrowseButton_" + index} className="SmartNodeSelector__BrowseButtons">
                     <button
                         key={"TagPreviousButton_" + index}
                         className="SmartNodeSelector__ShiftNode SmartNodeSelector__ShiftUp"
@@ -162,7 +171,7 @@ export default class Tag extends Component {
                             e.stopPropagation();
                         }}
                     />
-                </Fragment>
+                </div>
             )
         }
         return null;
@@ -305,6 +314,17 @@ export default class Tag extends Component {
                 onMouseEnter={(): void => this.setState({ hovered: true })}
                 onMouseLeave={(): void => this.setState({ hovered: false })}
             >
+                {
+                    this.displayAsTag() &&
+                    <button
+                        type="button"
+                        key={"TagRemoveButton_" + index}
+                        className="SmartNodeSelector__RemoveButton"
+                        title="Remove"
+                        onClick={(e): void => removeTag(e, index)}
+                    />
+                }
+                {this.createBrowseButtons(treeNodeSelection, index)}
                 <div key={"InnerTag_" + index} className={
                     this.innerTagClasses((!valid && !currentTag), duplicate)
                 }
@@ -313,7 +333,6 @@ export default class Tag extends Component {
                     } : {})
                     }
                 >
-                    {this.createBrowseButtons(treeNodeSelection, index)}
                     {this.createMatchesCounter(treeNodeSelection, index)}
                     <div className="SmartNodeSelector__InputContainer">
                         <input
@@ -341,22 +360,13 @@ export default class Tag extends Component {
                             onKeyUp={(e): void => inputKeyUp(e)}
                             onKeyDown={(e): void => inputKeyDown(e)}
                             onSelect={(e): void => inputSelect(e, index)}
+                            onBlur={(e): void => treeNodeSelection.setFocussedLevel(treeNodeSelection.countLevel() - 1)}
                         />
                         {
                             ((currentTag || this.state.hovered) && !treeNodeSelection.isSelected()) &&
                             this.createFocusOverlay(treeNodeSelection)
                         }
                     </div>
-                    {
-                        this.displayAsTag() &&
-                        <button
-                            type="button"
-                            key={"TagRemoveButton_" + index}
-                            className="SmartNodeSelector__RemoveButton"
-                            title="Remove"
-                            onClick={(e): void => removeTag(e, index)}
-                        />
-                    }
                     {
                         treeNodeSelection.isSelected() &&
                         <div

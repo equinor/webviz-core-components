@@ -14,7 +14,7 @@ import { TreeDataNodeMetaData } from '../utils/TreeDataNodeTypes';
 
 type SuggestionsProps = {
     suggestionsRef: React.RefObject<HTMLDivElement>;
-    tagInputFieldRef: React.RefObject<HTMLInputElement>;
+    tagInputFieldRef: React.RefObject<HTMLUListElement>;
     visible: boolean;
     useSuggestion: (e: globalThis.KeyboardEvent | MouseEvent<HTMLDivElement>, option: string) => void;
     treeNodeSelection?: TreeNodeSelection;

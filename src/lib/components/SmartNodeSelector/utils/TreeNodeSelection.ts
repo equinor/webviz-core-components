@@ -16,7 +16,6 @@ export default class TreeNodeSelection {
     private selected: boolean;
     private delimiter: string;
     private treeData: TreeData;
-    private numMatchedNodes: number;
     private numMetaNodes: number;
     private objectIdentifier: number;
 
@@ -41,7 +40,6 @@ export default class TreeNodeSelection {
         this.ref = React.createRef<HTMLInputElement>();
         this.treeData = treeData;
         this.delimiter = delimiter;
-        this.numMatchedNodes = 0;
         this.numMetaNodes = numMetaNodes;
         this.objectIdentifier = Date.now();
     }
@@ -274,7 +272,10 @@ export default class TreeNodeSelection {
     }
 
     isValidUpToFocussedNode(): boolean {
-        return this.treeData.findFirstNode(this.getNodePath(this.focussedLevel), false) !== null;
+        return (
+            this.getNodeName(this.focussedLevel) != ""
+            && this.treeData.findFirstNode(this.getNodePath(this.focussedLevel), false) !== null
+        );
     }
 
     private tidy(): void {
