@@ -15,12 +15,20 @@ const DEFAULT_SCALE = [
     "#2a4858",
 ];
 
+type ColorScalesPropsTypes = {
+    id: string,
+    setProps?: (props: object) => void,
+    colorscale?: Array<string>,
+    nSwatches?: number,
+    fixSwatches?: boolean
+};
+
 /**
  * ColorScales is a Dash wrapper for `react-colorscales`.
  * It takes an array of colors, `colorscale`, and
  * displays a UI for modifying it or choosing a new scale.
  */
-const ColorScales = (props) => {
+const ColorScales: React.FC<ColorScalesPropsTypes> = (props: ColorScalesPropsTypes) => {
     const { id, setProps, colorscale, nSwatches, fixSwatches } = props;
 
     const [showColorScalePicker, setShowColorScalePicker] = useState(false);

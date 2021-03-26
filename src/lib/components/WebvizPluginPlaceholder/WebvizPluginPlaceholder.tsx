@@ -24,12 +24,32 @@ import downloadFile from "./utils/downloadFile";
 
 import "./webviz_plugin_component.css";
 
+type WebvizPluginPlaceholderPropsType = {
+    id: string,
+    children?: PropTypes.ReactNodeLike,
+    buttons?: Array<string>,
+    contact_person?: {
+        name: string,
+        email: string,
+        phone: string
+    },
+    download?: {
+        filename: string,
+        content: string,
+        mime_type: string
+    },
+    screenshot_filename?: string,
+    tour_steps?: Array<{ selector: string, content: string }>,
+    data_requested?: number,
+    setProps: (props: object) => void
+};
+
 /**
  * WebvizPluginPlaceholder is a fundamental webviz dash component.
  * It takes a property, `label`, and displays it.
  * It renders an input with the property `value` which is editable by the user.
  */
-const WebvizPluginPlaceholder = (props) => {
+const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderPropsType> = (props: WebvizPluginPlaceholderPropsType) => {
     const {
         id,
         children,
@@ -46,8 +66,10 @@ const WebvizPluginPlaceholder = (props) => {
     const [showOverlay, setShowOverlay] = useState(false);
     const [tourIsOpen, setTourIsOpen] = useState(false);
 
-    const prevExpandedRef = useRef();
+    const prevExpandedRef = useRef(false);
     const didMountRef = useRef(false);
+
+    let dataRequested = data_requested ? data_requested : 0;
 
     useEffect(() => {
         if (didMountRef.current) {
@@ -77,7 +99,7 @@ const WebvizPluginPlaceholder = (props) => {
         buttons && buttons.includes("guided_tour") &&
         tour_steps && tour_steps.length > 0;
 
-    const ref = React.createRef();
+    const ref = React.createRef<HTMLDivElement>();
 
     return (
         <>
@@ -147,7 +169,7 @@ const WebvizPluginPlaceholder = (props) => {
                             onClick={() =>
                                 setProps({
                                     data_requested:
-                                        data_requested + 1,
+                                        dataRequested + 1,
                                 })
                             }
                         />
@@ -267,5 +289,5 @@ WebvizPluginPlaceholder.propTypes = {
      * Dash-assigned callback that should be called whenever any of the
      * properties change
      */
-    setProps: PropTypes.func,
+    setProps: PropTypes.func.isRequired,
 };

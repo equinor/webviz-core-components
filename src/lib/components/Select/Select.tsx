@@ -9,15 +9,33 @@ import React from "react";
 import PropTypes from "prop-types";
 import "./Select.css";
 
+type SelectPropsType = {
+    id: string,
+    size?: number,
+    options?: Array<{
+        label: number | string,
+        value: number | string
+    }>,
+    value?: number | string | Array<string>,
+    multi?: boolean,
+    className?: string,
+    style?: object,
+    parent_className?: string
+    parent_style?: object,
+    setProps: (props: object) => void,
+    persistence?: boolean | string | number,
+    persisted_props?: Array<string>,
+    persistence_type?: "local" | "session" | "memory"
+};
 /**
  * Select is a dash wrapper for the html select tag.
  */
-const Select = (props) => {
+const Select: React.FC<SelectPropsType> = (props: SelectPropsType) => {
     const { id, parent_className, parent_style, value, multi, size, className, style, options, setProps } = props;
 
-    const handleChange = (e) => {
-        const options = e.target.selectedOptions;
-        let values = [];
+    const handleChange = (e: React.ChangeEvent) => {
+        const options = (e.target as HTMLSelectElement).selectedOptions;
+        let values: string[] = [];
         for (let i = 0; i < options.length; i++) {
             values.push(options[i].value);
         }
@@ -129,7 +147,7 @@ Select.propTypes = {
     /**
      * Dash-assigned callback that gets fired when the input changes
      */
-    setProps: PropTypes.func,
+    setProps: PropTypes.func.isRequired,
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
