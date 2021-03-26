@@ -68,30 +68,40 @@
     background-repeat: no-repeat;
 }
 
+.SmartNodeSelector__BrowseButtons {
+    background: #007079;
+    width: 20px;
+}
+
 .SmartNodeSelector__ShiftNode {
     appearance: none;
     background: #007079;
     border: none;
-    border-radius: 50%;
+    border-radius: 0px;
     cursor: pointer;
     height: 20px;
     margin-right: 8px;
     width: 20px;
     display: inline-block;
     outline: none;
-    top: -1px;
     padding: 0;
     background-size: 16px 16px;
     background-position: center center;
     background-repeat: no-repeat;
+    height: 50%;
+    position: absolute;
 }
 
 .SmartNodeSelector__ShiftUp {
     background-image: url('./images/chevron-up.svg');
+    top: 0;
+    border-top-left-radius: 2px;
 }
 
 .SmartNodeSelector__ShiftDown {
     background-image: url('./images/chevron-down.svg');
+    top: 50%;
+    border-bottom-left-radius: 2px;
 }
 
 .SmartNodeSelector__ShiftNode:disabled,
@@ -111,7 +121,6 @@
     background: none;
     outline: none;
     padding: 0px;
-    font-size: 12pt;
     width: 50px;
     color: #565656;
     display: inline-block;
@@ -139,13 +148,13 @@
     margin-bottom: 4px;
     color: #565656;
     border: 2px transparent solid;
+    position: relative;
 }
 
 .SmartNodeSelector__InnerTag {
     display: flex;
     border-radius: 4px;
     background-color: #fefefe;
-    font-size: 12pt;
     white-space: nowrap;
     padding: 8px;
     color: #565656;
@@ -164,7 +173,6 @@
 .SmartNodeSelector__Ruler {
     visibility: hidden;
     white-space: nowrap;
-    font-size: 12pt;
 }
 
 .SmartNodeSelector__TagSelected {
@@ -203,7 +211,6 @@
     border: 1px #ccc solid;
     border-radius: 11px;
     color: #565656;
-    font-size: 12px;
     height: 20px;
     justify-content: center;
     margin-right: 8px;
@@ -219,28 +226,27 @@
 }
 
 .SmartNodeSelector__RemoveButton {
-    align-items: center;
-    appearance: none;
+    position: absolute;
+    right: -9px;
+    top: -9px;
     background: #eb0000;
-    border: none;
+    border: 1px #fff solid;
     border-radius: 50%;
     cursor: pointer;
-    height: 22px;
-    margin-left: 8px;
-    width: 22px;
+    width: 18px;
+    height: 18px;
     padding: 0;
-    display: inline-block;
-    outline: none;
-    top: -1px;
+    display: block;
     background-image: url('./images/x.svg');
     background-position: center center;
-    background-size: 16px 16px;
+    background-size: 14px 14px;
     background-repeat: no-repeat;
 }
 
 .SmartNodeSelector__RemoveButton:hover {
     color: white;
-    background-color: #bb0000; 
+    background-color: #bb0000;
+    border: 1px #fff solid;
 }
 
 .SmartNodeSelector__Icon {

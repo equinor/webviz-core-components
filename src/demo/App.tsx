@@ -23,13 +23,13 @@ const steps = [
 ];
 
 class App extends Component {
-    constructor(props: object) {
+    constructor(props: Record<string, unknown>) {
         super(props);
 
         this.setProps = this.setProps.bind(this);
     }
 
-    setProps(newProps: object): void {
+    setProps(newProps: Record<string, unknown>): void {
         this.setState(newProps);
     }
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import PropTypes from "prop-types";
+import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
 
@@ -29,7 +29,9 @@ import "./webviz_plugin_component.css";
  * It takes a property, `label`, and displays it.
  * It renders an input with the property `value` which is editable by the user.
  */
-const WebvizPluginPlaceholder = (props) => {
+const WebvizPluginPlaceholder = (
+    props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
+): JSX.Element => {
     const {
         id,
         children,
@@ -46,8 +48,10 @@ const WebvizPluginPlaceholder = (props) => {
     const [showOverlay, setShowOverlay] = useState(false);
     const [tourIsOpen, setTourIsOpen] = useState(false);
 
-    const prevExpandedRef = useRef();
+    const prevExpandedRef = useRef(false);
     const didMountRef = useRef(false);
+
+    const dataRequested = data_requested ? data_requested : 0;
 
     useEffect(() => {
         if (didMountRef.current) {
@@ -77,7 +81,7 @@ const WebvizPluginPlaceholder = (props) => {
         buttons && buttons.includes("guided_tour") &&
         tour_steps && tour_steps.length > 0;
 
-    const ref = React.createRef();
+    const ref = React.createRef<HTMLDivElement>();
 
     return (
         <>
@@ -147,7 +151,7 @@ const WebvizPluginPlaceholder = (props) => {
                             onClick={() =>
                                 setProps({
                                     data_requested:
-                                        data_requested + 1,
+                                        dataRequested + 1,
                                 })
                             }
                         />
@@ -207,6 +211,7 @@ WebvizPluginPlaceholder.defaultProps = {
     data_requested: 0,
     download: undefined,
     screenshot_filename: "webviz-screenshot.png",
+    setProps: () => { return undefined },
 };
 
 WebvizPluginPlaceholder.propTypes = {
@@ -267,5 +272,5 @@ WebvizPluginPlaceholder.propTypes = {
      * Dash-assigned callback that should be called whenever any of the
      * properties change
      */
-    setProps: PropTypes.func,
+    setProps: PropTypes.func.isRequired,
 };

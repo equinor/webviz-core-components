@@ -14,7 +14,7 @@ import { TreeDataNodeMetaData } from '../utils/TreeDataNodeTypes';
 
 type SuggestionsProps = {
     suggestionsRef: React.RefObject<HTMLDivElement>;
-    tagInputFieldRef: React.RefObject<HTMLInputElement>;
+    tagInputFieldRef: React.RefObject<HTMLUListElement>;
     visible: boolean;
     useSuggestion: (e: globalThis.KeyboardEvent | MouseEvent<HTMLDivElement>, option: string) => void;
     treeNodeSelection?: TreeNodeSelection;
@@ -30,8 +30,8 @@ type SuggestionsState = {
 class Suggestions extends Component {
     public props: SuggestionsProps;
     public state: SuggestionsState;
-    public static propTypes: object;
-    public static defaultProps: object;
+    public static propTypes: Record<string, unknown>;
+    public static defaultProps: Record<string, unknown>;
 
     private mouseMoved: boolean;
     private currentlySelectedSuggestionIndex: number;

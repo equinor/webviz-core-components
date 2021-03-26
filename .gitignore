@@ -11,6 +11,7 @@ NAMESPACE
 R/
 man/
 inst/
+dist/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### VisualStudioCode template

@@ -1,7 +1,7 @@
 // Adapted from https://github.com/plotly/dash-colorscales
 
 import React, { useState } from "react";
-import PropTypes from "prop-types";
+import PropTypes, { InferProps } from "prop-types";
 
 import ColorscalePicker, { Colorscale } from "react-colorscales";
 
@@ -20,7 +20,7 @@ const DEFAULT_SCALE = [
  * It takes an array of colors, `colorscale`, and
  * displays a UI for modifying it or choosing a new scale.
  */
-const ColorScales = (props) => {
+const ColorScales = (props: InferProps<typeof ColorScales.propTypes>): JSX.Element => {
     const { id, setProps, colorscale, nSwatches, fixSwatches } = props;
 
     const [showColorScalePicker, setShowColorScalePicker] = useState(false);
@@ -35,7 +35,6 @@ const ColorScales = (props) => {
             >
                 <Colorscale
                     colorscale={colorScale}
-                    onClick={() => { }}
                     width={150}
                 />
             </div>
@@ -44,7 +43,7 @@ const ColorScales = (props) => {
                     colorscale={colorScale || DEFAULT_SCALE}
                     nSwatches={nSwatches || DEFAULT_SCALE.length}
                     fixSwatches={fixSwatches}
-                    onChange={newColorScale => {
+                    onChange={(newColorScale: string[]) => {
                         /*
                          * Send the new value to the parent component.
                          * In a Dash app, this will send the data back to the

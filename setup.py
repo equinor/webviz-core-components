@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 with open(os.path.join("webviz_core_components", "package-info.json")) as f:
     package = json.load(f)
 
-package_name = package["name"].replace(" ", "_").replace("-", "_")
+package_name = "webviz_" + package["name"].replace(" ", "_").replace("-", "_")
 
 install_requires = ["dash>=1.6"]
 
