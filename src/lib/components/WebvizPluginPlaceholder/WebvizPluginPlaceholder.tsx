@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import PropTypes from "prop-types";
+import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
 
@@ -24,32 +24,14 @@ import downloadFile from "./utils/downloadFile";
 
 import "./webviz_plugin_component.css";
 
-type WebvizPluginPlaceholderPropsType = {
-    id: string,
-    children?: PropTypes.ReactNodeLike,
-    buttons?: Array<string>,
-    contact_person?: {
-        name: string,
-        email: string,
-        phone: string
-    },
-    download?: {
-        filename: string,
-        content: string,
-        mime_type: string
-    },
-    screenshot_filename?: string,
-    tour_steps?: Array<{ selector: string, content: string }>,
-    data_requested?: number,
-    setProps: (props: object) => void
-};
-
 /**
  * WebvizPluginPlaceholder is a fundamental webviz dash component.
  * It takes a property, `label`, and displays it.
  * It renders an input with the property `value` which is editable by the user.
  */
-const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderPropsType> = (props: WebvizPluginPlaceholderPropsType) => {
+const WebvizPluginPlaceholder = (
+    props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
+): JSX.Element => {
     const {
         id,
         children,
@@ -69,7 +51,7 @@ const WebvizPluginPlaceholder: React.FC<WebvizPluginPlaceholderPropsType> = (pro
     const prevExpandedRef = useRef(false);
     const didMountRef = useRef(false);
 
-    let dataRequested = data_requested ? data_requested : 0;
+    const dataRequested = data_requested ? data_requested : 0;
 
     useEffect(() => {
         if (didMountRef.current) {

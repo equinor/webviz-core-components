@@ -18,7 +18,7 @@ import Tag from './Tag';
 enum Direction {
     Left = 0,
     Right
-};
+}
 
 type SmartNodeSelectorPropsType = {
     id: string,
@@ -28,7 +28,7 @@ type SmartNodeSelectorPropsType = {
     data: TreeDataNode[],
     label: string,
     showSuggestions: boolean,
-    setProps: (props: any) => void,
+    setProps: (props: Record<string, unknown>) => void,
     selectedNodes: string[],
     selectedTags: string[],
     selectedIds: string[],
@@ -77,8 +77,8 @@ export default class SmartNodeSelectorComponent extends Component {
 
     public props: SmartNodeSelectorPropsType;
     public state: SmartNodeSelectorStateType;
-    public static propTypes: object;
-    public static defaultProps: object;
+    public static propTypes: Record<string, unknown>;
+    public static defaultProps: Record<string, unknown>;
 
     constructor(props: SmartNodeSelectorPropsType) {
         super(props);
@@ -105,7 +105,7 @@ export default class SmartNodeSelectorComponent extends Component {
             delimiter: props.delimiter
         });
 
-        let nodeSelections: TreeNodeSelection[] = [];
+        const nodeSelections: TreeNodeSelection[] = [];
         if (props.selectedTags !== undefined) {
             for (const tag of props.selectedTags) {
                 const nodePath = tag.split(this.props.delimiter);
@@ -170,7 +170,11 @@ export default class SmartNodeSelectorComponent extends Component {
     setFocusOnTagInput(index: number): void {
         if (index >= 0 && index < this.countTags()) {
             if (this.state.nodeSelections.length > index && index >= 0) {
-                ((this.state.nodeSelections[index].getRef() as React.RefObject<HTMLInputElement>).current as HTMLInputElement).focus();
+                (
+                    (
+                        this.state.nodeSelections[index].getRef() as React.RefObject<HTMLInputElement>
+                    ).current as HTMLInputElement
+                ).focus();
             }
             this.maybeShowSuggestions();
         }
@@ -185,7 +189,7 @@ export default class SmartNodeSelectorComponent extends Component {
         return !(lastTag.displayAsTag() || lastTag.isValid());
     }
 
-    incrementCurrentTagIndex(callback: () => void = () => { }): boolean {
+    incrementCurrentTagIndex(callback: () => void = () => { return undefined }): boolean {
         if (this.currentTagIndex() < this.countTags() - 1) {
             this.updateState({ currentTagIndex: this.currentTagIndex() + 1, callback: callback });
             return true;
@@ -193,7 +197,7 @@ export default class SmartNodeSelectorComponent extends Component {
         return false;
     }
 
-    decrementCurrentTagIndex(callback: () => void = () => { }): boolean {
+    decrementCurrentTagIndex(callback: () => void = () => { return undefined }): boolean {
         if (this.currentTagIndex() > 0) {
             this.updateState({ currentTagIndex: this.currentTagIndex() - 1, callback: callback });
             return true;
@@ -201,7 +205,7 @@ export default class SmartNodeSelectorComponent extends Component {
         return false;
     }
 
-    nodeSelection(index): TreeNodeSelection {
+    nodeSelection(index: number): TreeNodeSelection {
         return this.state.nodeSelections[index];
     }
 
@@ -239,7 +243,7 @@ export default class SmartNodeSelectorComponent extends Component {
         nodeSelections = undefined,
         currentTagIndex = undefined,
         suggestionsVisible = undefined,
-        callback = () => { },
+        callback = () => { return undefined },
         forceUpdate = false
     }: SmartNodeSelectorUpdateStateType): void {
         if (!this.componentIsMounted) return;
@@ -299,7 +303,11 @@ export default class SmartNodeSelectorComponent extends Component {
 
     showSuggestions(): void {
         if (!document.activeElement || this.currentTagIndex() < 0) return;
-        if ((this.currentNodeSelection().getRef() as React.RefObject<HTMLInputElement>).current === document.activeElement) {
+        if (
+            (
+                this.currentNodeSelection().getRef() as React.RefObject<HTMLInputElement>
+            ).current === document.activeElement
+        ) {
 
             this.updateState({ suggestionsVisible: true });
         }
@@ -311,7 +319,7 @@ export default class SmartNodeSelectorComponent extends Component {
     }
 
     useSuggestion(e: globalThis.KeyboardEvent | MouseEvent<HTMLDivElement>, suggestion: string): void {
-        var nodeSelection = this.currentNodeSelection();
+        const nodeSelection = this.currentNodeSelection();
         this.noUserInputSelect = true;
 
         nodeSelection.setNodeName(suggestion);
@@ -334,9 +342,9 @@ export default class SmartNodeSelectorComponent extends Component {
     }
 
     letMaxNumValuesBlink(): void {
-        var numBlinks = 0;
+        let numBlinks = 0;
         const numberOfTagsDiv = ((this.refNumberOfTags as React.RefObject<HTMLDivElement>).current as HTMLDivElement);
-        var blinkTimer = setInterval(() => {
+        const blinkTimer = setInterval(() => {
             numBlinks++;
             if (numBlinks % 2 == 0) {
                 numberOfTagsDiv.classList.add("SmartNodeSelector__Warning");
@@ -357,7 +365,7 @@ export default class SmartNodeSelectorComponent extends Component {
     }
 
     blurActiveElement(): void {
-        if (document.activeElement && document.activeElement.hasOwnProperty("blur")) {
+        if (document.activeElement && document.activeElement instanceof HTMLElement) {
             (document.activeElement as HTMLElement).blur();
         }
     }
@@ -599,7 +607,11 @@ export default class SmartNodeSelectorComponent extends Component {
             currentTagIndex: 0,
             suggestionsVisible: false,
             callback: () => {
-                ((this.state.nodeSelections[0].getRef() as React.RefObject<HTMLInputElement>).current as HTMLInputElement).focus();
+                (
+                    (
+                        this.state.nodeSelections[0].getRef() as React.RefObject<HTMLInputElement>
+                    ).current as HTMLInputElement
+                ).focus();
             }
         });
         e.stopPropagation();
@@ -645,11 +657,11 @@ export default class SmartNodeSelectorComponent extends Component {
         if (this.clipboardData === null) return;
         const selections = this.clipboardData;
         if (selections && selections.length > 0) {
-            let newSelections = this.state.nodeSelections;
+            const newSelections = this.state.nodeSelections;
             if (this.lastNodeSelection().isEmpty()) {
                 newSelections.pop();
             }
-            for (let selection of selections) {
+            for (const selection of selections) {
                 if (newSelections.length < this.props.maxNumSelectedNodes || this.props.maxNumSelectedNodes == -1) {
                     newSelections.push(selection.clone());
                 }
@@ -675,9 +687,9 @@ export default class SmartNodeSelectorComponent extends Component {
 
     updateSelectedTagsAndNodes(): void {
         const { setProps, maxNumSelectedNodes } = this.props;
-        let selectedTags: string[] = [];
-        let selectedNodes: string[] = [];
-        let selectedIds: string[] = [];
+        const selectedTags: string[] = [];
+        const selectedNodes: string[] = [];
+        const selectedIds: string[] = [];
         loop1:
         for (let i = 0; i < this.countTags(); i++) {
             const nodeSelection = this.nodeSelection(i);
@@ -724,7 +736,13 @@ export default class SmartNodeSelectorComponent extends Component {
         const tag = this.nodeSelection(index);
         if (eventTarget.selectionStart != null && eventTarget.selectionEnd != null) {
             if (!tag.isFocusOnMetaData()) {
-                tag.setFocussedLevel(val.slice(0, eventTarget.selectionStart).split(this.props.delimiter).length - 1, false);
+                tag.setFocussedLevel(
+                    val.slice(
+                        0,
+                        eventTarget.selectionStart
+                    ).split(this.props.delimiter).length - 1,
+                    false
+                );
             }
             const selection = eventTarget.value.substring(eventTarget.selectionStart, eventTarget.selectionEnd);
             if (selection.includes(this.props.delimiter)) {
@@ -809,7 +827,14 @@ export default class SmartNodeSelectorComponent extends Component {
                 this.letMaxNumValuesBlink();
             }
         }
-        else if ((e.key === "ArrowRight" && eventTarget.selectionEnd == eventTarget.value.length && !e.repeat) && val) {
+        else if (
+            (
+                e.key === "ArrowRight"
+                && eventTarget.selectionEnd == eventTarget.value.length
+                && !e.repeat
+            )
+            && val
+        ) {
             if (e.shiftKey) {
                 if (this.currentTagIndex() < this.countTags() - 1) {
                     this.selectTag(this.currentTagIndex());
@@ -878,7 +903,7 @@ export default class SmartNodeSelectorComponent extends Component {
     }
 
     handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
-        var tag = this.currentNodeSelection();
+        const tag = this.currentNodeSelection();
         const value = e.target.value;
 
         if (tag.isFocusOnMetaData()) {

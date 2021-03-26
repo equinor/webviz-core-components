@@ -6,36 +6,18 @@
  */
 
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes, { InferProps } from "prop-types";
 import "./Select.css";
 
-type SelectPropsType = {
-    id: string,
-    size?: number,
-    options?: Array<{
-        label: number | string,
-        value: number | string
-    }>,
-    value?: number | string | Array<string>,
-    multi?: boolean,
-    className?: string,
-    style?: object,
-    parent_className?: string
-    parent_style?: object,
-    setProps: (props: object) => void,
-    persistence?: boolean | string | number,
-    persisted_props?: Array<string>,
-    persistence_type?: "local" | "session" | "memory"
-};
 /**
  * Select is a dash wrapper for the html select tag.
  */
-const Select: React.FC<SelectPropsType> = (props: SelectPropsType) => {
+const Select = (props: InferProps<typeof Select.propTypes>): JSX.Element => {
     const { id, parent_className, parent_style, value, multi, size, className, style, options, setProps } = props;
 
     const handleChange = (e: React.ChangeEvent) => {
         const options = (e.target as HTMLSelectElement).selectedOptions;
-        let values: string[] = [];
+        const values: string[] = [];
         for (let i = 0; i < options.length; i++) {
             values.push(options[i].value);
         }

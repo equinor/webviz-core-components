@@ -5,7 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-export default function downloadFile({ filename, data, mimeType }): void {
+export default function downloadFile(
+    {
+        filename,
+        data,
+        mimeType
+    }: {
+        filename: string,
+        data: Blob | null,
+        mimeType: string
+    }
+): void {
     const link = document.createElement("a");
 
     if (data instanceof Blob) {

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { Component, Fragment, ReactFragment } from 'react'
+import React, { Component, ReactFragment } from 'react'
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import TreeNodeSelection from '../utils/TreeNodeSelection';
@@ -33,8 +33,8 @@ type TagProps = {
  */
 export default class Tag extends Component {
     public props: TagProps;
-    public static propTypes: object;
-    public static defaultProps: object;
+    public static propTypes: Record<string, unknown>;
+    public static defaultProps: Record<string, unknown>;
     public state: { hovered: boolean };
 
     constructor(props: TagProps) {
@@ -360,7 +360,7 @@ export default class Tag extends Component {
                             onKeyUp={(e): void => inputKeyUp(e)}
                             onKeyDown={(e): void => inputKeyDown(e)}
                             onSelect={(e): void => inputSelect(e, index)}
-                            onBlur={(e): void => treeNodeSelection.setFocussedLevel(treeNodeSelection.countLevel() - 1)}
+                            onBlur={(): void => treeNodeSelection.setFocussedLevel(treeNodeSelection.countLevel() - 1)}
                         />
                         {
                             ((currentTag || this.state.hovered) && !treeNodeSelection.isSelected()) &&
