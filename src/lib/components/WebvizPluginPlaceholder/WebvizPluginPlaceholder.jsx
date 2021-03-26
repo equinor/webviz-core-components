@@ -47,24 +47,30 @@ const WebvizPluginPlaceholder = (props) => {
     const [tourIsOpen, setTourIsOpen] = useState(false);
 
     const prevExpandedRef = useRef();
+    const didMountRef = useRef(false);
 
     useEffect(() => {
-        if (download !== null && download !== undefined) {
-            downloadFile({
-                filename: download.filename,
-                data: download.content,
-                mimeType: download.mime_type
-            });
-            setProps({ download: null });
-        }
+        if (didMountRef.current) {
+            if (download !== null && download !== undefined) {
+                downloadFile({
+                    filename: download.filename,
+                    data: download.content,
+                    mimeType: download.mime_type
+                });
+                setProps({ download: null });
+            }
 
-        // Hide/show body scrollbar depending on plugin going in/out of full screen mode.
-        if (prevExpandedRef.current !== expanded) {
-            document.body.style.overflow = expanded
-                ? "hidden"
-                : "visible";
+            // Hide/show body scrollbar depending on plugin going in/out of full screen mode.
+            if (prevExpandedRef.current !== expanded) {
+                document.body.style.overflow = expanded
+                    ? "hidden"
+                    : "visible";
+            }
+            prevExpandedRef.current = expanded;
         }
-        prevExpandedRef.current = expanded;
+        else {
+            didMountRef.current = true;
+        }
     });
 
     const showTour =
@@ -139,7 +145,6 @@ const WebvizPluginPlaceholder = (props) => {
                             icon={faDownload}
                             tooltip="Download data"
                             onClick={() =>
-                                data_requested &&
                                 setProps({
                                     data_requested:
                                         data_requested + 1,
