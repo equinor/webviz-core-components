@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 ### Fixed
-- [#99](https://github.com/equinor/webviz-core-components/pull/99) - Fixed bug which prevented using the download button in WebvizPluginPlaceholder and started to download when compontent was mounting. 
+- [#99](https://github.com/equinor/webviz-core-components/pull/99) - Fixed bug which prevented using the download button in `WebvizPluginPlaceholder` and started to download when component was mounting. 
 
 ## [0.2.0] - 2021-03-11
 ### Changed
