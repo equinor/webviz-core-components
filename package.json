@@ -1,7 +1,6 @@
 {
     "name": "@webviz/core-components",
-    "version": "0.0.1",
-    "description": "Core components for webviz config",
+    "description": "Core components for webviz-config",
     "repository": {
         "type": "git",
         "url": "git://github.com/equinor/webviz-core-components.git"
@@ -37,7 +36,7 @@
         "validate": "npm run typecheck && npm run lint",
         "test": "jest"
     },
-    "author": "R&T Equinor <akia@equinor.com>",
+    "author": "Equinor <noreply@equinor.com>",
     "license": "MIT",
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.35",
