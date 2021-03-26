@@ -126,7 +126,7 @@ describe('SmartNodeSelector', () => {
 
         userEvent.type(firstInput, "Data:");
 
-        expect((firstTag.firstChild as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
         expect(firstTag.title === "Invalid").toBeTruthy();
 
         userEvent.type(firstInput, "Subdata");
@@ -213,7 +213,7 @@ describe('SmartNodeSelector', () => {
         fireEvent.keyDown(firstInput, { key: 'Enter' });
         fireEvent.keyUp(firstInput, { key: 'Enter' });
 
-        expect((firstTag.firstChild as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
         expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length == 2).toBeTruthy();
 
@@ -241,7 +241,7 @@ describe('SmartNodeSelector', () => {
         fireEvent.keyDown(firstInput, { key: 'Enter' });
         fireEvent.keyUp(firstInput, { key: 'Enter' });
 
-        expect((firstTag.firstChild as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
         expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length == 2).toBeTruthy();
 
