@@ -4,7 +4,7 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 const packagejson = require("./package.json");
 
-const dashLibraryName = "webviz_" + packagejson.name.replace(/-/g, "_");
+const dashLibraryName = packagejson.name.replace(/[-\/]/g, "_").replace(/@/g, "");
 
 module.exports = (env, argv) => {
     const overrides = module.exports || {};
