@@ -73,7 +73,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm version ${GITHUB_REF//refs\/tags\//}
+          npm version --no-git-tag-version ${GITHUB_REF//refs\/tags\//}
           npm publish --access public
         
       - name: 🚢 Build and deploy Python package
