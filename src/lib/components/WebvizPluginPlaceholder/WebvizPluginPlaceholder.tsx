@@ -211,6 +211,7 @@ WebvizPluginPlaceholder.defaultProps = {
     data_requested: 0,
     download: undefined,
     screenshot_filename: "webviz-screenshot.png",
+    setProps: () => { return undefined },
 };
 
 WebvizPluginPlaceholder.propTypes = {
