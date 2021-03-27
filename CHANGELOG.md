@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 ### Fixed
+- [#105](https://github.com/equinor/webviz-core-components/pull/105) - Fixed bug when updating Select values from a Dash callback.
+
+## [0.3.0] - 2021-03-26
+### Fixed
 - [#99](https://github.com/equinor/webviz-core-components/pull/99) - Fixed bug which prevented using the download button in `WebvizPluginPlaceholder` and started to download when component was mounting. 
 
 ### Added

@@ -31,7 +31,7 @@ const Select = (props: InferProps<typeof Select.propTypes>): JSX.Element => {
             style={parent_style}
         >
             <select
-                defaultValue={value}
+                value={value}
                 multiple={multi}
                 size={size}
                 onChange={(e) => handleChange(e)}
@@ -129,7 +129,7 @@ Select.propTypes = {
     /**
      * Dash-assigned callback that gets fired when the input changes
      */
-    setProps: PropTypes.func.isRequired,
+    setProps: PropTypes.func,
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
