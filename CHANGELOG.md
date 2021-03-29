@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED] - YYYY-MM-DD
+
+## [0.3.1] - 2021-03-28
 ### Fixed
 - [#105](https://github.com/equinor/webviz-core-components/pull/105) - Fixed bug when updating Select values from a Dash callback.
 
