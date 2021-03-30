@@ -8,19 +8,13 @@ from pkg_resources import get_distribution, DistributionNotFound
 
 import dash as _dash
 
-try:
-    from ._imports_ import *
-    from ._imports_ import __all__
+from ._imports_ import *
+from ._imports_ import __all__
 
-    from .graph import Graph
-    from .flexbox import FlexBox
+from .graph import Graph
+from .flexbox import FlexBox
 
-    __all__ += ["Graph", "FlexBox"]
-
-except ModuleNotFoundError:
-    # The _imports_ file does not exist before dash-generate-components
-    # has been called.
-    pass
+__all__ += ["Graph", "FlexBox"]
 
 try:
     __version__ = get_distribution(__name__).version
@@ -64,7 +58,10 @@ _js_dist = [
 ]
 
 _css_dist = [
-    {"relative_package_path": "webviz_core_components.css", "namespace": package_name,}
+    {
+        "relative_package_path": "webviz_core_components.css",
+        "namespace": package_name,
+    }
 ]
 
 

@@ -1,5 +1,3 @@
-import copy
-
 import dash_html_components as html
 
 from ._argument_modifier import argument_modifier
@@ -10,8 +8,10 @@ class FlexBox(html.Div):
     flexbox style settings. It also adds min-width CSS style to direct children.
     """
 
+    # pylint: disable=too-few-public-methods
+
     def __init__(self, *args, **kwargs):
-        def add_flexbox_css_class(className):
+        def add_flexbox_css_class(className):  # pylint: disable=invalid-name
             return (
                 "" if className is None else className + " "
             ) + "webviz-core-components-flexbox"

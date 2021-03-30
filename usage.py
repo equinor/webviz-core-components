@@ -136,7 +136,10 @@ app.layout = html.Div(
                                     "id": "1.1",
                                     "name": "Submetadata 1",
                                     "description": "A data category",
-                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/anchor.svg",
+                                    "icon": (
+                                        "https://raw.githubusercontent.com/"
+                                        "feathericons/feather/master/icons/anchor.svg"
+                                    ),
                                     "children": [
                                         {
                                             "id": "1.1.1",
@@ -171,11 +174,16 @@ app.layout = html.Div(
                                             "description": "A second data node",
                                         },
                                     ],
+                                },
+                                {
                                     "id": "1.2",
                                     "name": "Submetadata 2",
                                     "description": "Another data category",
-                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/activity.svg",
-                                }
+                                    "icon": (
+                                        "https://raw.githubusercontent.com/"
+                                        "feathericons/feather/master/icons/activity.svg"
+                                    ),
+                                },
                             ],
                         },
                         {
@@ -188,7 +196,10 @@ app.layout = html.Div(
                                     "id": "2.1",
                                     "name": "Submetadata 1",
                                     "description": "A data category",
-                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/anchor.svg",
+                                    "icon": (
+                                        "https://raw.githubusercontent.com/"
+                                        "feathericons/feather/master/icons/anchor.svg"
+                                    ),
                                     "children": [
                                         {
                                             "id": "2.1.1",
@@ -223,11 +234,16 @@ app.layout = html.Div(
                                             "description": "A second data node",
                                         },
                                     ],
+                                },
+                                {
                                     "id": "2.2",
                                     "name": "Submetadata 2",
                                     "description": "Another data category",
-                                    "icon": "https://raw.githubusercontent.com/feathericons/feather/master/icons/activity.svg",
-                                }
+                                    "icon": (
+                                        "https://raw.githubusercontent.com/"
+                                        "feathericons/feather/master/icons/activity.svg"
+                                    ),
+                                },
                             ],
                         },
                     ],
@@ -258,8 +274,9 @@ def update_colors(colorscale, figure):
     ],
 )
 def display_output(nodes, tags, ids):
-    return "By using the tags '{}' you have selected the nodes with the paths '{}' with the ids '{}'".format(
-        tags, nodes, ids
+    return (
+        f"By using the tags '{tags}' you have selected "
+        f"the nodes with the paths '{nodes}' with the ids '{ids}'"
     )
 
 

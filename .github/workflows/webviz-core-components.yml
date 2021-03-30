@@ -58,10 +58,12 @@ jobs:
         run: pip freeze
 
       - name: 🕵️ Check code style & linting
+        if: matrix.python-version == '3.8'
         run: |
           npm run validate
           black --check webviz_core_components tests setup.py usage.py
-          bandit -r -c ./bandit.yml webviz_core_components tests setup.py
+          pylint webviz_core_components/ tests/py/*.py setup.py usage.py
+          bandit -r -c ./bandit.yml webviz_core_components tests setup.py usage.py
 
       - name: 🤖 Run tests
         run: |
