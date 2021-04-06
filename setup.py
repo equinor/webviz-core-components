@@ -17,9 +17,9 @@ package_name = (
     .replace("@", "")
 )
 
-install_requires = ["dash>=1.6"]
+INSTALL_REQUIRES = ["dash>=1.6"]
 
-tests_require = ["selenium", "pylint", "black", "bandit"]
+TESTS_REQUIRE = ["selenium", "pylint", "black>=20.8b1", "bandit"]
 
 # 'dash[testing]' to be added in tests_require when
 # https://github.com/pypa/pip/issues/4957 is closed.
@@ -34,9 +34,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/equinor/webviz-core-components",
-    install_requires=install_requires,
-    tests_require=tests_require,
-    extras_require={"tests": tests_require, "dependencies": install_requires},
+    install_requires=INSTALL_REQUIRES,
+    tests_require=TESTS_REQUIRE,
+    extras_require={"tests": TESTS_REQUIRE, "dependencies": INSTALL_REQUIRES},
     setup_requires=["setuptools_scm~=3.2"],
     python_requires="~=3.6",
     use_scm_version=True,

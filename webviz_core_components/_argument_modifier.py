@@ -9,7 +9,7 @@ def argument_modifier(parent_class, argument_name, modifying_function, args, kwa
     * modifying_function: Reference to a function which should take one value. It is
                           automatically given the current value of the relevant argument
                           (None if not given), and should return the new modified value.
-    * args, kwargs: The arguments to be changed. 
+    * args, kwargs: The arguments to be changed.
 
     Returns new pair of args and kwargs.
     """
@@ -19,7 +19,7 @@ def argument_modifier(parent_class, argument_name, modifying_function, args, kwa
     if len(args) > arg_index:  # given as positional argument
         args = (
             args[:arg_index]
-            + (modifying_function(args[config_arg_index]),)
+            + (modifying_function(args[arg_index]),)
             + args[arg_index + 1 :]
         )
     else:
