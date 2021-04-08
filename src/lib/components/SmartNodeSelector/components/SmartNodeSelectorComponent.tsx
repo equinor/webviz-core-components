@@ -57,7 +57,7 @@ type SmartNodeSelectorUpdateStateType = {
  * SmartNodeSelector is a component that allows to create tags by selecting data from a tree structure.
  * The tree structure can also provide meta data that is displayed as color or icon.
  */
-export default class SmartNodeSelectorComponent extends Component {
+export default class SmartNodeSelectorComponent extends Component<SmartNodeSelectorPropsType> {
     protected suggestionTimer: ReturnType<typeof setTimeout> | undefined;
     protected ref: React.RefObject<HTMLDivElement>;
     protected suggestionsRef: React.RefObject<HTMLDivElement>;
@@ -78,7 +78,19 @@ export default class SmartNodeSelectorComponent extends Component {
     public props: SmartNodeSelectorPropsType;
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
-    public static defaultProps: Record<string, unknown>;
+    public static defaultProps: Partial<SmartNodeSelectorPropsType> = {
+        maxNumSelectedNodes: -1,
+        delimiter: ":",
+        numMetaNodes: 0,
+        showSuggestions: true,
+        selectedNodes: [],
+        selectedTags: [],
+        selectedIds: [],
+        placeholder: "Add new tag...",
+        numSecondsUntilSuggestionsAreShown: 1.5,
+        persisted_props: ['selectedNodes', 'selectedTags', 'selectedIds'],
+        persistence_type: 'local',
+    };
 
     constructor(props: SmartNodeSelectorPropsType) {
         super(props);
@@ -984,20 +996,6 @@ export default class SmartNodeSelectorComponent extends Component {
         );
     }
 }
-
-SmartNodeSelectorComponent.defaultProps = {
-    maxNumSelectedNodes: -1,
-    delimiter: ":",
-    numMetaNodes: 0,
-    showSuggestions: true,
-    selectedNodes: [],
-    selectedTags: [],
-    selectedIds: [],
-    placeholder: "Add new tag...",
-    numSecondsUntilSuggestionsAreShown: 1.5,
-    persisted_props: ['selectedNodes', 'selectedTags', 'selectedIds'],
-    persistence_type: 'local',
-};
 
 SmartNodeSelectorComponent.propTypes = {
     /**

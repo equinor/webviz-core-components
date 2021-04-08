@@ -27,11 +27,11 @@ type SuggestionsState = {
 /**
  * A component for showing a list of suggestions.
  */
-class Suggestions extends Component {
+class Suggestions extends Component<SuggestionsProps> {
     public props: SuggestionsProps;
     public state: SuggestionsState;
     public static propTypes: Record<string, unknown>;
-    public static defaultProps: Record<string, unknown>;
+    public static defaultProps: Partial<SuggestionsProps> = {};
 
     private mouseMoved: boolean;
     private currentlySelectedSuggestionIndex: number;
@@ -56,7 +56,8 @@ class Suggestions extends Component {
 
         this.state = {
             fromIndex: 0
-        }
+        };
+        
         if (this.props.treeNodeSelection) {
             this.allOptions = this.props.treeNodeSelection.getSuggestions();
             this.currentNodeLevel = this.props.treeNodeSelection.getFocussedLevel();
@@ -327,10 +328,6 @@ class Suggestions extends Component {
     }
 }
 
-export default Suggestions;
-
-Suggestions.defaultProps = {};
-
 Suggestions.propTypes = {
     /**
      * Reference to suggestions div element.
@@ -353,3 +350,5 @@ Suggestions.propTypes = {
      */
     treeNodeSelection: PropTypes.instanceOf(TreeNodeSelection)
 };
+
+export default Suggestions;

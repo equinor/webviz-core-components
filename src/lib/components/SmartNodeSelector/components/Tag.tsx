@@ -31,10 +31,10 @@ type TagProps = {
 /**
  * A component for displaying and interacting with a tag.
  */
-export default class Tag extends Component {
+export default class Tag extends Component<TagProps> {
     public props: TagProps;
     public static propTypes: Record<string, unknown>;
-    public static defaultProps: Record<string, unknown>;
+    public static defaultProps: Partial<TagProps> = {};
     public state: { hovered: boolean };
 
     constructor(props: TagProps) {
@@ -379,8 +379,6 @@ export default class Tag extends Component {
         );
     }
 }
-
-Tag.defaultProps = {};
 
 Tag.propTypes = {
     /**
