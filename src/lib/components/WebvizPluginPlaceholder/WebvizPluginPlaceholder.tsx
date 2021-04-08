@@ -9,6 +9,9 @@ import React, { useState, useEffect, useRef } from "react";
 import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "@material-ui/lab/Alert";
+import Link from "@material-ui/core/Link";
 
 import {
     faAddressCard,
@@ -16,6 +19,7 @@ import {
     faCameraRetro,
     faExpand,
     faDownload,
+    faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
 
 import WebvizToolbarButton from "./utils/WebvizToolbarButton";
@@ -41,12 +45,16 @@ const WebvizPluginPlaceholder = (
         screenshot_filename,
         tour_steps,
         data_requested,
+        show_deprecation_warning,
+        deprecation_message,
+        deprecation_url,
         setProps
     } = props;
 
     const [expanded, setExpanded] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
     const [tourIsOpen, setTourIsOpen] = useState(false);
+    const [deprecationWarningOpen, setDeprecationWarningOpen] = useState(show_deprecation_warning);
 
     const prevExpandedRef = useRef(false);
     const didMountRef = useRef(false);
@@ -177,6 +185,16 @@ const WebvizPluginPlaceholder = (
                                 }
                             />
                         )}
+                    {show_deprecation_warning && (
+                        <WebvizToolbarButton
+                            icon={faExclamationTriangle}
+                            tooltip="This plugin is deprecated"
+                            important={true}
+                            onClick={() =>
+                                setDeprecationWarningOpen(true)
+                            }
+                        />
+                    )}
                 </div>
             </div>
             {showTour && (
@@ -191,6 +209,31 @@ const WebvizPluginPlaceholder = (
                     accentColor="red"
                 />
             )}
+            <Snackbar 
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }} 
+                open={deprecationWarningOpen} 
+                autoHideDuration={10000} 
+                onClose={(_event: any, reason: string) => {
+                    if (reason !== "clickaway") {
+                        setDeprecationWarningOpen(false);
+                    }
+                }}
+            >
+                <Alert elevation={6} variant="filled" severity="warning">
+                    {deprecation_message}
+                    {deprecation_url != "" && (
+                        <Link 
+                            className="webviz-config-plugin-deprecation-link" 
+                            href={deprecation_url}
+                            color="inherit"
+                            target="_blank"
+                            underline="always"
+                        >
+                            More info
+                        </Link>
+                    )}
+                </Alert>
+            </Snackbar>
         </>
     );
 };
@@ -211,6 +254,9 @@ WebvizPluginPlaceholder.defaultProps = {
     data_requested: 0,
     download: undefined,
     screenshot_filename: "webviz-screenshot.png",
+    show_deprecation_warning: false,
+    deprecation_message: "This plugin is deprecated. Please consider to switch.",
+    deprecation_url: "",
     setProps: () => { return undefined },
 };
 
@@ -267,6 +313,21 @@ WebvizPluginPlaceholder.propTypes = {
      * that the data download button has been clicked.
      */
     data_requested: PropTypes.number,
+
+    /**
+     * Stating if a deprecation warning for the related plugin should be shown.
+     */
+    show_deprecation_warning: PropTypes.bool,
+
+    /**
+     * Message to display when plugin is deprecated (max 255 chars).
+     */
+    deprecation_message: PropTypes.string,
+
+    /**
+     * URL referring to a source with more information about the deprecation of this plugin.
+     */
+    deprecation_url: PropTypes.string,
 
     /**
      * Dash-assigned callback that should be called whenever any of the

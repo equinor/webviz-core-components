@@ -71,6 +71,7 @@
     margin-bottom: 5px;
     opacity: 0.2;
     transition: 1.0s;
+    cursor: pointer;
 }
 
 .webviz-config-plugin-wrapper:hover .webviz-config-plugin-button {
@@ -84,7 +85,7 @@
 
 .webviz-config-tooltip-wrapper .webviz-config-tooltip {
     position: absolute;
-    top: -10px;
+    top: -5px;
     right: 180%;
     padding: 5px 5px;
     white-space: nowrap;
@@ -115,4 +116,14 @@
 {
     opacity: 1.0;
     color: black;
+}
+
+.webviz-config-plugin-button-important
+{
+    opacity: 1.0;
+    color: #ff9900 !important;
+}
+
+.webviz-config-plugin-deprecation-link {
+    padding-left: 8px;
 }
