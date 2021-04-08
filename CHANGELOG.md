@@ -5,8 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED] - YYYY-MM-DD
+### Added
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Added deprecation warning to WebvizPluginPlaceholder
+
+### Changed
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Better alignment of tooltips with icons and pointer cursor when hovering buttons in WebvizPluginPlaceholder
+
 ### Fixed
 - [#115](https://github.com/equinor/webviz-core-components/pull/115) - Removed postinstall script in order to not having npm trying to copy package.json when installing as npm package.
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Fixed bug in WebvizPluginPlaceholder preventing tooltips from being shown.
 - [#113](https://github.com/equinor/webviz-core-components/pull/113) - Fixed LGTM warnings caused by SmartNodeSelector component's defaultProps definitions.
 - [#107](https://github.com/equinor/webviz-core-components/pull/107) - Fixed bug in argument modifier method (when input argument is given as positional).
 - [#107](https://github.com/equinor/webviz-core-components/pull/107) - Prevent false positives through LGTM/GitHub CodeQL.
