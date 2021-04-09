@@ -28,16 +28,12 @@ then:
     ```
     npm ci --ignore-scripts
     ```
-2. Run the project's own `postinstall` script
-    ```
-    npm run postinstall
-    ```
-3. Install python packages required to build components.
+2. Install python packages required to build components.
     ```
     pip install .[dependencies]
     pip install dash[dev]
     ```
-4. Install the python packages for testing.
+3. Install the python packages for testing.
     ```
     pip install .[tests]
     pip install dash[testing]
