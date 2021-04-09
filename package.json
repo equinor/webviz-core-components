@@ -16,7 +16,6 @@
     ],
     "scripts": {
         "start": "webpack serve --mode development --devtool inline-source-map --entry ./src/demo/index.tsx --open",
-        "postinstall": "cp ./package.json webviz_core_components/package-info.json",
         "transpile": "tsc && npm run copy-files",
         "transpile:dash": "tsc && rimraf ./dist/components/*/**/",
         "tidy-up": "rimraf ./R && rimraf ./dist && rimraf ./inst",
