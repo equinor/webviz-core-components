@@ -1,4 +1,3 @@
-import os
 import json
 from setuptools import setup
 
@@ -6,7 +5,7 @@ from setuptools import setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open(os.path.join("webviz_core_components", "package-info.json")) as f:
+with open("package.json") as f:
     package = json.load(f)
 
 package_name = (

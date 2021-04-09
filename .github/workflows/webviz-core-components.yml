@@ -34,7 +34,6 @@ jobs:
       - name: 📦 Install build dependencies
         run: |
           npm ci --ignore-scripts
-          npm run postinstall
           pip install .[dependencies]
           pip install dash[dev]
   
