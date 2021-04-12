@@ -9,9 +9,8 @@ import React, { useState, useEffect, useRef } from "react";
 import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
-import Snackbar from "@material-ui/core/Snackbar";
-import Alert from "@material-ui/lab/Alert";
-import Link from "@material-ui/core/Link";
+import { SnackbarProvider, useSnackbar } from 'notistack';
+import Button from "@material-ui/core/Button";
 
 import {
     faAddressCard,
@@ -33,7 +32,7 @@ import "./webviz_plugin_component.css";
  * It takes a property, `label`, and displays it.
  * It renders an input with the property `value` which is editable by the user.
  */
-const WebvizPluginPlaceholder = (
+const InnerWebvizPluginPlaceholder = (
     props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
 ): JSX.Element => {
     const {
@@ -45,16 +44,15 @@ const WebvizPluginPlaceholder = (
         screenshot_filename,
         tour_steps,
         data_requested,
-        show_deprecation_warning,
-        deprecation_message,
-        deprecation_url,
+        deprecation_warnings,
+        deprecation_urls,
         setProps
     } = props;
 
     const [expanded, setExpanded] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
     const [tourIsOpen, setTourIsOpen] = useState(false);
-    const [deprecationWarningOpen, setDeprecationWarningOpen] = useState(show_deprecation_warning);
+    const { enqueueSnackbar } = useSnackbar();
 
     const prevExpandedRef = useRef(false);
     const didMountRef = useRef(false);
@@ -83,7 +81,26 @@ const WebvizPluginPlaceholder = (
         else {
             didMountRef.current = true;
         }
-    });
+        showDeprecationWarnings();
+    }, []);
+
+    const showDeprecationWarnings = () => {
+        for (const warning of deprecation_warnings) {
+            enqueueSnackbar(
+                warning.message,
+                {
+                    variant: "warning",
+                    action: () => (
+                        <Button onClick={() => window.open(warning.url, '_blank')}>More info</Button>
+                    ),
+                    anchorOrigin: {
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }
+                }
+            );
+        }
+    }
 
     const showTour =
         buttons && buttons.includes("guided_tour") &&
@@ -185,13 +202,13 @@ const WebvizPluginPlaceholder = (
                                 }
                             />
                         )}
-                    {show_deprecation_warning && (
+                    {deprecation_warnings.length > 0 && (
                         <WebvizToolbarButton
                             icon={faExclamationTriangle}
-                            tooltip="This plugin is deprecated"
+                            tooltip="This plugin has deprecation warnings"
                             important={true}
                             onClick={() =>
-                                setDeprecationWarningOpen(true)
+                                showDeprecationWarnings()
                             }
                         />
                     )}
@@ -209,33 +226,18 @@ const WebvizPluginPlaceholder = (
                     accentColor="red"
                 />
             )}
-            <Snackbar 
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }} 
-                open={deprecationWarningOpen} 
-                autoHideDuration={10000} 
-                onClose={(_event: any, reason: string) => {
-                    if (reason !== "clickaway") {
-                        setDeprecationWarningOpen(false);
-                    }
-                }}
-            >
-                <Alert elevation={6} variant="filled" severity="warning">
-                    {deprecation_message}
-                    {deprecation_url != "" && (
-                        <Link 
-                            className="webviz-config-plugin-deprecation-link" 
-                            href={deprecation_url}
-                            color="inherit"
-                            target="_blank"
-                            underline="always"
-                        >
-                            More info
-                        </Link>
-                    )}
-                </Alert>
-            </Snackbar>
         </>
     );
+};
+
+const WebvizPluginPlaceholder = (
+    props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
+): JSX.Element => {
+    return (
+        <SnackbarProvider maxSnack={3}>
+            <InnerWebvizPluginPlaceholder {...props} />
+        </SnackbarProvider>
+    )
 };
 
 export default WebvizPluginPlaceholder;
@@ -254,9 +256,7 @@ WebvizPluginPlaceholder.defaultProps = {
     data_requested: 0,
     download: undefined,
     screenshot_filename: "webviz-screenshot.png",
-    show_deprecation_warning: false,
-    deprecation_message: "This plugin is deprecated. Please consider to switch.",
-    deprecation_url: "",
+    deprecation_warnings: [],
     setProps: () => { return undefined },
 };
 
@@ -317,17 +317,14 @@ WebvizPluginPlaceholder.propTypes = {
     /**
      * Stating if a deprecation warning for the related plugin should be shown.
      */
-    show_deprecation_warning: PropTypes.bool,
-
-    /**
-     * Message to display when plugin is deprecated (max 255 chars).
-     */
-    deprecation_message: PropTypes.string,
-
-    /**
-     * URL referring to a source with more information about the deprecation of this plugin.
-     */
-    deprecation_url: PropTypes.string,
+    deprecation_warnings: PropTypes.arrayOf(
+        PropTypes.shape(
+            {
+                message: PropTypes.string,
+                url: PropTypes.string
+            }
+        )
+    ),
 
     /**
      * Dash-assigned callback that should be called whenever any of the

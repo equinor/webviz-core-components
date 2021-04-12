@@ -124,6 +124,10 @@
     color: #ff9900 !important;
 }
 
+.webviz-plugin-deprecation-alert {
+    font-size: 14px;
+}
+
 .webviz-config-plugin-deprecation-link {
     padding-left: 8px;
 }
