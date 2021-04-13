@@ -45,7 +45,6 @@ const InnerWebvizPluginPlaceholder = (
         tour_steps,
         data_requested,
         deprecation_warnings,
-        deprecation_urls,
         setProps
     } = props;
 
