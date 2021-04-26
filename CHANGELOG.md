@@ -6,13 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 ### Added
-- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Added deprecation warning to WebvizPluginPlaceholder
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Added deprecation warning to `WebvizPluginPlaceholder`.
 
 ### Changed
-- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Better alignment of tooltips with icons and pointer cursor when hovering buttons in WebvizPluginPlaceholder
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Better alignment of tooltips with icons and pointer cursor when hovering buttons in `WebvizPluginPlaceholder`.
 
 ### Fixed
-- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Fixed bug in WebvizPluginPlaceholder preventing tooltips from being shown.
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Fixed bug in `WebvizPluginPlaceholder` preventing tooltips from being shown.
 
 ## [0.3.2] - 2021-04-09
 - [#115](https://github.com/equinor/webviz-core-components/pull/115) - Removed postinstall script in order to not having npm trying to copy package.json when installing as npm package.

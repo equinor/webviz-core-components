@@ -10,7 +10,6 @@ import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
 import { SnackbarProvider, useSnackbar } from 'notistack';
-import Button from "@material-ui/core/Button";
 
 import {
     faAddressCard,
@@ -89,8 +88,15 @@ const InnerWebvizPluginPlaceholder = (
                 warning.message,
                 {
                     variant: "warning",
-                    action: () => (
-                        <Button onClick={() => window.open(warning.url, '_blank')}>More info</Button>
+                    action: (
+                        <a 
+                            className="webviz-config-plugin-deprecation-link" 
+                            href={warning.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                        >
+                            More info
+                        </a>
                     ),
                     anchorOrigin: {
                         vertical: 'bottom',

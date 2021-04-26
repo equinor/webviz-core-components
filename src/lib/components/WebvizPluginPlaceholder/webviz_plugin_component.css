@@ -111,7 +111,7 @@
 }
 
 .webviz-config-plugin-button:hover,
-.webviz-config-tooltip-wrapper:hover .webviz-config-plugin-button,
+.webviz-config-tooltip-wrapper:hover,
 .webviz-config-plugin-button-selected
 {
     opacity: 1.0;
@@ -120,14 +120,30 @@
 
 .webviz-config-plugin-button-important
 {
-    opacity: 1.0;
-    color: #ff9900 !important;
+    opacity: 0.9;
+    color: #FF9200;
 }
 
-.webviz-plugin-deprecation-alert {
-    font-size: 14px;
+.webviz-config-plugin-button-important:hover
+{
+    opacity: 1.0;
+    color: #AD6200;
 }
 
 .webviz-config-plugin-deprecation-link {
     padding-left: 8px;
+}
+
+a.webviz-config-plugin-deprecation-link, 
+a.webviz-config-plugin-deprecation-link:hover {
+    color: black;
+    text-transform: uppercase;
+    display: block;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+a.webviz-config-plugin-deprecation-link:hover {
+    background-color: rgba(173, 98, 0, 0.3);
 }
