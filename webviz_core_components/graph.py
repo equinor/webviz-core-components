@@ -26,7 +26,7 @@ class Graph(dcc.Graph):
             config = input_config.copy()
 
         if "modeBarButtonsToRemove" not in config:
-            config["modeBarButtonsToRemove"] = ["sendDataToCloud", "toImage"]
+            config["modeBarButtonsToRemove"] = ["sendDataToCloud"]
 
         if "displaylogo" not in config:
             config["displaylogo"] = False

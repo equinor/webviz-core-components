@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - [#114](https://github.com/equinor/webviz-core-components/pull/114) - Better alignment of tooltips with icons and pointer cursor when hovering buttons in `WebvizPluginPlaceholder`.
+- [#118](https://github.com/equinor/webviz-core-components/pull/118) - Remove `toImage` from default `modeBarButtonsToRemove` in `wcc.Graph`.
 
 ### Fixed
 - [#114](https://github.com/equinor/webviz-core-components/pull/114) - Fixed bug in `WebvizPluginPlaceholder` preventing tooltips from being shown.
