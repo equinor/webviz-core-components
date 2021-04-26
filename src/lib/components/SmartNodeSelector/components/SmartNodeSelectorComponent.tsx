@@ -26,13 +26,13 @@ type SmartNodeSelectorPropsType = {
     delimiter: string,
     numMetaNodes: number,
     data: TreeDataNode[],
-    label: string,
+    label?: string,
     showSuggestions: boolean,
     setProps: (props: Record<string, unknown>) => void,
     selectedNodes: string[],
     selectedTags: string[],
     selectedIds: string[],
-    placeholder: string,
+    placeholder?: string,
     numSecondsUntilSuggestionsAreShown: number,
     persistence: boolean | string | number,
     persisted_props: ("selectedNodes" | "selectedTags" | "selectedIds")[],
@@ -152,6 +152,22 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         document.removeEventListener('keydown', (e) => this.handleGlobalKeyDown(e), true);
     }
 
+    componentDidUpdate(prevProps: SmartNodeSelectorPropsType): void {
+        if (prevProps.selectedTags != this.props.selectedTags) {
+            const nodeSelections: TreeNodeSelection[] = [];
+            if (this.props.selectedTags !== undefined) {
+                for (const tag of this.props.selectedTags) {
+                    const nodePath = tag.split(this.props.delimiter);
+                    nodeSelections.push(this.createNewNodeSelection(nodePath));
+                }
+            }
+            if (nodeSelections.length < this.props.maxNumSelectedNodes || this.props.maxNumSelectedNodes === -1) {
+                nodeSelections.push(this.createNewNodeSelection());
+            }
+            this.updateState({nodeSelections: nodeSelections});
+        }
+    }
+
     createNewNodeSelection(nodePath: string[] = [""]): TreeNodeSelection {
         return new TreeNodeSelection({
             focussedLevel: nodePath.length - 1,
@@ -244,7 +260,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }: SmartNodeSelectorStateType): boolean {
         let check = nodeSelections.length != this.state.nodeSelections.length;
         if (nodeSelections.length == this.state.nodeSelections.length) {
-            check = check || !nodeSelections.some((v, i) => !v.trulyEquals(this.state.nodeSelections[i]));
+            check = check || nodeSelections.some((v, i) => !v.trulyEquals(this.state.nodeSelections[i]));
         }
         check = check || currentTagIndex != this.currentTagIndex();
         check = check || suggestionsVisible != this.state.suggestionsVisible;
@@ -938,7 +954,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         return (
             <div id={id} ref={this.ref}>
-                <label>{label}</label>
+                {label && <label>{label}</label>}
                 <div className={classNames({
                     "SmartNodeSelector": true,
                     "SmartNodeSelector--SuggestionsActive": suggestionsVisible,
@@ -953,7 +969,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                             <Tag
                                 key={`${index}`}
                                 index={index}
-                                placeholder={placeholder}
+                                placeholder={placeholder ? placeholder : "Add new tag"}
                                 treeNodeSelection={selection}
                                 countTags={this.countTags()}
                                 currentTag={index === this.currentTagIndex()}
@@ -1027,7 +1043,7 @@ SmartNodeSelectorComponent.propTypes = {
     /**
      * A label that will be printed when this component is rendered.
      */
-    label: PropTypes.string.isRequired,
+    label: PropTypes.string,
 
     /**
      * Stating of suggestions should be shown or not.
