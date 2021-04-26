@@ -40,6 +40,18 @@ class App extends Component {
                     id={"placeholder"}
                     setProps={this.setProps}
                     tour_steps={steps}
+                    deprecation_warnings={
+                        [
+                            {
+                                message: "Deprecated 1",
+                                url: "https://github.com/equinor/webviz-core-components"
+                            },
+                            {
+                                message: "Deprecated 2",
+                                url: "https://github.com/equinor/webviz-core-components"
+                            }
+                        ]
+                    }
                 />
                 <SmartNodeSelector
                     id="SmartNodeSelector3"

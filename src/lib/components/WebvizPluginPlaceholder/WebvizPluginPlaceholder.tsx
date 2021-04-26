@@ -9,6 +9,7 @@ import React, { useState, useEffect, useRef } from "react";
 import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
+import { SnackbarProvider, useSnackbar } from 'notistack';
 
 import {
     faAddressCard,
@@ -16,6 +17,7 @@ import {
     faCameraRetro,
     faExpand,
     faDownload,
+    faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
 
 import WebvizToolbarButton from "./utils/WebvizToolbarButton";
@@ -29,7 +31,7 @@ import "./webviz_plugin_component.css";
  * It takes a property, `label`, and displays it.
  * It renders an input with the property `value` which is editable by the user.
  */
-const WebvizPluginPlaceholder = (
+const InnerWebvizPluginPlaceholder = (
     props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
 ): JSX.Element => {
     const {
@@ -41,12 +43,14 @@ const WebvizPluginPlaceholder = (
         screenshot_filename,
         tour_steps,
         data_requested,
+        deprecation_warnings,
         setProps
     } = props;
 
     const [expanded, setExpanded] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
     const [tourIsOpen, setTourIsOpen] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     const prevExpandedRef = useRef(false);
     const didMountRef = useRef(false);
@@ -75,7 +79,33 @@ const WebvizPluginPlaceholder = (
         else {
             didMountRef.current = true;
         }
-    });
+        showDeprecationWarnings();
+    }, []);
+
+    const showDeprecationWarnings = () => {
+        for (const warning of deprecation_warnings) {
+            enqueueSnackbar(
+                warning.message,
+                {
+                    variant: "warning",
+                    action: (
+                        <a 
+                            className="webviz-config-plugin-deprecation-link" 
+                            href={warning.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                        >
+                            More info
+                        </a>
+                    ),
+                    anchorOrigin: {
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }
+                }
+            );
+        }
+    }
 
     const showTour =
         buttons && buttons.includes("guided_tour") &&
@@ -177,6 +207,16 @@ const WebvizPluginPlaceholder = (
                                 }
                             />
                         )}
+                    {deprecation_warnings.length > 0 && (
+                        <WebvizToolbarButton
+                            icon={faExclamationTriangle}
+                            tooltip="This plugin has deprecation warnings"
+                            important={true}
+                            onClick={() =>
+                                showDeprecationWarnings()
+                            }
+                        />
+                    )}
                 </div>
             </div>
             {showTour && (
@@ -195,6 +235,16 @@ const WebvizPluginPlaceholder = (
     );
 };
 
+const WebvizPluginPlaceholder = (
+    props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
+): JSX.Element => {
+    return (
+        <SnackbarProvider maxSnack={3}>
+            <InnerWebvizPluginPlaceholder {...props} />
+        </SnackbarProvider>
+    )
+};
+
 export default WebvizPluginPlaceholder;
 
 WebvizPluginPlaceholder.defaultProps = {
@@ -211,6 +261,7 @@ WebvizPluginPlaceholder.defaultProps = {
     data_requested: 0,
     download: undefined,
     screenshot_filename: "webviz-screenshot.png",
+    deprecation_warnings: [],
     setProps: () => { return undefined },
 };
 
@@ -267,6 +318,18 @@ WebvizPluginPlaceholder.propTypes = {
      * that the data download button has been clicked.
      */
     data_requested: PropTypes.number,
+
+    /**
+     * Stating if a deprecation warning for the related plugin should be shown.
+     */
+    deprecation_warnings: PropTypes.arrayOf(
+        PropTypes.shape(
+            {
+                message: PropTypes.string,
+                url: PropTypes.string
+            }
+        )
+    ),
 
     /**
      * Dash-assigned callback that should be called whenever any of the
