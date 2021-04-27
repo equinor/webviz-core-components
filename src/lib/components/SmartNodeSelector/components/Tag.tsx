@@ -283,6 +283,7 @@ export default class Tag extends Component<TagProps> {
             index,
             treeNodeSelection,
             currentTag,
+            placeholder,
             checkIfDuplicate,
             inputKeyDown,
             inputKeyUp,
@@ -343,7 +344,7 @@ export default class Tag extends Component<TagProps> {
                                 (
                                     treeNodeSelection.getFocussedNodeName() === ""
                                         && treeNodeSelection.getFocussedLevel() == 0
-                                        ? "Add new tag..." : ""
+                                        ? placeholder : ""
                                 )
                             }
                             value={displayText}

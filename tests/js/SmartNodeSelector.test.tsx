@@ -2,8 +2,10 @@ import React from 'react';
 import { fireEvent, render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SmartNodeSelector } from '../../src/lib';
+import {SmartNodeSelectorInteractiveContainer} from './SmartNodeSelectorInteractiveContainer';
+import { clear } from '@testing-library/user-event/dist/clear';
 
-type PropType = {
+export type PropType = {
     selectedTags: string[];
     selectedNodes: string[];
     selectedIds: string[];
@@ -23,6 +25,14 @@ enum RenderDataStructure {
     Flat = 1,
     Deep,
     DeepWithMetaData,
+}
+
+const clearParentProps = () => {
+    parentProps = {
+        selectedTags: [],
+        selectedNodes: [],
+        selectedIds: []
+    };
 }
 
 const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showSuggestions = true): RenderResult => {
@@ -92,6 +102,10 @@ const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showS
         />
     );
 }
+
+const renderInteractiveSmartNodeSelector = (): RenderResult => {
+    return render(<SmartNodeSelectorInteractiveContainer setProps={setProps} />);
+};
 
 describe('SmartNodeSelector', () => {
 
@@ -339,6 +353,35 @@ describe('SmartNodeSelector', () => {
         expect(parentProps.selectedNodes[0]).toMatch("Data");
         expect(parentProps.selectedIds).toHaveLength(1);
         expect(parentProps.selectedIds[0]).toMatch("1");
+
+        clearParentProps();
+    });
+
+    it('Check if properties can be dynamically changed', () => {
+        const { container } = renderInteractiveSmartNodeSelector();
+
+        const smartNodeSelector = container.querySelector("#SmartNodeSelector");
+        expect(smartNodeSelector).toBeDefined();
+
+        const button = container.querySelector("#setValuesButton");
+        expect(button).toBeDefined();
+
+        expect(parentProps.selectedTags).toHaveLength(0);
+        expect(parentProps.selectedNodes).toHaveLength(0);
+        
+        userEvent.click(button);
+
+        expect(parentProps.selectedTags).toHaveLength(2);
+        expect(parentProps.selectedTags[0]).toMatch("Data1");
+        expect(parentProps.selectedTags[1]).toMatch("Data2");
+        expect(parentProps.selectedNodes).toHaveLength(2);
+        expect(parentProps.selectedNodes[0]).toMatch("Data1");
+        expect(parentProps.selectedNodes[1]).toMatch("Data2");
+        expect(parentProps.selectedIds).toHaveLength(2);
+        expect(parentProps.selectedIds[0]).toMatch("1");
+        expect(parentProps.selectedIds[1]).toMatch("2");
+
+        clearParentProps();
     });
 
 });

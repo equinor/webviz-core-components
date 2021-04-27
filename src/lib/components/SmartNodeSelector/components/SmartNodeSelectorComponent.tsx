@@ -30,7 +30,7 @@ type SmartNodeSelectorPropsType = {
     showSuggestions: boolean,
     setProps: (props: Record<string, unknown>) => void,
     selectedNodes: string[],
-    selectedTags: string[],
+    selectedTags?: string[],
     selectedIds: string[],
     placeholder?: string,
     numSecondsUntilSuggestionsAreShown: number,
@@ -75,7 +75,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected componentIsMounted: boolean;
     protected treeData: TreeData;
 
-    public props: SmartNodeSelectorPropsType;
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
     public static defaultProps: Partial<SmartNodeSelectorPropsType> = {
@@ -84,7 +83,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         numMetaNodes: 0,
         showSuggestions: true,
         selectedNodes: [],
-        selectedTags: [],
+        selectedTags: undefined,
         selectedIds: [],
         placeholder: "Add new tag...",
         numSecondsUntilSuggestionsAreShown: 1.5,
@@ -110,7 +109,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.noUserInputSelect = false;
         this.mouseDownElement = null;
         this.componentIsMounted = false;
-        this.props = props;
 
         this.treeData = new TreeData({
             treeData: props.data,
@@ -153,7 +151,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     componentDidUpdate(prevProps: SmartNodeSelectorPropsType): void {
-        if (prevProps.selectedTags != this.props.selectedTags) {
+        const selectedTags = this.state.nodeSelections.filter(nodeSelection => nodeSelection.isValid()).map(nodeSelection => nodeSelection.getCompleteNodePathAsString());
+        if (this.props.selectedTags && JSON.stringify(this.props.selectedTags) !== JSON.stringify(selectedTags) && JSON.stringify(prevProps.selectedTags) !== JSON.stringify(this.props.selectedTags)) {
             const nodeSelections: TreeNodeSelection[] = [];
             if (this.props.selectedTags !== undefined) {
                 for (const tag of this.props.selectedTags) {
@@ -762,6 +761,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         const eventTarget = (e.target as HTMLInputElement);
         const val = eventTarget.value;
         const tag = this.nodeSelection(index);
+        const previouslyFocussedLevel = tag.getFocussedLevel();
         if (eventTarget.selectionStart != null && eventTarget.selectionEnd != null) {
             if (!tag.isFocusOnMetaData()) {
                 tag.setFocussedLevel(
@@ -792,7 +792,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 currentTagIndex: index,
                 callback: () => {
                     this.maybeShowSuggestions();
-                }
+                },
+                forceUpdate: tag.getFocussedLevel() !== previouslyFocussedLevel
             });
         }
         e.stopPropagation();

@@ -24,6 +24,8 @@ const SmartNodeSelector = props => {
             label={props.label}
             showSuggestions={props.showSuggestions}
             setProps={props.setProps}
+            onSelectionChange={props.onSelectionChange}
+            selectedTags={props.selectedTags}
             selectedNodes={props.selectedNodes}
             selectedIds={props.selectedIds}
             placeholder={props.placeholder}
@@ -41,7 +43,7 @@ SmartNodeSelector.defaultProps = {
     numMetaNodes: 0,
     showSuggestions: true,
     selectedNodes: [],
-    selectedTags: [],
+    selectedTags: undefined,
     selectedIds: [],
     placeholder: "Add new tag...",
     numSecondsUntilSuggestionsAreShown: 1.5,
