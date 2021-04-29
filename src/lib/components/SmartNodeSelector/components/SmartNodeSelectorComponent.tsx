@@ -20,6 +20,12 @@ enum Direction {
     Right
 }
 
+type ParentProps = {
+    selectedTags: string[],
+    selectedNodes: string[],
+    selectedIds: string[]
+};
+
 type SmartNodeSelectorPropsType = {
     id: string,
     maxNumSelectedNodes: number,
@@ -28,10 +34,8 @@ type SmartNodeSelectorPropsType = {
     data: TreeDataNode[],
     label?: string,
     showSuggestions: boolean,
-    setProps: (props: Record<string, unknown>) => void,
-    selectedNodes: string[],
+    setProps: (props: ParentProps) => void,
     selectedTags?: string[],
-    selectedIds: string[],
     placeholder?: string,
     numSecondsUntilSuggestionsAreShown: number,
     persistence: boolean | string | number,
@@ -40,6 +44,14 @@ type SmartNodeSelectorPropsType = {
 };
 
 type SmartNodeSelectorStateType = {
+    nodeSelections: TreeNodeSelection[];
+    currentTagIndex: number;
+    suggestionsVisible: boolean;
+    hasError: boolean;
+    error: string;
+};
+
+type SmartNodeSelectorSubStateType = {
     nodeSelections: TreeNodeSelection[];
     currentTagIndex: number;
     suggestionsVisible: boolean;
@@ -82,9 +94,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         delimiter: ":",
         numMetaNodes: 0,
         showSuggestions: true,
-        selectedNodes: [],
         selectedTags: undefined,
-        selectedIds: [],
         placeholder: "Add new tag...",
         numSecondsUntilSuggestionsAreShown: 1.5,
         persisted_props: ['selectedNodes', 'selectedTags', 'selectedIds'],
@@ -110,10 +120,18 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.mouseDownElement = null;
         this.componentIsMounted = false;
 
-        this.treeData = new TreeData({
-            treeData: props.data,
-            delimiter: props.delimiter
-        });
+        let hasError = false;
+        let error = "";
+        try {
+            this.treeData = new TreeData({
+                treeData: props.data,
+                delimiter: props.delimiter
+            });
+        }
+        catch(e) {
+            hasError = true;
+            error = e;
+        }
 
         const nodeSelections: TreeNodeSelection[] = [];
         if (props.selectedTags !== undefined) {
@@ -129,7 +147,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.state = {
             nodeSelections,
             currentTagIndex: 0,
-            suggestionsVisible: false
+            suggestionsVisible: false,
+            hasError: hasError,
+            error: error
         };
     }
 
@@ -256,7 +276,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         nodeSelections,
         currentTagIndex,
         suggestionsVisible
-    }: SmartNodeSelectorStateType): boolean {
+    }: SmartNodeSelectorSubStateType): boolean {
         let check = nodeSelections.length != this.state.nodeSelections.length;
         if (nodeSelections.length == this.state.nodeSelections.length) {
             check = check || nodeSelections.some((v, i) => !v.trulyEquals(this.state.nodeSelections[i]));
@@ -301,7 +321,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.setState({
                 nodeSelections: newNodeSelections,
                 currentTagIndex: newTagIndex,
-                suggestionsVisible: newSuggestionsVisible
+                suggestionsVisible: newSuggestionsVisible,
+                hasError: this.state.hasError,
+                error: this.state.error
             }, () => {
                 callback();
                 if (newNodeSelections != currentNodeSelections) {
@@ -398,6 +420,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleClickOutside(event: globalThis.MouseEvent): void {
+        if (this.state.hasError) {
+            return;
+        }
         const domNode = (this.tagFieldRef as React.RefObject<HTMLUListElement>).current as HTMLUListElement;
         const suggestions = (this.suggestionsRef as React.RefObject<HTMLDivElement>).current as HTMLDivElement;
         const eventTarget = (event.target as Element);
@@ -416,6 +441,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleGlobalKeyDown(e: globalThis.KeyboardEvent): void {
+        if (this.state.hasError) {
+            return;
+        }
         this.handleTagSelection(e);
         if ((e.key === "Backspace" || e.key === "Delete") && this.countSelectedTags() > 0) {
             this.removeSelectedTags();
@@ -437,6 +465,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleMouseDown(e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>): void {
+        if (this.state.hasError) {
+            return;
+        }
         if (e.target instanceof HTMLElement)
             this.mouseDownElement = e.target as HTMLElement;
         else
@@ -951,7 +982,20 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
     render(): React.ReactNode {
         const { id, label, maxNumSelectedNodes, placeholder, showSuggestions } = this.props;
-        const { nodeSelections, suggestionsVisible } = this.state;
+        const { nodeSelections, suggestionsVisible, hasError, error } = this.state;
+
+        if (hasError) {
+            return (
+            <div id={id} ref={this.ref} className="SmartNodeSelector--Error">
+                <strong>SmartNodeSelector</strong><br />
+                {
+                    error.split("\n").map((item) => (
+                        <>{item}<br /></>
+                    ))
+                }
+            </div>
+            )
+        }
 
         return (
             <div id={id} ref={this.ref}>
@@ -1058,19 +1102,9 @@ SmartNodeSelectorComponent.propTypes = {
     setProps: PropTypes.func,
 
     /**
-     * Selected nodes - readonly.
-     */
-    selectedNodes: PropTypes.arrayOf(PropTypes.string),
-
-    /**
      * Selected tags.
      */
     selectedTags: PropTypes.arrayOf(PropTypes.string),
-
-    /**
-     * Selected ids.
-     */
-    selectedIds: PropTypes.arrayOf(PropTypes.string),
 
     /**
      * Placeholder text for input field.

@@ -3,7 +3,6 @@ import { fireEvent, render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SmartNodeSelector } from '../../src/lib';
 import {SmartNodeSelectorInteractiveContainer} from './SmartNodeSelectorInteractiveContainer';
-import { clear } from '@testing-library/user-event/dist/clear';
 
 export type PropType = {
     selectedTags: string[];
@@ -25,6 +24,7 @@ enum RenderDataStructure {
     Flat = 1,
     Deep,
     DeepWithMetaData,
+    InvalidData
 }
 
 const clearParentProps = () => {
@@ -35,7 +35,11 @@ const clearParentProps = () => {
     };
 }
 
-const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showSuggestions = true): RenderResult => {
+const renderSmartNodeSelector = (
+    renderDataStructure: RenderDataStructure, 
+    showSuggestions = true,
+    initialTags: string[] = []
+): RenderResult => {
     let data = [];
     switch (renderDataStructure) {
         case RenderDataStructure.Flat:
@@ -87,6 +91,21 @@ const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showS
                 }
             ];
             break;
+        case RenderDataStructure.InvalidData:
+            data = [
+                {
+                    "id": "1",
+                    "name": "Metadata 1",
+                    "description": "Description",
+                    "children": [
+                        {
+                            "id": "1.1",
+                            "name": "",
+                            "description": "Description"
+                        }
+                    ]
+                }
+            ]
     }
 
     return render(
@@ -94,6 +113,7 @@ const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showS
             id="SmartNodeSelector"
             key="SmartNodeSelector"
             delimiter=":"
+            selectedTags={initialTags}
             showSuggestions={showSuggestions}
             setProps={setProps}
             label="Smart Node Selector"
@@ -357,6 +377,17 @@ describe('SmartNodeSelector', () => {
         clearParentProps();
     });
 
+    it('Check if initial properties can be set', () => {
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Deep, false, ["Data:Subdata"]);
+
+        const smartNodeSelector = container.firstChild as HTMLElement;
+
+        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect(firstTag.title === "Data:Subdata").toBeTruthy();
+        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length == 2).toBeTruthy();
+    });
+
     it('Check if properties can be dynamically changed', () => {
         const { container } = renderInteractiveSmartNodeSelector();
 
@@ -383,5 +414,12 @@ describe('SmartNodeSelector', () => {
 
         clearParentProps();
     });
+
+    it('Ensure that invalid data throws exception', () => {
+        const {container} = renderSmartNodeSelector(RenderDataStructure.InvalidData);
+
+        const smartNodeSelector = container.firstChild as HTMLElement;
+        expect(smartNodeSelector.classList.contains("SmartNodeSelector--Error")).toBeTruthy();
+    })
 
 });

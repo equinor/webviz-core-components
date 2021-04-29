@@ -14,6 +14,8 @@ import SmartNodeSelectorComponent from "./components/SmartNodeSelectorComponent"
  * The tree structure can also provide meta data that is displayed as color or icon.
  */
 const SmartNodeSelector = props => {
+    const [hasError, setHasError] = React.useState(false);
+    
     return (
         <SmartNodeSelectorComponent
             id={props.id}

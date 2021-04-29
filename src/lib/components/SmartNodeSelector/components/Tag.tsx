@@ -44,6 +44,18 @@ export default class Tag extends Component<TagProps> {
         this.state = { hovered: false };
     }
 
+    componentDidMount(): void {
+        const {treeNodeSelection} = this.props;
+        const input = (
+            treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
+        ).current as HTMLInputElement;
+        if (input) {
+            const value = input.value === "" ? input.placeholder : input.value;
+            const width = this.calculateTextWidth(value);
+            input.style.width = width + "px";
+        }
+    }
+
     private addAdditionalClasses(invalid: boolean): boolean {
         const { currentTag, treeNodeSelection } = this.props;
         return (

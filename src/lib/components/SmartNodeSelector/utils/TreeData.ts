@@ -35,14 +35,22 @@ export default class TreeData {
         const delimiter = this.delimiter;
         const populateNode = (indices: number[] = [], nodePath: string): void => {
             if (indices.length == 0) {
-                throw "indices array must at least have one element"
+                throw "Indices array must at least have one element";
             }
             let node: TreeDataNode = this.treeData[indices[0]];
             for (let i = 1; i < indices.length; i++) {
                 if (node.children)
                     node = node.children[indices[i]];
                 else
-                    throw "implementation error"
+                    throw "Implementation error";
+            }
+            if (node.name === "" || node.name === undefined || node.name === null) {
+                const path = nodePath.replace(/\{[0-9]+\}/g, "") + (nodePath !== "" ? delimiter : "") + node.name;
+                throw `
+                    Empty/invalid strings are not allowed as names of nodes:
+                    "${path}"
+                    ${Array(path.length + 2).join("\u00A0")}^`;
+                
             }
             nodeData.push({
                 id: node.id,
@@ -61,7 +69,7 @@ export default class TreeData {
                 }
             }
             else {
-                stringifiedData += `"${nodePath}${nodePath != "" ? delimiter : ""}{${index}}${node.name}" `
+                stringifiedData += `"${nodePath}${nodePath !== "" ? delimiter : ""}{${index}}${node.name}" `
             }
 
         }
