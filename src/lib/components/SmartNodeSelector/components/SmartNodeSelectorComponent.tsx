@@ -86,6 +86,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected mouseDownElement: HTMLElement | null;
     protected componentIsMounted: boolean;
     protected treeData: TreeData;
+    protected numValidSelections: number;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -128,7 +129,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 delimiter: props.delimiter
             });
         }
-        catch(e) {
+        catch (e) {
             hasError = true;
             error = e;
         }
@@ -151,6 +152,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             hasError: hasError,
             error: error
         };
+
+        this.numValidSelections = this.countValidSelections();
     }
 
     componentDidMount(): void {
@@ -177,8 +180,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             nodeSelection => nodeSelection.getCompleteNodePathAsString()
         );
         if (
-            this.props.selectedTags 
-            && JSON.stringify(this.props.selectedTags) !== JSON.stringify(selectedTags) 
+            this.props.selectedTags
+            && JSON.stringify(this.props.selectedTags) !== JSON.stringify(selectedTags)
             && JSON.stringify(prevProps.selectedTags) !== JSON.stringify(this.props.selectedTags)
         ) {
             const nodeSelections: TreeNodeSelection[] = [];
@@ -191,7 +194,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             if (nodeSelections.length < this.props.maxNumSelectedNodes || this.props.maxNumSelectedNodes === -1) {
                 nodeSelections.push(this.createNewNodeSelection());
             }
-            this.updateState({nodeSelections: nodeSelections});
+            this.numValidSelections = this.countValidSelections();
+            this.updateState({ nodeSelections: nodeSelections });
         }
     }
 
@@ -285,8 +289,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         currentTagIndex,
         suggestionsVisible
     }: SmartNodeSelectorSubStateType): boolean {
-        let check = nodeSelections.length != this.state.nodeSelections.length;
-        if (nodeSelections.length == this.state.nodeSelections.length) {
+        let check = nodeSelections.length !== this.state.nodeSelections.length;
+        if (nodeSelections.length === this.state.nodeSelections.length) {
             check = check || nodeSelections.some((v, i) => !v.trulyEquals(this.state.nodeSelections[i]));
         }
         check = check || currentTagIndex != this.currentTagIndex();
@@ -321,6 +325,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 : suggestionsVisible
         );
 
+        const selectedTags = this.state.nodeSelections.filter(
+            nodeSelection => nodeSelection.isValid()
+        ).map(
+            nodeSelection => nodeSelection.getCompleteNodePathAsString()
+        );
+
         if (forceUpdate || this.doesStateChange({
             nodeSelections: newNodeSelections,
             currentTagIndex: newTagIndex,
@@ -334,14 +344,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 error: this.state.error
             }, () => {
                 callback();
-                if (newNodeSelections != currentNodeSelections) {
+                if (newNodeSelections !== currentNodeSelections || this.countValidSelections() !== this.numValidSelections) {
                     this.updateSelectedTagsAndNodes();
                 }
             });
         }
         else {
             callback();
-            if (newNodeSelections != currentNodeSelections) {
+            if (newNodeSelections !== currentNodeSelections || this.countValidSelections() !== this.numValidSelections) {
                 this.updateSelectedTagsAndNodes();
             }
         }
@@ -776,6 +786,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             selectedNodes: selectedNodes,
             selectedIds: selectedIds
         });
+        this.numValidSelections = this.countValidSelections();
     }
 
     debugOutput(): React.ReactNode | null {
@@ -994,14 +1005,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         if (hasError) {
             return (
-            <div id={id} ref={this.ref} className="SmartNodeSelector--Error">
-                <strong>SmartNodeSelector</strong><br />
-                {
-                    error.split("\n").map((item) => (
-                        <>{item}<br /></>
-                    ))
-                }
-            </div>
+                <div id={id} ref={this.ref} className="SmartNodeSelector--Error">
+                    <strong>SmartNodeSelector</strong><br />
+                    {
+                        error.split("\n").map((item) => (
+                            <>{item}<br /></>
+                        ))
+                    }
+                </div>
             )
         }
 

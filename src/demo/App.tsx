@@ -22,14 +22,26 @@ const steps = [
     },
 ];
 
+type ParentProps = {
+    selectedTags: string[],
+    selectedNodes: string[],
+    selectedIds: string[]
+};
+
 class App extends Component {
+    state: ParentProps;
     constructor(props: Record<string, unknown>) {
         super(props);
 
         this.setProps = this.setProps.bind(this);
+        this.state = {
+            selectedNodes: [],
+            selectedIds: [],
+            selectedTags: []
+        };
     }
 
-    setProps(newProps: Record<string, unknown>): void {
+    setProps(newProps: ParentProps): void {
         this.setState(newProps);
     }
 
@@ -56,10 +68,9 @@ class App extends Component {
                 <SmartNodeSelector
                     id="SmartNodeSelector"
                     key="SmartNodeSelector"
-                    maxNumSelectedNodes={3}
+                    maxNumSelectedNodes={1}
                     numMetaNodes={2}
                     delimiter=":"
-                    selectedNodes={[]}
                     setProps={this.setProps}
                     label="Smart Tree Node Selector"
                     data={[
@@ -187,9 +198,14 @@ class App extends Component {
                             ]
                         }
                     ]}
-
-                    {...this.state}
                 />
+                Selected nodes:<br />
+                {this.state.selectedNodes.length > 0 && this.state.selectedNodes.map((node, index) => (
+                    <div key={`node-${index}`}>{node}</div>
+                ))}
+                {this.state.selectedNodes.length == 0 && (
+                    <i>None</i>
+                )}
             </div>
         );
     }
