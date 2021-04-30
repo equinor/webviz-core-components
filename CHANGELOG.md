@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED] - YYYY-MM-DD
+### Fixed
+- [#120](https://github.com/equinor/webviz-core-components/pull/120) - Multiple bug fixes (deletion of currently selected tag not possible; state not dynamically updated;
+empty or invalid node names no longer allowed; auto resizing not working when initializing tag component) and new tests for these bugs. Also removed unnecessary properties.
 
 ## [0.4.0] - 2021-04-26
 ### Added

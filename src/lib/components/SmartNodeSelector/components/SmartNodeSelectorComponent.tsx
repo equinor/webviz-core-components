@@ -171,8 +171,16 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     componentDidUpdate(prevProps: SmartNodeSelectorPropsType): void {
-        const selectedTags = this.state.nodeSelections.filter(nodeSelection => nodeSelection.isValid()).map(nodeSelection => nodeSelection.getCompleteNodePathAsString());
-        if (this.props.selectedTags && JSON.stringify(this.props.selectedTags) !== JSON.stringify(selectedTags) && JSON.stringify(prevProps.selectedTags) !== JSON.stringify(this.props.selectedTags)) {
+        const selectedTags = this.state.nodeSelections.filter(
+            nodeSelection => nodeSelection.isValid()
+        ).map(
+            nodeSelection => nodeSelection.getCompleteNodePathAsString()
+        );
+        if (
+            this.props.selectedTags 
+            && JSON.stringify(this.props.selectedTags) !== JSON.stringify(selectedTags) 
+            && JSON.stringify(prevProps.selectedTags) !== JSON.stringify(this.props.selectedTags)
+        ) {
             const nodeSelections: TreeNodeSelection[] = [];
             if (this.props.selectedTags !== undefined) {
                 for (const tag of this.props.selectedTags) {
