@@ -42,7 +42,7 @@ SmartNodeSelector.defaultProps = {
     selectedTags: undefined,
     placeholder: "Add new tag...",
     numSecondsUntilSuggestionsAreShown: 1.5,
-    persisted_props: ['selectedNodes', 'selectedTags', 'selectedIds'],
+    persisted_props: ['selectedTags'],
     persistence_type: 'local',
 };
 

@@ -39,7 +39,7 @@ type SmartNodeSelectorPropsType = {
     placeholder?: string,
     numSecondsUntilSuggestionsAreShown: number,
     persistence: boolean | string | number,
-    persisted_props: ("selectedNodes" | "selectedTags" | "selectedIds")[],
+    persisted_props: ("selectedTags")[],
     persistence_type: "local" | "session" | "memory"
 };
 
@@ -98,7 +98,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         selectedTags: undefined,
         placeholder: "Add new tag...",
         numSecondsUntilSuggestionsAreShown: 1.5,
-        persisted_props: ['selectedNodes', 'selectedTags', 'selectedIds'],
+        persisted_props: ['selectedTags'],
         persistence_type: 'local',
     };
 
@@ -153,7 +153,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             error: error
         };
 
-        this.numValidSelections = this.countValidSelections();
+        if (!hasError) {
+            this.numValidSelections = this.countValidSelections();
+        }
+        else {
+            this.numValidSelections = 0;
+        }
     }
 
     componentDidMount(): void {
@@ -344,14 +349,20 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 error: this.state.error
             }, () => {
                 callback();
-                if (newNodeSelections !== currentNodeSelections || this.countValidSelections() !== this.numValidSelections) {
+                if (
+                    newNodeSelections !== currentNodeSelections
+                    || this.countValidSelections() !== this.numValidSelections
+                ) {
                     this.updateSelectedTagsAndNodes();
                 }
             });
         }
         else {
             callback();
-            if (newNodeSelections !== currentNodeSelections || this.countValidSelections() !== this.numValidSelections) {
+            if (
+                newNodeSelections !== currentNodeSelections
+                || this.countValidSelections() !== this.numValidSelections
+            ) {
                 this.updateSelectedTagsAndNodes();
             }
         }
@@ -1152,7 +1163,7 @@ SmartNodeSelectorComponent.propTypes = {
      * component or the page. Since only `value` is allowed this prop can
      * normally be ignored.
      */
-    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(['selectedNodes', 'selectedTags', 'selectedIds'])),
+    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(['selectedTags'])),
 
     /**
      * Where persisted user changes will be stored:
