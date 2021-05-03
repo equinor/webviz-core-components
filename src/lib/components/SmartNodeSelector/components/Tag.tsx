@@ -18,6 +18,7 @@ type TagProps = {
     treeNodeSelection: TreeNodeSelection;
     countTags: number;
     currentTag: boolean;
+    frameless: boolean;
     checkIfDuplicate: (nodeSelection: TreeNodeSelection, index: number) => boolean;
     inputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     inputKeyUp: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -42,18 +43,6 @@ export default class Tag extends Component<TagProps> {
 
         this.props = props;
         this.state = { hovered: false };
-    }
-
-    componentDidMount(): void {
-        const {treeNodeSelection} = this.props;
-        const input = (
-            treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
-        ).current as HTMLInputElement;
-        if (input) {
-            const value = input.value === "" ? input.placeholder : input.value;
-            const width = this.calculateTextWidth(value);
-            input.style.width = width + "px";
-        }
     }
 
     private addAdditionalClasses(invalid: boolean): boolean {
@@ -85,10 +74,10 @@ export default class Tag extends Component<TagProps> {
         return classNames(ret);
     }
 
-    private outerTagClasses(invalid: boolean, duplicate: boolean): string {
+    private outerTagClasses(invalid: boolean, duplicate: boolean, frameless: boolean): string {
         return classNames({
             "SmartNodeSelector__Tag": true,
-            "SmartNodeSelector__Border": this.displayAsTag(),
+            "SmartNodeSelector__Border": this.displayAsTag() || frameless,
             [
                 !(this.addAdditionalClasses(invalid)) ? ""
                     : invalid ? "SmartNodeSelector__Invalid"
@@ -290,12 +279,51 @@ export default class Tag extends Component<TagProps> {
         }
     }
 
+    private calculateInputWidth(): string {
+        const {
+            treeNodeSelection,
+        } = this.props;
+        const displayText = treeNodeSelection.displayText();
+
+        if (treeNodeSelection.getFocussedNodeName() === ""
+            && treeNodeSelection.getFocussedLevel() == 0) {
+            return "100px";
+        }
+        else {
+            return this.calculateTextWidth(displayText) + "px";
+        }
+    }
+
+    private makeStyle(): object {
+        const {
+            treeNodeSelection,
+            frameless,
+        } = this.props;
+
+        const colors = treeNodeSelection.colors();
+        const style: object = {};
+
+        if (colors.length >= 2) {
+            style["background"] = `linear-gradient(to left, ${colors.join(", ")}) border-box`;
+            style["border"] = "1px solid transparent";
+        }
+        else {
+            style["borderColor"] = colors[0];
+        }
+
+        if (frameless) {
+            style["flex"] = "1";
+        }
+
+        return style;
+    }
+
     render(): React.ReactNode {
         const {
             index,
             treeNodeSelection,
             currentTag,
-            placeholder,
+            frameless,
             checkIfDuplicate,
             inputKeyDown,
             inputKeyUp,
@@ -309,26 +337,17 @@ export default class Tag extends Component<TagProps> {
         const valid = treeNodeSelection.isValid();
         const duplicate = checkIfDuplicate(treeNodeSelection, index);
 
-        const colors = treeNodeSelection.colors();
-        const style = colors.length >= 2 ? {
-            background: `linear-gradient(to left, ${colors.join(", ")}) border-box`,
-            border: "1px solid transparent"
-        }
-            : colors.length == 1 ? {
-                borderColor: `${colors[0]}`
-            } : {};
-
         return (
             <li
                 key={"Tag_" + index}
                 title={this.tagTitle(treeNodeSelection, index)}
-                className={this.outerTagClasses((!valid && !currentTag), duplicate)}
-                style={style}
+                className={this.outerTagClasses((!valid && !currentTag), duplicate, frameless)}
+                style={this.makeStyle()}
                 onMouseEnter={(): void => this.setState({ hovered: true })}
                 onMouseLeave={(): void => this.setState({ hovered: false })}
             >
                 {
-                    this.displayAsTag() &&
+                    this.displayAsTag() && !frameless &&
                     <button
                         type="button"
                         key={"TagRemoveButton_" + index}
@@ -356,15 +375,12 @@ export default class Tag extends Component<TagProps> {
                                 (
                                     treeNodeSelection.getFocussedNodeName() === ""
                                         && treeNodeSelection.getFocussedLevel() == 0
-                                        ? placeholder : ""
+                                        ? "Add new tag..." : ""
                                 )
                             }
                             value={displayText}
                             style={{
-                                width: (treeNodeSelection.getFocussedNodeName() === ""
-                                    && treeNodeSelection.getFocussedLevel() == 0 ? 100
-                                    : this.calculateTextWidth(displayText)
-                                ) + "px"
+                                width: this.calculateInputWidth()
                             }}
                             ref={treeNodeSelection.getRef()}
                             onInput={(e): void => this.handleInput(e)}
@@ -410,6 +426,11 @@ Tag.propTypes = {
      * Boolean stating if this is the currently active tag.
      */
     currentTag: PropTypes.bool.isRequired,
+    /**
+     * Flag stating if the tag should be displayed frameless
+     * (no border, no remove button).
+     */
+    frameless: PropTypes.bool.isRequired,
     /**
      * Function to check if this tag is a duplicate.
      */

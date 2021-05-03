@@ -45,6 +45,12 @@
     min-width: 200px;
 }
 
+.SmartNodeSelector--frameless {
+    border: 0;
+    padding: 0;
+    padding-right: 40px;
+}
+
 .SmartNodeSelector--Invalid {
     border: 1px #eb0000 solid !IMPORTANT;
 }
@@ -164,6 +170,7 @@
 
 .SmartNodeSelector__InnerTag {
     display: flex;
+    flex: 1;
     border-radius: 4px;
     background-color: #fefefe;
     white-space: nowrap;
