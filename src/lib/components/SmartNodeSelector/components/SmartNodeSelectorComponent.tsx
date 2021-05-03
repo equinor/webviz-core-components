@@ -1040,7 +1040,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     onClick={(e) => this.selectLastInput(e)}
                     onMouseDown={(e) => this.handleMouseDown(e)}
                 >
-                    <ul className="SmartNodeSelector__Tags" ref={this.tagFieldRef} style={frameless ? { width: "100%" } : {}}>
+                    <ul
+                        className="SmartNodeSelector__Tags"
+                        ref={this.tagFieldRef}
+                        style={frameless ? { width: "100%" } : {}}
+                    >
                         {nodeSelections.map((selection, index) => (
                             <Tag
                                 key={`${index}`}

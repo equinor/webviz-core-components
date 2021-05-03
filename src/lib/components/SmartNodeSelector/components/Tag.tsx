@@ -294,14 +294,14 @@ export default class Tag extends Component<TagProps> {
         }
     }
 
-    private makeStyle(): object {
+    private makeStyle(): { [key: string]: string | number } {
         const {
             treeNodeSelection,
             frameless,
         } = this.props;
 
         const colors = treeNodeSelection.colors();
-        const style: object = {};
+        const style = {};
 
         if (colors.length >= 2) {
             style["background"] = `linear-gradient(to left, ${colors.join(", ")}) border-box`;
