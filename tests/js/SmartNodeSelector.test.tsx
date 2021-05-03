@@ -2,8 +2,9 @@ import React from 'react';
 import { fireEvent, render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SmartNodeSelector } from '../../src/lib';
+import { SmartNodeSelectorInteractiveContainer } from './SmartNodeSelectorInteractiveContainer';
 
-type PropType = {
+export type PropType = {
     selectedTags: string[];
     selectedNodes: string[];
     selectedIds: string[];
@@ -23,9 +24,30 @@ enum RenderDataStructure {
     Flat = 1,
     Deep,
     DeepWithMetaData,
+    InvalidData
 }
 
-const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showSuggestions = true): RenderResult => {
+const clearParentProps = () => {
+    parentProps = {
+        selectedTags: [],
+        selectedNodes: [],
+        selectedIds: []
+    };
+}
+
+const renderSmartNodeSelector = (
+    renderDataStructure: RenderDataStructure,
+    options:
+        {
+            showSuggestions?: boolean;
+            initialTags?: string[];
+            maxNumSelectedNodes?: number;
+        } = {
+            showSuggestions: true,
+            initialTags: [],
+            maxNumSelectedNodes: -1
+        }
+): RenderResult => {
     let data = [];
     switch (renderDataStructure) {
         case RenderDataStructure.Flat:
@@ -77,6 +99,21 @@ const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showS
                 }
             ];
             break;
+        case RenderDataStructure.InvalidData:
+            data = [
+                {
+                    "id": "1",
+                    "name": "Metadata 1",
+                    "description": "Description",
+                    "children": [
+                        {
+                            "id": "1.1",
+                            "name": "",
+                            "description": "Description"
+                        }
+                    ]
+                }
+            ]
     }
 
     return render(
@@ -84,7 +121,8 @@ const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showS
             id="SmartNodeSelector"
             key="SmartNodeSelector"
             delimiter=":"
-            showSuggestions={showSuggestions}
+            selectedTags={options.initialTags}
+            showSuggestions={options.showSuggestions}
             setProps={setProps}
             label="Smart Node Selector"
             numSecondsUntilSuggestionsAreShown={0.5}
@@ -92,6 +130,10 @@ const renderSmartNodeSelector = (renderDataStructure: RenderDataStructure, showS
         />
     );
 }
+
+const renderInteractiveSmartNodeSelector = (): RenderResult => {
+    return render(<SmartNodeSelectorInteractiveContainer setProps={setProps} />);
+};
 
 describe('SmartNodeSelector', () => {
 
@@ -101,7 +143,7 @@ describe('SmartNodeSelector', () => {
     });
 
     it('Entering valid data node name and checking if tag is created (tree levels: 1)', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, false);
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -117,7 +159,7 @@ describe('SmartNodeSelector', () => {
     });
 
     it('Entering valid data node name and checking if tag is created (tree levels: 2)', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Deep, false);
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Deep, { showSuggestions: false });
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -139,7 +181,7 @@ describe('SmartNodeSelector', () => {
     });
 
     it('Entering valid data node name and then a duplicate', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, false);
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -162,7 +204,7 @@ describe('SmartNodeSelector', () => {
     });
 
     it('Entering invalid data source name', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Deep, false);
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Deep, { showSuggestions: false });
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -202,7 +244,7 @@ describe('SmartNodeSelector', () => {
     });
 
     it('Remove button is working', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, false);
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -230,7 +272,7 @@ describe('SmartNodeSelector', () => {
     });
 
     it('Clear all button is working', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, false);
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -260,7 +302,7 @@ describe('SmartNodeSelector', () => {
     });
 
     const selectingTagsWithKeyboard = (numTags: number): HTMLElement => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, false);
+        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -339,6 +381,93 @@ describe('SmartNodeSelector', () => {
         expect(parentProps.selectedNodes[0]).toMatch("Data");
         expect(parentProps.selectedIds).toHaveLength(1);
         expect(parentProps.selectedIds[0]).toMatch("1");
+
+        clearParentProps();
     });
+
+    it('Check if initial properties can be set', () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Deep,
+            {
+                showSuggestions: false,
+                initialTags: ["Data:Subdata"]
+            }
+        );
+
+        const smartNodeSelector = container.firstChild as HTMLElement;
+
+        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect(firstTag.title === "Data:Subdata").toBeTruthy();
+        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length == 2).toBeTruthy();
+    });
+
+    it('Check if properties can be dynamically changed', () => {
+        const { container } = renderInteractiveSmartNodeSelector();
+
+        const smartNodeSelector = container.querySelector("#SmartNodeSelector");
+        expect(smartNodeSelector).toBeDefined();
+
+        const button = container.querySelector("#setValuesButton");
+        expect(button).toBeDefined();
+
+        expect(parentProps.selectedTags).toHaveLength(0);
+        expect(parentProps.selectedNodes).toHaveLength(0);
+
+        userEvent.click(button);
+
+        expect(parentProps.selectedTags).toHaveLength(2);
+        expect(parentProps.selectedTags[0]).toMatch("Data1");
+        expect(parentProps.selectedTags[1]).toMatch("Data2");
+        expect(parentProps.selectedNodes).toHaveLength(2);
+        expect(parentProps.selectedNodes[0]).toMatch("Data1");
+        expect(parentProps.selectedNodes[1]).toMatch("Data2");
+        expect(parentProps.selectedIds).toHaveLength(2);
+        expect(parentProps.selectedIds[0]).toMatch("1");
+        expect(parentProps.selectedIds[1]).toMatch("2");
+
+        clearParentProps();
+    });
+
+    it('Check if selecting a node in a single node selection is calling setProps correctly', () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Flat,
+            {
+                showSuggestions: false,
+                maxNumSelectedNodes: 1
+            }
+        );
+
+        const smartNodeSelector = container.firstChild as HTMLElement;
+
+        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstInput = firstTag.querySelector("input");
+
+        userEvent.type(firstInput, "Data");
+        fireEvent.keyDown(firstInput, { key: 'Enter' });
+        fireEvent.keyUp(firstInput, { key: 'Enter' });
+
+        expect(firstTag.classList.contains('SmartNodeSelector__Border')).toBeTruthy();
+        expect(firstTag.title === firstInput.value).toBeTruthy();
+
+
+        expect(parentProps.selectedTags).toHaveLength(1);
+        expect(parentProps.selectedTags[0]).toMatch("Data");
+        expect(parentProps.selectedNodes).toHaveLength(1);
+        expect(parentProps.selectedNodes[0]).toMatch("Data");
+        expect(parentProps.selectedIds).toHaveLength(1);
+        expect(parentProps.selectedIds[0]).toMatch("1");
+
+        clearParentProps();
+    });
+
+    it('Ensure that invalid data throws exception', () => {
+        jest.spyOn(console, 'error').mockImplementation(jest.fn());
+        const { container } = renderSmartNodeSelector(RenderDataStructure.InvalidData);
+
+        const smartNodeSelector = container.firstChild as HTMLElement;
+        expect(smartNodeSelector.classList.contains("SmartNodeSelector--Error")).toBeTruthy();
+        jest.spyOn(console, 'error').mockRestore();
+    })
 
 });

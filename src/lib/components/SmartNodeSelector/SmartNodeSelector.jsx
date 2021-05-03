@@ -24,8 +24,7 @@ const SmartNodeSelector = props => {
             label={props.label}
             showSuggestions={props.showSuggestions}
             setProps={props.setProps}
-            selectedNodes={props.selectedNodes}
-            selectedIds={props.selectedIds}
+            selectedTags={props.selectedTags}
             placeholder={props.placeholder}
             numSecondsUntilSuggestionsAreShown={
                 props.numSecondsUntilSuggestionsAreShown
@@ -40,12 +39,10 @@ SmartNodeSelector.defaultProps = {
     delimiter: ":",
     numMetaNodes: 0,
     showSuggestions: true,
-    selectedNodes: [],
-    selectedTags: [],
-    selectedIds: [],
+    selectedTags: undefined,
     placeholder: "Add new tag...",
     numSecondsUntilSuggestionsAreShown: 1.5,
-    persisted_props: ['selectedNodes', 'selectedTags', 'selectedIds'],
+    persisted_props: ['selectedTags'],
     persistence_type: 'local',
 };
 
@@ -93,19 +90,9 @@ SmartNodeSelector.propTypes = {
     setProps: PropTypes.func,
 
     /**
-     * Selected nodes - readonly.
-     */
-    selectedNodes: PropTypes.arrayOf(PropTypes.string),
-
-    /**
      * Selected tags.
      */
     selectedTags: PropTypes.arrayOf(PropTypes.string),
-
-    /**
-     * Selected ids.
-     */
-    selectedIds: PropTypes.arrayOf(PropTypes.string),
 
     /**
      * Placeholder text for input field.
@@ -131,10 +118,9 @@ SmartNodeSelector.propTypes = {
 
     /**
      * Properties whose user interactions will persist after refreshing the
-     * component or the page. Since only `value` is allowed this prop can
-     * normally be ignored.
+     * component or the page.
      */
-    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(['selectedNodes', 'selectedTags', 'selectedIds'])),
+    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(['selectedTags'])),
 
     /**
      * Where persisted user changes will be stored:

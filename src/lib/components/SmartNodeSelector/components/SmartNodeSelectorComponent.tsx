@@ -20,26 +20,38 @@ enum Direction {
     Right
 }
 
+type ParentProps = {
+    selectedTags: string[],
+    selectedNodes: string[],
+    selectedIds: string[]
+};
+
 type SmartNodeSelectorPropsType = {
     id: string,
     maxNumSelectedNodes: number,
     delimiter: string,
     numMetaNodes: number,
     data: TreeDataNode[],
-    label: string,
+    label?: string,
     showSuggestions: boolean,
-    setProps: (props: Record<string, unknown>) => void,
-    selectedNodes: string[],
-    selectedTags: string[],
-    selectedIds: string[],
-    placeholder: string,
+    setProps: (props: ParentProps) => void,
+    selectedTags?: string[],
+    placeholder?: string,
     numSecondsUntilSuggestionsAreShown: number,
     persistence: boolean | string | number,
-    persisted_props: ("selectedNodes" | "selectedTags" | "selectedIds")[],
+    persisted_props: ("selectedTags")[],
     persistence_type: "local" | "session" | "memory"
 };
 
 type SmartNodeSelectorStateType = {
+    nodeSelections: TreeNodeSelection[];
+    currentTagIndex: number;
+    suggestionsVisible: boolean;
+    hasError: boolean;
+    error: string;
+};
+
+type SmartNodeSelectorSubStateType = {
     nodeSelections: TreeNodeSelection[];
     currentTagIndex: number;
     suggestionsVisible: boolean;
@@ -74,8 +86,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected mouseDownElement: HTMLElement | null;
     protected componentIsMounted: boolean;
     protected treeData: TreeData;
+    protected numValidSelections: number;
 
-    public props: SmartNodeSelectorPropsType;
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
     public static defaultProps: Partial<SmartNodeSelectorPropsType> = {
@@ -83,12 +95,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         delimiter: ":",
         numMetaNodes: 0,
         showSuggestions: true,
-        selectedNodes: [],
-        selectedTags: [],
-        selectedIds: [],
+        selectedTags: undefined,
         placeholder: "Add new tag...",
         numSecondsUntilSuggestionsAreShown: 1.5,
-        persisted_props: ['selectedNodes', 'selectedTags', 'selectedIds'],
+        persisted_props: ['selectedTags'],
         persistence_type: 'local',
     };
 
@@ -110,12 +120,19 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.noUserInputSelect = false;
         this.mouseDownElement = null;
         this.componentIsMounted = false;
-        this.props = props;
 
-        this.treeData = new TreeData({
-            treeData: props.data,
-            delimiter: props.delimiter
-        });
+        let hasError = false;
+        let error = "";
+        try {
+            this.treeData = new TreeData({
+                treeData: props.data,
+                delimiter: props.delimiter
+            });
+        }
+        catch (e) {
+            hasError = true;
+            error = e;
+        }
 
         const nodeSelections: TreeNodeSelection[] = [];
         if (props.selectedTags !== undefined) {
@@ -131,8 +148,17 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.state = {
             nodeSelections,
             currentTagIndex: 0,
-            suggestionsVisible: false
+            suggestionsVisible: false,
+            hasError: hasError,
+            error: error
         };
+
+        if (!hasError) {
+            this.numValidSelections = this.countValidSelections();
+        }
+        else {
+            this.numValidSelections = 0;
+        }
     }
 
     componentDidMount(): void {
@@ -150,6 +176,32 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         document.removeEventListener('mouseup', (e) => this.handleMouseUp(e), true);
         document.removeEventListener('mousemove', (e) => this.handleMouseMove(e), true);
         document.removeEventListener('keydown', (e) => this.handleGlobalKeyDown(e), true);
+    }
+
+    componentDidUpdate(prevProps: SmartNodeSelectorPropsType): void {
+        const selectedTags = this.state.nodeSelections.filter(
+            nodeSelection => nodeSelection.isValid()
+        ).map(
+            nodeSelection => nodeSelection.getCompleteNodePathAsString()
+        );
+        if (
+            this.props.selectedTags
+            && JSON.stringify(this.props.selectedTags) !== JSON.stringify(selectedTags)
+            && JSON.stringify(prevProps.selectedTags) !== JSON.stringify(this.props.selectedTags)
+        ) {
+            const nodeSelections: TreeNodeSelection[] = [];
+            if (this.props.selectedTags !== undefined) {
+                for (const tag of this.props.selectedTags) {
+                    const nodePath = tag.split(this.props.delimiter);
+                    nodeSelections.push(this.createNewNodeSelection(nodePath));
+                }
+            }
+            if (nodeSelections.length < this.props.maxNumSelectedNodes || this.props.maxNumSelectedNodes === -1) {
+                nodeSelections.push(this.createNewNodeSelection());
+            }
+            this.numValidSelections = this.countValidSelections();
+            this.updateState({ nodeSelections: nodeSelections });
+        }
     }
 
     createNewNodeSelection(nodePath: string[] = [""]): TreeNodeSelection {
@@ -241,10 +293,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         nodeSelections,
         currentTagIndex,
         suggestionsVisible
-    }: SmartNodeSelectorStateType): boolean {
-        let check = nodeSelections.length != this.state.nodeSelections.length;
-        if (nodeSelections.length == this.state.nodeSelections.length) {
-            check = check || !nodeSelections.some((v, i) => !v.trulyEquals(this.state.nodeSelections[i]));
+    }: SmartNodeSelectorSubStateType): boolean {
+        let check = nodeSelections.length !== this.state.nodeSelections.length;
+        if (nodeSelections.length === this.state.nodeSelections.length) {
+            check = check || nodeSelections.some((v, i) => !v.trulyEquals(this.state.nodeSelections[i]));
         }
         check = check || currentTagIndex != this.currentTagIndex();
         check = check || suggestionsVisible != this.state.suggestionsVisible;
@@ -278,6 +330,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 : suggestionsVisible
         );
 
+        const selectedTags = this.state.nodeSelections.filter(
+            nodeSelection => nodeSelection.isValid()
+        ).map(
+            nodeSelection => nodeSelection.getCompleteNodePathAsString()
+        );
+
         if (forceUpdate || this.doesStateChange({
             nodeSelections: newNodeSelections,
             currentTagIndex: newTagIndex,
@@ -286,17 +344,25 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.setState({
                 nodeSelections: newNodeSelections,
                 currentTagIndex: newTagIndex,
-                suggestionsVisible: newSuggestionsVisible
+                suggestionsVisible: newSuggestionsVisible,
+                hasError: this.state.hasError,
+                error: this.state.error
             }, () => {
                 callback();
-                if (newNodeSelections != currentNodeSelections) {
+                if (
+                    newNodeSelections !== currentNodeSelections
+                    || this.countValidSelections() !== this.numValidSelections
+                ) {
                     this.updateSelectedTagsAndNodes();
                 }
             });
         }
         else {
             callback();
-            if (newNodeSelections != currentNodeSelections) {
+            if (
+                newNodeSelections !== currentNodeSelections
+                || this.countValidSelections() !== this.numValidSelections
+            ) {
                 this.updateSelectedTagsAndNodes();
             }
         }
@@ -383,6 +449,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleClickOutside(event: globalThis.MouseEvent): void {
+        if (this.state.hasError) {
+            return;
+        }
         const domNode = (this.tagFieldRef as React.RefObject<HTMLUListElement>).current as HTMLUListElement;
         const suggestions = (this.suggestionsRef as React.RefObject<HTMLDivElement>).current as HTMLDivElement;
         const eventTarget = (event.target as Element);
@@ -401,6 +470,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleGlobalKeyDown(e: globalThis.KeyboardEvent): void {
+        if (this.state.hasError) {
+            return;
+        }
         this.handleTagSelection(e);
         if ((e.key === "Backspace" || e.key === "Delete") && this.countSelectedTags() > 0) {
             this.removeSelectedTags();
@@ -422,6 +494,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleMouseDown(e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>): void {
+        if (this.state.hasError) {
+            return;
+        }
         if (e.target instanceof HTMLElement)
             this.mouseDownElement = e.target as HTMLElement;
         else
@@ -722,6 +797,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             selectedNodes: selectedNodes,
             selectedIds: selectedIds
         });
+        this.numValidSelections = this.countValidSelections();
     }
 
     debugOutput(): React.ReactNode | null {
@@ -746,6 +822,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         const eventTarget = (e.target as HTMLInputElement);
         const val = eventTarget.value;
         const tag = this.nodeSelection(index);
+        const previouslyFocussedLevel = tag.getFocussedLevel();
         if (eventTarget.selectionStart != null && eventTarget.selectionEnd != null) {
             if (!tag.isFocusOnMetaData()) {
                 tag.setFocussedLevel(
@@ -776,7 +853,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 currentTagIndex: index,
                 callback: () => {
                     this.maybeShowSuggestions();
-                }
+                },
+                forceUpdate: tag.getFocussedLevel() !== previouslyFocussedLevel
             });
         }
         e.stopPropagation();
@@ -934,11 +1012,24 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
     render(): React.ReactNode {
         const { id, label, maxNumSelectedNodes, placeholder, showSuggestions } = this.props;
-        const { nodeSelections, suggestionsVisible } = this.state;
+        const { nodeSelections, suggestionsVisible, hasError, error } = this.state;
+
+        if (hasError) {
+            return (
+                <div id={id} ref={this.ref} className="SmartNodeSelector--Error">
+                    <strong>SmartNodeSelector</strong><br />
+                    {
+                        error.split("\n").map((item) => (
+                            <>{item}<br /></>
+                        ))
+                    }
+                </div>
+            )
+        }
 
         return (
             <div id={id} ref={this.ref}>
-                <label>{label}</label>
+                {label && <label>{label}</label>}
                 <div className={classNames({
                     "SmartNodeSelector": true,
                     "SmartNodeSelector--SuggestionsActive": suggestionsVisible,
@@ -953,7 +1044,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                             <Tag
                                 key={`${index}`}
                                 index={index}
-                                placeholder={placeholder}
+                                placeholder={placeholder ? placeholder : "Add new tag"}
                                 treeNodeSelection={selection}
                                 countTags={this.countTags()}
                                 currentTag={index === this.currentTagIndex()}
@@ -1027,7 +1118,7 @@ SmartNodeSelectorComponent.propTypes = {
     /**
      * A label that will be printed when this component is rendered.
      */
-    label: PropTypes.string.isRequired,
+    label: PropTypes.string,
 
     /**
      * Stating of suggestions should be shown or not.
@@ -1041,19 +1132,9 @@ SmartNodeSelectorComponent.propTypes = {
     setProps: PropTypes.func,
 
     /**
-     * Selected nodes - readonly.
-     */
-    selectedNodes: PropTypes.arrayOf(PropTypes.string),
-
-    /**
      * Selected tags.
      */
     selectedTags: PropTypes.arrayOf(PropTypes.string),
-
-    /**
-     * Selected ids.
-     */
-    selectedIds: PropTypes.arrayOf(PropTypes.string),
 
     /**
      * Placeholder text for input field.
@@ -1082,7 +1163,7 @@ SmartNodeSelectorComponent.propTypes = {
      * component or the page. Since only `value` is allowed this prop can
      * normally be ignored.
      */
-    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(['selectedNodes', 'selectedTags', 'selectedIds'])),
+    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(['selectedTags'])),
 
     /**
      * Where persisted user changes will be stored:
