@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SmartNodeSelector } from '../../src/lib';
+import { SmartNodeSelector } from '../src/lib';
 import { SmartNodeSelectorInteractiveContainer } from './SmartNodeSelectorInteractiveContainer';
 
 export type PropType = {

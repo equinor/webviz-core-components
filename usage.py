@@ -122,7 +122,6 @@ app.layout = html.Div(
                     maxNumSelectedNodes=3,
                     numMetaNodes=2,
                     delimiter=":",
-                    selectedNodes=[],
                     selectedTags=[],
                     label="Smart Node Selector",
                     data=[

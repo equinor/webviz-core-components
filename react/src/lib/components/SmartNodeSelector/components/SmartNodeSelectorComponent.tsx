@@ -26,7 +26,7 @@ type ParentProps = {
     selectedIds: string[]
 };
 
-type SmartNodeSelectorPropsType = {
+export type SmartNodeSelectorPropsType = {
     id: string,
     maxNumSelectedNodes: number,
     delimiter: string,

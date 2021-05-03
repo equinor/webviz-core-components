@@ -60,7 +60,7 @@ module.exports = (env, argv) => {
         mode: mode,
         entry,
         output: {
-            path: demo ? __dirname : path.resolve(__dirname, dashLibraryName),
+            path: demo ? __dirname : path.resolve(__dirname, "..", dashLibraryName),
             filename: filenameJs,
             library: {
                 type: "window",

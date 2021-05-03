@@ -6,4 +6,4 @@ include webviz_core_components/metadata.json
 include webviz_core_components/package.json
 include README.md
 include LICENSE
-include package.json
+include react/package.json
