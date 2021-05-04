@@ -12,7 +12,7 @@ export default function downloadFile(
         mimeType
     }: {
         filename: string,
-        data: Blob | null,
+        data: Blob | string,
         mimeType: string
     }
 ): void {

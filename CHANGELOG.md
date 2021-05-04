@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 ### Fixed
+- [#122](https://github.com/equinor/webviz-core-components/pull/122) - Fixed bug in `WebvizPluginPlaceholder` preventing download button from working. Added tests for `WebvizPluginPlaceholder`.
 - [#120](https://github.com/equinor/webviz-core-components/pull/120) - Multiple bug fixes (deletion of currently selected tag not possible; state not dynamically updated;
 empty or invalid node names no longer allowed; auto resizing not working when initializing tag component) and new tests for these bugs. Also removed unnecessary properties.
 

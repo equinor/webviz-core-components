@@ -59,15 +59,6 @@ const InnerWebvizPluginPlaceholder = (
 
     useEffect(() => {
         if (didMountRef.current) {
-            if (download !== null && download !== undefined) {
-                downloadFile({
-                    filename: download.filename,
-                    data: download.content,
-                    mimeType: download.mime_type
-                });
-                setProps({ download: null });
-            }
-
             // Hide/show body scrollbar depending on plugin going in/out of full screen mode.
             if (prevExpandedRef.current !== expanded) {
                 document.body.style.overflow = expanded
@@ -79,8 +70,27 @@ const InnerWebvizPluginPlaceholder = (
         else {
             didMountRef.current = true;
         }
+    }, [prevExpandedRef]);
+
+    useEffect(() => {
         showDeprecationWarnings();
     }, []);
+
+    useEffect(() => {
+        if (didMountRef.current) {
+            if (download !== null && download !== undefined) {
+                downloadFile({
+                    filename: download.filename,
+                    data: download.content,
+                    mimeType: download.mime_type
+                });
+                setProps({ download: null });
+            }
+        }
+        else {
+            didMountRef.current = true;
+        }
+    }, [download]);
 
     const showDeprecationWarnings = () => {
         for (const warning of deprecation_warnings) {
@@ -89,10 +99,10 @@ const InnerWebvizPluginPlaceholder = (
                 {
                     variant: "warning",
                     action: (
-                        <a 
-                            className="webviz-config-plugin-deprecation-link" 
-                            href={warning.url} 
-                            target="_blank" 
+                        <a
+                            className="webviz-config-plugin-deprecation-link"
+                            href={warning.url}
+                            target="_blank"
                             rel="noopener noreferrer"
                         >
                             More info
@@ -148,13 +158,15 @@ const InnerWebvizPluginPlaceholder = (
                                             scrollY: -window.scrollY,
                                         }
                                     ).then(canvas =>
-                                        canvas.toBlob(blob =>
-                                            downloadFile({
-                                                filename: screenshot_filename,
-                                                data: blob,
-                                                mimeType: "image/png"
-                                            })
-                                        )
+                                        canvas.toBlob(blob => {
+                                            if (blob !== null) {
+                                                downloadFile({
+                                                    filename: screenshot_filename,
+                                                    data: blob,
+                                                    mimeType: "image/png"
+                                                })
+                                            }
+                                        })
                                     )
                             }
                             }
