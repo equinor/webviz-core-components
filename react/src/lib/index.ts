@@ -6,7 +6,7 @@
  */
 
 import WebvizPluginPlaceholder from "./components/WebvizPluginPlaceholder";
-import ColorScales from "./components/ColorScales";
+import { ColorScales } from "./components/ColorScales";
 import Select from "./components/Select";
 import SmartNodeSelector from "./components/SmartNodeSelector"
 

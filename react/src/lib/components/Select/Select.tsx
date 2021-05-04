@@ -7,65 +7,13 @@
 
 import React from "react";
 import PropTypes, { InferProps } from "prop-types";
+
+import { getPropsWithMissingValuesSetToDefault, Optionals } from "../../../utils/DefaultPropsHelpers";
 import "./Select.css";
 
-/**
- * Select is a dash wrapper for the html select tag.
- */
-const Select = (props: InferProps<typeof Select.propTypes>): JSX.Element => {
-    const { id, parent_className, parent_style, value, multi, size, className, style, options, setProps } = props;
-
-    const handleChange = (e: React.ChangeEvent) => {
-        const options = (e.target as HTMLSelectElement).selectedOptions;
-        const values: string[] = [];
-        for (let i = 0; i < options.length; i++) {
-            values.push(options[i].value);
-        }
-        setProps({ value: values });
-    }
-
-    return (
-        <div
-            id={id}
-            className={parent_className}
-            style={parent_style}
-        >
-            <select
-                value={value}
-                multiple={multi}
-                size={size}
-                onChange={(e) => handleChange(e)}
-                className={"webviz-config-select " + className}
-                style={style}
-            >
-                {options !== undefined && options.map((opt, idx) => {
-                    return (
-                        <option key={idx.toString() + opt.value} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    );
-                })}
-            </select>
-        </div>
-    );
-}
-
-export default Select;
-
-Select.defaultProps = {
-    options: [],
-    size: 4,
-    value: [],
-    multi: true,
-    className: "",
-    parent_className: "",
-    persisted_props: ["value"],
-    persistence_type: "local",
-};
-
-Select.propTypes = {
+const propTypes = {
     /**
-     * The ID used to identify this compnent in Dash callbacks
+     * The ID used to identify this component in Dash callbacks
      */
     id: PropTypes.string.isRequired,
     /**
@@ -129,7 +77,7 @@ Select.propTypes = {
     /**
      * Dash-assigned callback that gets fired when the input changes
      */
-    setProps: PropTypes.func,
+    setProps: PropTypes.func.isRequired,
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
@@ -159,3 +107,64 @@ Select.propTypes = {
      */
     persistence_type: PropTypes.oneOf(["local", "session", "memory"]),
 };
+
+const defaultProps: Optionals<InferProps<typeof propTypes>> = {
+    options: [],
+    size: 4,
+    value: [],
+    multi: true,
+    style: {},
+    parent_style: {},
+    className: "",
+    parent_className: "",
+    persistence: false,
+    persisted_props: ["value"],
+    persistence_type: "local",
+};
+
+/**
+* Select is a dash wrapper for the html select tag.
+*/
+const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof propTypes>): JSX.Element => {
+    const { id, parent_className, parent_style, value, multi, size, className, style, options, setProps } = getPropsWithMissingValuesSetToDefault(props, defaultProps);
+
+    const handleChange = (e: React.ChangeEvent) => {
+        const options = (e.target as HTMLSelectElement).selectedOptions;
+        const values: string[] = [];
+        for (let i = 0; i < options.length; i++) {
+            values.push(options[i].value);
+        }
+        setProps({ value: values });
+    }
+
+    return (
+        <div
+            id={id}
+            className={parent_className ? parent_className : ""}
+            style={parent_style ? parent_style : {}}
+        >
+            <select
+                value={value ? value : ""}
+                multiple={multi!}
+                size={size!}
+                onChange={(e) => handleChange(e)}
+                className={"webviz-config-select " + className}
+                style={style!}
+            >
+                {options!.map((opt, idx) => {
+                    return (
+                        <option key={idx.toString() + opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    );
+                })}
+            </select>
+        </div>
+    );
+}
+
+export default Select;
+
+Select.defaultProps = defaultProps;
+
+Select.propTypes = propTypes;

@@ -53,11 +53,12 @@ class Suggestions extends Component<SuggestionsProps> {
         this.currentNodeLevel = -1;
         this.currentNodeName = "";
         this.lastNodeSelection = props.treeNodeSelection;
+        this.allOptions = [];
 
         this.state = {
             fromIndex: 0
         };
-        
+
         if (this.props.treeNodeSelection) {
             this.allOptions = this.props.treeNodeSelection.getSuggestions();
             this.currentNodeLevel = this.props.treeNodeSelection.getFocussedLevel();
