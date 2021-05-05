@@ -39,6 +39,7 @@ jobs:
   
       - name: 🏗️ Build JavaScript part
         run: |
+          cd react
           npm run build
 
       - name: 📦 Install webviz-core-components with dependencies
@@ -59,13 +60,16 @@ jobs:
       - name: 🕵️ Check code style & linting
         if: matrix.python-version == '3.8'
         run: |
+          cd react
           npm run validate
+          cd ..
           black --check webviz_core_components tests setup.py usage.py
           pylint webviz_core_components/ tests/py/*.py setup.py usage.py
           bandit -r -c ./bandit.yml webviz_core_components tests setup.py usage.py
 
       - name: 🤖 Run tests
         run: |
+          cd react
           npm run test
           pytest ./tests/py --headless
 
@@ -74,6 +78,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          cd react
           npm version --no-git-tag-version ${GITHUB_REF//refs\/tags\//}
           npm config set '//registry.npmjs.org/:_authToken' '${NPM_TOKEN}'
           npm config set always-auth true
