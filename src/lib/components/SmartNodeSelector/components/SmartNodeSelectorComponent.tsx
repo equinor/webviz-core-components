@@ -330,12 +330,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 : suggestionsVisible
         );
 
-        const selectedTags = this.state.nodeSelections.filter(
-            nodeSelection => nodeSelection.isValid()
-        ).map(
-            nodeSelection => nodeSelection.getCompleteNodePathAsString()
-        );
-
         if (forceUpdate || this.doesStateChange({
             nodeSelections: newNodeSelections,
             currentTagIndex: newTagIndex,
