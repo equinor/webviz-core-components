@@ -21,19 +21,107 @@ import {
     faCommentAlt
 } from "@fortawesome/free-solid-svg-icons";
 
+import { getPropsWithMissingValuesSetToDefault, Optionals } from "../../utils/DefaultPropsHelpers";
+
 import WebvizToolbarButton from "./utils/WebvizToolbarButton";
 import WebvizContentOverlay from "./utils/WebvizContentOverlay";
 import downloadFile from "./utils/downloadFile";
 
 import "./webviz_plugin_component.css";
 
-/**
- * WebvizPluginPlaceholder is a fundamental webviz dash component.
- * It takes a property, `label`, and displays it.
- * It renders an input with the property `value` which is editable by the user.
- */
-const InnerWebvizPluginPlaceholder = (
-    props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
+const propTypes = {
+    /**
+     * The ID used to identify this component in Dash callbacks
+     */
+    id: PropTypes.string,
+
+    /**
+     * The children of this component
+     */
+    children: PropTypes.node,
+
+    /**
+     * Array of strings, representing which buttons to render. Full set is
+     * ['download', 'contact_person', 'guided_tour', 'screenshot', 'expand']
+     */
+    buttons: PropTypes.array,
+
+    /**
+     * A dictionary of information regarding contact person for the data content.
+     * Valid keys are 'name', 'email' and 'phone'.
+     */
+    contact_person: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        email: PropTypes.string.isRequired,
+        phone: PropTypes.string.isRequired
+    }),
+
+    /**
+     * A dictionary with information regarding the resource file the plugin requested.
+     * Dictionary keys are 'filename', 'content' and 'mime_type'.
+     * The 'content' value should be a base64 encoded ASCII string.
+     */
+    download: PropTypes.shape({
+        filename: PropTypes.string.isRequired,
+        content: PropTypes.string.isRequired,
+        mime_type: PropTypes.string.isRequired
+    }),
+
+    /**
+     *  File name used when saving a screenshot of the plugin.
+     */
+    screenshot_filename: PropTypes.string,
+
+    /**
+     * Tour steps. List of dictionaries, each with two keys ('selector' and 'content').
+     */
+    tour_steps: PropTypes.array,
+
+    /**
+     * An integer that represents the number of times
+     * that the data download button has been clicked.
+     */
+    data_requested: PropTypes.number,
+
+    /**
+     * Stating if a deprecation warning for the related plugin should be shown.
+     */
+    deprecation_warnings: PropTypes.arrayOf(
+        PropTypes.shape(
+            {
+                message: PropTypes.string.isRequired,
+                url: PropTypes.string.isRequired
+            }
+        ).isRequired
+    ),
+
+    /**
+     * Dash-assigned callback that should be called whenever any of the
+     * properties change
+     */
+    setProps: PropTypes.func.isRequired,
+};
+
+const defaultProps: Optionals<InferProps<typeof propTypes>> = {
+    id: "some-id",
+    buttons: [
+        "screenshot",
+        "expand",
+        "download",
+        "guided_tour",
+        "contact_person",
+    ],
+    children: null,
+    contact_person: null,
+    tour_steps: [],
+    data_requested: 0,
+    download: null,
+    screenshot_filename: "webviz-screenshot.png",
+    deprecation_warnings: []
+};
+
+const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
+    props: InferProps<typeof propTypes>
 ): JSX.Element => {
     const {
         id,
@@ -47,7 +135,7 @@ const InnerWebvizPluginPlaceholder = (
         data_requested,
         deprecation_warnings,
         setProps
-    } = props;
+    } = getPropsWithMissingValuesSetToDefault(props, defaultProps);
 
     const [expanded, setExpanded] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
@@ -258,8 +346,16 @@ const InnerWebvizPluginPlaceholder = (
     );
 };
 
-const WebvizPluginPlaceholder = (
-    props: InferProps<typeof WebvizPluginPlaceholder.propTypes>
+InnerWebvizPluginPlaceholder.propTypes = propTypes;
+InnerWebvizPluginPlaceholder.defaultProps = defaultProps;
+
+/**
+ * WebvizPluginPlaceholder is a fundamental webviz dash component.
+ * It takes a property, `label`, and displays it.
+ * It renders an input with the property `value` which is editable by the user.
+ */
+const WebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
+    props: InferProps<typeof propTypes>
 ): JSX.Element => {
     return (
         <SnackbarProvider maxSnack={3}>
@@ -267,6 +363,9 @@ const WebvizPluginPlaceholder = (
         </SnackbarProvider>
     )
 };
+
+WebvizPluginPlaceholder.propTypes = propTypes;
+WebvizPluginPlaceholder.defaultProps = defaultProps;
 
 export default WebvizPluginPlaceholder;
 

@@ -5,7 +5,7 @@ from setuptools import setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open("package.json") as f:
+with open("webviz_core_components/package.json") as f:
     package = json.load(f)
 
 package_name = (

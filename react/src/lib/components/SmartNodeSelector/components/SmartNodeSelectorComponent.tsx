@@ -85,7 +85,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected noUserInputSelect: boolean;
     protected mouseDownElement: HTMLElement | null;
     protected componentIsMounted: boolean;
-    protected treeData: TreeData;
+    protected treeData: TreeData | null;
     protected numValidSelections: number;
 
     public state: SmartNodeSelectorStateType;
@@ -130,6 +130,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             });
         }
         catch (e) {
+            this.treeData = null;
             hasError = true;
             error = e;
         }
@@ -211,7 +212,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             selected: false,
             delimiter: this.props.delimiter,
             numMetaNodes: this.props.numMetaNodes,
-            treeData: this.treeData
+            treeData: this.treeData as TreeData
         });
     }
 

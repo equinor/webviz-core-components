@@ -8,7 +8,7 @@
 import React from "react";
 import PropTypes, { InferProps } from "prop-types";
 
-import { getPropsWithMissingValuesSetToDefault, Optionals } from "../../../utils/DefaultPropsHelpers";
+import { getPropsWithMissingValuesSetToDefault, Optionals } from "../../utils/DefaultPropsHelpers";
 import "./Select.css";
 
 const propTypes = {
