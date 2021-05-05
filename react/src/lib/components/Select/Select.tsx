@@ -77,7 +77,7 @@ const propTypes = {
     /**
      * Dash-assigned callback that gets fired when the input changes
      */
-    setProps: PropTypes.func.isRequired,
+    setProps: PropTypes.func,
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
@@ -120,13 +120,25 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     persistence: false,
     persisted_props: ["value"],
     persistence_type: "local",
+    setProps: (_: { value: string | number | string[] }) => { }
 };
 
 /**
 * Select is a dash wrapper for the html select tag.
 */
 const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof propTypes>): JSX.Element => {
-    const { id, parent_className, parent_style, value, multi, size, className, style, options, setProps } = getPropsWithMissingValuesSetToDefault(props, defaultProps);
+    const {
+        id,
+        parent_className,
+        parent_style,
+        value,
+        multi,
+        size,
+        className,
+        style,
+        options,
+        setProps
+    } = getPropsWithMissingValuesSetToDefault(props, defaultProps);
 
     const handleChange = (e: React.ChangeEvent) => {
         const options = (e.target as HTMLSelectElement).selectedOptions;

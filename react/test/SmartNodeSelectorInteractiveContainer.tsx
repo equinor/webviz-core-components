@@ -15,7 +15,9 @@ const data = [
     }
 ];
 
-export const SmartNodeSelectorInteractiveContainer = (props: { setProps: (props: PropType) => void }) => {
+export const SmartNodeSelectorInteractiveContainer: React.FC<{ setProps: (props: PropType) => void }> = (
+    props: { setProps: (props: PropType) => void }
+): JSX.Element => {
     const { setProps } = props;
     const [selectedTags, setSelectedTags] = React.useState([]);
 

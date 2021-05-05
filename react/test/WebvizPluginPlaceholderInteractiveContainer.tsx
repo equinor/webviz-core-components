@@ -1,15 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import { WebvizPluginPlaceholder } from '../src/lib';
 import { PropType } from './WebvizPluginPlaceholder.test';
 
-type Download = {
-    filename: string,
-    content: string,
-    mime_type: string
-};
 
-
-export const WebvizPluginPlaceholderInteractiveContainer = () => {
+export const WebvizPluginPlaceholderInteractiveContainer: React.FC = (): JSX.Element => {
     const [download, setDownload] = React.useState(undefined);
 
     const steps = [
@@ -23,7 +19,7 @@ export const WebvizPluginPlaceholderInteractiveContainer = () => {
         },
     ];
 
-    const setProps = (props: PropType) => {
+    const setProps = (props: PropType): void => {
         if (props.data_requested) {
             setDownload({
                 filename: "test.txt",
@@ -41,4 +37,8 @@ export const WebvizPluginPlaceholderInteractiveContainer = () => {
             download={download}
         />
     )
+};
+
+WebvizPluginPlaceholderInteractiveContainer.propTypes = {
+    data_requested: PropTypes.number
 };

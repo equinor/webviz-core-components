@@ -1,27 +1,15 @@
 import React from 'react';
-import { fireEvent, render, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WebvizPluginPlaceholder } from '../src/lib';
 import { WebvizPluginPlaceholderInteractiveContainer } from './WebvizPluginPlaceholderInteractiveContainer';
 
 export type PropType = {
-    data_requested: number;
+    data_requested?: number;
 };
 
-let parentProps: PropType = {
-    data_requested: 0
-};
-
-const setProps = (props: PropType): void => {
-    parentProps = props;
-}
-
-const clearParentProps = () => {
-
-}
 
 const renderWebvizPluginPlaceholder = (
-    setPropsFunc: (props: PropType) => void = setProps
 ): RenderResult => {
     const steps = [
         {
@@ -37,7 +25,7 @@ const renderWebvizPluginPlaceholder = (
         <WebvizPluginPlaceholder
             id="WebvizPluginPlaceholder"
             tour_steps={steps}
-            setProps={setPropsFunc}
+            setProps={() => { return; }}
             deprecation_warnings={
                 [
                     {
@@ -81,6 +69,7 @@ describe('WebvizPluginPlaceholder', () => {
 
         expect(link.href).toEqual('data:application/txt;base64,test');
         expect(link.download).toEqual("test.txt");
+        jest.spyOn(document, "createElement").mockRestore();
     });
 
 });

@@ -99,7 +99,7 @@ const propTypes = {
      * Dash-assigned callback that should be called whenever any of the
      * properties change
      */
-    setProps: PropTypes.func.isRequired,
+    setProps: PropTypes.func,
 };
 
 const defaultProps: Optionals<InferProps<typeof propTypes>> = {
@@ -117,7 +117,8 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     data_requested: 0,
     download: null,
     screenshot_filename: "webviz-screenshot.png",
-    deprecation_warnings: []
+    deprecation_warnings: [],
+    setProps: (_: { download?: null, data_requested?: number }) => { }
 };
 
 const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
