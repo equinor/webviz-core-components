@@ -1,6 +1,6 @@
 import React from 'react';
 import { SmartNodeSelector } from '../../src/lib';
-import {PropType} from './SmartNodeSelector.test';
+import { PropType } from './SmartNodeSelector.test';
 
 const data = [
     {
@@ -15,8 +15,10 @@ const data = [
     }
 ];
 
-export const SmartNodeSelectorInteractiveContainer = (props: { setProps: (props: PropType) => void }) => {
-    const {setProps} = props;
+export const SmartNodeSelectorInteractiveContainer: React.FC<{ setProps: (props: PropType) => void }> = (
+    props: { setProps: (props: PropType) => void }
+): JSX.Element => {
+    const { setProps } = props;
     const [selectedTags, setSelectedTags] = React.useState([]);
 
     const handleButtonClick = () => {
