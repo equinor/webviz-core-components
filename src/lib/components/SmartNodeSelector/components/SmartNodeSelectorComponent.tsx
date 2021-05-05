@@ -774,9 +774,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         loop1:
         for (let i = 0; i < this.countTags(); i++) {
             const nodeSelection = this.nodeSelection(i);
+            if (nodeSelection.getCompleteNodePathAsString() !== "") {
+                selectedTags.push(nodeSelection.getCompleteNodePathAsString());
+            }
             if (nodeSelection.isValid() && !this.checkIfSelectionIsDuplicate(nodeSelection, i)) {
                 const matchedNodePaths = nodeSelection.exactlyMatchedNodePaths();
-                selectedTags.push(nodeSelection.getCompleteNodePathAsString());
                 for (let j = 0; j < matchedNodePaths.length; j++) {
                     if (selectedNodes.length >= maxNumSelectedNodes && maxNumSelectedNodes > 0) {
                         break loop1;

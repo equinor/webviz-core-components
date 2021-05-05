@@ -136,6 +136,9 @@ const renderInteractiveSmartNodeSelector = (): RenderResult => {
 };
 
 describe('SmartNodeSelector', () => {
+    afterEach(() => {
+        clearParentProps();
+    });
 
     it('Renders correctly (compare to snapshot in ./__snapshots__/SmartNodeSelector.test.tsx.snap)', () => {
         const { container } = renderSmartNodeSelector(RenderDataStructure.Flat);
@@ -375,8 +378,8 @@ describe('SmartNodeSelector', () => {
         fireEvent.keyDown(lastInput, { key: 'v', ctrlKey: true });
 
 
-        expect(parentProps.selectedTags).toHaveLength(1);
-        expect(parentProps.selectedTags[0]).toMatch("Data");
+        expect(parentProps.selectedTags).toHaveLength(6);
+        expect(parentProps.selectedTags).toEqual(["Data", "Data", "Data", "Data", "Data", "Data"]);
         expect(parentProps.selectedNodes).toHaveLength(1);
         expect(parentProps.selectedNodes[0]).toMatch("Data");
         expect(parentProps.selectedIds).toHaveLength(1);

@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 ### Fixed
+- [#124](https://github.com/equinor/webviz-core-components/pull/124) - `SmartNodeSelector` now returns all selected tags (also invalid and duplicate ones) to parent.
 - [#123](https://github.com/equinor/webviz-core-components/pull/123) - Removed unused variables and added types to `SmartNodeSelector` and its tests.
 
 ## [0.4.1] - 2021-05-04
