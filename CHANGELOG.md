@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED] - YYYY-MM-DD
+
+## [0.4.1] - 2021-05-04
 ### Fixed
 - [#122](https://github.com/equinor/webviz-core-components/pull/122) - Fixed bug in `WebvizPluginPlaceholder` preventing download button from working. Added tests for `WebvizPluginPlaceholder`.
 - [#120](https://github.com/equinor/webviz-core-components/pull/120) - Multiple bug fixes (deletion of currently selected tag not possible; state not dynamically updated;
