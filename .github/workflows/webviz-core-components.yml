@@ -33,13 +33,15 @@ jobs:
 
       - name: 📦 Install build dependencies
         run: |
+          cd ./react
           npm ci --ignore-scripts
+          cd ..
           pip install .[dependencies]
           pip install dash[dev]
   
       - name: 🏗️ Build JavaScript part
+        working-directory: ./react
         run: |
-          cd react
           npm run build
 
       - name: 📦 Install webviz-core-components with dependencies
@@ -60,7 +62,7 @@ jobs:
       - name: 🕵️ Check code style & linting
         if: matrix.python-version == '3.8'
         run: |
-          cd react
+          cd ./react
           npm run validate
           cd ..
           black --check webviz_core_components tests setup.py usage.py
@@ -69,7 +71,7 @@ jobs:
 
       - name: 🤖 Run tests
         run: |
-          cd react
+          cd ./react
           npm run test
           pytest ./tests/py --headless
 
@@ -77,8 +79,8 @@ jobs:
         if: github.event_name == 'release' && matrix.python-version == '3.6'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: ./react
         run: |
-          cd react
           npm version --no-git-tag-version ${GITHUB_REF//refs\/tags\//}
           npm config set '//registry.npmjs.org/:_authToken' '${NPM_TOKEN}'
           npm config set always-auth true
