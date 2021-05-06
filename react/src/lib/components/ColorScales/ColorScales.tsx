@@ -47,7 +47,9 @@ const propTypes = {
  * It takes an array of colors, `colorscale`, and
  * displays a UI for modifying it or choosing a new scale.
  */
-export const ColorScales: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof propTypes>): JSX.Element => {
+export const ColorScales: React.FC<InferProps<typeof propTypes>> = (
+    props: InferProps<typeof propTypes>
+): JSX.Element => {
     const { id, setProps, colorscale, nSwatches, fixSwatches } = props;
 
 

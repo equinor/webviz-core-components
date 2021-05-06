@@ -41,8 +41,8 @@ jobs:
           pip install dash[dev]
   
       - name: 🏗️ Build JavaScript part
-        working-directory: ./react
         run: |
+          cd ./react
           npm run build
 
       - name: 📦 Install webviz-core-components with dependencies
@@ -67,14 +67,15 @@ jobs:
           npm run validate
           cd ..
           black --check webviz_core_components tests setup.py usage.py
-          pylint webviz_core_components/ tests/py/*.py setup.py usage.py
+          pylint webviz_core_components/ tests/*.py setup.py usage.py
           bandit -r -c ./bandit.yml webviz_core_components tests setup.py usage.py
 
       - name: 🤖 Run tests
         run: |
           cd ./react
           npm run test
-          pytest ./tests/py --headless
+          cd ..
+          pytest ./tests --headless
 
       - name: 🔼 Build and publish Node.js package
         if: github.event_name == 'release' && matrix.python-version == '3.6'

@@ -118,7 +118,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     download: null,
     screenshot_filename: "webviz-screenshot.png",
     deprecation_warnings: [],
-    setProps: (_: { download?: null, data_requested?: number }) => { }
+    setProps: () => { return; }
 };
 
 const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (

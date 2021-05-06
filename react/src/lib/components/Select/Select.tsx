@@ -120,7 +120,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     persistence: false,
     persisted_props: ["value"],
     persistence_type: "local",
-    setProps: (_: { value: string | number | string[] }) => { }
+    setProps: (): void => { return; }
 };
 
 /**
@@ -157,13 +157,13 @@ const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof
         >
             <select
                 value={value ? value : ""}
-                multiple={multi!}
-                size={size!}
+                multiple={multi}
+                size={size}
                 onChange={(e) => handleChange(e)}
                 className={"webviz-config-select " + className}
-                style={style!}
+                style={style}
             >
-                {options!.map((opt, idx) => {
+                {options.map((opt, idx) => {
                     return (
                         <option key={idx.toString() + opt.value} value={opt.value}>
                             {opt.label}
