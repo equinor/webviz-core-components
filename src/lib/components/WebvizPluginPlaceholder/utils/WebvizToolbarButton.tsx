@@ -10,20 +10,36 @@ type WebvizToolbarButtonProps = {
     onClick?: (event: MouseEvent) => void;
     important?: boolean;
     tooltip?: string;
+    href?: string;
+    target?: string;
 };
 
-const WebvizToolbarButton: React.FC<WebvizToolbarButtonProps> = ({ icon, selected, onClick, important, tooltip }) => {
+const WebvizToolbarButton: React.FC<WebvizToolbarButtonProps> = ({
+    icon,
+    selected,
+    onClick,
+    important,
+    tooltip,
+    href,
+    target
+}) => {
+    const createIcon = (useOnClick: boolean) => (<FontAwesomeIcon
+        icon={icon}
+        className={classNames({
+            "webviz-config-plugin-button": true,
+            "webviz-config-plugin-button-selected": selected,
+            "webviz-config-plugin-button-important": important,
+        })}
+        onClick={useOnClick ? onClick : undefined}
+    />);
+
     return (
         <div className="webviz-config-tooltip-wrapper">
-            <FontAwesomeIcon
-                icon={icon}
-                className={classNames({
-                    "webviz-config-plugin-button": true,
-                    "webviz-config-plugin-button-selected": selected,
-                    "webviz-config-plugin-button-important": important,
-                })}
-                onClick={onClick}
-            />
+            {href ? (
+                <a href={href} target={target}>{createIcon(false)}</a>
+            ) : (
+                createIcon(true)
+            )}
             <div className="webviz-config-tooltip">
                 {tooltip}
             </div>
@@ -58,4 +74,14 @@ WebvizToolbarButton.propTypes = {
      * The callback function to triger when button is clicked.
      */
     onClick: PropTypes.func,
+
+    /**
+     * URL the button shall forward to.
+     */
+    href: PropTypes.string,
+
+    /**
+     * The target the URL defined in `href` is opened in.
+     */
+    target: PropTypes.string,
 };

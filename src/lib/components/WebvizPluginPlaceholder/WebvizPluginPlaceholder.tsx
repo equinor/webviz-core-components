@@ -17,7 +17,8 @@ import {
     faCameraRetro,
     faExpand,
     faDownload,
-    faExclamationTriangle
+    faExclamationTriangle,
+    faCommentAlt
 } from "@fortawesome/free-solid-svg-icons";
 
 import WebvizToolbarButton from "./utils/WebvizToolbarButton";
@@ -42,6 +43,7 @@ const InnerWebvizPluginPlaceholder = (
         download,
         screenshot_filename,
         tour_steps,
+        feedback_url,
         data_requested,
         deprecation_warnings,
         setProps
@@ -219,6 +221,15 @@ const InnerWebvizPluginPlaceholder = (
                                 }
                             />
                         )}
+                    {buttons && buttons.includes("feedback") && feedback_url
+                        && (
+                            <WebvizToolbarButton
+                                icon={faCommentAlt}
+                                tooltip="Report issue / suggest improvement"
+                                href={feedback_url}
+                                target="blank"
+                            />
+                        )}
                     {deprecation_warnings.length > 0 && (
                         <WebvizToolbarButton
                             icon={faExclamationTriangle}
@@ -267,6 +278,7 @@ WebvizPluginPlaceholder.defaultProps = {
         "download",
         "guided_tour",
         "contact_person",
+        "feedback"
     ],
     contact_person: undefined,
     tour_steps: [],
@@ -274,6 +286,7 @@ WebvizPluginPlaceholder.defaultProps = {
     download: undefined,
     screenshot_filename: "webviz-screenshot.png",
     deprecation_warnings: [],
+    feedback_url: "",
     setProps: () => { return undefined },
 };
 
@@ -342,6 +355,11 @@ WebvizPluginPlaceholder.propTypes = {
             }
         )
     ),
+
+    /**
+     * URL to feedback website.
+     */
+    feedback_url: PropTypes.string,
 
     /**
      * Dash-assigned callback that should be called whenever any of the
