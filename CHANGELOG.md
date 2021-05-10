@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 ### Added
-- [#126](https://github.com/equinor/webviz-core-components/pull/126) - Added feedback button to `WebvizPluginPlaceholder`. Added `href` and `target` properties to `WebvizToolbarButton`.
+- [#130](https://github.com/equinor/webviz-core-components/pull/130) - Added feedback button to `WebvizPluginPlaceholder`. Added `href` and `target` properties to `WebvizToolbarButton`.
 
 ### Fixed
 - [#124](https://github.com/equinor/webviz-core-components/pull/124) - `SmartNodeSelector` now returns all selected tags (also invalid and duplicate ones) to parent.
