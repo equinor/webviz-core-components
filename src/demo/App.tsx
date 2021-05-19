@@ -52,6 +52,10 @@ class App extends Component {
                     id={"placeholder"}
                     setProps={this.setProps}
                     tour_steps={steps}
+                    feedback_url={
+                        "https://github.com/equinor/webviz-core-components/issues/"
+                        + "new?title=New+feedback&body=Feedback+text&labels=userfeedback"
+                    }
                     deprecation_warnings={
                         [
                             {
