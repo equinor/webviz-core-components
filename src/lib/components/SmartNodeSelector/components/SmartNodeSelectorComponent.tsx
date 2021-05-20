@@ -606,15 +606,17 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     markTagsAsSelected(startIndex: number, endIndex: number): void {
-        this.state.nodeSelections.map((nodeSelection, index) => {
-            if (index >= startIndex && index <= endIndex) {
-                nodeSelection.setSelected(true);
-            }
-            else {
-                nodeSelection.setSelected(false);
-            }
-        });
-        this.updateState({ forceUpdate: true });
+        if (this.props.maxNumSelectedNodes !== 1) {
+            this.state.nodeSelections.map((nodeSelection, index) => {
+                if (index >= startIndex && index <= endIndex) {
+                    nodeSelection.setSelected(true);
+                }
+                else {
+                    nodeSelection.setSelected(false);
+                }
+            });
+            this.updateState({ forceUpdate: true });
+        }
     }
 
     unselectAllTags({
@@ -1023,11 +1025,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             )
         }
 
+        const frameless = maxNumSelectedNodes === 1;
+
         return (
             <div id={id} ref={this.ref}>
                 {label && <label>{label}</label>}
                 <div className={classNames({
                     "SmartNodeSelector": true,
+                    "SmartNodeSelector--frameless": frameless,
                     "SmartNodeSelector--SuggestionsActive": suggestionsVisible,
                     "SmartNodeSelector--Invalid":
                         (maxNumSelectedNodes > 0 && this.countValidSelections() > maxNumSelectedNodes)
@@ -1035,11 +1040,16 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     onClick={(e) => this.selectLastInput(e)}
                     onMouseDown={(e) => this.handleMouseDown(e)}
                 >
-                    <ul className="SmartNodeSelector__Tags" ref={this.tagFieldRef}>
+                    <ul
+                        className="SmartNodeSelector__Tags"
+                        ref={this.tagFieldRef}
+                        style={frameless ? { width: "100%" } : {}}
+                    >
                         {nodeSelections.map((selection, index) => (
                             <Tag
                                 key={`${index}`}
                                 index={index}
+                                frameless={frameless}
                                 placeholder={placeholder ? placeholder : "Add new tag"}
                                 treeNodeSelection={selection}
                                 countTags={this.countTags()}
@@ -1075,7 +1085,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         />
                     }
                 </div>
-                {maxNumSelectedNodes > 0 && <div className={classNames({
+                {maxNumSelectedNodes > 1 && <div className={classNames({
                     "SmartNodeSelector__NumberOfTags": true,
                     "SmartNodeSelector__Error": this.countValidSelections() > maxNumSelectedNodes
                 })} ref={this.refNumberOfTags}>Selected {this.countValidSelections()} of {maxNumSelectedNodes}</div>}
