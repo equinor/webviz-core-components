@@ -27,7 +27,7 @@ exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapsho
               <input
                 placeholder="Add new tag..."
                 spellcheck="false"
-                style="width: 50px;"
+                style="width: 100px;"
                 type="text"
                 value=""
               />
