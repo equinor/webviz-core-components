@@ -5,27 +5,36 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { Component, ReactFragment } from 'react'
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
-import TreeNodeSelection from '../utils/TreeNodeSelection';
-import './SmartNodeSelector.css';
+import React, { Component, ReactFragment } from "react";
+import classNames from "classnames";
+import PropTypes from "prop-types";
+import TreeNodeSelection from "../utils/TreeNodeSelection";
+import "./SmartNodeSelector.css";
 
 type TagProps = {
     key: string;
     index: number;
-    placeholder: string,
+    placeholder: string;
     treeNodeSelection: TreeNodeSelection;
     countTags: number;
     currentTag: boolean;
     frameless: boolean;
-    checkIfDuplicate: (nodeSelection: TreeNodeSelection, index: number) => boolean;
+    checkIfDuplicate: (
+        nodeSelection: TreeNodeSelection,
+        index: number
+    ) => boolean;
     inputKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     inputKeyUp: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     inputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    inputSelect: (e: React.SyntheticEvent<HTMLInputElement, Event>, index: number) => void;
+    inputSelect: (
+        e: React.SyntheticEvent<HTMLInputElement, Event>,
+        index: number
+    ) => void;
     hideSuggestions: (callback?: () => void) => void;
-    removeTag: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, index: number) => void;
+    removeTag: (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+        index: number
+    ) => void;
     updateSelectedTagsAndNodes: () => void;
 };
 
@@ -48,55 +57,65 @@ export default class Tag extends Component<TagProps> {
     private addAdditionalClasses(invalid: boolean): boolean {
         const { currentTag, treeNodeSelection } = this.props;
         return (
-            treeNodeSelection.displayAsTag()
-            || (!invalid && !currentTag)
-            || (invalid && !currentTag && treeNodeSelection.getNodeName(0) != "")
+            treeNodeSelection.displayAsTag() ||
+            (!invalid && !currentTag) ||
+            (invalid && !currentTag && treeNodeSelection.getNodeName(0) != "")
         );
     }
 
     private innerTagClasses(invalid = false, duplicate = false): string {
         const { treeNodeSelection } = this.props;
         let ret = {
-            "SmartNodeSelector__InnerTag": true
+            SmartNodeSelector__InnerTag: true,
         };
         if (this.addAdditionalClasses(invalid)) {
             const icons = treeNodeSelection.icons();
             ret = Object.assign({}, ret, {
-                "SmartNodeSelector__Icon": icons.length > 0 || invalid || duplicate,
-                [
-                    invalid ? "SmartNodeSelector__InnerInvalid"
-                        : duplicate ? "SmartNodeSelector__InnerDuplicate"
-                            : icons.length > 1 ? "SmartNodeSelector__Unknown"
-                                : ""
-                ]: true
+                SmartNodeSelector__Icon:
+                    icons.length > 0 || invalid || duplicate,
+                [invalid
+                    ? "SmartNodeSelector__InnerInvalid"
+                    : duplicate
+                    ? "SmartNodeSelector__InnerDuplicate"
+                    : icons.length > 1
+                    ? "SmartNodeSelector__Unknown"
+                    : ""]: true,
             });
         }
         return classNames(ret);
     }
 
-    private outerTagClasses(invalid: boolean, duplicate: boolean, frameless: boolean): string {
+    private outerTagClasses(
+        invalid: boolean,
+        duplicate: boolean,
+        frameless: boolean
+    ): string {
         return classNames({
-            "SmartNodeSelector__Tag": true,
-            "SmartNodeSelector__Border": this.displayAsTag() || frameless,
-            [
-                !(this.addAdditionalClasses(invalid)) ? ""
-                    : invalid ? "SmartNodeSelector__Invalid"
-                        : duplicate ? "SmartNodeSelector__Duplicate"
-                            : ""
-            ]: true
+            SmartNodeSelector__Tag: true,
+            SmartNodeSelector__Border: this.displayAsTag() || frameless,
+            [!this.addAdditionalClasses(invalid)
+                ? ""
+                : invalid
+                ? "SmartNodeSelector__Invalid"
+                : duplicate
+                ? "SmartNodeSelector__Duplicate"
+                : ""]: true,
         });
     }
 
-    private calculateTextWidth(text: string, padding = 10, minWidth = 50): number {
+    private calculateTextWidth(
+        text: string,
+        padding = 10,
+        minWidth = 50
+    ): number {
         const { treeNodeSelection } = this.props;
         const span = document.createElement("span");
         if (text === undefined) {
             text = "";
         }
         span.classList.add("SmartNodeSelector__Ruler");
-        const input = (
-            treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
-        ).current as HTMLInputElement;
+        const input = (treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
+            .current as HTMLInputElement;
         if (input) {
             const fontSize = window.getComputedStyle(input).fontSize;
             span.style.fontSize = fontSize;
@@ -109,8 +128,14 @@ export default class Tag extends Component<TagProps> {
         return Math.max(minWidth, width + padding);
     }
 
-    private createMatchesCounter(nodeSelection: TreeNodeSelection, index: number): JSX.Element | null {
-        if (nodeSelection.containsWildcard() && nodeSelection.countExactlyMatchedNodePaths() > 0) {
+    private createMatchesCounter(
+        nodeSelection: TreeNodeSelection,
+        index: number
+    ): JSX.Element | null {
+        if (
+            nodeSelection.containsWildcard() &&
+            nodeSelection.countExactlyMatchedNodePaths() > 0
+        ) {
             const matches = nodeSelection.countExactlyMatchedNodePaths();
             return (
                 <span
@@ -125,29 +150,42 @@ export default class Tag extends Component<TagProps> {
         return null;
     }
 
-    private createBrowseButtons(nodeSelection: TreeNodeSelection, index: number): ReactFragment | null {
+    private createBrowseButtons(
+        nodeSelection: TreeNodeSelection,
+        index: number
+    ): ReactFragment | null {
         const { currentTag } = this.props;
         if (
-            ((nodeSelection.isValidUpToFocussedNode() && currentTag) || nodeSelection.isValid())
-            && !nodeSelection.containsWildcard()
-            && this.displayAsTag()
-            && nodeSelection.countAvailableChildNodes(nodeSelection.getFocussedLevel() - 1) > 1
-        ) {
-            const subgroups = nodeSelection.availableChildNodes(
+            ((nodeSelection.isValidUpToFocussedNode() && currentTag) ||
+                nodeSelection.isValid()) &&
+            !nodeSelection.containsWildcard() &&
+            this.displayAsTag() &&
+            nodeSelection.countAvailableChildNodes(
                 nodeSelection.getFocussedLevel() - 1
-            ).map((data) => data.nodeName);
-            let position = subgroups.indexOf(nodeSelection.getFocussedNodeName());
+            ) > 1
+        ) {
+            const subgroups = nodeSelection
+                .availableChildNodes(nodeSelection.getFocussedLevel() - 1)
+                .map((data) => data.nodeName);
+            let position = subgroups.indexOf(
+                nodeSelection.getFocussedNodeName()
+            );
             if (position === -1) {
                 position = 0;
             }
             return (
-                <div key={"TagBrowseButton_" + index} className="SmartNodeSelector__BrowseButtons">
+                <div
+                    key={"TagBrowseButton_" + index}
+                    className="SmartNodeSelector__BrowseButtons"
+                >
                     <button
                         key={"TagPreviousButton_" + index}
                         className="SmartNodeSelector__ShiftNode SmartNodeSelector__ShiftUp"
                         disabled={position == 0}
                         title="Previous option"
-                        onMouseDown={(e): void => this.shiftOption(e, nodeSelection, false)}
+                        onMouseDown={(e): void =>
+                            this.shiftOption(e, nodeSelection, false)
+                        }
                         onMouseUp={(e): void => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -162,7 +200,9 @@ export default class Tag extends Component<TagProps> {
                         className="SmartNodeSelector__ShiftNode SmartNodeSelector__ShiftDown"
                         disabled={position == subgroups.length - 1}
                         title="Next option"
-                        onMouseDown={(e): void => this.shiftOption(e, nodeSelection, true)}
+                        onMouseDown={(e): void =>
+                            this.shiftOption(e, nodeSelection, true)
+                        }
                         onMouseUp={(e): void => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -173,25 +213,38 @@ export default class Tag extends Component<TagProps> {
                         }}
                     />
                 </div>
-            )
+            );
         }
         return null;
     }
 
-    private shiftOption(e: React.MouseEvent<HTMLButtonElement>, nodeSelection: TreeNodeSelection, up: boolean): void {
+    private shiftOption(
+        e: React.MouseEvent<HTMLButtonElement>,
+        nodeSelection: TreeNodeSelection,
+        up: boolean
+    ): void {
         const { hideSuggestions, updateSelectedTagsAndNodes } = this.props;
-        const inputElement = (nodeSelection.getRef() as React.RefObject<HTMLInputElement>).current as HTMLInputElement;
-        const currentSelection = [inputElement.selectionStart, inputElement.selectionEnd];
-        const subgroups = nodeSelection.availableChildNodes(
-            nodeSelection.getFocussedLevel() - 1
-        ).map((el) => el.nodeName);
-        const newPosition = subgroups.indexOf(nodeSelection.getFocussedNodeName()) + (up ? 1 : -1);
+        const inputElement = (nodeSelection.getRef() as React.RefObject<HTMLInputElement>)
+            .current as HTMLInputElement;
+        const currentSelection = [
+            inputElement.selectionStart,
+            inputElement.selectionEnd,
+        ];
+        const subgroups = nodeSelection
+            .availableChildNodes(nodeSelection.getFocussedLevel() - 1)
+            .map((el) => el.nodeName);
+        const newPosition =
+            subgroups.indexOf(nodeSelection.getFocussedNodeName()) +
+            (up ? 1 : -1);
         if (!up && newPosition < 0) return;
         if (up && newPosition >= subgroups.length) return;
         nodeSelection.setNodeName(subgroups[newPosition]);
         hideSuggestions(() => {
             if (currentSelection[0] !== null && currentSelection[1] !== null) {
-                inputElement.setSelectionRange(currentSelection[0], currentSelection[1]);
+                inputElement.setSelectionRange(
+                    currentSelection[0],
+                    currentSelection[1]
+                );
             }
         });
         e.preventDefault();
@@ -203,46 +256,40 @@ export default class Tag extends Component<TagProps> {
         const { countTags, checkIfDuplicate } = this.props;
         if (index === countTags - 1 && !nodeSelection.displayAsTag()) {
             return "Enter a new name";
-        }
-        else if (!nodeSelection.isValid()) {
+        } else if (!nodeSelection.isValid()) {
             return "Invalid";
-        }
-        else if (checkIfDuplicate(nodeSelection, index)) {
+        } else if (checkIfDuplicate(nodeSelection, index)) {
             return "Duplicate";
-        }
-        else if (!nodeSelection.isComplete()) {
+        } else if (!nodeSelection.isComplete()) {
             return "Incomplete";
-        }
-        else {
+        } else {
             return nodeSelection.exactlyMatchedNodePaths().join("\n");
         }
     }
 
-
     private handleInput(e: React.FormEvent<HTMLInputElement>): void {
         const val = (e.target as HTMLInputElement).value;
         if (val) {
-            (e.target as HTMLInputElement).style.width = this.calculateTextWidth(val) + "px";
+            (e.target as HTMLInputElement).style.width =
+                this.calculateTextWidth(val) + "px";
         }
     }
 
     private displayAsTag(): boolean {
-        const {
-            treeNodeSelection,
-            currentTag,
-        } = this.props;
+        const { treeNodeSelection, currentTag } = this.props;
 
         return (
-            treeNodeSelection.displayAsTag()
-            || (treeNodeSelection.isValid() && currentTag)
-            || (treeNodeSelection.getNodeName(0) != "" && !currentTag)
+            treeNodeSelection.displayAsTag() ||
+            (treeNodeSelection.isValid() && currentTag) ||
+            (treeNodeSelection.getNodeName(0) != "" && !currentTag)
         );
     }
 
-    private createFocusOverlay(treeNodeSelection: TreeNodeSelection): React.ReactNode | null {
-        const inputElement = (
-            treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
-        ).current as HTMLInputElement;
+    private createFocusOverlay(
+        treeNodeSelection: TreeNodeSelection
+    ): React.ReactNode | null {
+        const inputElement = (treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
+            .current as HTMLInputElement;
         if (inputElement) {
             const inputContainerBoundingRect = (inputElement.parentElement as HTMLElement).getBoundingClientRect();
             const inputBoundingRect = inputElement.getBoundingClientRect();
@@ -252,62 +299,69 @@ export default class Tag extends Component<TagProps> {
 
             let width = this.calculateTextWidth(value, 0, 0);
             let distanceLeft = 0;
-            const splitByDelimiter = value.split(treeNodeSelection.getDelimiter());
+            const splitByDelimiter = value.split(
+                treeNodeSelection.getDelimiter()
+            );
             if (splitByDelimiter.length > 1) {
-                const currentText = splitByDelimiter[
-                    treeNodeSelection.getFocussedLevel() - treeNodeSelection.getNumMetaNodes()
-                ];
+                const currentText =
+                    splitByDelimiter[
+                        treeNodeSelection.getFocussedLevel() -
+                            treeNodeSelection.getNumMetaNodes()
+                    ];
                 width = this.calculateTextWidth(currentText, 0, 0);
                 const splitByCurrentText = value.split(currentText);
 
                 if (splitByCurrentText[0] !== undefined) {
-                    distanceLeft = this.calculateTextWidth(splitByCurrentText[0], 0, 0);
+                    distanceLeft = this.calculateTextWidth(
+                        splitByCurrentText[0],
+                        0,
+                        0
+                    );
                 }
             }
 
             left += distanceLeft;
 
             return (
-                <div className="SmartNodeSelector__FocusOverlay" style={{
-                    left: left + "px",
-                    width: width + "px"
-                }}></div>
+                <div
+                    className="SmartNodeSelector__FocusOverlay"
+                    style={{
+                        left: left + "px",
+                        width: width + "px",
+                    }}
+                ></div>
             );
-        }
-        else {
+        } else {
             return null;
         }
     }
 
     private calculateInputWidth(): string {
-        const {
-            treeNodeSelection,
-        } = this.props;
+        const { treeNodeSelection } = this.props;
         const displayText = treeNodeSelection.displayText();
 
-        if (treeNodeSelection.getFocussedNodeName() === ""
-            && treeNodeSelection.getFocussedLevel() == 0) {
+        if (
+            treeNodeSelection.getFocussedNodeName() === "" &&
+            treeNodeSelection.getFocussedLevel() == 0
+        ) {
             return "100px";
-        }
-        else {
+        } else {
             return this.calculateTextWidth(displayText) + "px";
         }
     }
 
     private makeStyle(): { [key: string]: string | number } {
-        const {
-            treeNodeSelection,
-            frameless,
-        } = this.props;
+        const { treeNodeSelection, frameless } = this.props;
 
         const colors = treeNodeSelection.colors();
-        const style = {};
+        const style: { [key: string]: string } = {};
 
         if (colors.length >= 2) {
-            style["background"] = `linear-gradient(to left, ${colors.join(", ")}) border-box`;
+            style["background"] = `linear-gradient(to left, ${colors.join(
+                ", "
+            )}) border-box`;
             style["border"] = "1px solid transparent";
-        }
-        else {
+        } else {
             style["borderColor"] = colors[0];
         }
 
@@ -329,7 +383,7 @@ export default class Tag extends Component<TagProps> {
             inputKeyUp,
             inputChange,
             inputSelect,
-            removeTag
+            removeTag,
         } = this.props;
 
         const displayText = treeNodeSelection.displayText();
@@ -341,13 +395,16 @@ export default class Tag extends Component<TagProps> {
             <li
                 key={"Tag_" + index}
                 title={this.tagTitle(treeNodeSelection, index)}
-                className={this.outerTagClasses((!valid && !currentTag), duplicate, frameless)}
+                className={this.outerTagClasses(
+                    !valid && !currentTag,
+                    duplicate,
+                    frameless
+                )}
                 style={this.makeStyle()}
                 onMouseEnter={(): void => this.setState({ hovered: true })}
                 onMouseLeave={(): void => this.setState({ hovered: false })}
             >
-                {
-                    this.displayAsTag() && !frameless &&
+                {this.displayAsTag() && !frameless && (
                     <button
                         type="button"
                         key={"TagRemoveButton_" + index}
@@ -355,14 +412,25 @@ export default class Tag extends Component<TagProps> {
                         title="Remove"
                         onClick={(e): void => removeTag(e, index)}
                     />
-                }
+                )}
                 {this.createBrowseButtons(treeNodeSelection, index)}
-                <div key={"InnerTag_" + index} className={
-                    this.innerTagClasses((!valid && !currentTag), duplicate)
-                }
-                    style={(treeNodeSelection.icons().length == 1 && !duplicate && (valid || currentTag) ? {
-                        backgroundImage: "url(" + treeNodeSelection.icons()[0] + ")"
-                    } : {})
+                <div
+                    key={"InnerTag_" + index}
+                    className={this.innerTagClasses(
+                        !valid && !currentTag,
+                        duplicate
+                    )}
+                    style={
+                        treeNodeSelection.icons().length == 1 &&
+                        !duplicate &&
+                        (valid || currentTag)
+                            ? {
+                                  backgroundImage:
+                                      "url(" +
+                                      treeNodeSelection.icons()[0] +
+                                      ")",
+                              }
+                            : {}
                     }
                 >
                     {this.createMatchesCounter(treeNodeSelection, index)}
@@ -372,15 +440,15 @@ export default class Tag extends Component<TagProps> {
                             key={"TagInput_" + index}
                             type="text"
                             placeholder={
-                                (
-                                    treeNodeSelection.getFocussedNodeName() === ""
-                                        && treeNodeSelection.getFocussedLevel() == 0
-                                        ? "Add new tag..." : ""
-                                )
+                                treeNodeSelection.getFocussedNodeName() ===
+                                    "" &&
+                                treeNodeSelection.getFocussedLevel() == 0
+                                    ? "Add new tag..."
+                                    : ""
                             }
                             value={displayText}
                             style={{
-                                width: this.calculateInputWidth()
+                                width: this.calculateInputWidth(),
                             }}
                             ref={treeNodeSelection.getRef()}
                             onInput={(e): void => this.handleInput(e)}
@@ -389,22 +457,24 @@ export default class Tag extends Component<TagProps> {
                             onKeyUp={(e): void => inputKeyUp(e)}
                             onKeyDown={(e): void => inputKeyDown(e)}
                             onSelect={(e): void => inputSelect(e, index)}
-                            onBlur={(): void => treeNodeSelection.setFocussedLevel(treeNodeSelection.countLevel() - 1)}
+                            onBlur={(): void =>
+                                treeNodeSelection.setFocussedLevel(
+                                    treeNodeSelection.countLevel() - 1
+                                )
+                            }
                         />
-                        {
-                            ((currentTag || this.state.hovered) && !treeNodeSelection.isSelected()) &&
-                            this.createFocusOverlay(treeNodeSelection)
-                        }
+                        {(currentTag || this.state.hovered) &&
+                            !treeNodeSelection.isSelected() &&
+                            this.createFocusOverlay(treeNodeSelection)}
                     </div>
-                    {
-                        treeNodeSelection.isSelected() &&
+                    {treeNodeSelection.isSelected() && (
                         <div
                             key={"TagSelected_" + index}
-                            className="SmartNodeSelector__TagSelected">
-                        </div>
-                    }
+                            className="SmartNodeSelector__TagSelected"
+                        ></div>
+                    )}
                 </div>
-            </li >
+            </li>
         );
     }
 }
@@ -462,5 +532,5 @@ Tag.propTypes = {
     /**
      * Function for updating selected tags, nodes and ids.
      */
-    updateSelectedTagsAndNodes: PropTypes.func.isRequired
+    updateSelectedTagsAndNodes: PropTypes.func.isRequired,
 };

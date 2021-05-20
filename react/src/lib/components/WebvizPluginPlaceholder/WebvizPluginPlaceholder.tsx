@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef } from "react";
 import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
-import { SnackbarProvider, useSnackbar } from 'notistack';
+import { SnackbarProvider, useSnackbar } from "notistack";
 
 import {
     faAddressCard,
@@ -18,10 +18,13 @@ import {
     faExpand,
     faDownload,
     faExclamationTriangle,
-    faCommentAlt
+    faCommentAlt,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { getPropsWithMissingValuesSetToDefault, Optionals } from "../../utils/DefaultPropsHelpers";
+import {
+    getPropsWithMissingValuesSetToDefault,
+    Optionals,
+} from "../../utils/DefaultPropsHelpers";
 
 import WebvizToolbarButton from "./utils/WebvizToolbarButton";
 import WebvizContentOverlay from "./utils/WebvizContentOverlay";
@@ -53,7 +56,7 @@ const propTypes = {
     contact_person: PropTypes.shape({
         name: PropTypes.string.isRequired,
         email: PropTypes.string.isRequired,
-        phone: PropTypes.string.isRequired
+        phone: PropTypes.string.isRequired,
     }),
 
     /**
@@ -64,7 +67,7 @@ const propTypes = {
     download: PropTypes.shape({
         filename: PropTypes.string.isRequired,
         content: PropTypes.string.isRequired,
-        mime_type: PropTypes.string.isRequired
+        mime_type: PropTypes.string.isRequired,
     }),
 
     /**
@@ -87,13 +90,16 @@ const propTypes = {
      * Stating if a deprecation warning for the related plugin should be shown.
      */
     deprecation_warnings: PropTypes.arrayOf(
-        PropTypes.shape(
-            {
-                message: PropTypes.string.isRequired,
-                url: PropTypes.string.isRequired
-            }
-        ).isRequired
+        PropTypes.shape({
+            message: PropTypes.string.isRequired,
+            url: PropTypes.string.isRequired,
+        }).isRequired
     ),
+
+    /**
+     * URL to feedback website.
+     */
+    feedback_url: PropTypes.string,
 
     /**
      * Dash-assigned callback that should be called whenever any of the
@@ -110,6 +116,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
         "download",
         "guided_tour",
         "contact_person",
+        "feedback",
     ],
     children: null,
     contact_person: null,
@@ -118,7 +125,10 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     download: null,
     screenshot_filename: "webviz-screenshot.png",
     deprecation_warnings: [],
-    setProps: () => { return; }
+    feedback_url: "",
+    setProps: () => {
+        return;
+    },
 };
 
 const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
@@ -135,7 +145,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
         feedback_url,
         data_requested,
         deprecation_warnings,
-        setProps
+        setProps,
     } = getPropsWithMissingValuesSetToDefault(props, defaultProps);
 
     const [expanded, setExpanded] = useState(false);
@@ -152,13 +162,10 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
         if (didMountRef.current) {
             // Hide/show body scrollbar depending on plugin going in/out of full screen mode.
             if (prevExpandedRef.current !== expanded) {
-                document.body.style.overflow = expanded
-                    ? "hidden"
-                    : "visible";
+                document.body.style.overflow = expanded ? "hidden" : "visible";
             }
             prevExpandedRef.current = expanded;
-        }
-        else {
+        } else {
             didMountRef.current = true;
         }
     }, [prevExpandedRef]);
@@ -173,44 +180,42 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                 downloadFile({
                     filename: download.filename,
                     data: download.content,
-                    mimeType: download.mime_type
+                    mimeType: download.mime_type,
                 });
                 setProps({ download: null });
             }
-        }
-        else {
+        } else {
             didMountRef.current = true;
         }
     }, [download]);
 
     const showDeprecationWarnings = () => {
         for (const warning of deprecation_warnings) {
-            enqueueSnackbar(
-                warning.message,
-                {
-                    variant: "warning",
-                    action: (
-                        <a
-                            className="webviz-config-plugin-deprecation-link"
-                            href={warning.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            More info
-                        </a>
-                    ),
-                    anchorOrigin: {
-                        vertical: 'bottom',
-                        horizontal: 'right',
-                    }
-                }
-            );
+            enqueueSnackbar(warning.message, {
+                variant: "warning",
+                action: (
+                    <a
+                        className="webviz-config-plugin-deprecation-link"
+                        href={warning.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        More info
+                    </a>
+                ),
+                anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "right",
+                },
+            });
         }
-    }
+    };
 
     const showTour =
-        buttons && buttons.includes("guided_tour") &&
-        tour_steps && tour_steps.length > 0;
+        buttons &&
+        buttons.includes("guided_tour") &&
+        tour_steps &&
+        tour_steps.length > 0;
 
     const ref = React.createRef<HTMLDivElement>();
 
@@ -219,9 +224,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
             <div
                 className={
                     "webviz-config-plugin-wrapper" +
-                    (expanded
-                        ? " webviz-config-plugin-expand"
-                        : "")
+                    (expanded ? " webviz-config-plugin-expand" : "")
                 }
             >
                 <div id={id} ref={ref} className="webviz-plugin-content">
@@ -233,34 +236,28 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                         showOverlay={showOverlay}
                     />
                 </div>
-                <div
-                    className="webviz-config-plugin-buttonbar"
-                >
+                <div className="webviz-config-plugin-buttonbar">
                     {buttons && buttons.includes("screenshot") && (
                         <WebvizToolbarButton
                             icon={faCameraRetro}
                             tooltip="Take screenshot"
                             onClick={() => {
                                 ref.current &&
-                                    html2canvas(
-                                        ref.current,
-                                        {
-                                            scrollX: -window.scrollX,
-                                            scrollY: -window.scrollY,
-                                        }
-                                    ).then(canvas =>
-                                        canvas.toBlob(blob => {
+                                    html2canvas(ref.current, {
+                                        scrollX: -window.scrollX,
+                                        scrollY: -window.scrollY,
+                                    }).then((canvas) =>
+                                        canvas.toBlob((blob) => {
                                             if (blob !== null) {
                                                 downloadFile({
                                                     filename: screenshot_filename,
                                                     data: blob,
-                                                    mimeType: "image/png"
-                                                })
+                                                    mimeType: "image/png",
+                                                });
                                             }
                                         })
-                                    )
-                            }
-                            }
+                                    );
+                            }}
                         />
                     )}
                     {buttons && buttons.includes("expand") && (
@@ -269,7 +266,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                             tooltip="Expand"
                             selected={expanded}
                             onClick={() => {
-                                setExpanded(!expanded)
+                                setExpanded(!expanded);
                                 // Trigger resize events of content in plugin,
                                 // relevant as long as this issue is open:
                                 // https://github.com/plotly/plotly.js/issues/3984
@@ -283,8 +280,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                             tooltip="Download data"
                             onClick={() =>
                                 setProps({
-                                    data_requested:
-                                        dataRequested + 1,
+                                    data_requested: dataRequested + 1,
                                 })
                             }
                         />
@@ -293,25 +289,23 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                         <WebvizToolbarButton
                             icon={faQuestionCircle}
                             tooltip="Guided tour"
-                            onClick={() =>
-                                setTourIsOpen(true)
-                            }
+                            onClick={() => setTourIsOpen(true)}
                         />
                     )}
-                    {buttons && buttons.includes("contact_person") &&
-                        (contact_person && Object.keys(contact_person).length > 0)
-                        && (
+                    {buttons &&
+                        buttons.includes("contact_person") &&
+                        contact_person &&
+                        Object.keys(contact_person).length > 0 && (
                             <WebvizToolbarButton
                                 icon={faAddressCard}
                                 tooltip="Contact person"
                                 selected={showOverlay}
-                                onClick={() =>
-                                    setShowOverlay(!showOverlay)
-                                }
+                                onClick={() => setShowOverlay(!showOverlay)}
                             />
                         )}
-                    {buttons && buttons.includes("feedback") && feedback_url
-                        && (
+                    {buttons &&
+                        buttons.includes("feedback") &&
+                        feedback_url && (
                             <WebvizToolbarButton
                                 icon={faCommentAlt}
                                 tooltip="Report issue / suggest improvement"
@@ -324,9 +318,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                             icon={faExclamationTriangle}
                             tooltip="This plugin has deprecation warnings"
                             important={true}
-                            onClick={() =>
-                                showDeprecationWarnings()
-                            }
+                            onClick={() => showDeprecationWarnings()}
                         />
                     )}
                 </div>
@@ -335,9 +327,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                 <Tour
                     steps={tour_steps}
                     isOpen={tourIsOpen}
-                    onRequestClose={() =>
-                        setTourIsOpen(false)
-                    }
+                    onRequestClose={() => setTourIsOpen(false)}
                     showNumber={false}
                     rounded={5}
                     accentColor="red"
@@ -362,108 +352,10 @@ const WebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
         <SnackbarProvider maxSnack={3}>
             <InnerWebvizPluginPlaceholder {...props} />
         </SnackbarProvider>
-    )
+    );
 };
 
 WebvizPluginPlaceholder.propTypes = propTypes;
 WebvizPluginPlaceholder.defaultProps = defaultProps;
 
 export default WebvizPluginPlaceholder;
-
-WebvizPluginPlaceholder.defaultProps = {
-    id: "some-id",
-    buttons: [
-        "screenshot",
-        "expand",
-        "download",
-        "guided_tour",
-        "contact_person",
-        "feedback"
-    ],
-    contact_person: undefined,
-    tour_steps: [],
-    data_requested: 0,
-    download: undefined,
-    screenshot_filename: "webviz-screenshot.png",
-    deprecation_warnings: [],
-    feedback_url: "",
-    setProps: () => { return undefined },
-};
-
-WebvizPluginPlaceholder.propTypes = {
-    /**
-     * The ID used to identify this component in Dash callbacks
-     */
-    id: PropTypes.string.isRequired,
-
-    /**
-     * The children of this component
-     */
-    children: PropTypes.node,
-
-    /**
-     * Array of strings, representing which buttons to render. Full set is
-     * ['download', 'contact_person', 'guided_tour', 'screenshot', 'expand']
-     */
-    buttons: PropTypes.array.isRequired,
-
-    /**
-     * A dictionary of information regarding contact person for the data content.
-     * Valid keys are 'name', 'email' and 'phone'.
-     */
-    contact_person: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        email: PropTypes.string.isRequired,
-        phone: PropTypes.string.isRequired
-    }),
-
-    /**
-     * A dictionary with information regarding the resource file the plugin requested.
-     * Dictionary keys are 'filename', 'content' and 'mime_type'.
-     * The 'content' value should be a base64 encoded ASCII string.
-     */
-    download: PropTypes.shape({
-        filename: PropTypes.string.isRequired,
-        content: PropTypes.string.isRequired,
-        mime_type: PropTypes.string.isRequired
-    }),
-
-    /**
-     *  File name used when saving a screenshot of the plugin.
-     */
-    screenshot_filename: PropTypes.string,
-
-    /**
-     * Tour steps. List of dictionaries, each with two keys ('selector' and 'content').
-     */
-    tour_steps: PropTypes.array,
-
-    /**
-     * An integer that represents the number of times
-     * that the data download button has been clicked.
-     */
-    data_requested: PropTypes.number,
-
-    /**
-     * Stating if a deprecation warning for the related plugin should be shown.
-     */
-    deprecation_warnings: PropTypes.arrayOf(
-        PropTypes.shape(
-            {
-                message: PropTypes.string,
-                url: PropTypes.string
-            }
-        )
-    ),
-
-    /**
-     * URL to feedback website.
-     */
-    feedback_url: PropTypes.string,
-
-    /**
-     * Dash-assigned callback that should be called whenever any of the
-     * properties change
-     */
-    setProps: PropTypes.func.isRequired,
-};

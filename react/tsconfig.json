@@ -2,19 +2,11 @@
     "compilerOptions": {
         "baseUrl": "src",
         "paths": {
-            "test-utils": [
-                "./tests/js"
-            ]
+            "test-utils": ["./tests/js"]
         },
         "outDir": "./dist", // path to output directory
         "sourceMap": true, // allow sourcemap support
-        "strict": true, // enable strict null checks as a best practice
-        // These (and more) are turned on by strict
-        //"strictNullChecks": true, // enable strict null checks as a best practice
-        //"noImplicitAny": true,
-        //"noImplicitThis": true,
-        //"strictPropertyInitialization": true,
-        // Should probable have these 'linting' options enabled
+        "strict": true, // enable all of the strict mode family of options
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
@@ -28,10 +20,7 @@
         "jsx": "react", // use typescript to transpile jsx to js
         "target": "es6", // specify ECMAScript target version
         "allowJs": true, // allow a partial TypeScript and JavaScript codebase
-        "skipLibCheck": true, // don't do typechecking on the node modules
+        "skipLibCheck": true // don't do typechecking on the node modules
     },
-    "include": [
-        "./src/lib",
-        "./src/custom_typings"
-    ]
+    "include": ["./src/lib", "./src/custom_typings"]
 }
