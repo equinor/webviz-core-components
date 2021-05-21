@@ -6,12 +6,15 @@ webviz_core_components/**/*
 !webviz_core_components/flexbox.py
 !webviz_core_components/_argument_modifier.py 
 
+react/storybook-static/**/*
+!react/storybook-static/favicon.ico
+
 DESCRIPTION
 NAMESPACE
 R/
 man/
 inst/
-dist/
+react/dist/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### VisualStudioCode template

@@ -6,7 +6,7 @@
             "request": "launch",
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}/react/"
         },
         {
             "type": "node",
@@ -20,12 +20,13 @@
             "request": "launch",
             "runtimeArgs": [
                 "--inspect-brk",
-                "${workspaceRoot}/node_modules/.bin/jest",
+                "${workspaceRoot}/react/node_modules/.bin/jest",
                 "--runInBand"
             ],
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "port": 9229
+            "port": 9229,
+            "cwd": "${workspaceRoot}/react/"
         }
     ]
 }

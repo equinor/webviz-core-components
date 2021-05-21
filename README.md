@@ -24,48 +24,57 @@ You can quickly get started with:
 If you want to build and develop yourself, you should fork + clone the repository, and
 then:
 
-1. Install npm packages
-    ```
-    npm ci --ignore-scripts
-    ```
+1. Install npm packages.
+   ```
+   npm ci --ignore-scripts --prefix ./react
+   ```
 2. Install python packages required to build components.
-    ```
-    pip install .[dependencies]
-    pip install dash[dev]
-    ```
+   ```
+   pip install .[dependencies]
+   pip install dash[dev]
+   ```
 3. Install the python packages for testing.
-    ```
-    pip install .[tests]
-    pip install dash[testing]
-    ```
-    The second of these commands appears to be necessary as long as
-    [this `pip` issue is open](https://github.com/pypa/pip/issues/4957).
+   ```
+   pip install .[tests]
+   pip install dash[testing]
+   ```
+   The second of these commands appears to be necessary as long as
+   [this `pip` issue is open](https://github.com/pypa/pip/issues/4957).
 
-### Write component code in `src/lib/components/<component_name>.react.js`
+### Write component code in `react/src/lib/components/<ComponentName>/<ComponentName>.tsx`
 
-- The demo app is in `src/demo` and is where you will import an example of your
-  component. To start the existing demo app, run `npm start`.
+- Have a look at other components to see how the directory and file structure looks like.
+- The demo app is in `react/src/demo` and is where you will import an example of your
+  component. To start the existing demo app, run `npm start --prefix ./react`.
 - To test your code in a Python environment:
-    1. Build your code
-        ```
-        npm run build
-        ```
-    2. Install the Python pacakge in development mode (if not already done and
-       assuming you are using a virtual environment):
-        ```
-        pip install -e .
-        ```
-    3. Create a new example in `examples/` which uses your new component.
 
--   Write tests for your component.
-    -   Tests exist in `tests/`. Take a look at them to see how to write tests using
-        the Dash test framework.
-    -   Run the tests with `pytest tests`.
+  1. Build your code
+     ```
+     npm run build --prefix ./react
+     ```
+  2. Install the Python pacakge in development mode (if not already done and
+     assuming you are using a virtual environment):
+     ```
+     pip install -e .
+     ```
+  3. Create a new example in `examples/` which uses your new component.
 
--   Add custom styles to your component by putting your custom CSS files into
-    your distribution folder (`webviz_core_components`).
-    -   Make sure that they are referenced in `MANIFEST.in` so that they get
-        properly included when you're ready to publish your component.
-    -   Make sure the stylesheets are added to the `_css_dist` dict in
-        `webviz_core_components/__init__.py` so dash will serve them
-        automatically when the component suite is requested.
+- Write tests for your component.
+
+  - Python
+    - Python tests exist in `tests/`. Take a look at them to see how to write tests using
+      the Dash test framework.
+    - Run the tests with `pytest tests`.
+  - JavaScript
+    - JavaScript tests exist in `react/tests`. Take a look at them to see how to write tests using
+      the Jest test framework.
+
+- Add custom styles to your component by putting your custom CSS files into
+  your distribution folder (`webviz_core_components`).
+  - Make sure that they are referenced in `MANIFEST.in` so that they get
+    properly included when you're ready to publish your component.
+  - Make sure the stylesheets are added to the `_css_dist` dict in
+    `webviz_core_components/__init__.py` so dash will serve them
+    automatically when the component suite is requested.
+  - You can also include stylesheets directly in your component by adding the stylesheet to your component's directory and importing it via `import "./<ComponentName>.css`. Make sure that the class names in your stylesheet
+    are starting with your component's name and two underscores: `.MyComponent__MyClassName`.
