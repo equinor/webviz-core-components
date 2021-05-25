@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 ### Changed
+- [#134](https://github.com/equinor/webviz-core-components/pull/134) - When prereleases are done in GitHub, they will now be published to `npm` using the `next` tag. E.g. `npm install @webviz/core-components` will install the latest official release, while `npm install @webviz/core-components@next` will install the
+latest prerelease.
 - [#125](https://github.com/equinor/webviz-core-components/pull/125) - Moved `React` code and `Node.js` configuration into `./react/` directory. 
 Adjusted `package.json`, `.gitignore`, `.vscode/launch.js` and GitHub workflow file accordingly.
 - [#125](https://github.com/equinor/webviz-core-components/pull/125) - Tightened `tsconfig` options in order to have a more strict code validation.
