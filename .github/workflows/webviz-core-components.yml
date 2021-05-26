@@ -69,6 +69,10 @@ jobs:
           npm run test --prefix ./react
           pytest ./tests --headless
 
+      - name: ⏭️ Set next as npm publish tag if prerelease
+        if: github.event.release.prerelease
+        run: echo "NPM_PUBLISH_TAG=next" >> $GITHUB_ENV
+
       - name: 🔼 Build and publish Node.js package
         if: github.event_name == 'release' && matrix.python-version == '3.6'
         env:
@@ -78,7 +82,8 @@ jobs:
           npm version --no-git-tag-version ${GITHUB_REF//refs\/tags\//}
           npm config set '//registry.npmjs.org/:_authToken' '${NPM_TOKEN}'
           npm config set always-auth true
-          npm publish --access public
+          # Use 'latest' tag if $NPM_PUBLISH_TAG is not set:
+          npm publish --access public --tag ${NPM_PUBLISH_TAG:-latest}
 
       - name: 🚢 Build and deploy Python package
         if: github.event_name == 'release' && matrix.python-version == '3.6'
