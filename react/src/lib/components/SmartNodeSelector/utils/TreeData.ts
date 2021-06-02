@@ -123,6 +123,9 @@ export default class TreeData {
     }
 
     private adjustNodeName(nodeName: string): string {
+        if (nodeName === undefined) {
+            console.log(nodeName);
+        }
         return this.replaceAll(
             this.replaceAll(this.escapeRegExp(nodeName), "*", '[^:"]*'),
             "?",

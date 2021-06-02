@@ -390,7 +390,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             nodeSelections === undefined
                 ? this.state.nodeSelections
                 : nodeSelections;
-        const currentNodeSelections = this.state.nodeSelections;
         const newTagIndex =
             currentTagIndex === undefined
                 ? this.currentTagIndex()
@@ -418,22 +417,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 },
                 () => {
                     callback();
-                    if (
-                        newNodeSelections !== currentNodeSelections ||
-                        this.countValidSelections() !== this.numValidSelections
-                    ) {
-                        this.updateSelectedTagsAndNodes();
-                    }
+                    this.updateSelectedTagsAndNodes();
                 }
             );
         } else {
             callback();
-            if (
-                newNodeSelections !== currentNodeSelections ||
-                this.countValidSelections() !== this.numValidSelections
-            ) {
-                this.updateSelectedTagsAndNodes();
-            }
+            this.updateSelectedTagsAndNodes();
         }
     }
 
@@ -1047,7 +1036,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             } else if (!this.currentNodeSelection().isValid()) {
                 this.currentNodeSelection().setNodeName(
                     val.split(this.props.delimiter)[
-                        this.currentNodeSelection().getFocussedLevel()
+                        this.currentNodeSelection().getFocussedLevel() - this.currentNodeSelection().getNumMetaNodes()
                     ]
                 );
                 this.currentNodeSelection().incrementFocussedLevel();

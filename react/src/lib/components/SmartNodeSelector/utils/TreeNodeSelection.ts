@@ -78,6 +78,9 @@ export default class TreeNodeSelection {
     }
 
     setNodeName(data: string, index?: number): void {
+        if (data === undefined) {
+            console.log(data);
+        }
         if (index !== undefined) {
             this.nodePath[index] = data;
         }
@@ -289,7 +292,16 @@ export default class TreeNodeSelection {
     }
 
     isValid(): boolean {
-        return this.treeData.findFirstNode(this.nodePath) !== null;
+        if (this.nodePath.length === 0) {
+            return false;
+        }
+        try {
+            return this.treeData.findFirstNode(this.nodePath) !== null;
+        }
+        catch (e) {
+            console.log(e);
+        }
+        return false;
     }
 
     numberOfPossiblyMatchedNodes(): number {

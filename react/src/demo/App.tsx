@@ -210,6 +210,13 @@ class App extends Component {
                 {this.state.selectedNodes.length == 0 && (
                     <i>None</i>
                 )}
+                <br />Selected tags:<br />
+                {this.state.selectedTags.length > 0 && this.state.selectedTags.map((tag, index) => (
+                    <div key={`tag-${index}`}>{tag}</div>
+                ))}
+                {this.state.selectedTags.length === 0 && (
+                    <i>None</i>
+                )}
             </div>
         );
     }
