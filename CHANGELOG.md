@@ -26,6 +26,7 @@ Adjusted `package.json`, `.gitignore`, `.vscode/launch.js` and GitHub workflow f
 - [#130](https://github.com/equinor/webviz-core-components/pull/130) - Added feedback button to `WebvizPluginPlaceholder`. Added `href` and `target` properties to `WebvizToolbarButton`.
 
 ### Fixed
+- [#136](https://github.com/equinor/webviz-core-components/pull/136) - Several bug fixes (Exception on entering invalid node name when no metadata given, exception on using several wildcards, new tag when pressing enter with single node selection and invalid data, node selected several times when its name is partly contained in other nodes).
 - [#125](https://github.com/equinor/webviz-core-components/pull/125) - Removed `selectedNodes` attribute from `SmartNodeSelector` arguments in `usage.py`.
 - [#124](https://github.com/equinor/webviz-core-components/pull/124) - `SmartNodeSelector` now returns all selected tags (also invalid and duplicate ones) to parent.
 - [#123](https://github.com/equinor/webviz-core-components/pull/123) - Removed unused variables and added types to `SmartNodeSelector` and its tests.
