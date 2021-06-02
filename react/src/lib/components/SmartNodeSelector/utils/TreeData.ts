@@ -198,7 +198,7 @@ export default class TreeData {
         return nodeName.replace(new RegExp(`\\{\\d+\\}`, 'g'), "");
     }
 
-    findNodes(nodePath: string[]): { nodePaths: string[]; metaData: TreeDataNodeMetaData[][] } {
+    findNodes(nodePath: string[], exactMatch: boolean = false): { nodePaths: string[]; metaData: TreeDataNodeMetaData[][] } {
         let nodePathString = "";
         for (let i = 0; i < nodePath.length; i++) {
             if (i > 0) {
@@ -206,7 +206,7 @@ export default class TreeData {
             }
             nodePathString += `\\{(\\d+)\\}${this.adjustNodeName(nodePath[i])}`;
         }
-        const re = RegExp(`"(${nodePathString})`, 'g');
+        const re = exactMatch ? RegExp(`"(${nodePathString})"`, 'g') : RegExp(`"(${nodePathString})`, 'g');
 
         const metaData: TreeDataNodeMetaData[][] = [];
         const nodePaths: string[] = [];

@@ -59,7 +59,7 @@ export default class Tag extends Component<TagProps> {
         return (
             treeNodeSelection.displayAsTag() ||
             (!invalid && !currentTag) ||
-            (invalid && !currentTag && treeNodeSelection.getNodeName(0) != "")
+            (invalid && !currentTag && treeNodeSelection.getNodeName(0) !== "")
         );
     }
 
@@ -281,7 +281,7 @@ export default class Tag extends Component<TagProps> {
         return (
             treeNodeSelection.displayAsTag() ||
             (treeNodeSelection.isValid() && currentTag) ||
-            (treeNodeSelection.getNodeName(0) != "" && !currentTag)
+            (treeNodeSelection.getNodeName(0) !== "" && !currentTag)
         );
     }
 

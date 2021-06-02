@@ -63,8 +63,7 @@ export default class TreeNodeSelection {
             }
             return nodePath;
         }
-        else
-            throw "The given index is out of bounds";
+        return [];
     }
 
     getFocussedNodeName(): string {
@@ -242,13 +241,13 @@ export default class TreeNodeSelection {
             let text = "";
             for (let i = 0; i < this.countLevel(); i++) {
                 const el = this.getNodeName(i);
-                if (this.getFocussedLevel() == i && i < this.numMetaNodes && typeof el === "string") {
+                if (this.getFocussedLevel() === i && i < this.numMetaNodes && typeof el === "string") {
                     text = el
                     break;
                 }
                 else if (i >= this.numMetaNodes) {
                     if (el === "" && this.getFocussedLevel() < i) break;
-                    text += text == "" ? el : this.delimiter + el;
+                    text += text === "" ? el : this.delimiter + el;
                 }
             }
             return text;
@@ -273,7 +272,7 @@ export default class TreeNodeSelection {
 
     isValidUpToFocussedNode(): boolean {
         return (
-            this.getNodeName(this.focussedLevel) != ""
+            this.getNodeName(this.focussedLevel) !== ""
             && this.treeData.findFirstNode(this.getNodePath(this.focussedLevel), false) !== null
         );
     }
@@ -298,7 +297,7 @@ export default class TreeNodeSelection {
     }
 
     exactlyMatchedNodePaths(): Array<string> {
-        return this.treeData.findNodes(this.nodePath).nodePaths;
+        return this.treeData.findNodes(this.nodePath, true).nodePaths;
     }
 
     countExactlyMatchedNodePaths(): number {

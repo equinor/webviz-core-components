@@ -415,19 +415,21 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     letMaxNumValuesBlink(): void {
-        let numBlinks = 0;
-        const numberOfTagsDiv = ((this.refNumberOfTags as React.RefObject<HTMLDivElement>).current as HTMLDivElement);
-        const blinkTimer = setInterval(() => {
-            numBlinks++;
-            if (numBlinks % 2 == 0) {
-                numberOfTagsDiv.classList.add("SmartNodeSelector__Warning");
-            } else {
-                numberOfTagsDiv.classList.remove("SmartNodeSelector__Warning");
-            }
-            if (numBlinks === 7) {
-                clearInterval(blinkTimer);
-            }
-        }, 200);
+        if (this.props.maxNumSelectedNodes !== 1) {
+            let numBlinks = 0;
+            const numberOfTagsDiv = ((this.refNumberOfTags as React.RefObject<HTMLDivElement>).current as HTMLDivElement);
+            const blinkTimer = setInterval(() => {
+                numBlinks++;
+                if (numBlinks % 2 == 0) {
+                    numberOfTagsDiv.classList.add("SmartNodeSelector__Warning");
+                } else {
+                    numberOfTagsDiv.classList.remove("SmartNodeSelector__Warning");
+                }
+                if (numBlinks === 7) {
+                    clearInterval(blinkTimer);
+                }
+            }, 200);
+        }
     }
 
     checkIfSelectionIsDuplicate(nodeSelection: TreeNodeSelection, index: number): boolean {
@@ -766,7 +768,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     canAddSelection(): boolean {
-        return this.countValidSelections() < this.props.maxNumSelectedNodes || this.props.maxNumSelectedNodes == -1;
+        return (this.countValidSelections() < this.props.maxNumSelectedNodes || this.props.maxNumSelectedNodes == -1) && this.props.maxNumSelectedNodes !== 1;
     }
 
     updateSelectedTagsAndNodes(): void {
@@ -870,7 +872,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 this.incrementCurrentTagIndex();
                 this.setFocusOnTagInput(this.currentTagIndex() + 1);
             }
-
         }
         else if (e.key === "ArrowRight" && val) {
             if (eventTarget.selectionStart == eventTarget.value.length) {
@@ -892,7 +893,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 this.updateState({ forceUpdate: true });
             }
             else if (!this.currentNodeSelection().isValid()) {
-                this.currentNodeSelection().setNodeName(val);
+                this.currentNodeSelection().setNodeName(val.split(this.props.delimiter)[this.currentNodeSelection().getFocussedLevel()]);
                 this.currentNodeSelection().incrementFocussedLevel();
                 this.updateState({ forceUpdate: true });
             }
