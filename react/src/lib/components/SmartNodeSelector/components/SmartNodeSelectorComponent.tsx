@@ -1121,10 +1121,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         } else if (
             e.key === "Backspace" &&
             this.currentNodeSelection().getFocussedLevel() > 0 &&
-            (eventTarget.value == "" ||
+            (eventTarget.value === "" ||
                 (!this.currentNodeSelection().isFocusOnMetaData() &&
-                    val.slice(-1) == this.props.delimiter))
+                    val.slice(-1) === this.props.delimiter))
         ) {
+            if (e.repeat) {
+                e.preventDefault();
+                return;
+            }
             this.currentNodeSelection().decrementFocussedLevel();
             this.updateState({ forceUpdate: true });
             e.preventDefault();
