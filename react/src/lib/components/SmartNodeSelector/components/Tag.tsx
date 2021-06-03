@@ -59,7 +59,7 @@ export default class Tag extends Component<TagProps> {
         return (
             treeNodeSelection.displayAsTag() ||
             (!invalid && !currentTag) ||
-            (invalid && !currentTag && treeNodeSelection.getNodeName(0) != "")
+            (invalid && !currentTag && treeNodeSelection.getNodeName(0) !== "")
         );
     }
 
@@ -281,7 +281,7 @@ export default class Tag extends Component<TagProps> {
         return (
             treeNodeSelection.displayAsTag() ||
             (treeNodeSelection.isValid() && currentTag) ||
-            (treeNodeSelection.getNodeName(0) != "" && !currentTag)
+            (treeNodeSelection.getNodeName(0) !== "" && !currentTag)
         );
     }
 
@@ -309,11 +309,14 @@ export default class Tag extends Component<TagProps> {
                             treeNodeSelection.getNumMetaNodes()
                     ];
                 width = this.calculateTextWidth(currentText, 0, 0);
-                const splitByCurrentText = value.split(currentText);
+                const splitByCurrentText = [
+                    ...splitByDelimiter.filter(
+                        (_, index) => index < treeNodeSelection.getFocussedLevel() - treeNodeSelection.getNumMetaNodes()
+                    ), ""].join(treeNodeSelection.getDelimiter());
 
                 if (splitByCurrentText[0] !== undefined) {
                     distanceLeft = this.calculateTextWidth(
-                        splitByCurrentText[0],
+                        splitByCurrentText,
                         0,
                         0
                     );

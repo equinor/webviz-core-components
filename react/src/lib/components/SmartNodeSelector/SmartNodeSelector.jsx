@@ -76,7 +76,7 @@ SmartNodeSelector.propTypes = {
     /**
      * A label that will be printed when this component is rendered.
      */
-    label: PropTypes.string.isRequired,
+    label: PropTypes.string,
 
     /**
      * Stating of suggestions should be shown or not.
