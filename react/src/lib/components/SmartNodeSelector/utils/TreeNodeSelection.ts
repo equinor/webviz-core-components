@@ -295,13 +295,7 @@ export default class TreeNodeSelection {
         if (this.nodePath.length === 0) {
             return false;
         }
-        try {
-            return this.treeData.findFirstNode(this.nodePath) !== null;
-        }
-        catch (e) {
-            console.log(e);
-        }
-        return false;
+        return this.treeData.findFirstNode(this.nodePath) !== null;
     }
 
     numberOfPossiblyMatchedNodes(): number {
