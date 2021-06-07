@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED] - YYYY-MM-DD
+
+## [0.5.0] - 2021-06-06
 ### Changed
 - [#134](https://github.com/equinor/webviz-core-components/pull/134) - When prereleases are done in GitHub, they will now be published to `npm` using the `next` tag. E.g. `npm install @webviz/core-components` will install the latest official release, while `npm install @webviz/core-components@next` will install the
 latest prerelease.
