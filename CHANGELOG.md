@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED] - YYYY-MM-DD
 ### Changed
 - [#140](https://github.com/equinor/webviz-core-components/pull/140) - Improved styling of the `Select` component.
+- [#145](https://github.com/equinor/webviz-core-components/pull/145) - Added wrapper components for typically used Dash components (Dropdown, Slider, etc) with additional styling.
 
 ## [0.5.0] - 2021-06-06
 ### Changed

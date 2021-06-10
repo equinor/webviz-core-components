@@ -1,0 +1,18 @@
+.webviz-underlined-label {
+    font-size: 15px;
+    cursor: pointer;
+    color: #007079;
+    border-bottom-style: solid;
+    border-width: thin;
+    border-color: #007079;
+    font-weight:bold;
+}
+
+.webviz-label {
+    font-size: 15px;
+}
+
+.webviz-label-bold {
+    font-size: 15px;
+    font-weight:bold;
+}

@@ -2,9 +2,8 @@
 
 webviz_core_components/**/*
 !webviz_core_components/__init__.py
-!webviz_core_components/graph.py
-!webviz_core_components/flexbox.py
-!webviz_core_components/_argument_modifier.py 
+!webviz_core_components/wrapped_components
+!webviz_core_components/wrapped_components/*
 
 react/storybook-static/**/*
 !react/storybook-static/favicon.ico

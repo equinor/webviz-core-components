@@ -11,5 +11,6 @@ import Select from "./components/Select";
 import SmartNodeSelector from "./components/SmartNodeSelector";
 
 import "./components/FlexBox/flexbox.css";
+import "./components/Layout"
 
 export { WebvizPluginPlaceholder, ColorScales, Select, SmartNodeSelector };
