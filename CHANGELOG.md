@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED] - YYYY-MM-DD
+### Changed
+- [#140](https://github.com/equinor/webviz-core-components/pull/140) - Improved styling of the `Select` component.
 
 ## [0.5.0] - 2021-06-06
 ### Changed
