@@ -11,10 +11,10 @@ import dash as _dash
 from ._imports_ import *
 from ._imports_ import __all__
 
-from .graph import Graph
-from .flexbox import FlexBox
+from .wrapped_components import *
+from .wrapped_components import __all__ as wrapped_components
 
-__all__ += ["Graph", "FlexBox"]
+__all__ += wrapped_components
 
 try:
     __version__ = get_distribution(__name__).version

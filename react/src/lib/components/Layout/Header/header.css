@@ -1,0 +1,10 @@
+.webviz-header {
+    cursor: pointer;
+    color: #ff1243;
+    border-bottom-style: solid;
+    border-width: thin;
+    border-color: #ff1243;
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 25px;
+}

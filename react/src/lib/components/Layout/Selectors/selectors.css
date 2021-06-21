@@ -1,0 +1,11 @@
+.webviz-selectors {
+    cursor: pointer;
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 10px; 
+    
+}
+
+.webviz-selectors:hover {
+    box-shadow: 0px 0px 3px 0.5px lightgrey;
+}

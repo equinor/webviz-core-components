@@ -1,0 +1,16 @@
+/* !Important is needed to take precedence over the inline styles set in the dcc.Tabs
+component https://github.com/plotly/dash-core-components/blob/dev/src/components/Tabs.react.js */
+
+.webviz-tab {
+    border-bottom: 1px solid #d6d6d6 !important;
+    padding: 6px !important;
+    font-weight: bold !important;
+}
+
+.webviz-tab-selected {
+    border-top: 1px solid #d6d6d6 !important;
+    border-bottom: 1px solid #d6d6d6 !important;
+    background-color: #007079 !important;
+    color: white !important;
+    padding: 6px !important;
+}

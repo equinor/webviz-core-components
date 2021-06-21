@@ -1,0 +1,5 @@
+.webviz-dropdown .Select--multi .Select-value {
+    background-color: var(--menuLinkBackgroundHover);
+    border-color:  var(--menuLinkBackgroundHover);
+    color:  var(--menuLinkColor)
+  }

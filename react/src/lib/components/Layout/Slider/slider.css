@@ -1,0 +1,26 @@
+/* !Important is needed to take precedence of the .rc-slider classes */
+
+.webviz-slider .rc-slider-track {
+    background-color: var(--menuLinkColor) !important;
+  }
+  
+  .webviz-slider .rc-slider-dot-active {  
+    border-color: var(--menuLinkHoverColor) !important;
+    border-color: var(--menuLinkHoverColor) !important;
+  }
+  
+  .webviz-slider .rc-slider-handle {
+    background-color: var(--menuLinkHoverColor) !important;
+    border-color: var(--menuLinkHoverColor) !important;
+  }
+  
+  .webviz-slider .rc-slider-handle-active:active {
+    border-color: var(--menuLinkHoverColor) !important;
+    box-shadow: 0 0 5px  var(--menuLinkHoverColor) !important;
+  }
+  
+  .webviz-slider .rc-slider-dot {
+    margin-left:-10px !important;
+    background-color: var(--menuBackground) !important;
+    border-color: var(--menuLinkHoverColor) !important;
+  }

@@ -1,0 +1,22 @@
+.webviz-frame {
+    border-radius: 5px;
+    background-color: #F9F9F9;
+    margin: 10px;
+    padding: 15px;
+    position: relative;
+    box-shadow: 0px 0px 3px 0.5px lightgrey;
+    
+  }
+  
+  .webviz-frame:hover {
+    box-shadow: 0px 0px 4px 2px lightgrey;
+  }
+  
+  .webviz-frame-no-hover {
+    border-radius: 5px;
+    background-color: #F9F9F9;
+    margin: 10px;
+    padding: 15px;
+    position: relative;
+    box-shadow: 0px 0px 4px 0.5px lightgrey;
+}
