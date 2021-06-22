@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
- 
+
 .SmartNodeSelector *,
 .SmartNodeSelector__Ruler {
     font-family: sans-serif;
@@ -52,7 +52,7 @@
 }
 
 .SmartNodeSelector--Invalid {
-    border: 1px #eb0000 solid !IMPORTANT;
+    border: 1px #eb0000 solid !important;
 }
 
 .SmartNodeSelector--SuggestionsActive {
@@ -79,7 +79,7 @@
     outline: none;
     position: relative;
     padding: 0;
-    background-image: url('./images/x.svg');
+    background-image: url("./images/x.svg");
     background-size: 18px 18px;
     background-position: center center;
     background-repeat: no-repeat;
@@ -110,13 +110,13 @@
 }
 
 .SmartNodeSelector__ShiftUp {
-    background-image: url('./images/chevron-up.svg');
+    background-image: url("./images/chevron-up.svg");
     top: 0;
     border-top-left-radius: 2px;
 }
 
 .SmartNodeSelector__ShiftDown {
-    background-image: url('./images/chevron-down.svg');
+    background-image: url("./images/chevron-down.svg");
     top: 50%;
     border-bottom-left-radius: 2px;
 }
@@ -129,7 +129,7 @@
 
 .SmartNodeSelector__ShiftNode:hover:enabled,
 .SmartNodeSelector__ClearAll button:hover:enabled {
-    background-color: #004F55;
+    background-color: #004f55;
     color: #fff;
 }
 
@@ -144,11 +144,14 @@
 }
 
 .SmartNodeSelector ul {
-    display: inline-flex;
-    flex-wrap: wrap;
     margin: 0;
     padding: 0;
     list-style-type: none;
+}
+
+.SmartNodeSelector__Tags--nolinebreak {
+    display: inline-flex;
+    flex-wrap: wrap;
 }
 
 .SmartNodeSelector__Tag {
@@ -166,6 +169,7 @@
     color: #565656;
     border: 2px transparent solid;
     position: relative;
+    white-space: pre;
 }
 
 .SmartNodeSelector__InnerTag {
@@ -255,7 +259,7 @@
     height: 18px;
     padding: 0;
     display: block;
-    background-image: url('./images/x.svg');
+    background-image: url("./images/x.svg");
     background-position: center center;
     background-size: 14px 14px;
     background-repeat: no-repeat;
@@ -282,29 +286,28 @@
     bottom: 0px;
 }
 
-
-.SmartNodeSelector__Invalid, 
+.SmartNodeSelector__Invalid,
 .SmartNodeSelector__MissingSubgroup {
-    background-color: #ffc1c1 !IMPORTANT;
-    border: 2px #eb0000 solid !IMPORTANT;
+    background-color: #ffc1c1 !important;
+    border: 2px #eb0000 solid !important;
 }
 
 .SmartNodeSelector__Duplicate {
-    background-color: #ffe7d6 !IMPORTANT;
-    border: 2px #ff9200 solid !IMPORTANT;
+    background-color: #ffe7d6 !important;
+    border: 2px #ff9200 solid !important;
 }
 
-.SmartNodeSelector__InnerInvalid, 
+.SmartNodeSelector__InnerInvalid,
 .SmartNodeSelector__InnerMissingSubgroup {
-    background-color: #ffc1c1 !IMPORTANT;
-    background-image: url('./images/invalid.svg');
+    background-color: #ffc1c1 !important;
+    background-image: url("./images/invalid.svg");
 }
 
 .SmartNodeSelector__InnerDuplicate {
-    background-color: #ffe7d6 !IMPORTANT;
-    background-image: url('./images/duplicate.svg');
+    background-color: #ffe7d6 !important;
+    background-image: url("./images/duplicate.svg");
 }
 
 .SmartNodeSelector__Unknown {
-    background-image: url('./images/unknown.svg');
+    background-image: url("./images/unknown.svg");
 }
