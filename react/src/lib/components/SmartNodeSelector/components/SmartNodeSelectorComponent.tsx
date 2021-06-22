@@ -38,6 +38,7 @@ export type SmartNodeSelectorPropsType = {
     selectedTags?: string[];
     placeholder?: string;
     numSecondsUntilSuggestionsAreShown: number;
+    lineBreakAfterTag?: boolean;
     persistence: boolean | string | number;
     persisted_props: "selectedTags"[];
     persistence_type: "local" | "session" | "memory";
@@ -97,7 +98,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         showSuggestions: true,
         selectedTags: undefined,
         placeholder: "Add new tag...",
-        numSecondsUntilSuggestionsAreShown: 1.5,
+        numSecondsUntilSuggestionsAreShown: 0.5,
+        lineBreakAfterTag: false,
         persisted_props: ["selectedTags"],
         persistence_type: "local",
     };
@@ -1036,7 +1038,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             } else if (!this.currentNodeSelection().isValid()) {
                 this.currentNodeSelection().setNodeName(
                     val.split(this.props.delimiter)[
-                        this.currentNodeSelection().getFocussedLevel() - this.currentNodeSelection().getNumMetaNodes()
+                        this.currentNodeSelection().getFocussedLevel() -
+                            this.currentNodeSelection().getNumMetaNodes()
                     ]
                 );
                 this.currentNodeSelection().incrementFocussedLevel();
@@ -1165,6 +1168,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             maxNumSelectedNodes,
             placeholder,
             showSuggestions,
+            lineBreakAfterTag,
         } = this.props;
         const {
             nodeSelections,
@@ -1210,7 +1214,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     onMouseDown={(e) => this.handleMouseDown(e)}
                 >
                     <ul
-                        className="SmartNodeSelector__Tags"
+                        className={
+                            !lineBreakAfterTag
+                                ? "SmartNodeSelector__Tags--nolinebreak"
+                                : ""
+                        }
                         ref={this.tagFieldRef}
                         style={frameless ? { width: "100%" } : {}}
                     >
@@ -1350,6 +1358,11 @@ SmartNodeSelectorComponent.propTypes = {
      * Number of seconds until suggestions are shown.
      */
     numSecondsUntilSuggestionsAreShown: PropTypes.number,
+
+    /**
+     * If set to true, tags will be separated by a line break.
+     */
+    lineBreakAfterTag: PropTypes.bool,
 
     /**
      * Used to allow user interactions in this component to be persisted when

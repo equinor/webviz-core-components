@@ -12,7 +12,7 @@ exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapsho
       class="SmartNodeSelector"
     >
       <ul
-        class="SmartNodeSelector__Tags"
+        class="SmartNodeSelector__Tags--nolinebreak"
       >
         <li
           class="SmartNodeSelector__Tag "

@@ -29,6 +29,7 @@ const SmartNodeSelector = props => {
             numSecondsUntilSuggestionsAreShown={
                 props.numSecondsUntilSuggestionsAreShown
             }
+            lineBreakAfterTag={props.lineBreakAfterTag}
             persistence={props.persistence}
         />
     );
@@ -41,7 +42,8 @@ SmartNodeSelector.defaultProps = {
     showSuggestions: true,
     selectedTags: undefined,
     placeholder: "Add new tag...",
-    numSecondsUntilSuggestionsAreShown: 1.5,
+    numSecondsUntilSuggestionsAreShown: 0.5,
+    lineBreakAfterTag: false,
     persisted_props: ['selectedTags'],
     persistence_type: 'local',
 };
@@ -103,6 +105,11 @@ SmartNodeSelector.propTypes = {
      * Number of seconds until suggestions are shown.
      */
     numSecondsUntilSuggestionsAreShown: PropTypes.number,
+
+    /**
+     * If set to true, tags will be separated by a line break.
+     */
+    lineBreakAfterTag: PropTypes.bool,
 
     /**
      * Used to allow user interactions in this component to be persisted when
