@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- []
+- [#148](https://github.com/equinor/webviz-core-components/pull/148) - Added `lineBreakAfterTag` property to `SmartNodeSelector` which defaults to false. If set to true, tags are separated by a line break.
 
 ## [0.5.0] - 2021-06-06
 
