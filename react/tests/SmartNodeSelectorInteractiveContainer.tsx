@@ -19,7 +19,7 @@ export const SmartNodeSelectorInteractiveContainer: React.FC<{
     setProps: (props: PropType) => void;
 }> = (props: { setProps: (props: PropType) => void }): JSX.Element => {
     const { setProps } = props;
-    const [selectedTags, setSelectedTags] = React.useState([]);
+    const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
     const [data, setData] = React.useState(initialData);
     const [delimiter, setDelimiter] = React.useState(":");
 
