@@ -251,7 +251,7 @@
     position: absolute;
     right: -9px;
     top: -9px;
-    background: #eb0000;
+    background: #007079;
     border: 1px #fff solid;
     border-radius: 50%;
     cursor: pointer;
@@ -267,7 +267,7 @@
 
 .SmartNodeSelector__RemoveButton:hover {
     color: white;
-    background-color: #bb0000;
+    background-color: #004f55;
     border: 1px #fff solid;
 }
 

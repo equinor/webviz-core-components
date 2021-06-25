@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#140](https://github.com/equinor/webviz-core-components/pull/140) - Improved styling of the `Select` component.
 - [#145](https://github.com/equinor/webviz-core-components/pull/145) - Added wrapper components for typically used Dash components (Dropdown, Slider, etc) with additional styling.
 - [#148](https://github.com/equinor/webviz-core-components/pull/148) - Changed default value of `numSecondsUntilSuggestionsAreShown` to 0.5 in `SmartNodeSelector` component
+- [#150](https://github.com/equinor/webviz-core-components/pull/150) - Changed color of single remove button in `SmartNodeSelector` to the same as for the remove all button.
 
 ### Added
 
