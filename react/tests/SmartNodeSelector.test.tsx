@@ -1,8 +1,8 @@
-import React from 'react';
-import { fireEvent, render, RenderResult } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { SmartNodeSelector } from '../src/lib';
-import { SmartNodeSelectorInteractiveContainer } from './SmartNodeSelectorInteractiveContainer';
+import React from "react";
+import { fireEvent, render, RenderResult } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { SmartNodeSelector } from "../src/lib";
+import { SmartNodeSelectorInteractiveContainer } from "./SmartNodeSelectorInteractiveContainer";
 
 export type PropType = {
     selectedTags: string[];
@@ -13,107 +13,106 @@ export type PropType = {
 let parentProps: PropType = {
     selectedTags: [],
     selectedNodes: [],
-    selectedIds: []
+    selectedIds: [],
 };
 
 const setProps = (props: PropType): void => {
     parentProps = props;
-}
+};
 
 enum RenderDataStructure {
     Flat = 1,
     Deep,
     DeepWithMetaData,
-    InvalidData
+    InvalidData,
 }
 
 const clearParentProps = () => {
     parentProps = {
         selectedTags: [],
         selectedNodes: [],
-        selectedIds: []
+        selectedIds: [],
     };
-}
+};
 
 const renderSmartNodeSelector = (
     renderDataStructure: RenderDataStructure,
-    options:
-        {
-            showSuggestions?: boolean;
-            initialTags?: string[];
-            maxNumSelectedNodes?: number;
-        } = {
-            showSuggestions: true,
-            initialTags: [],
-            maxNumSelectedNodes: -1
-        }
+    options: {
+        showSuggestions?: boolean;
+        initialTags?: string[];
+        maxNumSelectedNodes?: number;
+    } = {
+        showSuggestions: true,
+        initialTags: [],
+        maxNumSelectedNodes: -1,
+    }
 ): RenderResult => {
     let data = [];
     switch (renderDataStructure) {
         case RenderDataStructure.Flat:
             data = [
                 {
-                    "id": "1",
-                    "name": "Data",
-                    "description": "Description",
-                }
+                    id: "1",
+                    name: "Data",
+                    description: "Description",
+                },
             ];
             break;
         case RenderDataStructure.Deep:
             data = [
                 {
-                    "id": "1",
-                    "name": "Data",
-                    "description": "Description",
-                    "children": [
+                    id: "1",
+                    name: "Data",
+                    description: "Description",
+                    children: [
                         {
-                            "id": "1.1",
-                            "name": "Subdata",
-                            "description": "Description"
-                        }
-                    ]
-                }
+                            id: "1.1",
+                            name: "Subdata",
+                            description: "Description",
+                        },
+                    ],
+                },
             ];
             break;
         case RenderDataStructure.DeepWithMetaData:
             data = [
                 {
-                    "id": "1",
-                    "name": "Metadata 1",
-                    "description": "A first data source",
-                    "color": "#0095FF",
-                    "children": [
+                    id: "1",
+                    name: "Metadata 1",
+                    description: "A first data source",
+                    color: "#0095FF",
+                    children: [
                         {
-                            "id": "1.1.1",
-                            "name": "Node 1",
-                            "description": "A first data node",
-                            "children": [
+                            id: "1.1.1",
+                            name: "Node 1",
+                            description: "A first data node",
+                            children: [
                                 {
-                                    "id": "1.1.1.1",
-                                    "name": "Subnode 1",
-                                    "description": "A first sub node",
+                                    id: "1.1.1.1",
+                                    name: "Subnode 1",
+                                    description: "A first sub node",
                                 },
-                            ]
-                        }
-                    ]
-                }
+                            ],
+                        },
+                    ],
+                },
             ];
             break;
         case RenderDataStructure.InvalidData:
             data = [
                 {
-                    "id": "1",
-                    "name": "Metadata 1",
-                    "description": "Description",
-                    "children": [
+                    id: "1",
+                    name: "Metadata 1",
+                    description: "Description",
+                    children: [
                         {
-                            "id": "1.1",
-                            "name": "",
-                            "description": "Description"
-                        }
-                    ]
-                }
-            ]
+                            id: "1.1",
+                            name: "",
+                            description: "Description",
+                        },
+                    ],
+                },
+            ];
     }
 
     return render(
@@ -129,106 +128,144 @@ const renderSmartNodeSelector = (
             data={data}
         />
     );
-}
-
-const renderInteractiveSmartNodeSelector = (): RenderResult => {
-    return render(<SmartNodeSelectorInteractiveContainer setProps={setProps} />);
 };
 
-describe('SmartNodeSelector', () => {
+const renderInteractiveSmartNodeSelector = (): RenderResult => {
+    return render(
+        <SmartNodeSelectorInteractiveContainer setProps={setProps} />
+    );
+};
+
+describe("SmartNodeSelector", () => {
     afterEach(() => {
         clearParentProps();
     });
 
-    it('Renders correctly (compare to snapshot in ./__snapshots__/SmartNodeSelector.test.tsx.snap)', () => {
+    it("Renders correctly (compare to snapshot in ./__snapshots__/SmartNodeSelector.test.tsx.snap)", () => {
         const { container } = renderSmartNodeSelector(RenderDataStructure.Flat);
         expect(container).toMatchSnapshot();
     });
 
-    it('Entering valid data node name and checking if tag is created (tree levels: 1)', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
+    it("Entering valid data node name and checking if tag is created (tree levels: 1)", () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Flat,
+            { showSuggestions: false }
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         userEvent.type(firstInput, "Data");
-        fireEvent.keyDown(firstInput, { key: 'Enter' });
-        fireEvent.keyUp(firstInput, { key: 'Enter' });
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
 
-        expect(firstTag.classList.contains('SmartNodeSelector__Border')).toBeTruthy();
+        expect(
+            firstTag.classList.contains("SmartNodeSelector__Border")
+        ).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
     });
 
-    it('Entering valid data node name and checking if tag is created (tree levels: 2)', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Deep, { showSuggestions: false });
+    it("Entering valid data node name and checking if tag is created (tree levels: 2)", () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Deep,
+            { showSuggestions: false }
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         userEvent.type(firstInput, "Data:");
 
-        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect(
+            (firstTag.children[1] as HTMLElement).classList.contains(
+                "SmartNodeSelector__InnerTag"
+            )
+        ).toBeTruthy();
         expect(firstTag.title === "Invalid").toBeTruthy();
 
         userEvent.type(firstInput, "Subdata");
 
-        fireEvent.keyDown(firstInput, { key: 'Enter' });
-        fireEvent.keyUp(firstInput, { key: 'Enter' });
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
 
-        expect(firstTag.classList.contains('SmartNodeSelector__Border')).toBeTruthy();
+        expect(
+            firstTag.classList.contains("SmartNodeSelector__Border")
+        ).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
     });
 
-    it('Entering valid data node name and then a duplicate', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
+    it("Entering valid data node name and then a duplicate", () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Flat,
+            { showSuggestions: false }
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         userEvent.type(firstInput, "Data");
-        fireEvent.keyDown(firstInput, { key: 'Enter' });
-        fireEvent.keyUp(firstInput, { key: 'Enter' });
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
 
-        const secondTag = smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")[1] as HTMLElement;
+        const secondTag = smartNodeSelector.querySelectorAll(
+            ".SmartNodeSelector__Tag"
+        )[1] as HTMLElement;
         const secondInput = secondTag.querySelector("input");
 
         userEvent.type(secondInput, "Data");
-        fireEvent.keyDown(secondInput, { key: 'Enter' });
-        fireEvent.keyUp(secondInput, { key: 'Enter' });
+        fireEvent.keyDown(secondInput, { key: "Enter" });
+        fireEvent.keyUp(secondInput, { key: "Enter" });
 
-        expect(secondTag.classList.contains('SmartNodeSelector__Duplicate')).toBeTruthy();
+        expect(
+            secondTag.classList.contains("SmartNodeSelector__Duplicate")
+        ).toBeTruthy();
         expect(secondTag.title === "Duplicate").toBeTruthy();
     });
 
-    it('Entering invalid data source name', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Deep, { showSuggestions: false });
+    it("Entering invalid data source name", () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Deep,
+            { showSuggestions: false }
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         userEvent.type(firstInput, "Data:Error");
-        fireEvent.keyDown(firstInput, { key: 'Enter' });
-        fireEvent.keyUp(firstInput, { key: 'Enter' });
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
 
-        expect(firstTag.classList.contains('SmartNodeSelector__Invalid')).toBeTruthy();
+        expect(
+            firstTag.classList.contains("SmartNodeSelector__Invalid")
+        ).toBeTruthy();
         expect(firstTag.title === "Invalid").toBeTruthy();
     });
 
-    it('Suggestions are shown and contain expected options', done => {
+    it("Suggestions are shown and contain expected options", (done) => {
         // eslint-disable-next-line no-undef
         jest.useFakeTimers();
         const { container } = renderSmartNodeSelector(RenderDataStructure.Deep);
 
         const smartNodeSelector = container.firstChild as HTMLElement;
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         fireEvent.mouseDown(firstInput);
@@ -237,7 +274,9 @@ describe('SmartNodeSelector', () => {
             const suggestions = smartNodeSelector.querySelector(".Suggestions");
             expect(suggestions !== null).toBeTruthy();
             if (suggestions !== null) {
-                const firstSuggestion = suggestions.querySelector(".Suggestions__Suggestion");
+                const firstSuggestion = suggestions.querySelector(
+                    ".Suggestions__Suggestion"
+                );
                 expect(firstSuggestion !== null).toBeTruthy();
             }
             done();
@@ -246,66 +285,102 @@ describe('SmartNodeSelector', () => {
         jest.advanceTimersByTime(500);
     });
 
-    it('Remove button is working', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
+    it("Remove button is working", () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Flat,
+            { showSuggestions: false }
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         userEvent.type(firstInput, "Data");
-        fireEvent.keyDown(firstInput, { key: 'Enter' });
-        fireEvent.keyUp(firstInput, { key: 'Enter' });
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
 
-        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect(
+            (firstTag.children[1] as HTMLElement).classList.contains(
+                "SmartNodeSelector__InnerTag"
+            )
+        ).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length == 2).toBeTruthy();
+        expect(
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+                .length == 2
+        ).toBeTruthy();
 
-        const removeButton = firstTag.querySelector(".SmartNodeSelector__RemoveButton");
+        const removeButton = firstTag.querySelector(
+            ".SmartNodeSelector__RemoveButton"
+        );
         expect(removeButton !== null).toBeTruthy();
         if (removeButton !== null) {
             userEvent.click(removeButton);
             expect(
-                smartNodeSelector.querySelector(".SmartNodeSelector__Tag")
-                    .classList.contains('SmartNodeSelector__Border')
+                smartNodeSelector
+                    .querySelector(".SmartNodeSelector__Tag")
+                    .classList.contains("SmartNodeSelector__Border")
             ).toBeFalsy();
-            expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")).toHaveLength(1);
+            expect(
+                smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+            ).toHaveLength(1);
         }
     });
 
-    it('Clear all button is working', () => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
+    it("Clear all button is working", () => {
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Flat,
+            { showSuggestions: false }
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         userEvent.type(firstInput, "Data");
-        fireEvent.keyDown(firstInput, { key: 'Enter' });
-        fireEvent.keyUp(firstInput, { key: 'Enter' });
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
 
-        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        expect(
+            (firstTag.children[1] as HTMLElement).classList.contains(
+                "SmartNodeSelector__InnerTag"
+            )
+        ).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length == 2).toBeTruthy();
+        expect(
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+                .length == 2
+        ).toBeTruthy();
 
-        const clearAllButton =
-            smartNodeSelector.querySelector(".SmartNodeSelector__ClearAll").firstChild as HTMLDivElement;
+        const clearAllButton = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__ClearAll"
+        ).firstChild as HTMLDivElement;
 
         expect(clearAllButton !== null).toBeTruthy();
         if (clearAllButton !== null) {
             userEvent.click(clearAllButton);
             expect(
-                smartNodeSelector.querySelector(".SmartNodeSelector__Tag")
-                    .classList.contains('SmartNodeSelector__Border')
+                smartNodeSelector
+                    .querySelector(".SmartNodeSelector__Tag")
+                    .classList.contains("SmartNodeSelector__Border")
             ).toBeFalsy();
-            expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")).toHaveLength(1);
+            expect(
+                smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+            ).toHaveLength(1);
         }
     });
 
     const selectingTagsWithKeyboard = (numTags: number): HTMLElement => {
-        const { container } = renderSmartNodeSelector(RenderDataStructure.Flat, { showSuggestions: false });
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.Flat,
+            { showSuggestions: false }
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
@@ -313,73 +388,110 @@ describe('SmartNodeSelector', () => {
         let lastInput: HTMLInputElement | undefined = undefined;
 
         for (let i = 0; i < numTags; i++) {
-            lastTag = smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")[
-                smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length - 1
+            lastTag = smartNodeSelector.querySelectorAll(
+                ".SmartNodeSelector__Tag"
+            )[
+                smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+                    .length - 1
             ] as HTMLElement;
             lastInput = lastTag.querySelector("input");
             userEvent.type(lastInput, "Data");
-            fireEvent.keyDown(lastInput, { key: 'Enter' });
-            fireEvent.keyUp(lastInput, { key: 'Enter' });
+            fireEvent.keyDown(lastInput, { key: "Enter" });
+            fireEvent.keyUp(lastInput, { key: "Enter" });
         }
 
         lastTag = smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")[
-            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length - 1
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+                .length - 1
         ] as HTMLElement;
         lastInput = lastTag.querySelector("input");
 
         userEvent.click(lastInput);
 
         for (let i = 0; i < numTags; i++) {
-            fireEvent.keyDown(i == 0 ? lastInput : document, { key: 'ArrowLeft', shiftKey: true });
+            fireEvent.keyDown(i == 0 ? lastInput : document, {
+                key: "ArrowLeft",
+                shiftKey: true,
+            });
         }
 
         return smartNodeSelector;
     };
 
-    it('Selecting several tags with keyboard and delete using backspace', () => {
+    it("Selecting several tags with keyboard and delete using backspace", () => {
         const smartNodeSelector = selectingTagsWithKeyboard(3);
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__TagSelected")).toHaveLength(3);
-        fireEvent.keyDown(document, { key: 'Backspace' });
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")).toHaveLength(1);
+        expect(
+            smartNodeSelector.querySelectorAll(
+                ".SmartNodeSelector__TagSelected"
+            )
+        ).toHaveLength(3);
+        fireEvent.keyDown(document, { key: "Backspace" });
+        expect(
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+        ).toHaveLength(1);
     });
 
-    it('Selecting several tags with keyboard and delete using delete', () => {
+    it("Selecting several tags with keyboard and delete using delete", () => {
         const smartNodeSelector = selectingTagsWithKeyboard(3);
 
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__TagSelected")).toHaveLength(3);
-        fireEvent.keyDown(document, { key: 'Delete' });
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")).toHaveLength(1);
+        expect(
+            smartNodeSelector.querySelectorAll(
+                ".SmartNodeSelector__TagSelected"
+            )
+        ).toHaveLength(3);
+        fireEvent.keyDown(document, { key: "Delete" });
+        expect(
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+        ).toHaveLength(1);
     });
 
-    it('Selecting several tags and copy and pasting them', () => {
+    it("Selecting several tags and copy and pasting them", () => {
         const smartNodeSelector = selectingTagsWithKeyboard(3);
-        const lastTag = smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")[
-            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length - 1
+        const lastTag = smartNodeSelector.querySelectorAll(
+            ".SmartNodeSelector__Tag"
+        )[
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+                .length - 1
         ] as HTMLElement;
         const lastInput = lastTag.querySelector("input");
 
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__TagSelected")).toHaveLength(3);
-        fireEvent.keyDown(document, { key: 'c', ctrlKey: true });
+        expect(
+            smartNodeSelector.querySelectorAll(
+                ".SmartNodeSelector__TagSelected"
+            )
+        ).toHaveLength(3);
+        fireEvent.keyDown(document, { key: "c", ctrlKey: true });
         userEvent.click(lastInput);
-        fireEvent.keyDown(lastInput, { key: 'v', ctrlKey: true });
+        fireEvent.keyDown(lastInput, { key: "v", ctrlKey: true });
 
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")).toHaveLength(7);
+        expect(
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+        ).toHaveLength(7);
     });
 
-    it('Check if return values are correct', () => {
+    it("Check if return values are correct", () => {
         const smartNodeSelector = selectingTagsWithKeyboard(3);
-        const lastTag = smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")[
-            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length - 1
+        const lastTag = smartNodeSelector.querySelectorAll(
+            ".SmartNodeSelector__Tag"
+        )[
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+                .length - 1
         ] as HTMLElement;
         const lastInput = lastTag.querySelector("input");
 
-        fireEvent.keyDown(document, { key: 'c', ctrlKey: true });
+        fireEvent.keyDown(document, { key: "c", ctrlKey: true });
         userEvent.click(lastInput);
-        fireEvent.keyDown(lastInput, { key: 'v', ctrlKey: true });
-
+        fireEvent.keyDown(lastInput, { key: "v", ctrlKey: true });
 
         expect(parentProps.selectedTags).toHaveLength(6);
-        expect(parentProps.selectedTags).toEqual(["Data", "Data", "Data", "Data", "Data", "Data"]);
+        expect(parentProps.selectedTags).toEqual([
+            "Data",
+            "Data",
+            "Data",
+            "Data",
+            "Data",
+            "Data",
+        ]);
         expect(parentProps.selectedNodes).toHaveLength(1);
         expect(parentProps.selectedNodes[0]).toMatch("Data");
         expect(parentProps.selectedIds).toHaveLength(1);
@@ -388,24 +500,33 @@ describe('SmartNodeSelector', () => {
         clearParentProps();
     });
 
-    it('Check if initial properties can be set', () => {
+    it("Check if initial properties can be set", () => {
         const { container } = renderSmartNodeSelector(
             RenderDataStructure.Deep,
             {
                 showSuggestions: false,
-                initialTags: ["Data:Subdata"]
+                initialTags: ["Data:Subdata"],
             }
         );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
-        expect((firstTag.children[1] as HTMLElement).classList.contains('SmartNodeSelector__InnerTag')).toBeTruthy();
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
+        expect(
+            (firstTag.children[1] as HTMLElement).classList.contains(
+                "SmartNodeSelector__InnerTag"
+            )
+        ).toBeTruthy();
         expect(firstTag.title === "Data:Subdata").toBeTruthy();
-        expect(smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag").length == 2).toBeTruthy();
+        expect(
+            smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+                .length == 2
+        ).toBeTruthy();
     });
 
-    it('Check if properties can be dynamically changed', () => {
+    it("Check if selected tags can be dynamically changed", () => {
         const { container } = renderInteractiveSmartNodeSelector();
 
         const smartNodeSelector = container.querySelector("#SmartNodeSelector");
@@ -432,27 +553,89 @@ describe('SmartNodeSelector', () => {
         clearParentProps();
     });
 
-    it('Check if selecting a node in a single node selection is calling setProps correctly', () => {
+    it("Check if data can be dynamically changed", () => {
+        const { container } = renderInteractiveSmartNodeSelector();
+
+        const smartNodeSelector = container.querySelector("#SmartNodeSelector");
+        expect(smartNodeSelector).toBeDefined();
+
+        const button = container.querySelector("#setDataButton");
+        expect(button).toBeDefined();
+
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
+        const firstInput = firstTag.querySelector("input");
+
+        userEvent.type(firstInput, "Data1");
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
+
+        expect(
+            firstTag.classList.contains("SmartNodeSelector__Border")
+        ).toBeTruthy();
+        expect(firstTag.title === firstInput.value).toBeTruthy();
+
+        userEvent.click(button);
+
+        expect(
+            firstTag.classList.contains("SmartNodeSelector__Invalid")
+        ).toBeTruthy();
+        expect(firstTag.title === "Invalid").toBeTruthy();
+
+        const clearAllButton = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__ClearAll"
+        ).firstChild as HTMLDivElement;
+
+        expect(clearAllButton !== null).toBeTruthy();
+        if (clearAllButton !== null) {
+            userEvent.click(clearAllButton);
+            expect(
+                smartNodeSelector
+                    .querySelector(".SmartNodeSelector__Tag")
+                    .classList.contains("SmartNodeSelector__Border")
+            ).toBeFalsy();
+            expect(
+                smartNodeSelector.querySelectorAll(".SmartNodeSelector__Tag")
+            ).toHaveLength(1);
+        }
+
+        userEvent.type(firstInput, "ChangedData1");
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
+
+        expect(
+            firstTag.classList.contains("SmartNodeSelector__Border")
+        ).toBeTruthy();
+        expect(firstTag.title === firstInput.value).toBeTruthy();
+
+        clearParentProps();
+    });
+
+    it("Check if selecting a node in a single node selection is calling setProps correctly", () => {
         const { container } = renderSmartNodeSelector(
             RenderDataStructure.Flat,
             {
                 showSuggestions: false,
-                maxNumSelectedNodes: 1
+                maxNumSelectedNodes: 1,
             }
         );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
 
-        const firstTag = smartNodeSelector.querySelector(".SmartNodeSelector__Tag") as HTMLElement;
+        const firstTag = smartNodeSelector.querySelector(
+            ".SmartNodeSelector__Tag"
+        ) as HTMLElement;
         const firstInput = firstTag.querySelector("input");
 
         userEvent.type(firstInput, "Data");
-        fireEvent.keyDown(firstInput, { key: 'Enter' });
-        fireEvent.keyUp(firstInput, { key: 'Enter' });
+        fireEvent.keyDown(firstInput, { key: "Enter" });
+        fireEvent.keyUp(firstInput, { key: "Enter" });
 
-        expect(firstTag.classList.contains('SmartNodeSelector__Border')).toBeTruthy();
+        expect(
+            firstTag.classList.contains("SmartNodeSelector__Border")
+        ).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
-
 
         expect(parentProps.selectedTags).toHaveLength(1);
         expect(parentProps.selectedTags[0]).toMatch("Data");
@@ -464,13 +647,16 @@ describe('SmartNodeSelector', () => {
         clearParentProps();
     });
 
-    it('Ensure that invalid data throws exception', () => {
-        jest.spyOn(console, 'error').mockImplementation(jest.fn());
-        const { container } = renderSmartNodeSelector(RenderDataStructure.InvalidData);
+    it("Ensure that invalid data throws exception", () => {
+        jest.spyOn(console, "error").mockImplementation(jest.fn());
+        const { container } = renderSmartNodeSelector(
+            RenderDataStructure.InvalidData
+        );
 
         const smartNodeSelector = container.firstChild as HTMLElement;
-        expect(smartNodeSelector.classList.contains("SmartNodeSelector--Error")).toBeTruthy();
-        jest.spyOn(console, 'error').mockRestore();
-    })
-
+        expect(
+            smartNodeSelector.classList.contains("SmartNodeSelector--Error")
+        ).toBeTruthy();
+        jest.spyOn(console, "error").mockRestore();
+    });
 });
