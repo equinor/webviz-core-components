@@ -1,28 +1,49 @@
-import React from 'react';
-import { SmartNodeSelector } from '../src/lib';
-import { PropType } from './SmartNodeSelector.test';
+import React from "react";
+import { SmartNodeSelector } from "../src/lib";
+import { PropType } from "./SmartNodeSelector.test";
 
-const data = [
+const initialData = [
     {
-        "id": "1",
-        "name": "Data1",
-        "description": "Description",
+        id: "1",
+        name: "Data1",
+        description: "Description",
     },
     {
-        "id": "2",
-        "name": "Data2",
-        "description": "Description",
-    }
+        id: "2",
+        name: "Data2",
+        description: "Description",
+    },
 ];
 
-export const SmartNodeSelectorInteractiveContainer: React.FC<{ setProps: (props: PropType) => void }> = (
-    props: { setProps: (props: PropType) => void }
-): JSX.Element => {
+export const SmartNodeSelectorInteractiveContainer: React.FC<{
+    setProps: (props: PropType) => void;
+}> = (props: { setProps: (props: PropType) => void }): JSX.Element => {
     const { setProps } = props;
-    const [selectedTags, setSelectedTags] = React.useState([]);
+    const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+    const [data, setData] = React.useState(initialData);
+    const [delimiter, setDelimiter] = React.useState(":");
 
-    const handleButtonClick = () => {
+    const handleChangeSelectedTagsButtonClick = () => {
         setSelectedTags(["Data1", "Data2"]);
+    };
+
+    const handleChangeDelimiterButtonClick = () => {
+        setDelimiter(";");
+    };
+
+    const handleChangeDataButtonClick = () => {
+        setData([
+            {
+                id: "1",
+                name: "ChangedData1",
+                description: "Description",
+            },
+            {
+                id: "2",
+                name: "ChangedData2",
+                description: "Description",
+            },
+        ]);
     };
 
     return (
@@ -30,7 +51,7 @@ export const SmartNodeSelectorInteractiveContainer: React.FC<{ setProps: (props:
             <SmartNodeSelector
                 id="SmartNodeSelector"
                 key="SmartNodeSelector"
-                delimiter=":"
+                delimiter={delimiter}
                 showSuggestions={false}
                 setProps={setProps}
                 label="Smart Node Selector"
@@ -38,7 +59,21 @@ export const SmartNodeSelectorInteractiveContainer: React.FC<{ setProps: (props:
                 data={data}
                 selectedTags={selectedTags}
             />
-            <button onClick={handleButtonClick} id="setValuesButton">Set values</button>
+            <button
+                onClick={handleChangeSelectedTagsButtonClick}
+                id="setValuesButton"
+            >
+                Set values
+            </button>
+            <button onClick={handleChangeDataButtonClick} id="setDataButton">
+                Set data
+            </button>
+            <button
+                onClick={handleChangeDelimiterButtonClick}
+                id="setDelimiterButton"
+            >
+                Set delimiter
+            </button>
         </>
-    )
+    );
 };
