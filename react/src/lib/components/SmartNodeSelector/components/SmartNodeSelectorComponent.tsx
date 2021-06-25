@@ -222,8 +222,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             (this.props.delimiter &&
                 this.props.delimiter !== prevProps.delimiter)
         ) {
-            let hasError = false;
-            let error = "";
+            let error: string | undefined;
             try {
                 this.treeData = new TreeData({
                     treeData: this.props.data,
@@ -231,7 +230,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 });
             } catch (e) {
                 this.treeData = null;
-                hasError = true;
                 error = e;
             }
             const nodeSelections: TreeNodeSelection[] = [];
@@ -246,7 +244,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     nodeSelections: nodeSelections,
                     currentTagIndex: this.state.currentTagIndex,
                     suggestionsVisible: this.state.suggestionsVisible,
-                    hasError: hasError,
+                    hasError: error !== undefined,
                     error: error,
                 },
                 () => {
