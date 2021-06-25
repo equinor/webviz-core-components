@@ -123,8 +123,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.mouseDownElement = null;
         this.componentIsMounted = false;
 
-        let hasError = false;
-        let error = "";
+        let error: string | undefined;
         try {
             this.treeData = new TreeData({
                 treeData: props.data,
@@ -132,7 +131,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             });
         } catch (e) {
             this.treeData = null;
-            hasError = true;
             error = e;
         }
 
@@ -154,11 +152,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             nodeSelections,
             currentTagIndex: 0,
             suggestionsVisible: false,
-            hasError: hasError,
-            error: error,
+            hasError: error !== undefined,
+            error: error || "",
         };
 
-        if (!hasError) {
+        if (error === undefined) {
             this.numValidSelections = this.countValidSelections();
         } else {
             this.numValidSelections = 0;
@@ -245,7 +243,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     currentTagIndex: this.state.currentTagIndex,
                     suggestionsVisible: this.state.suggestionsVisible,
                     hasError: error !== undefined,
-                    error: error,
+                    error: error || "",
                 },
                 () => {
                     this.updateSelectedTagsAndNodes();
