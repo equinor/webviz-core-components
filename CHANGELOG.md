@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+## [0.5.1] - 2021-07-12
+
 ### Changed
 
 - [#140](https://github.com/equinor/webviz-core-components/pull/140) - Improved styling of the `Select` component.
