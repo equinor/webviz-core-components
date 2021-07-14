@@ -8,9 +8,11 @@
 import WebvizPluginPlaceholder from "./components/WebvizPluginPlaceholder";
 import { ColorScales } from "./components/ColorScales";
 import Select from "./components/Select";
+import Frame from "./components/Frame";
 import SmartNodeSelector from "./components/SmartNodeSelector";
+import { ThemeContext } from "./ThemeContext"
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout"
 
-export { WebvizPluginPlaceholder, ColorScales, Select, SmartNodeSelector };
+export { WebvizPluginPlaceholder, ColorScales, Select, SmartNodeSelector, Frame, ThemeContext };

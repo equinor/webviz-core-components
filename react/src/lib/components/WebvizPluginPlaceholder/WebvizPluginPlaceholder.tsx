@@ -9,8 +9,9 @@ import React, { useState, useEffect, useRef } from "react";
 import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
 import Tour from "reactour";
+import { ThemeContext } from "../../"
 import { SnackbarProvider, useSnackbar } from "notistack";
-
+// import Frame from "../Frame"
 import {
     faAddressCard,
     faQuestionCircle,
@@ -19,6 +20,7 @@ import {
     faDownload,
     faExclamationTriangle,
     faCommentAlt,
+    faPrint
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -117,6 +119,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
         "guided_tour",
         "contact_person",
         "feedback",
+        "print"
     ],
     children: null,
     contact_person: null,
@@ -151,8 +154,9 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
     const [expanded, setExpanded] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
     const [tourIsOpen, setTourIsOpen] = useState(false);
+    const [isPrintMode, setPrintMode] = useState(false);
+    const [themeName, setThemeName] = useState("presentation");
     const { enqueueSnackbar } = useSnackbar();
-
     const prevExpandedRef = useRef(false);
     const didMountRef = useRef(false);
 
@@ -218,9 +222,13 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
         tour_steps.length > 0;
 
     const ref = React.createRef<HTMLDivElement>();
+    const toggleTheme = () => {
+        setPrintMode(!isPrintMode)
+        themeName === "presentation" ? setThemeName("print") : setThemeName("presentation");
 
+    };
     return (
-        <>
+        <ThemeContext.Provider value={{ themeName: themeName }}>
             <div
                 className={
                     "webviz-config-plugin-wrapper" +
@@ -274,6 +282,17 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                             }}
                         />
                     )}
+                    {buttons &&
+                        (
+                            <WebvizToolbarButton
+                                icon={faPrint}
+                                tooltip="Print mode"
+                                selected={isPrintMode}
+                                onClick={() => {
+                                    toggleTheme()
+                                }}
+                            />
+                        )}
                     {buttons && buttons.includes("download") && (
                         <WebvizToolbarButton
                             icon={faDownload}
@@ -313,6 +332,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                                 target="blank"
                             />
                         )}
+
                     {deprecation_warnings.length > 0 && (
                         <WebvizToolbarButton
                             icon={faExclamationTriangle}
@@ -333,7 +353,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                     accentColor="red"
                 />
             )}
-        </>
+        </ThemeContext.Provider>
     );
 };
 
