@@ -41,6 +41,8 @@
   "author": "Equinor <noreply@equinor.com>",
   "license": "MIT",
   "dependencies": {
+    "@equinor/eds-core-react": "^0.13.1",
+    "@equinor/eds-icons": "^0.6.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",

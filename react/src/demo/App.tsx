@@ -5,11 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-
 /* eslint no-magic-numbers: 0 */
 import React, { Component } from "react";
 
-import { WebvizPluginPlaceholder, SmartNodeSelector } from "../lib";
+import { WebvizPluginPlaceholder, SmartNodeSelector, Menu } from "../lib";
 
 const steps = [
     {
@@ -23,9 +22,9 @@ const steps = [
 ];
 
 type ParentProps = {
-    selectedTags: string[],
-    selectedNodes: string[],
-    selectedIds: string[]
+    selectedTags: string[];
+    selectedNodes: string[];
+    selectedIds: string[];
 };
 
 class App extends Component {
@@ -37,7 +36,7 @@ class App extends Component {
         this.state = {
             selectedNodes: [],
             selectedIds: [],
-            selectedTags: []
+            selectedTags: [],
         };
     }
 
@@ -53,21 +52,21 @@ class App extends Component {
                     setProps={this.setProps}
                     tour_steps={steps}
                     feedback_url={
-                        "https://github.com/equinor/webviz-core-components/issues/"
-                        + "new?title=New+feedback&body=Feedback+text&labels=userfeedback"
+                        "https://github.com/equinor/webviz-core-components/issues/" +
+                        "new?title=New+feedback&body=Feedback+text&labels=userfeedback"
                     }
-                    deprecation_warnings={
-                        [
-                            {
-                                message: "Deprecated 1",
-                                url: "https://github.com/equinor/webviz-core-components"
-                            },
-                            {
-                                message: "Deprecated 2",
-                                url: "https://github.com/equinor/webviz-core-components"
-                            }
-                        ]
-                    }
+                    deprecation_warnings={[
+                        {
+                            message: "Deprecated 1",
+                            url:
+                                "https://github.com/equinor/webviz-core-components",
+                        },
+                        {
+                            message: "Deprecated 2",
+                            url:
+                                "https://github.com/equinor/webviz-core-components",
+                        },
+                    ]}
                 />
                 <SmartNodeSelector
                     id="SmartNodeSelector"
@@ -79,144 +78,234 @@ class App extends Component {
                     label="Smart Tree Node Selector"
                     data={[
                         {
-                            "id": "1",
-                            "name": "Metadata 1",
-                            "description": "A first data source",
-                            "color": "#0095FF",
-                            "children": [
+                            id: "1",
+                            name: "Metadata 1",
+                            description: "A first data source",
+                            color: "#0095FF",
+                            children: [
                                 {
-                                    "id": "1.1",
-                                    "name": "Submetadata 1",
-                                    "description": "A data category",
-                                    "icon":
-                                        (
-                                            "https://raw.githubusercontent.com/feathericons/"
-                                            + "feather/master/icons/anchor.svg"
-                                        ),
-                                    "children": [
+                                    id: "1.1",
+                                    name: "Submetadata 1",
+                                    description: "A data category",
+                                    icon:
+                                        "https://raw.githubusercontent.com/feathericons/" +
+                                        "feather/master/icons/anchor.svg",
+                                    children: [
                                         {
-                                            "id": "1.1.1",
-                                            "name": "Node 1",
-                                            "description": "A first data node",
-                                            "children": [
+                                            id: "1.1.1",
+                                            name: "Node 1",
+                                            description: "A first data node",
+                                            children: [
                                                 {
-                                                    "id": "1.1.1.1",
-                                                    "name": "Subnode 1",
-                                                    "description": "A first sub node",
+                                                    id: "1.1.1.1",
+                                                    name: "Subnode 1",
+                                                    description:
+                                                        "A first sub node",
                                                 },
                                                 {
-                                                    "id": "1.1.1.2",
-                                                    "name": "Subnode 2",
-                                                    "description": "A second sub node",
+                                                    id: "1.1.1.2",
+                                                    name: "Subnode 2",
+                                                    description:
+                                                        "A second sub node",
                                                 },
                                                 {
-                                                    "id": "1.1.1.3",
-                                                    "name": "Subnode 3",
-                                                    "description": "A third sub node",
+                                                    id: "1.1.1.3",
+                                                    name: "Subnode 3",
+                                                    description:
+                                                        "A third sub node",
                                                 },
                                                 {
-                                                    "id": "1.1.1.4",
-                                                    "name": "Subnode 4",
-                                                    "description": "A fourth sub node",
-                                                }
+                                                    id: "1.1.1.4",
+                                                    name: "Subnode 4",
+                                                    description:
+                                                        "A fourth sub node",
+                                                },
                                             ],
                                         },
                                         {
-                                            "id": "1.1.2",
-                                            "name": "Node 2",
-                                            "description": "A second data node",
-                                        }
+                                            id: "1.1.2",
+                                            name: "Node 2",
+                                            description: "A second data node",
+                                        },
                                     ],
                                 },
                                 {
-                                    "id": "1.2",
-                                    "name": "Submetadata 2",
-                                    "description": "Another data category",
-                                    "icon":
-                                        (
-                                            "https://raw.githubusercontent.com/feathericons/"
-                                            + "feather/master/icons/activity.svg"
-                                        ),
-                                }
-                            ]
+                                    id: "1.2",
+                                    name: "Submetadata 2",
+                                    description: "Another data category",
+                                    icon:
+                                        "https://raw.githubusercontent.com/feathericons/" +
+                                        "feather/master/icons/activity.svg",
+                                },
+                            ],
                         },
                         {
-                            "id": "2",
-                            "name": "Metadata 2",
-                            "description": "A second data source",
-                            "color": "#FF5555",
-                            "children": [
+                            id: "2",
+                            name: "Metadata 2",
+                            description: "A second data source",
+                            color: "#FF5555",
+                            children: [
                                 {
-                                    "id": "2.1",
-                                    "name": "Submetadata 1",
-                                    "description": "A data category",
-                                    "icon": (
-                                        "https://raw.githubusercontent.com/feathericons/"
-                                        + "feather/master/icons/anchor.svg"
-                                    ),
-                                    "children": [
+                                    id: "2.1",
+                                    name: "Submetadata 1",
+                                    description: "A data category",
+                                    icon:
+                                        "https://raw.githubusercontent.com/feathericons/" +
+                                        "feather/master/icons/anchor.svg",
+                                    children: [
                                         {
-                                            "id": "2.1.1",
-                                            "name": "Node 1",
-                                            "description": "A first data node",
-                                            "children": [
+                                            id: "2.1.1",
+                                            name: "Node 1",
+                                            description: "A first data node",
+                                            children: [
                                                 {
-                                                    "id": "2.1.1.1",
-                                                    "name": "Subnode 1",
-                                                    "description": "A first sub node",
+                                                    id: "2.1.1.1",
+                                                    name: "Subnode 1",
+                                                    description:
+                                                        "A first sub node",
                                                 },
                                                 {
-                                                    "id": "2.1.1.2",
-                                                    "name": "Subnode 2",
-                                                    "description": "A second sub node",
+                                                    id: "2.1.1.2",
+                                                    name: "Subnode 2",
+                                                    description:
+                                                        "A second sub node",
                                                 },
                                                 {
-                                                    "id": "2.1.1.3",
-                                                    "name": "Subnode 3",
-                                                    "description": "A third sub node",
+                                                    id: "2.1.1.3",
+                                                    name: "Subnode 3",
+                                                    description:
+                                                        "A third sub node",
                                                 },
                                                 {
-                                                    "id": "2.1.1.4",
-                                                    "name": "Subnode 4",
-                                                    "description": "A fourth sub node",
-                                                }
+                                                    id: "2.1.1.4",
+                                                    name: "Subnode 4",
+                                                    description:
+                                                        "A fourth sub node",
+                                                },
                                             ],
                                         },
                                         {
-                                            "id": "2.1.2",
-                                            "name": "Node 2",
-                                            "description": "A second data node",
-                                        }
+                                            id: "2.1.2",
+                                            name: "Node 2",
+                                            description: "A second data node",
+                                        },
                                     ],
                                 },
                                 {
-                                    "id": "2.2",
-                                    "name": "Submetadata 2",
-                                    "description": "Another data category",
-                                    "icon":
-                                        (
-                                            "https://raw.githubusercontent.com/feathericons/"
-                                            + "feather/master/icons/activity.svg"
-                                        ),
-                                }
-                            ]
-                        }
+                                    id: "2.2",
+                                    name: "Submetadata 2",
+                                    description: "Another data category",
+                                    icon:
+                                        "https://raw.githubusercontent.com/feathericons/" +
+                                        "feather/master/icons/activity.svg",
+                                },
+                            ],
+                        },
                     ]}
                 />
-                Selected nodes:<br />
-                {this.state.selectedNodes.length > 0 && this.state.selectedNodes.map((node, index) => (
-                    <div key={`node-${index}`}>{node}</div>
-                ))}
-                {this.state.selectedNodes.length == 0 && (
-                    <i>None</i>
-                )}
-                <br />Selected tags:<br />
-                {this.state.selectedTags.length > 0 && this.state.selectedTags.map((tag, index) => (
-                    <div key={`tag-${index}`}>{tag}</div>
-                ))}
-                {this.state.selectedTags.length === 0 && (
-                    <i>None</i>
-                )}
+                Selected nodes:
+                <br />
+                {this.state.selectedNodes.length > 0 &&
+                    this.state.selectedNodes.map((node, index) => (
+                        <div key={`node-${index}`}>{node}</div>
+                    ))}
+                {this.state.selectedNodes.length == 0 && <i>None</i>}
+                <br />
+                Selected tags:
+                <br />
+                {this.state.selectedTags.length > 0 &&
+                    this.state.selectedTags.map((tag, index) => (
+                        <div key={`tag-${index}`}>{tag}</div>
+                    ))}
+                {this.state.selectedTags.length === 0 && <i>None</i>}
+                <Menu
+                    navigationItems={[
+                        {
+                            type: "section",
+                            title: "Section 1",
+                            content: [
+                                {
+                                    type: "group",
+                                    title: "Group 1",
+                                    content: [
+                                        {
+                                            title: "Page 1",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 2",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 3",
+                                            href: "#",
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "group",
+                                    title: "Group 2",
+                                    content: [
+                                        {
+                                            title: "Page 1",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 2",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 3",
+                                            href: "#",
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            type: "section",
+                            title: "Section 2",
+                            content: [
+                                {
+                                    type: "group",
+                                    title: "Group 1",
+                                    content: [
+                                        {
+                                            title: "Page 1",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 2",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 3",
+                                            href: "#",
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "group",
+                                    title: "Group 2",
+                                    content: [
+                                        {
+                                            title: "Page 1",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 2",
+                                            href: "#",
+                                        },
+                                        {
+                                            title: "Page 3",
+                                            href: "#",
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ]}
+                />
             </div>
         );
     }

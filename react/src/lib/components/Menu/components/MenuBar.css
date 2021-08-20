@@ -1,0 +1,13 @@
+.Menu .MenuBar {
+    background-color: white;
+    position: fixed;
+    padding: 16px;
+    height: 100vh;
+    top: 0;
+    left: 0;
+}
+
+.Menu .MenuBarLeft {
+    -webkit-box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+}
