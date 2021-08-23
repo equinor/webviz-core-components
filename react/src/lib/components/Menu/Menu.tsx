@@ -4,6 +4,7 @@ import PropTypes, { string } from "prop-types";
 import { TopMenu } from "./components/TopMenu";
 import { MenuBar } from "./components/MenuBar";
 import { MenuDrawer } from "./components/MenuDrawer";
+import { Overlay } from "./components/Overlay";
 
 import { Navigation } from "./types/navigation";
 
@@ -23,10 +24,15 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const [open, setOpen] = React.useState(false);
     const [pinned, setPinned] = React.useState(props.initiallyPinned || false);
 
+    React.useEffect(() => {
+        document.body.style.marginLeft = "150px";
+    }, [])
+
     const currentHref = window.location.href;
 
     return (
         <div className="Menu">
+            <Overlay visible={open} />
             <MenuBar position={position} onMenuOpen={() => setOpen(true)} />
             <MenuDrawer position={position} open={open}>
                 <TopMenu pinned={pinned}></TopMenu>
