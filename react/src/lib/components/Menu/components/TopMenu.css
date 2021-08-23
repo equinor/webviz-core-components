@@ -1,0 +1,19 @@
+.TopMenu {
+    text-align: right;
+}
+
+.TopMenu .PinButton {
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+.TopMenu .pin {
+    background-image: url("./pin.svg");
+}
+
+.TopMenu .unpin {
+    background-image: url("./unpin.svg");
+}

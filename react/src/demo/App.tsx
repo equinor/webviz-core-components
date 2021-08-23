@@ -229,14 +229,18 @@ class App extends Component {
                                     title: "Group 1",
                                     content: [
                                         {
+                                            type: "page",
                                             title: "Page 1",
                                             href: "#",
+                                            icon: "assignment1",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 2",
                                             href: "#",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 3",
                                             href: "#",
                                         },
@@ -247,14 +251,17 @@ class App extends Component {
                                     title: "Group 2",
                                     content: [
                                         {
+                                            type: "page",
                                             title: "Page 1",
                                             href: "#",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 2",
                                             href: "#",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 3",
                                             href: "#",
                                         },
@@ -271,14 +278,17 @@ class App extends Component {
                                     title: "Group 1",
                                     content: [
                                         {
+                                            type: "page",
                                             title: "Page 1",
                                             href: "#",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 2",
                                             href: "#",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 3",
                                             href: "#",
                                         },
@@ -289,14 +299,17 @@ class App extends Component {
                                     title: "Group 2",
                                     content: [
                                         {
+                                            type: "page",
                                             title: "Page 1",
                                             href: "#",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 2",
                                             href: "#",
                                         },
                                         {
+                                            type: "page",
                                             title: "Page 3",
                                             href: "#",
                                         },

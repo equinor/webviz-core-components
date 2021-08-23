@@ -1,0 +1,9 @@
+.Menu .GroupTitle {
+    font-size: weight;
+    padding: 16px;
+    cursor: pointer;
+}
+
+.Menu .GroupTitle:hover {
+    background-color: #f7f7f7;
+}

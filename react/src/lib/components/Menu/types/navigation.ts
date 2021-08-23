@@ -1,21 +1,33 @@
-export type Page = {
+export interface NavigationItemType {
+    type: string;
+    title: string;
+    icon?: string;
+}
+
+export interface PageType extends NavigationItemType {
+    type: "page";
     title: string;
     icon?: string;
     href: string;
-};
+}
 
-export type Group = {
+export interface GroupType extends NavigationItemType {
     type: "group";
     title: string;
     icon?: string;
-    content: (Group | Page)[];
-};
+    content: (GroupType | PageType)[];
+}
 
-export type Section = {
+export interface SectionType extends NavigationItemType {
     type: "section";
     title: string;
     icon?: string;
-    content: (Group | Page)[];
-};
+    href?: undefined;
+    content: (GroupType | PageType)[];
+}
 
-export type Navigation = Section[] | Group[] | Page[] | (Group | Page)[];
+export type NavigationType =
+    | SectionType[]
+    | GroupType[]
+    | PageType[]
+    | (GroupType | PageType)[];
