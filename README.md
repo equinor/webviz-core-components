@@ -1,4 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/webviz-core-components.svg)](https://badge.fury.io/py/webviz-core-components)
+[![npm version](https://badge.fury.io/js/%40webviz%2Fcore-components.svg)](https://badge.fury.io/js/%40webviz%2Fcore-components)
 [![Build Status](https://github.com/equinor/webviz-core-components/workflows/webviz-core-components/badge.svg)](https://github.com/equinor/webviz-core-components/actions?query=branch%3Amaster)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/equinor/webviz-core-components.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/equinor/webviz-core-components/alerts/)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/equinor/webviz-core-components.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/equinor/webviz-core-components/context:javascript)
