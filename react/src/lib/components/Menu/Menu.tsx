@@ -10,7 +10,8 @@ import { NavigationType } from "./types/navigation";
 import { useContainerDimensions } from "./hooks/useContainerDimensions";
 import { MenuPosition } from "./types/menuPosition";
 import { MenuContent } from "./components/MenuContent";
-import { any } from "prop-types";
+
+import "./Menu.css";
 
 type MenuProps = {
     id?: string;
@@ -48,13 +49,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
             <Overlay visible={open && !pinned} onClick={() => setOpen(false)} />
             <MenuBar
                 position={position as MenuPosition}
-                visible={!open}
+                visible={!open && !pinned}
                 onMenuOpen={() => setOpen(true)}
                 ref={menuBarRef}
             />
             <MenuDrawer
                 position={position as MenuPosition}
-                open={open}
+                open={open || pinned}
                 ref={menuDrawerRef}
             >
                 <TopMenu
@@ -102,7 +103,7 @@ Menu.propTypes = {
     /**
      * A list of navigation items to show in the menu.
      */
-    navigationItems: any,
+    navigationItems: PropTypes.any,
 };
 
 Menu.defaultProps = {

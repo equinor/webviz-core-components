@@ -232,7 +232,7 @@ class App extends Component {
                                             type: "page",
                                             title: "Page 1",
                                             href: "#",
-                                            icon: "assignment1",
+                                            icon: "account_circle",
                                         },
                                         {
                                             type: "page",
@@ -318,6 +318,7 @@ class App extends Component {
                             ],
                         },
                     ]}
+                    initiallyPinned={true}
                 />
             </div>
         );
