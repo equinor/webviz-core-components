@@ -1,9 +1,15 @@
-.Menu .GroupTitle {
-    font-size: weight;
+.Menu .GroupHeader {
+    display: flex;
     padding: 16px;
     cursor: pointer;
+    align-items: center;
 }
 
-.Menu .GroupTitle:hover {
+.Menu .GroupHeader:hover {
     background-color: #f7f7f7;
+}
+
+.Menu .GroupTitle {
+    font-weight: bold;
+    flex-grow: 4;
 }

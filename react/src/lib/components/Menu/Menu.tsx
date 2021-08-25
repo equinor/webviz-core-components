@@ -6,7 +6,16 @@ import { MenuBar } from "./components/MenuBar";
 import { MenuDrawer } from "./components/MenuDrawer";
 import { Overlay } from "./components/Overlay";
 
-import { NavigationType } from "./types/navigation";
+import {
+    PropertyNavigationType,
+    NavigationType,
+    PropertySectionType,
+    PropertyGroupType,
+    PropertyPageType,
+    PageType,
+    GroupType,
+    SectionType,
+} from "./types/navigation";
 import { useContainerDimensions } from "./hooks/useContainerDimensions";
 import { MenuPosition } from "./types/menuPosition";
 import { MenuContent } from "./components/MenuContent";
@@ -16,11 +25,49 @@ import "./Menu.css";
 type MenuProps = {
     id?: string;
     setProps?: () => void;
-    navigationItems: NavigationType;
+    navigationItems: PropertyNavigationType;
     initiallyPinned?: boolean;
     position?: "top" | "left" | "right" | "bottom";
     smallLogoUrl?: string;
     logoUrl?: string;
+};
+
+const makeNavigationItemsWithAssignedIds = (
+    navigationItems: PropertyNavigationType
+): NavigationType => {
+    let index = 0;
+    const recursivelyAssignUuids = (
+        item: PropertyPageType | PropertyGroupType | PropertySectionType
+    ): GroupType | PageType | SectionType => {
+        if (item.type === "group") {
+            return {
+                ...item,
+                type: "group",
+                content: (item as PropertyGroupType).content.map(
+                    (el) => recursivelyAssignUuids(el) as GroupType | PageType
+                ),
+                uuid: `${index++}`,
+            };
+        } else if (item.type === "page") {
+            return {
+                ...item,
+                type: "page",
+                uuid: `${index++}`,
+            };
+        } else {
+            return {
+                ...item,
+                type: "section",
+                content: (item as PropertySectionType).content.map(
+                    (el) => recursivelyAssignUuids(el) as GroupType | PageType
+                ),
+                uuid: `${index++}`,
+            };
+        }
+    };
+    return navigationItems.map((el) =>
+        recursivelyAssignUuids(el)
+    ) as NavigationType;
 };
 
 export const Menu: React.FC<MenuProps> = (props) => {
@@ -30,6 +77,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const [pinned, setPinned] = React.useState<boolean>(
         props.initiallyPinned || false
     );
+    const [
+        navigationItemsWithAssignedIds,
+        setNavigationsItemsWithAssignedIds,
+    ] = React.useState<NavigationType>(
+        makeNavigationItemsWithAssignedIds(props.navigationItems)
+    );
 
     const menuBarRef = React.useRef<HTMLDivElement>(null);
     const menuDrawerRef = React.useRef<HTMLDivElement>(null);
@@ -37,6 +90,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const menuDrawerSize = useContainerDimensions(menuDrawerRef);
 
     const menuContentSpacing = 50;
+
+    React.useEffect(() => {
+        setNavigationsItemsWithAssignedIds(
+            makeNavigationItemsWithAssignedIds(props.navigationItems)
+        );
+    }, [props.navigationItems]);
 
     React.useEffect(() => {
         document.body.style.marginLeft = pinned
@@ -62,7 +121,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                     pinned={pinned}
                     onPinnedChange={() => setPinned(!pinned)}
                 />
-                <MenuContent content={props.navigationItems} />
+                <MenuContent content={navigationItemsWithAssignedIds} />
             </MenuDrawer>
         </div>
     );

@@ -1,5 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Icon } from "@equinor/eds-core-react";
+import { arrow_drop_right, arrow_drop_down } from "@equinor/eds-icons";
+
+Icon.add({ arrow_drop_down, arrow_drop_right });
 
 import "./Group.css";
 
@@ -14,10 +18,17 @@ export const Group: React.FC<GroupProps> = (props) => {
     return (
         <div className="Group">
             <div
-                className="GroupTitle"
+                className="GroupHeader"
                 onClick={() => setCollapsed(!collapsed)}
             >
-                {props.title}
+                <div className="GroupTitle">{props.title}</div>
+                <div>
+                    <Icon
+                        name={
+                            collapsed ? "arrow_drop_right" : "arrow_drop_down"
+                        }
+                    />
+                </div>
             </div>
             <div
                 className="GroupContent"

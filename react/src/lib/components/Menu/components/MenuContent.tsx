@@ -6,7 +6,6 @@ import { FilterInput } from "./FilterInput";
 import { Section } from "./Section";
 import { Group } from "./Group";
 import { Page } from "./Page";
-import { useContainerDimensions } from "../hooks/useContainerDimensions";
 import { usePan } from "../hooks/usePan";
 
 import {
@@ -47,6 +46,7 @@ const recursivelyFilterNavigation = (
                 title: filterItem.title,
                 icon: filterItem.icon,
                 content: [],
+                uuid: filterItem.uuid,
             };
             if ((filterItem as GroupType).content) {
                 (filterItem as GroupType).content.forEach((el) => {
@@ -74,6 +74,7 @@ const recursivelyFilterNavigation = (
                 title: el.title,
                 icon: el.icon,
                 content: [],
+                uuid: el.uuid,
             };
             (el as GroupType).content.forEach((el) => {
                 test = makeFilteredNavigation(el, newItem) || test;
@@ -88,6 +89,7 @@ const recursivelyFilterNavigation = (
                 title: el.title,
                 icon: el.icon,
                 content: [],
+                uuid: el.uuid,
             };
             if ((el as SectionType).content) {
                 (el as SectionType).content.forEach(
@@ -112,7 +114,11 @@ const makeNavigation = (navigation: NavigationType): JSX.Element => {
             {items.map((item) => {
                 if (item.type === "section") {
                     return (
-                        <Section title={item.title} icon={item.icon}>
+                        <Section
+                            key={item.uuid}
+                            title={item.title}
+                            icon={item.icon}
+                        >
                             {recursivelyMakeNavigation(
                                 (item as SectionType).content
                             )}
@@ -120,14 +126,18 @@ const makeNavigation = (navigation: NavigationType): JSX.Element => {
                     );
                 } else if (item.type === "group") {
                     return (
-                        <Group title={item.title} icon={item.icon}>
+                        <Group
+                            key={item.uuid}
+                            title={item.title}
+                            icon={item.icon}
+                        >
                             {recursivelyMakeNavigation(
                                 (item as GroupType).content
                             )}
                         </Group>
                     );
                 } else if (item.type === "page") {
-                    return <Page {...(item as PageType)} />;
+                    return <Page key={item.uuid} {...(item as PageType)} />;
                 } else {
                     return null;
                 }
@@ -153,19 +163,23 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
     );
 
     const contentRef = React.useRef<HTMLDivElement>(null);
-    const [contentWidth, contentHeight] = useSize(contentRef);
+    const [contentWidth, contentHeight] = useSize(contentRef, {
+        initialHeight: 0,
+        initialWidth: 0,
+    });
     const scrollAreaRef = React.useRef<HTMLDivElement>(null);
-    const [scrollAreaWidth, scrollAreaHeight] = useSize(scrollAreaRef);
+    const [scrollAreaWidth, scrollAreaHeight] = useSize(scrollAreaRef, {
+        initialHeight: 0,
+        initialWidth: 0,
+    });
     const scrollbarRef = React.useRef<HTMLDivElement>(null);
     const offset = usePan(scrollbarRef);
-    console.log(offset);
 
     React.useEffect(() => {
         setContent(recursivelyFilterNavigation(props.content, filter));
     }, [filter, props.content]);
 
     React.useEffect(() => {
-        console.log(offset);
         setScrollPosition({
             height: Math.max(
                 Math.min((offset.y / scrollAreaHeight) * contentHeight, 0),
@@ -179,17 +193,19 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
 
     const fadeScrollbarIn = React.useCallback(
         (opacity: number) => {
-            const interval = setInterval(() => {
-                if (opacity >= 0.75) {
-                    setScrollbarOpacity(0.75);
-                    clearInterval(interval);
-                    return;
-                }
-                opacity += 0.05;
-                setScrollbarOpacity(opacity);
-            }, 10);
+            if (contentHeight > scrollAreaHeight) {
+                const interval = setInterval(() => {
+                    if (opacity >= 0.75) {
+                        setScrollbarOpacity(0.75);
+                        clearInterval(interval);
+                        return;
+                    }
+                    opacity += 0.05;
+                    setScrollbarOpacity(opacity);
+                }, 10);
+            }
         },
-        [setScrollbarOpacity]
+        [setScrollbarOpacity, contentHeight, scrollAreaHeight]
     );
 
     const fadeScrollbarOut = React.useCallback(
@@ -207,46 +223,44 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
         [setScrollbarOpacity]
     );
 
-    const scroll = React.useCallback(
-        (e: React.WheelEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setScrollPosition({
-                height: Math.max(
-                    Math.min(scrollPosition.height - e.deltaY, 0),
-                    contentHeight > scrollAreaHeight
-                        ? -(contentHeight - scrollAreaHeight)
-                        : 0
-                ),
-                width: scrollPosition.width + e.deltaX,
-            });
-        },
-        [setScrollPosition, scrollPosition, scrollAreaHeight, contentHeight]
-    );
+    const scroll = (e: React.WheelEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setScrollPosition({
+            height: Math.max(
+                Math.min(scrollPosition.height - e.deltaY, 0),
+                contentHeight > scrollAreaHeight
+                    ? -(contentHeight - scrollAreaHeight)
+                    : 0
+            ),
+            width: scrollPosition.width + e.deltaX,
+        });
+    };
 
     React.useEffect(() => {
-        document.addEventListener(
-            "mouseup",
-            () => {
+        const unselectScrollbar = () => {
+            if (scrollbarSelected) {
                 setScrollbarSelected(false);
                 if (!scrollAreaHovered) {
                     fadeScrollbarOut(0.75);
                 }
-            },
-            true
-        );
+            }
+        };
+        document.addEventListener("mouseup", unselectScrollbar, true);
         return () =>
-            document.removeEventListener(
-                "mouseup",
-                () => {
-                    setScrollbarSelected(false);
-                    if (!scrollAreaHovered) {
-                        fadeScrollbarOut(0.75);
-                    }
-                },
-                true
-            );
-    }, []);
+            document.removeEventListener("mouseup", unselectScrollbar, true);
+    }, [scrollAreaHovered, scrollbarSelected, setScrollbarSelected]);
+
+    React.useEffect(() => {
+        if (
+            contentHeight > scrollAreaHeight &&
+            (scrollAreaHovered || scrollbarSelected)
+        ) {
+            fadeScrollbarIn(scrollbarOpacity);
+        } else {
+            fadeScrollbarOut(scrollbarOpacity);
+        }
+    }, [scrollAreaHeight, contentHeight, scrollAreaHovered, scrollbarSelected]);
 
     return (
         <div className="ContentWrapper">
@@ -264,9 +278,9 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
                 }}
                 onMouseLeave={() => {
                     if (!scrollbarSelected) {
-                        fadeScrollbarIn(scrollbarOpacity);
+                        fadeScrollbarOut(scrollbarOpacity);
                     }
-                    setScrollAreaHovered(false);
+                    //setScrollAreaHovered(false);
                 }}
                 onWheel={(e: React.WheelEvent) => scroll(e)}
             >
@@ -282,8 +296,10 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
                             (1 / contentHeight)
                         }px`,
                         top: `${
-                            (-scrollPosition.height / contentHeight) *
-                            scrollAreaHeight
+                            Math.abs(contentHeight) > 0
+                                ? (-scrollPosition.height / contentHeight) *
+                                  scrollAreaHeight
+                                : 0
                         }px`,
                     }}
                     onMouseDown={() => setScrollbarSelected(true)}

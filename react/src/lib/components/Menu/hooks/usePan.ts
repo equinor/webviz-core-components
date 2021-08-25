@@ -1,10 +1,4 @@
-import {
-    MANHATTAN_LENGTH,
-    ORIGIN,
-    vectorLength,
-    pointDifference,
-    pointSum,
-} from "../utils/geometry";
+import { ORIGIN, pointDifference, pointSum } from "../utils/geometry";
 import React from "react";
 
 import { Point } from "../types/point";
@@ -21,9 +15,7 @@ export const usePan = (ref: React.RefObject<HTMLElement>): Point => {
             const delta = pointDifference(referencePosition, currentPosition);
 
             if (!panningStarted.current) {
-                if (vectorLength(delta) > MANHATTAN_LENGTH) {
-                    panningStarted.current = true;
-                }
+                panningStarted.current = true;
             } else {
                 referencePositionRef.current = currentPosition;
                 setPanPosition((panPosition) => pointSum(panPosition, delta));

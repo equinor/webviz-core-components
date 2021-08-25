@@ -1,28 +1,52 @@
-export interface NavigationItemType {
+export interface PropertyNavigationItemType {
     type: string;
     title: string;
     icon?: string;
 }
 
-export interface PageType extends NavigationItemType {
+export interface PropertyPageType extends PropertyNavigationItemType {
     type: "page";
     title: string;
     icon?: string;
     href: string;
 }
 
-export interface GroupType extends NavigationItemType {
+export interface PropertyGroupType extends PropertyNavigationItemType {
     type: "group";
     title: string;
     icon?: string;
-    content: (GroupType | PageType)[];
+    content: (PropertyGroupType | PropertyPageType)[];
 }
 
-export interface SectionType extends NavigationItemType {
+export interface PropertySectionType extends PropertyNavigationItemType {
     type: "section";
     title: string;
     icon?: string;
     href?: undefined;
+    content: (PropertyGroupType | PropertyPageType)[];
+}
+
+export type PropertyNavigationType =
+    | PropertySectionType[]
+    | PropertyGroupType[]
+    | PropertyPageType[]
+    | (PropertyGroupType | PropertyPageType)[];
+
+export interface NavigationItemType extends PropertyNavigationItemType {
+    uuid: string;
+}
+
+export interface PageType extends PropertyPageType {
+    uuid: string;
+}
+
+export interface GroupType extends PropertyGroupType {
+    uuid: string;
+    content: (GroupType | PageType)[];
+}
+
+export interface SectionType extends PropertySectionType {
+    uuid: string;
     content: (GroupType | PageType)[];
 }
 
