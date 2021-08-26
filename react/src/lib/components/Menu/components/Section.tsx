@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { Icon } from "./Icon";
+
 import "./Section.css";
 
 type SectionProps = {
@@ -12,7 +14,12 @@ type SectionProps = {
 export const Section: React.FC<SectionProps> = (props) => {
     return (
         <div className="Section">
-            <div className="SectionTitle">{props.title}</div>
+            <div className="SectionTitle">
+                {props.icon && (
+                    <Icon className="Icon" icon={props.icon} active={false} />
+                )}
+                {props.title}
+            </div>
             {props.children}
         </div>
     );

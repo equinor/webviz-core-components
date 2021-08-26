@@ -5,6 +5,10 @@ import { TopMenu } from "./components/TopMenu";
 import { MenuBar } from "./components/MenuBar";
 import { MenuDrawer } from "./components/MenuDrawer";
 import { Overlay } from "./components/Overlay";
+import { Logo } from "./components/Logo";
+import { useContainerDimensions } from "./hooks/useContainerDimensions";
+import { MenuPosition } from "./types/menuPosition";
+import { MenuContent } from "./components/MenuContent";
 
 import {
     PropertyNavigationType,
@@ -16,9 +20,6 @@ import {
     GroupType,
     SectionType,
 } from "./types/navigation";
-import { useContainerDimensions } from "./hooks/useContainerDimensions";
-import { MenuPosition } from "./types/menuPosition";
-import { MenuContent } from "./components/MenuContent";
 
 import "./Menu.css";
 
@@ -111,6 +112,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 visible={!open && !pinned}
                 onMenuOpen={() => setOpen(true)}
                 ref={menuBarRef}
+                logoUrl={props.smallLogoUrl}
             />
             <MenuDrawer
                 position={position as MenuPosition}
@@ -121,6 +123,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                     pinned={pinned}
                     onPinnedChange={() => setPinned(!pinned)}
                 />
+                {props.logoUrl && <Logo size="large" url={props.logoUrl} />}
                 <MenuContent content={navigationItemsWithAssignedIds} />
             </MenuDrawer>
         </div>

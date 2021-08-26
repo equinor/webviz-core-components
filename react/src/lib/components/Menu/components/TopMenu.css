@@ -1,6 +1,7 @@
 .TopMenu {
     text-align: right;
     padding: 16px;
+    padding-bottom: 0px;
 }
 
 .TopMenu .PinButton {

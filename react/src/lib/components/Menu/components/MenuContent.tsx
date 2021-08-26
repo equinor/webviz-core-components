@@ -181,12 +181,18 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
 
     React.useEffect(() => {
         setScrollPosition({
-            height: Math.max(
-                Math.min((offset.y / scrollAreaHeight) * contentHeight, 0),
-                contentHeight > scrollAreaHeight
-                    ? -(contentHeight - scrollAreaHeight)
-                    : 0
-            ),
+            height:
+                scrollAreaHeight > 0
+                    ? Math.max(
+                          Math.min(
+                              (offset.y / scrollAreaHeight) * contentHeight,
+                              0
+                          ),
+                          contentHeight > scrollAreaHeight
+                              ? -(contentHeight - scrollAreaHeight)
+                              : 0
+                      )
+                    : 0,
             width: scrollPosition.width + offset.x,
         });
     }, [offset]);
@@ -280,7 +286,7 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
                     if (!scrollbarSelected) {
                         fadeScrollbarOut(scrollbarOpacity);
                     }
-                    //setScrollAreaHovered(false);
+                    setScrollAreaHovered(false);
                 }}
                 onWheel={(e: React.WheelEvent) => scroll(e)}
             >

@@ -4,6 +4,7 @@ import { Button, Icon } from "@equinor/eds-core-react";
 import { menu } from "@equinor/eds-icons";
 
 import { MenuPosition } from "../types/menuPosition";
+import { Logo } from "./Logo";
 
 Icon.add({ menu });
 
@@ -30,6 +31,7 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                     props.position.slice(1)
                 }`}
             >
+                {props.logoUrl && <Logo url={props.logoUrl} size="small" />}
                 <Button variant="ghost_icon" onClick={handleMenuButtonClick}>
                     <Icon name="menu" title="Open menu" />
                 </Button>

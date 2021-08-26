@@ -219,51 +219,61 @@ class App extends Component {
                     ))}
                 {this.state.selectedTags.length === 0 && <i>None</i>}
                 <Menu
+                    logoUrl="https://eds-static.equinor.com/logo/equinor-logo-primary.svg#red"
+                    smallLogoUrl="https://pbs.twimg.com/profile_images/996637792326291456/s0Joo4jt_200x200.jpg"
                     navigationItems={[
                         {
                             type: "section",
                             title: "Section 1",
+                            icon: "layers",
                             content: [
                                 {
                                     type: "group",
                                     title: "Group 1",
+                                    icon: "star_filled",
                                     content: [
                                         {
                                             type: "page",
                                             title: "Page 1",
                                             href: "#",
-                                            icon: "account_circle",
+                                            icon: "star_half",
                                         },
                                         {
                                             type: "page",
                                             title: "Page 2",
                                             href: "#",
+                                            icon: "star_circle",
                                         },
                                         {
                                             type: "page",
                                             title: "Page 3",
                                             href: "#",
+                                            icon: "star_outlined",
                                         },
                                     ],
                                 },
                                 {
                                     type: "group",
                                     title: "Group 2",
+                                    icon: "bookmark_collection",
                                     content: [
                                         {
                                             type: "page",
                                             title: "Page 1",
                                             href: "#",
+                                            icon: "bookmarks",
                                         },
                                         {
                                             type: "page",
                                             title: "Page 2",
                                             href: "#",
+                                            icon: "bookmark_outlined",
                                         },
                                         {
                                             type: "page",
                                             title: "Page 3",
                                             href: "#",
+                                            icon: "bookmark_filled",
                                         },
                                     ],
                                 },
