@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import { Button, Icon } from "@equinor/eds-core-react";
 import { menu } from "@equinor/eds-icons";
 
-import { MenuPosition } from "../types/menuPosition";
-import { Logo } from "./Logo";
+import { MenuPosition } from "../../types/menu-position";
+import { Logo } from "../Logo";
 
 Icon.add({ menu });
 
@@ -14,6 +14,7 @@ type MenuBarProps = {
     position: MenuPosition;
     visible: boolean;
     logoUrl?: string;
+    homepage: string;
     onMenuOpen: () => void;
 };
 
@@ -31,7 +32,13 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                     props.position.slice(1)
                 }`}
             >
-                {props.logoUrl && <Logo url={props.logoUrl} size="small" />}
+                {props.logoUrl && (
+                    <Logo
+                        homepage={props.homepage}
+                        url={props.logoUrl}
+                        size="small"
+                    />
+                )}
                 <Button variant="ghost_icon" onClick={handleMenuButtonClick}>
                     <Icon name="menu" title="Open menu" />
                 </Button>
@@ -51,5 +58,6 @@ MenuBar.propTypes = {
     ]).isRequired,
     visible: PropTypes.bool.isRequired,
     logoUrl: PropTypes.string,
+    homepage: PropTypes.string.isRequired,
     onMenuOpen: PropTypes.func.isRequired,
 };

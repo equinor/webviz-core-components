@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+import useSize from "@react-hook/size";
 
-import { useContainerDimensions } from "../hooks/useContainerDimensions";
-import { MenuPosition } from "../types/menuPosition";
+import { MenuPosition } from "../../types/menu-position";
 
 import "./MenuDrawer.css";
 
@@ -32,7 +32,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
         const drawerRef =
             (ref as React.RefObject<HTMLDivElement>) ||
             React.useRef<HTMLDivElement>(null);
-        const drawerSize = useContainerDimensions(drawerRef);
+        const [drawerWidth, drawerHeight] = useSize(drawerRef);
 
         const slideInDrawer = React.useCallback(
             (pos: Position) => {
@@ -61,10 +61,10 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
             (pos: Position) => {
                 let currentPosition = pos.left as number;
                 const interval = setInterval(() => {
-                    if (currentPosition > -drawerSize.width) {
+                    if (currentPosition > -drawerWidth) {
                         currentPosition -= Math.min(
                             10,
-                            drawerSize.width - Math.abs(currentPosition)
+                            drawerWidth - Math.abs(currentPosition)
                         );
                         setPosition({
                             left: currentPosition,
@@ -78,14 +78,14 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     }
                 }, 10);
             },
-            [setPosition, setVisible, drawerSize]
+            [setPosition, setVisible, drawerWidth]
         );
 
         React.useEffect(() => {
             if (props.open) {
                 if (props.position === "left") {
                     const newPosition: Position = {
-                        left: -drawerSize.width,
+                        left: -drawerWidth,
                         top: 0,
                         right: "auto",
                         bottom: "auto",
@@ -122,7 +122,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     bottom: position.bottom,
                 }}
             >
-                {props.children}
+                <div className="MenuDrawerContentWrapper">{props.children}</div>
             </div>
         );
     }

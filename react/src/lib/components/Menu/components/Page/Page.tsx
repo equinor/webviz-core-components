@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Icon } from "./Icon";
-import { checkIfUrlIsCurrent } from "../utils/check-url";
+import { Icon } from "../Icon";
+import { checkIfUrlIsCurrent } from "../../utils/check-url";
 
 import "./Page.css";
 

@@ -1,14 +1,14 @@
 import React from "react";
 import PropTypes, { string } from "prop-types";
+import useSize from "@react-hook/size";
 
-import { TopMenu } from "./components/TopMenu";
-import { MenuBar } from "./components/MenuBar";
-import { MenuDrawer } from "./components/MenuDrawer";
-import { Overlay } from "./components/Overlay";
-import { Logo } from "./components/Logo";
-import { useContainerDimensions } from "./hooks/useContainerDimensions";
-import { MenuPosition } from "./types/menuPosition";
-import { MenuContent } from "./components/MenuContent";
+import { TopMenu } from "./components/TopMenu/TopMenu";
+import { MenuBar } from "./components/MenuBar/MenuBar";
+import { MenuDrawer } from "./components/MenuDrawer/MenuDrawer";
+import { Overlay } from "./components/Overlay/Overlay";
+import { Logo } from "./components/Logo/Logo";
+import { MenuPosition } from "./types/menu-position";
+import { MenuContent } from "./components/MenuContent/MenuContent";
 
 import {
     PropertyNavigationType,
@@ -66,8 +66,9 @@ const makeNavigationItemsWithAssignedIds = (
             };
         }
     };
-    return navigationItems.map((el) =>
-        recursivelyAssignUuids(el)
+    return navigationItems.map(
+        (el: PropertySectionType | PropertyGroupType | PropertyPageType) =>
+            recursivelyAssignUuids(el)
     ) as NavigationType;
 };
 
@@ -84,11 +85,16 @@ export const Menu: React.FC<MenuProps> = (props) => {
     ] = React.useState<NavigationType>(
         makeNavigationItemsWithAssignedIds(props.navigationItems)
     );
+    const [homepage, setHomepage] = React.useState<string>("");
+
+    React.useEffect(() => {
+        setHomepage(window.location.href);
+    }, []);
 
     const menuBarRef = React.useRef<HTMLDivElement>(null);
     const menuDrawerRef = React.useRef<HTMLDivElement>(null);
-    const menuBarSize = useContainerDimensions(menuBarRef);
-    const menuDrawerSize = useContainerDimensions(menuDrawerRef);
+    const [menuBarWidth, menuBarHeight] = useSize(menuBarRef);
+    const [menuDrawerWidth, menuDrawerHeight] = useSize(menuDrawerRef);
 
     const menuContentSpacing = 50;
 
@@ -100,9 +106,9 @@ export const Menu: React.FC<MenuProps> = (props) => {
 
     React.useEffect(() => {
         document.body.style.marginLeft = pinned
-            ? `${menuDrawerSize.width + menuContentSpacing}px`
-            : `${menuBarSize.width + menuContentSpacing}px`;
-    }, [menuBarSize, menuDrawerSize, pinned]);
+            ? `${menuDrawerWidth + menuContentSpacing}px`
+            : `${menuBarWidth + menuContentSpacing}px`;
+    }, [menuBarWidth, menuDrawerWidth, pinned]);
 
     return (
         <div className="Menu">
@@ -112,6 +118,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 visible={!open && !pinned}
                 onMenuOpen={() => setOpen(true)}
                 ref={menuBarRef}
+                homepage={homepage}
                 logoUrl={props.smallLogoUrl}
             />
             <MenuDrawer
@@ -123,7 +130,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
                     pinned={pinned}
                     onPinnedChange={() => setPinned(!pinned)}
                 />
-                {props.logoUrl && <Logo size="large" url={props.logoUrl} />}
+                {props.logoUrl && (
+                    <Logo
+                        homepage={homepage}
+                        size="large"
+                        url={props.logoUrl}
+                    />
+                )}
                 <MenuContent content={navigationItemsWithAssignedIds} />
             </MenuDrawer>
         </div>

@@ -2,12 +2,17 @@
     background-color: white;
     position: fixed;
     height: 100vh;
+    width: fit-content;
     top: 0;
     left: 0;
-    width: 200px;
     z-index: 101;
+    display: inline-block;
+}
+
+.Menu .MenuDrawerContentWrapper {
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .Menu .MenuDrawerLeft {
