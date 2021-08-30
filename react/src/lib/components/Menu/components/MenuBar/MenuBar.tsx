@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Button, Icon } from "@equinor/eds-core-react";
 import { menu } from "@equinor/eds-icons";
 
-import { MenuPosition } from "../../types/menu-position";
+import { MenuBarPosition, MenuDrawerPosition } from "../../types/menu-position";
 import { Logo } from "../Logo";
 
 Icon.add({ menu });
@@ -11,7 +11,8 @@ Icon.add({ menu });
 import "./MenuBar.css";
 
 type MenuBarProps = {
-    position: MenuPosition;
+    position: MenuBarPosition;
+    menuButtonPosition: MenuDrawerPosition;
     visible: boolean;
     logoUrl?: string;
     homepage: string;
@@ -39,9 +40,24 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                         size="small"
                     />
                 )}
-                <Button variant="ghost_icon" onClick={handleMenuButtonClick}>
-                    <Icon name="menu" title="Open menu" />
-                </Button>
+                <div
+                    style={{
+                        flexGrow: 1,
+                        textAlign:
+                            props.menuButtonPosition === "right" &&
+                            (props.position === "top" ||
+                                props.position === "bottom")
+                                ? "right"
+                                : "inherit",
+                    }}
+                >
+                    <Button
+                        variant="ghost_icon"
+                        onClick={handleMenuButtonClick}
+                    >
+                        <Icon name="menu" title="Open menu" />
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -50,11 +66,15 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
 MenuBar.displayName = "MenuBar";
 
 MenuBar.propTypes = {
-    position: PropTypes.oneOf<MenuPosition>([
-        MenuPosition.Left,
-        MenuPosition.Top,
-        MenuPosition.Right,
-        MenuPosition.Bottom,
+    position: PropTypes.oneOf<MenuBarPosition>([
+        MenuBarPosition.Left,
+        MenuBarPosition.Top,
+        MenuBarPosition.Right,
+        MenuBarPosition.Bottom,
+    ]).isRequired,
+    menuButtonPosition: PropTypes.oneOf<MenuDrawerPosition>([
+        MenuDrawerPosition.Left,
+        MenuDrawerPosition.Right,
     ]).isRequired,
     visible: PropTypes.bool.isRequired,
     logoUrl: PropTypes.string,

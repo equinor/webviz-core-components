@@ -7,7 +7,7 @@ import { MenuBar } from "./components/MenuBar/MenuBar";
 import { MenuDrawer } from "./components/MenuDrawer/MenuDrawer";
 import { Overlay } from "./components/Overlay/Overlay";
 import { Logo } from "./components/Logo/Logo";
-import { MenuPosition } from "./types/menu-position";
+import { MenuBarPosition, MenuDrawerPosition } from "./types/menu-position";
 import { MenuContent } from "./components/MenuContent/MenuContent";
 
 import {
@@ -28,7 +28,8 @@ type MenuProps = {
     setProps?: () => void;
     navigationItems: PropertyNavigationType;
     initiallyPinned?: boolean;
-    position?: "top" | "left" | "right" | "bottom";
+    menuBarPosition?: "top" | "left" | "right" | "bottom";
+    menuDrawerPosition?: "left" | "right";
     smallLogoUrl?: string;
     logoUrl?: string;
 };
@@ -73,7 +74,8 @@ const makeNavigationItemsWithAssignedIds = (
 };
 
 export const Menu: React.FC<MenuProps> = (props) => {
-    const position = props.position || "left";
+    const menuBarPosition = props.menuBarPosition || "left";
+    const menuDrawerPosition = props.menuDrawerPosition || "left";
 
     const [open, setOpen] = React.useState<boolean>(false);
     const [pinned, setPinned] = React.useState<boolean>(
@@ -94,7 +96,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const menuBarRef = React.useRef<HTMLDivElement>(null);
     const menuDrawerRef = React.useRef<HTMLDivElement>(null);
     const [menuBarWidth, menuBarHeight] = useSize(menuBarRef);
-    const [menuDrawerWidth, menuDrawerHeight] = useSize(menuDrawerRef);
+    const [menuDrawerWidth, _] = useSize(menuDrawerRef);
 
     const menuContentSpacing = 50;
 
@@ -105,16 +107,42 @@ export const Menu: React.FC<MenuProps> = (props) => {
     }, [props.navigationItems]);
 
     React.useEffect(() => {
-        document.body.style.marginLeft = pinned
-            ? `${menuDrawerWidth + menuContentSpacing}px`
-            : `${menuBarWidth + menuContentSpacing}px`;
-    }, [menuBarWidth, menuDrawerWidth, pinned]);
+        const bodyMargins = { left: 16, top: 16, right: 16, bottom: 16 };
+
+        if (props.menuBarPosition === "left" && !pinned) {
+            bodyMargins.left = menuBarWidth + menuContentSpacing;
+        } else if (props.menuBarPosition === "top") {
+            bodyMargins.top = menuBarHeight + menuContentSpacing;
+        } else if (props.menuBarPosition === "right" && !pinned) {
+            bodyMargins.right = menuBarWidth + menuContentSpacing;
+        } else if (props.menuBarPosition === "bottom") {
+            bodyMargins.bottom = menuBarHeight + menuContentSpacing;
+        }
+
+        if (props.menuDrawerPosition === "left" && pinned) {
+            bodyMargins.left = menuDrawerWidth + menuContentSpacing;
+        } else if (props.menuDrawerPosition === "right" && pinned) {
+            bodyMargins.right = menuDrawerWidth + menuContentSpacing;
+        }
+
+        document.body.style.marginLeft = bodyMargins.left + "px";
+        document.body.style.marginTop = bodyMargins.top + "px";
+        document.body.style.marginRight = bodyMargins.right + "px";
+        document.body.style.marginBottom = bodyMargins.bottom + "px";
+    }, [
+        menuBarWidth,
+        menuDrawerWidth,
+        pinned,
+        menuBarPosition,
+        menuDrawerPosition,
+    ]);
 
     return (
         <div className="Menu">
             <Overlay visible={open && !pinned} onClick={() => setOpen(false)} />
             <MenuBar
-                position={position as MenuPosition}
+                position={menuBarPosition as MenuBarPosition}
+                menuButtonPosition={menuDrawerPosition as MenuDrawerPosition}
                 visible={!open && !pinned}
                 onMenuOpen={() => setOpen(true)}
                 ref={menuBarRef}
@@ -122,7 +150,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 logoUrl={props.smallLogoUrl}
             />
             <MenuDrawer
-                position={position as MenuPosition}
+                position={menuDrawerPosition as MenuDrawerPosition}
                 open={open || pinned}
                 ref={menuDrawerRef}
             >
@@ -161,9 +189,14 @@ Menu.propTypes = {
     initiallyPinned: PropTypes.bool,
 
     /**
-     * Define the position the menu shall be displayed at.
+     * Define the position the menu bar shall be displayed at.
      */
-    position: PropTypes.oneOf(["left", "top", "right", "bottom"]),
+    menuBarPosition: PropTypes.oneOf(["left", "top", "right", "bottom"]),
+
+    /**
+     * Define the position the menu drawer shall be displayed at.
+     */
+    menuDrawerPosition: PropTypes.oneOf(["left", "right"]),
 
     /**
      * URL to a small logo asset that is shown when the menu is collapsed.
@@ -187,5 +220,6 @@ Menu.defaultProps = {
         return;
     },
     initiallyPinned: false,
-    position: "left",
+    menuBarPosition: "left",
+    menuDrawerPosition: "left",
 };

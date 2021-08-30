@@ -2,12 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import useSize from "@react-hook/size";
 
-import { MenuPosition } from "../../types/menu-position";
+import { MenuDrawerPosition } from "../../types/menu-position";
 
 import "./MenuDrawer.css";
 
 type MenuDrawerProps = {
-    position: MenuPosition;
+    position: MenuDrawerPosition;
     open: boolean;
     children?: React.ReactNode;
 };
@@ -32,53 +32,94 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
         const drawerRef =
             (ref as React.RefObject<HTMLDivElement>) ||
             React.useRef<HTMLDivElement>(null);
-        const [drawerWidth, drawerHeight] = useSize(drawerRef);
+        const [drawerWidth, _] = useSize(drawerRef);
 
         const slideInDrawer = React.useCallback(
             (pos: Position) => {
-                let currentPosition = pos.left as number;
-                const interval = setInterval(() => {
-                    if (currentPosition < 0) {
-                        currentPosition += Math.min(
-                            10,
-                            Math.abs(currentPosition)
-                        );
-                        setPosition({
-                            left: currentPosition,
-                            top: position.top,
-                            right: position.right,
-                            bottom: position.bottom,
-                        });
-                    } else {
-                        clearInterval(interval);
-                    }
-                }, 10);
+                if (props.position === "left") {
+                    let currentPosition = pos.left as number;
+                    const interval = setInterval(() => {
+                        if (currentPosition < 0) {
+                            currentPosition += Math.min(
+                                10,
+                                Math.abs(currentPosition)
+                            );
+                            setPosition({
+                                left: currentPosition,
+                                top: pos.top,
+                                right: pos.right,
+                                bottom: pos.bottom,
+                            });
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 10);
+                } else if (props.position === "right") {
+                    let currentPosition = pos.right as number;
+                    const interval = setInterval(() => {
+                        if (currentPosition < 0) {
+                            currentPosition += Math.min(
+                                10,
+                                Math.abs(currentPosition)
+                            );
+                            setPosition({
+                                left: pos.left,
+                                top: pos.top,
+                                right: currentPosition,
+                                bottom: pos.bottom,
+                            });
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 10);
+                }
             },
-            [setPosition]
+            [setPosition, props.position]
         );
 
         const slideOutDrawer = React.useCallback(
             (pos: Position) => {
-                let currentPosition = pos.left as number;
-                const interval = setInterval(() => {
-                    if (currentPosition > -drawerWidth) {
-                        currentPosition -= Math.min(
-                            10,
-                            drawerWidth - Math.abs(currentPosition)
-                        );
-                        setPosition({
-                            left: currentPosition,
-                            top: position.top,
-                            right: position.right,
-                            bottom: position.bottom,
-                        });
-                    } else {
-                        setVisible(false);
-                        clearInterval(interval);
-                    }
-                }, 10);
+                if (props.position === "left") {
+                    let currentPosition = pos.left as number;
+                    const interval = setInterval(() => {
+                        if (currentPosition > -drawerWidth) {
+                            currentPosition -= Math.min(
+                                10,
+                                drawerWidth - Math.abs(currentPosition)
+                            );
+                            setPosition({
+                                left: currentPosition,
+                                top: pos.top,
+                                right: pos.right,
+                                bottom: pos.bottom,
+                            });
+                        } else {
+                            setVisible(false);
+                            clearInterval(interval);
+                        }
+                    }, 10);
+                } else if (props.position === "right") {
+                    let currentPosition = pos.right as number;
+                    const interval = setInterval(() => {
+                        if (currentPosition > -drawerWidth) {
+                            currentPosition -= Math.min(
+                                10,
+                                drawerWidth - Math.abs(currentPosition)
+                            );
+                            setPosition({
+                                left: pos.left,
+                                top: pos.top,
+                                right: currentPosition,
+                                bottom: pos.bottom,
+                            });
+                        } else {
+                            setVisible(false);
+                            clearInterval(interval);
+                        }
+                    }, 10);
+                }
             },
-            [setPosition, setVisible, drawerWidth]
+            [setPosition, setVisible, drawerWidth, props.position]
         );
 
         React.useEffect(() => {
@@ -93,6 +134,16 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     setPosition(newPosition);
                     setVisible(true);
                     slideInDrawer(newPosition);
+                } else if (props.position === "right") {
+                    const newPosition: Position = {
+                        left: "auto",
+                        top: 0,
+                        right: -drawerWidth,
+                        bottom: "auto",
+                    };
+                    setPosition(newPosition);
+                    setVisible(true);
+                    slideInDrawer(newPosition);
                 }
             } else {
                 if (props.position === "left") {
@@ -100,6 +151,14 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                         left: 0,
                         top: 0,
                         right: "auto",
+                        bottom: "auto",
+                    };
+                    slideOutDrawer(newPosition);
+                } else if (props.position === "right") {
+                    const newPosition: Position = {
+                        left: "auto",
+                        top: 0,
+                        right: 0,
                         bottom: "auto",
                     };
                     slideOutDrawer(newPosition);
@@ -131,11 +190,9 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
 MenuDrawer.displayName = "MenuDrawer";
 
 MenuDrawer.propTypes = {
-    position: PropTypes.oneOf<MenuPosition>([
-        MenuPosition.Left,
-        MenuPosition.Top,
-        MenuPosition.Right,
-        MenuPosition.Bottom,
+    position: PropTypes.oneOf<MenuDrawerPosition>([
+        MenuDrawerPosition.Left,
+        MenuDrawerPosition.Right,
     ]).isRequired,
     open: PropTypes.bool.isRequired,
     children: PropTypes.oneOfType([

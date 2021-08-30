@@ -3,9 +3,7 @@
     position: fixed;
     height: 100vh;
     width: fit-content;
-    top: 0;
-    left: 0;
-    z-index: 101;
+    z-index: 1001;
     display: inline-block;
 }
 
@@ -18,4 +16,13 @@
 .Menu .MenuDrawerLeft {
     -webkit-box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
     box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+    top: 0;
+    left: 0;
+}
+
+.Menu .MenuDrawerRight {
+    -webkit-box-shadow: -4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: -4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+    top: 0;
+    right: 0;
 }

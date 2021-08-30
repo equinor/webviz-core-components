@@ -27,12 +27,12 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         false
     );
     const contentRef = React.useRef<HTMLDivElement>(null);
-    const [contentWidth, contentHeight] = useSize(contentRef, {
+    const [_, contentHeight] = useSize(contentRef, {
         initialHeight: 0,
         initialWidth: 0,
     });
     const scrollAreaRef = React.useRef<HTMLDivElement>(null);
-    const [scrollAreaWidth, scrollAreaHeight] = useSize(scrollAreaRef, {
+    const [__, scrollAreaHeight] = useSize(scrollAreaRef, {
         initialHeight: 0,
         initialWidth: 0,
     });

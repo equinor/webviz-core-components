@@ -219,6 +219,8 @@ class App extends Component {
                     ))}
                 {this.state.selectedTags.length === 0 && <i>None</i>}
                 <Menu
+                    menuBarPosition="left"
+                    menuDrawerPosition="left"
                     logoUrl="https://eds-static.equinor.com/logo/equinor-logo-primary.svg#red"
                     smallLogoUrl="https://pbs.twimg.com/profile_images/996637792326291456/s0Joo4jt_200x200.jpg"
                     navigationItems={[
@@ -328,7 +330,6 @@ class App extends Component {
                             ],
                         },
                     ]}
-                    initiallyPinned={true}
                 />
             </div>
         );
