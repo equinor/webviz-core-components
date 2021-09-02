@@ -19,6 +19,7 @@ import "./MenuContent.css";
 
 type MenuContentProps = {
     content: NavigationType;
+    onPageChange: (url: string) => void;
 };
 
 const recursivelyFilterNavigation = (
@@ -106,10 +107,12 @@ const recursivelyFilterNavigation = (
 
 const makeNavigation = (
     navigation: NavigationType,
-    filtered: boolean
+    filtered: boolean,
+    onPageChange: (url: string) => void
 ): JSX.Element => {
     const recursivelyMakeNavigation = (
-        items: NavigationItemType[]
+        items: NavigationItemType[],
+        level: number = 1
     ): JSX.Element => (
         <>
             {items.map((item) => {
@@ -129,17 +132,28 @@ const makeNavigation = (
                     return (
                         <Group
                             key={item.uuid}
+                            level={level}
                             title={item.title}
                             icon={item.icon}
                             open={filtered}
                         >
                             {recursivelyMakeNavigation(
-                                (item as GroupType).content
+                                (item as GroupType).content,
+                                level + 1
                             )}
                         </Group>
                     );
                 } else if (item.type === "page") {
-                    return <Page key={item.uuid} {...(item as PageType)} />;
+                    return (
+                        <Page
+                            key={item.uuid}
+                            level={level}
+                            {...(item as PageType)}
+                            onClick={() =>
+                                onPageChange((item as PageType).href)
+                            }
+                        />
+                    );
                 } else {
                     return null;
                 }
@@ -162,7 +176,15 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
             <div className="FilterInputWrapper">
                 <FilterInput filter={filter} onFilterChange={setFilter} />
             </div>
-            <ScrollArea>{makeNavigation(content, filter !== "")}</ScrollArea>
+            <ScrollArea>
+                {content.length === 0 ? (
+                    <div className="NoResults">
+                        No pages matching the query...
+                    </div>
+                ) : (
+                    makeNavigation(content, filter !== "", props.onPageChange)
+                )}
+            </ScrollArea>
         </div>
     );
 };

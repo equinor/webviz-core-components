@@ -82,6 +82,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                 if (props.position === "left") {
                     let currentPosition = pos.left as number;
                     const interval = setInterval(() => {
+                        console.log(drawerWidth);
                         if (currentPosition > -drawerWidth) {
                             currentPosition -= Math.min(
                                 10,

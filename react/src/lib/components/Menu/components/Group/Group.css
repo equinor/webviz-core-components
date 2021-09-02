@@ -1,6 +1,7 @@
 .Menu .GroupHeader {
     display: flex;
     padding: 16px;
+    padding-left: 0px;
     cursor: pointer;
     align-items: center;
 }

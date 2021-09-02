@@ -1,15 +1,10 @@
 .Menu .Logo {
     text-align: center;
+    width: 100%;
 }
 
-.Menu .LogoImageLarge {
-    max-width: 120px;
-    max-height: 120px;
-    margin: 16px;
-}
-
-.Menu .LogoImageSmall {
-    max-width: 48px;
-    max-height: 48px;
-    margin-bottom: 16px;
+.Menu .Logo > a {
+    display: block;
+    background-position: center;
+    margin: auto;
 }

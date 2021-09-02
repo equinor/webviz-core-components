@@ -14,7 +14,7 @@ type MenuBarProps = {
     position: MenuBarPosition;
     menuButtonPosition: MenuDrawerPosition;
     visible: boolean;
-    logoUrl?: string;
+    showLogo: boolean;
     homepage: string;
     onMenuOpen: () => void;
 };
@@ -33,12 +33,8 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                     props.position.slice(1)
                 }`}
             >
-                {props.logoUrl && (
-                    <Logo
-                        homepage={props.homepage}
-                        url={props.logoUrl}
-                        size="small"
-                    />
+                {props.showLogo && (
+                    <Logo homepage={props.homepage} size="small" />
                 )}
                 <div
                     style={{
@@ -77,7 +73,7 @@ MenuBar.propTypes = {
         MenuDrawerPosition.Right,
     ]).isRequired,
     visible: PropTypes.bool.isRequired,
-    logoUrl: PropTypes.string,
+    showLogo: PropTypes.bool.isRequired,
     homepage: PropTypes.string.isRequired,
     onMenuOpen: PropTypes.func.isRequired,
 };

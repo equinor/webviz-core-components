@@ -93,20 +93,6 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         [setScrollbarOpacity]
     );
 
-    const scroll = (e: React.WheelEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setScrollPosition({
-            y: Math.max(
-                Math.min(scrollPosition.y - e.deltaY, 0),
-                contentHeight > scrollAreaHeight
-                    ? -(contentHeight - scrollAreaHeight)
-                    : 0
-            ),
-            x: scrollPosition.x + e.deltaX,
-        });
-    };
-
     React.useEffect(() => {
         const unselectScrollbar = () => {
             if (scrollbarSelected) {
@@ -129,9 +115,41 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
             fadeScrollbarIn(scrollbarOpacity);
         } else {
             fadeScrollbarOut(scrollbarOpacity);
-            setScrollPosition({ x: 0, y: 0 });
+            if (contentHeight <= scrollAreaHeight) {
+                setScrollPosition({ x: 0, y: 0 });
+            }
         }
     }, [scrollAreaHeight, contentHeight, scrollAreaHovered, scrollbarSelected]);
+
+    React.useEffect(() => {
+        const scroll = (e: WheelEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setScrollPosition({
+                y: Math.max(
+                    Math.min(scrollPosition.y - e.deltaY, 0),
+                    contentHeight > scrollAreaHeight
+                        ? -(contentHeight - scrollAreaHeight)
+                        : 0
+                ),
+                x: scrollPosition.x + e.deltaX,
+            });
+        };
+
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.addEventListener("wheel", scroll, true);
+        }
+
+        return () => {
+            if (scrollAreaRef.current) {
+                scrollAreaRef.current.removeEventListener(
+                    "wheel",
+                    scroll,
+                    true
+                );
+            }
+        };
+    }, [scrollAreaRef.current, setScrollPosition, scrollPosition]);
 
     return (
         <div
@@ -149,7 +167,6 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                 }
                 setScrollAreaHovered(false);
             }}
-            onWheel={(e: React.WheelEvent) => scroll(e)}
         >
             <div
                 ref={scrollbarRef}

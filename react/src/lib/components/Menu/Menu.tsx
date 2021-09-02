@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes, { string } from "prop-types";
+import PropTypes from "prop-types";
 import useSize from "@react-hook/size";
 
 import { TopMenu } from "./components/TopMenu/TopMenu";
@@ -23,15 +23,18 @@ import {
 
 import "./Menu.css";
 
+export type ParentProps = {
+    url: string;
+};
+
 type MenuProps = {
     id?: string;
-    setProps?: () => void;
     navigationItems: PropertyNavigationType;
     initiallyPinned?: boolean;
     menuBarPosition?: "top" | "left" | "right" | "bottom";
     menuDrawerPosition?: "left" | "right";
-    smallLogoUrl?: string;
-    logoUrl?: string;
+    showLogo?: boolean;
+    setProps?: (props: ParentProps) => void;
 };
 
 const makeNavigationItemsWithAssignedIds = (
@@ -76,6 +79,7 @@ const makeNavigationItemsWithAssignedIds = (
 export const Menu: React.FC<MenuProps> = (props) => {
     const menuBarPosition = props.menuBarPosition || "left";
     const menuDrawerPosition = props.menuDrawerPosition || "left";
+    const showLogo = props.showLogo || false;
 
     const [open, setOpen] = React.useState<boolean>(false);
     const [pinned, setPinned] = React.useState<boolean>(
@@ -137,6 +141,15 @@ export const Menu: React.FC<MenuProps> = (props) => {
         menuDrawerPosition,
     ]);
 
+    const handlePageChange = React.useCallback(
+        (url: string) => {
+            props.setProps && props.setProps({ url: url });
+            window.history.pushState({}, "", url);
+            setOpen(false);
+        },
+        [setOpen]
+    );
+
     return (
         <div className="Menu">
             <Overlay visible={open && !pinned} onClick={() => setOpen(false)} />
@@ -147,7 +160,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 onMenuOpen={() => setOpen(true)}
                 ref={menuBarRef}
                 homepage={homepage}
-                logoUrl={props.smallLogoUrl}
+                showLogo={showLogo}
             />
             <MenuDrawer
                 position={menuDrawerPosition as MenuDrawerPosition}
@@ -158,14 +171,11 @@ export const Menu: React.FC<MenuProps> = (props) => {
                     pinned={pinned}
                     onPinnedChange={() => setPinned(!pinned)}
                 />
-                {props.logoUrl && (
-                    <Logo
-                        homepage={homepage}
-                        size="large"
-                        url={props.logoUrl}
-                    />
-                )}
-                <MenuContent content={navigationItemsWithAssignedIds} />
+                {showLogo && <Logo homepage={homepage} size="large" />}
+                <MenuContent
+                    content={navigationItemsWithAssignedIds}
+                    onPageChange={handlePageChange}
+                />
             </MenuDrawer>
         </div>
     );
@@ -199,14 +209,9 @@ Menu.propTypes = {
     menuDrawerPosition: PropTypes.oneOf(["left", "right"]),
 
     /**
-     * URL to a small logo asset that is shown when the menu is collapsed.
+     * Set to true if a logo shall be shown, false if not.
      */
-    smallLogoUrl: string,
-
-    /**
-     * URL to a large logo asset that is shown when the menu is opened.
-     */
-    logoUrl: string,
+    showLogo: PropTypes.bool,
 
     /**
      * A list of navigation items to show in the menu.

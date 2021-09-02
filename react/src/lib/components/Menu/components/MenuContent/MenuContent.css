@@ -23,6 +23,12 @@
     width: 100%;
 }
 
+.Menu .NoResults {
+    padding: 16px;
+    font-style: italic;
+    color: #5c5c5c;
+}
+
 .Menu .VerticalScrollBar {
     position: absolute;
     right: 8px;

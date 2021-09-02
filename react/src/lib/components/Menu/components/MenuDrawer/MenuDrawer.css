@@ -5,6 +5,7 @@
     width: fit-content;
     z-index: 1001;
     display: inline-block;
+    max-width: 300px;
 }
 
 .Menu .MenuDrawerContentWrapper {

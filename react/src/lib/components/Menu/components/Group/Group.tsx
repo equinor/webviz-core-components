@@ -11,15 +11,19 @@ import "./Group.css";
 
 type GroupProps = {
     title: string;
+    level: number;
     icon?: string;
     open?: boolean;
     children?: React.ReactNode;
 };
 
 export const Group: React.FC<GroupProps> = (props) => {
-    const [collapsed, setCollapsed] = React.useState<boolean>(!props.open);
+    const [collapsed, setCollapsed] = React.useState<boolean>(
+        !props.open || false
+    );
+
     return (
-        <div className="Group">
+        <div className="Group" style={{ paddingLeft: 16 * props.level }}>
             <div
                 className="GroupHeader"
                 onClick={() => setCollapsed(!collapsed)}
@@ -31,14 +35,16 @@ export const Group: React.FC<GroupProps> = (props) => {
                 <div>
                     <EdsIcon
                         name={
-                            collapsed ? "arrow_drop_right" : "arrow_drop_down"
+                            collapsed && !props.open
+                                ? "arrow_drop_right"
+                                : "arrow_drop_down"
                         }
                     />
                 </div>
             </div>
             <div
                 className="GroupContent"
-                style={{ display: collapsed ? "none" : "block" }}
+                style={{ display: collapsed && !props.open ? "none" : "block" }}
             >
                 {props.children}
             </div>
@@ -48,6 +54,7 @@ export const Group: React.FC<GroupProps> = (props) => {
 
 Group.propTypes = {
     title: PropTypes.string.isRequired,
+    level: PropTypes.number.isRequired,
     icon: PropTypes.string,
     open: PropTypes.bool,
     children: PropTypes.oneOfType([
