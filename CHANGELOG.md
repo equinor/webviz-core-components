@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   [#159](https://github.com/equinor/webviz-core-components/pull/159) - Call `revokeObjectURL` after using `createObjectURL` in `WebvizPluginPlaceholder`.
 -   [#160](https://github.com/equinor/webviz-core-components/pull/160) - Bug fix: `Select` property `value` does not return correct type.
 
+### Added
+-   [#154](https://github.com/equinor/webviz-core-components/pull/154) - Implemented new menu component.
+
 ## [0.5.1] - 2021-07-12
 
 ### Changed
