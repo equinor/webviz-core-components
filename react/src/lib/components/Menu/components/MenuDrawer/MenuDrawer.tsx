@@ -32,7 +32,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
         const drawerRef =
             (ref as React.RefObject<HTMLDivElement>) ||
             React.useRef<HTMLDivElement>(null);
-        const [drawerWidth, _] = useSize(drawerRef);
+        const drawerWidth = useSize(drawerRef)[0];
 
         const slideInDrawer = React.useCallback(
             (pos: Position) => {

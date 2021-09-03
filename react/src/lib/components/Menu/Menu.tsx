@@ -100,7 +100,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const menuBarRef = React.useRef<HTMLDivElement>(null);
     const menuDrawerRef = React.useRef<HTMLDivElement>(null);
     const [menuBarWidth, menuBarHeight] = useSize(menuBarRef);
-    const [menuDrawerWidth, _] = useSize(menuDrawerRef);
+    const menuDrawerWidth = useSize(menuDrawerRef)[0];
 
     const menuContentSpacing = 50;
 

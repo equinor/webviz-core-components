@@ -22,6 +22,13 @@ type MenuContentProps = {
     onPageChange: (url: string) => void;
 };
 
+const searchTitle = (title: string, query: string): boolean => {
+    return title
+        .toLowerCase()
+        .replace(" ", "")
+        .includes(query.toLowerCase().replace(" ", ""));
+};
+
 const recursivelyFilterNavigation = (
     navigation: NavigationType,
     filter: string
@@ -34,7 +41,7 @@ const recursivelyFilterNavigation = (
     ): boolean => {
         if (
             filterItem.type === "page" &&
-            filterItem.title.toLowerCase().includes(filter.toLowerCase())
+            searchTitle(filterItem.title, filter)
         ) {
             parentItem.content.push(filterItem as PageType);
             return true;
@@ -61,10 +68,7 @@ const recursivelyFilterNavigation = (
     };
 
     navigation.forEach((el: NavigationItemType) => {
-        if (
-            el.type === "page" &&
-            el.title.toLowerCase().includes(filter.toLowerCase())
-        ) {
+        if (el.type === "page" && searchTitle(el.title, filter)) {
             (newNavigation as (GroupType | PageType)[]).push(el as PageType);
         } else if (el.type === "group") {
             let test = false;
@@ -112,7 +116,7 @@ const makeNavigation = (
 ): JSX.Element => {
     const recursivelyMakeNavigation = (
         items: NavigationItemType[],
-        level: number = 1
+        level = 1
     ): JSX.Element => (
         <>
             {items.map((item) => {
@@ -190,5 +194,6 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
 };
 
 MenuContent.propTypes = {
-    content: PropTypes.any,
+    content: PropTypes.any.isRequired,
+    onPageChange: PropTypes.func.isRequired,
 };

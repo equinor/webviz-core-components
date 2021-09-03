@@ -27,15 +27,15 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         false
     );
     const contentRef = React.useRef<HTMLDivElement>(null);
-    const [_, contentHeight] = useSize(contentRef, {
+    const contentHeight = useSize(contentRef, {
         initialHeight: 0,
         initialWidth: 0,
-    });
+    })[1];
     const scrollAreaRef = React.useRef<HTMLDivElement>(null);
-    const [__, scrollAreaHeight] = useSize(scrollAreaRef, {
+    const scrollAreaHeight = useSize(scrollAreaRef, {
         initialHeight: 0,
         initialWidth: 0,
-    });
+    })[1];
     const scrollbarRef = React.useRef<HTMLDivElement>(null);
     const offset = usePan(scrollbarRef);
     const previousOffset = usePrevious<Point>(offset) || ORIGIN;
