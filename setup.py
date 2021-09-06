@@ -2,10 +2,10 @@ import json
 from setuptools import setup
 
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf8") as fh:
     long_description = fh.read()
 
-with open("webviz_core_components/package.json") as f:
+with open("webviz_core_components/package.json", encoding="utf8") as f:
     package = json.load(f)
 
 package_name = (
