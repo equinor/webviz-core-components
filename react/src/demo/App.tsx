@@ -83,7 +83,9 @@ const App: React.FC = () => {
                     <h1>WebvizPluginPlaceholder</h1>
                     <WebvizPluginPlaceholder
                         id={"placeholder"}
-                        setProps={() => {}}
+                        setProps={() => {
+                            return;
+                        }}
                         tour_steps={steps}
                         feedback_url={
                             "https://github.com/equinor/webviz-core-components/issues/" +
