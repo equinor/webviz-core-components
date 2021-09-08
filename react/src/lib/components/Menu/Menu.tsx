@@ -76,6 +76,10 @@ const makeNavigationItemsWithAssignedIds = (
     ) as NavigationType;
 };
 
+/**
+ * Menu is a component that allows to create an interactive menu with flexible depth that
+ * can be pinned and filtered.
+ */
 export const Menu: React.FC<MenuProps> = (props) => {
     const menuBarPosition = props.menuBarPosition || "left";
     const menuDrawerPosition = props.menuDrawerPosition || "left";

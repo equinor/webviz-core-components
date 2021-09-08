@@ -22,29 +22,36 @@ export const Group: React.FC<GroupProps> = (props) => {
         !props.open || false
     );
 
+    React.useEffect(() => {
+        if (props.open !== undefined) {
+            setCollapsed(!props.open);
+        }
+    }, [props.open]);
+
     return (
-        <div className="Group" style={{ paddingLeft: 16 * props.level }}>
+        <div className="Group">
             <div
                 className="GroupHeader"
                 onClick={() => setCollapsed(!collapsed)}
             >
-                <div className="GroupTitle">
+                <div
+                    className="GroupTitle"
+                    style={{ paddingLeft: 16 * props.level }}
+                >
                     {props.icon && <Icon className="Icon" icon={props.icon} />}
                     {props.title}
                 </div>
                 <div>
                     <EdsIcon
                         name={
-                            collapsed && !props.open
-                                ? "arrow_drop_right"
-                                : "arrow_drop_down"
+                            collapsed ? "arrow_drop_right" : "arrow_drop_down"
                         }
                     />
                 </div>
             </div>
             <div
                 className="GroupContent"
-                style={{ display: collapsed && !props.open ? "none" : "block" }}
+                style={{ display: collapsed ? "none" : "block" }}
             >
                 {props.children}
             </div>

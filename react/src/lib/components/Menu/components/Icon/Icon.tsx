@@ -13,11 +13,7 @@ type IconProps = {
 export const Icon: React.FC<IconProps> = (props) => {
     let icon: IconData | undefined = undefined;
     if (props.icon) {
-        Object.values(edsIcons).forEach((el) => {
-            if (el.name === props.icon) {
-                icon = el;
-            }
-        });
+        icon = Object.values(edsIcons).find((el) => el.name === props.icon);
     }
 
     return (
