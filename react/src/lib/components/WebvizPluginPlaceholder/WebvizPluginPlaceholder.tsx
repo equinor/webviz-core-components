@@ -54,9 +54,9 @@ const propTypes = {
      * Valid keys are 'name', 'email' and 'phone'.
      */
     contact_person: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        email: PropTypes.string.isRequired,
-        phone: PropTypes.string.isRequired,
+        name: PropTypes.string,
+        email: PropTypes.string,
+        phone: PropTypes.string,
     }),
 
     /**
