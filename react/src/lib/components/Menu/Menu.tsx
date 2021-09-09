@@ -87,7 +87,9 @@ export const Menu: React.FC<MenuProps> = (props) => {
 
     const [open, setOpen] = React.useState<boolean>(false);
     const [pinned, setPinned] = React.useState<boolean>(
-        props.initiallyPinned || false
+        localStorage.getItem("pinned") === "true" ||
+            props.initiallyPinned ||
+            false
     );
     const [
         navigationItemsWithAssignedIds,
@@ -96,6 +98,10 @@ export const Menu: React.FC<MenuProps> = (props) => {
         makeNavigationItemsWithAssignedIds(props.navigationItems)
     );
     const [homepage, setHomepage] = React.useState<string>("");
+
+    React.useEffect(() => {
+        localStorage.setItem("pinned", pinned ? "true" : "false");
+    }, [pinned]);
 
     React.useEffect(() => {
         setHomepage(window.location.href);
