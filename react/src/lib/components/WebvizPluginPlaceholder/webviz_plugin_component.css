@@ -5,13 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-
 .webviz-config-plugin-wrapper {
     width: 100%;
     box-sizing: border-box;
     padding: 0;
     display: grid;
     grid-template-columns: 1fr auto;
+    margin: -16px;
+    padding: 16px;
 }
 
 .webviz-config-plugin-expand {
@@ -70,7 +71,7 @@
     color: grey;
     margin-bottom: 5px;
     opacity: 0.2;
-    transition: 1.0s;
+    transition: 1s;
     cursor: pointer;
 }
 
@@ -112,29 +113,26 @@
 
 .webviz-config-plugin-button:hover,
 .webviz-config-tooltip-wrapper:hover,
-.webviz-config-plugin-button-selected
-{
-    opacity: 1.0;
+.webviz-config-plugin-button-selected {
+    opacity: 1;
     color: black;
 }
 
-.webviz-config-plugin-button-important
-{
+.webviz-config-plugin-button-important {
     opacity: 0.9;
-    color: #FF9200;
+    color: #ff9200;
 }
 
-.webviz-config-plugin-button-important:hover
-{
-    opacity: 1.0;
-    color: #AD6200;
+.webviz-config-plugin-button-important:hover {
+    opacity: 1;
+    color: #ad6200;
 }
 
 .webviz-config-plugin-deprecation-link {
     padding-left: 8px;
 }
 
-a.webviz-config-plugin-deprecation-link, 
+a.webviz-config-plugin-deprecation-link,
 a.webviz-config-plugin-deprecation-link:hover {
     color: black;
     text-transform: uppercase;
