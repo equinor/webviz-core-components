@@ -1,9 +1,11 @@
-.Menu .Logo {
+.Menu .LogoLarge {
     text-align: center;
     width: 100%;
+    display: inline-block;
 }
 
-.Menu .Logo > a {
+.Menu .LogoLarge > a,
+.Menu .LogoSmall > a {
     display: block;
     background-position: center;
     margin: auto;
