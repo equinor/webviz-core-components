@@ -1,19 +1,35 @@
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes, { InferProps } from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faPhone } from "@fortawesome/free-solid-svg-icons";
 
-type WebvizContentOverlayType = {
-    id: string;
-    showOverlay?: boolean;
-    contactPerson?: {
-        name: string;
-        email: string;
-        phone: string;
-    };
+const propTypes = {
+    /**
+     * The ID used to identify this component in Dash callbacks
+     */
+    id: PropTypes.string.isRequired,
+
+    /**
+     * If the overlay should be visible or not.
+     */
+    showOverlay: PropTypes.bool,
+
+    /**
+     * A dictionary of information regarding contact person for the data content.
+     * Valid keys are 'name', 'email' and 'phone'.
+     */
+    contactPerson: PropTypes.shape({
+        name: PropTypes.string,
+        email: PropTypes.string,
+        phone: PropTypes.string,
+    }),
 };
 
-const WebvizContentOverlay: React.FC<WebvizContentOverlayType> = ({ id, showOverlay, contactPerson }) => {
+const WebvizContentOverlay: React.FC<InferProps<typeof propTypes>> = ({
+    id,
+    showOverlay,
+    contactPerson,
+}) => {
     return (
         <div
             id={id}
@@ -51,31 +67,10 @@ const WebvizContentOverlay: React.FC<WebvizContentOverlayType> = ({ id, showOver
                     </p>
                 )}
             </div>
-        </div >
+        </div>
     );
-}
+};
 
 export default WebvizContentOverlay;
 
-WebvizContentOverlay.propTypes = {
-    /**
-     * The ID used to identify this component in Dash callbacks
-     */
-    id: PropTypes.string.isRequired,
-
-    /**
-     * If the overlay should be visible or not.
-     */
-    showOverlay: PropTypes.bool,
-
-    /**
-     * A dictionary of information regarding contact person for the data content.
-     * Valid keys are 'name', 'email' and 'phone'.
-     */
-    contactPerson: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        email: PropTypes.string.isRequired,
-        phone: PropTypes.string.isRequired
-    })
-
-};
+WebvizContentOverlay.propTypes = propTypes;
