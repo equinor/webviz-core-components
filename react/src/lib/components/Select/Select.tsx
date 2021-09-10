@@ -8,7 +8,10 @@
 import React from "react";
 import PropTypes, { InferProps } from "prop-types";
 
-import { getPropsWithMissingValuesSetToDefault, Optionals } from "../../utils/DefaultPropsHelpers";
+import {
+    getPropsWithMissingValuesSetToDefault,
+    Optionals,
+} from "../../utils/DefaultPropsHelpers";
 import "./Select.css";
 
 const propTypes = {
@@ -29,14 +32,20 @@ const propTypes = {
             /**
              * The dropdown's label
              */
-            label: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]).isRequired,
+            label: PropTypes.oneOfType([
+                PropTypes.string.isRequired,
+                PropTypes.number.isRequired,
+            ]).isRequired,
 
             /**
              * The value of the dropdown. This value
              * corresponds to the items specified in the
              * `value` property.
              */
-            value: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]).isRequired,
+            value: PropTypes.oneOfType([
+                PropTypes.string.isRequired,
+                PropTypes.number.isRequired,
+            ]).isRequired,
         }).isRequired
     ),
     /**
@@ -51,8 +60,11 @@ const propTypes = {
         PropTypes.string.isRequired,
         PropTypes.number.isRequired,
         PropTypes.arrayOf(
-            PropTypes.string.isRequired
-        ),
+            PropTypes.oneOfType([
+                PropTypes.string.isRequired,
+                PropTypes.number.isRequired,
+            ]).isRequired
+        ).isRequired,
     ]),
     /**
      * If true, the user can select multiple values
@@ -120,13 +132,17 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     persistence: false,
     persisted_props: ["value"],
     persistence_type: "local",
-    setProps: (): void => { return; }
+    setProps: (): void => {
+        return;
+    },
 };
 
 /**
-* Select is a dash wrapper for the html select tag.
-*/
-const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof propTypes>): JSX.Element => {
+ * Select is a dash wrapper for the html select tag.
+ */
+const Select: React.FC<InferProps<typeof propTypes>> = (
+    props: InferProps<typeof propTypes>
+): JSX.Element => {
     const {
         id,
         parent_className,
@@ -137,17 +153,27 @@ const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof
         className,
         style,
         options,
-        setProps
+        setProps,
     } = getPropsWithMissingValuesSetToDefault(props, defaultProps);
 
     const handleChange = (e: React.ChangeEvent) => {
-        const options = (e.target as HTMLSelectElement).selectedOptions;
-        const values: string[] = [];
+        const selectedOptions = [].slice.call(
+            (e.target as HTMLSelectElement).selectedOptions
+        );
+        const values: (string | number)[] = [];
+
         for (let i = 0; i < options.length; i++) {
-            values.push(options[i].value);
+            if (
+                selectedOptions.some(
+                    (el: HTMLOptionElement) =>
+                        el.value === options[i].value.toString()
+                )
+            ) {
+                values.push(options[i].value);
+            }
         }
         setProps({ value: values });
-    }
+    };
 
     return (
         <div
@@ -156,7 +182,15 @@ const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof
             style={parent_style ? parent_style : {}}
         >
             <select
-                value={value ? value : ""}
+                value={
+                    value
+                        ? typeof value === "string" || typeof value === "number"
+                            ? value
+                            : (value as (string | number)[]).map((el) =>
+                                  el.toString()
+                              )
+                        : ""
+                }
                 multiple={multi}
                 size={size}
                 onChange={(e) => handleChange(e)}
@@ -165,7 +199,10 @@ const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof
             >
                 {options.map((opt, idx) => {
                     return (
-                        <option key={idx.toString() + opt.value} value={opt.value}>
+                        <option
+                            key={idx.toString() + opt.value}
+                            value={opt.value}
+                        >
                             {opt.label}
                         </option>
                     );
@@ -173,7 +210,7 @@ const Select: React.FC<InferProps<typeof propTypes>> = (props: InferProps<typeof
             </select>
         </div>
     );
-}
+};
 
 export default Select;
 
