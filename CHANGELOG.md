@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   [#157](https://github.com/equinor/webviz-core-components/pull/157) - Added utf8 encoding to Python's open() calls.
 -   [#158](https://github.com/equinor/webviz-core-components/pull/158) - Fixed error messages when contact person details not provided to `WebvizPluginPlaceholder`.
+-   [#159](https://github.com/equinor/webviz-core-components/pull/159) - Call `revokeObjectURL` after using `createObjectURL` in `WebvizPluginPlaceholder`.
 
 ## [0.5.1] - 2021-07-12
 
