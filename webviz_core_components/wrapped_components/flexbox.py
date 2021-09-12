@@ -1,10 +1,10 @@
-import dash_html_components as html
+from dash import html
 
 from ._argument_modifier import argument_modifier
 
 
 class FlexBox(html.Div):
-    """Behaves like Div from dash_html_components, but extends that container with
+    """Behaves like Div from dash.html, but extends that container with
     flexbox style settings. It also adds min-width CSS style to direct children.
     """
 

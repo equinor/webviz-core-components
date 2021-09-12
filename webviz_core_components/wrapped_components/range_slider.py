@@ -1,7 +1,6 @@
 from typing import Any
 
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc
 
 
 class RangeSlider(html.Div):

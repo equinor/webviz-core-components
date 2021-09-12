@@ -1,9 +1,8 @@
-import dash
-from dash.dependencies import Input, Output, State
-import dash_html_components as html
+from dash import Dash, Input, Output, State, html
+
 import webviz_core_components as wcc
 
-app = dash.Dash(__name__)
+app = Dash(__name__)
 
 app.layout = html.Div(
     [

@@ -1,6 +1,6 @@
 from typing import Any
 
-import dash_core_components as dcc
+from dash import dcc
 
 
 class Tabs(dcc.Tabs):
