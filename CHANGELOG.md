@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+### Changed
+- [#161](https://github.com/equinor/webviz-core-components/pull/161) - Updated to `Dash 2.0`.
+
 ### Fixed
 
 -   [#157](https://github.com/equinor/webviz-core-components/pull/157) - Added utf8 encoding to Python's open() calls.

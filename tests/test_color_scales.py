@@ -7,14 +7,13 @@
 #
 ##################################################################
 
-import dash
-import dash_html_components as html
+from dash import html, Dash
 import webviz_core_components
 
 
 def test_colorscale(dash_duo):
 
-    app = dash.Dash(__name__)
+    app = Dash(__name__)
 
     app.layout = html.Div(
         [

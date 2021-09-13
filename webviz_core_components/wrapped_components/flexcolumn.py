@@ -1,5 +1,6 @@
 from typing import Union, Any
-import dash_html_components as html
+
+from dash import html
 
 
 class FlexColumn(html.Div):
