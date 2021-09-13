@@ -1,0 +1,19 @@
+/**
+ * Copyright (c) 2021- Equinor ASA
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+ .webviz-config-frame {
+    border-radius: 5px;
+    background-color: #F9F9F9;
+    margin: 10px;
+    padding: 15px;
+    position: relative;
+    box-shadow: 2px 2px 2px lightgrey;
+  }
+  
+  .webviz-config-frame:hover {
+    box-shadow: 5px 5px 5px 3px lightgrey;
+  }
