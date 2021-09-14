@@ -10,6 +10,7 @@
     background-color: #f7f7f7;
 }
 
-.Menu .CurrentPage {
-    font-weight: bold;
+.Menu .CurrentPage,
+.Menu .CurrentPage:hover {
+    background-color: #dcdcdc;
 }

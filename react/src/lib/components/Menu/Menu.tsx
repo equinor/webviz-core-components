@@ -9,6 +9,7 @@ import { Overlay } from "./components/Overlay/Overlay";
 import { Logo } from "./components/Logo/Logo";
 import { MenuBarPosition, MenuDrawerPosition } from "./types/menu-position";
 import { MenuContent } from "./components/MenuContent/MenuContent";
+import { useWindowSize } from "./hooks/useWindowSize";
 
 import {
     PropertyNavigationType,
@@ -35,6 +36,22 @@ type MenuProps = {
     menuDrawerPosition?: "left" | "right";
     showLogo?: boolean;
     setProps?: (props: ParentProps) => void;
+};
+
+const calculateTextWidth = (text: string): number => {
+    const span = document.createElement("span");
+    span.classList.add("Menu__Ruler");
+    const menu = document.getElementsByClassName("Menu")[0];
+    if (menu) {
+        const fontSize = window.getComputedStyle(menu).fontSize;
+        span.style.fontSize = fontSize;
+    }
+    const textNode = document.createTextNode(text.replace(/ /g, "\u00A0"));
+    span.appendChild(textNode);
+    document.body.appendChild(span);
+    const width = span.offsetWidth;
+    document.body.removeChild(span);
+    return Math.max(width);
 };
 
 const makeNavigationItemsWithAssignedIds = (
@@ -76,6 +93,33 @@ const makeNavigationItemsWithAssignedIds = (
     ) as NavigationType;
 };
 
+const getNavigationMaxWidth = (
+    navigationItems: PropertyNavigationType
+): number => {
+    const recursivelyParseItems = (
+        item: PropertyPageType | PropertyGroupType | PropertySectionType,
+        depth = 0
+    ) => {
+        let maxWidth = depth * 16 + calculateTextWidth(item.title);
+        if (item.type !== "page") {
+            item.content.forEach(
+                (el) =>
+                    (maxWidth = Math.max(
+                        maxWidth,
+                        recursivelyParseItems(el, depth + 1)
+                    ))
+            );
+        }
+        return maxWidth;
+    };
+    let maxWidth = 0;
+    navigationItems.forEach(
+        (el: PropertyPageType | PropertyGroupType | PropertySectionType) =>
+            (maxWidth = Math.max(recursivelyParseItems(el), maxWidth))
+    );
+    return maxWidth;
+};
+
 /**
  * Menu is a component that allows to create an interactive menu with flexible depth that
  * can be pinned and filtered.
@@ -91,26 +135,27 @@ export const Menu: React.FC<MenuProps> = (props) => {
             props.initiallyPinned ||
             false
     );
+
+    const [menuWidth, setMenuWidth] = React.useState<number>(
+        getNavigationMaxWidth(props.navigationItems) + 40
+    );
+
     const [
         navigationItemsWithAssignedIds,
         setNavigationsItemsWithAssignedIds,
     ] = React.useState<NavigationType>(
         makeNavigationItemsWithAssignedIds(props.navigationItems)
     );
-    const [homepage, setHomepage] = React.useState<string>("");
 
     React.useEffect(() => {
         localStorage.setItem("pinned", pinned ? "true" : "false");
     }, [pinned]);
 
-    React.useEffect(() => {
-        setHomepage(window.location.href);
-    }, []);
-
     const menuBarRef = React.useRef<HTMLDivElement>(null);
     const menuDrawerRef = React.useRef<HTMLDivElement>(null);
     const [menuBarWidth, menuBarHeight] = useSize(menuBarRef);
     const menuDrawerWidth = useSize(menuDrawerRef)[0];
+    const windowSize = useWindowSize();
 
     const menuContentSpacing = 50;
 
@@ -118,7 +163,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
         setNavigationsItemsWithAssignedIds(
             makeNavigationItemsWithAssignedIds(props.navigationItems)
         );
-    }, [props.navigationItems]);
+        setMenuWidth(
+            Math.min(
+                getNavigationMaxWidth(props.navigationItems) * 1.1 + 40,
+                windowSize.width / 2
+            )
+        );
+    }, [props.navigationItems, windowSize.width]);
 
     React.useEffect(() => {
         const bodyMargins = { left: 16, top: 16, right: 16, bottom: 16 };
@@ -169,19 +220,20 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 visible={!open && !pinned}
                 onMenuOpen={() => setOpen(true)}
                 ref={menuBarRef}
-                homepage={homepage}
+                homepage={"/"}
                 showLogo={showLogo}
             />
             <MenuDrawer
                 position={menuDrawerPosition as MenuDrawerPosition}
                 open={open || pinned}
                 ref={menuDrawerRef}
+                maxWidth={menuWidth}
             >
                 <TopMenu
                     pinned={pinned}
                     onPinnedChange={() => setPinned(!pinned)}
                 />
-                {showLogo && <Logo homepage={homepage} size="large" />}
+                {showLogo && <Logo homepage={"/"} size="large" />}
                 <MenuContent
                     content={navigationItemsWithAssignedIds}
                     onPageChange={handlePageChange}

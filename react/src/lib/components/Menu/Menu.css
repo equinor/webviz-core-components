@@ -7,6 +7,10 @@
     user-select: none;
 }
 
+.Menu__Ruler {
+    font-family: sans-serif;
+}
+
 .Menu .Icon {
     margin-right: 16px;
     vertical-align: middle;

@@ -9,6 +9,7 @@ import "./MenuDrawer.css";
 type MenuDrawerProps = {
     position: MenuDrawerPosition;
     open: boolean;
+    maxWidth: number;
     children?: React.ReactNode;
 };
 
@@ -179,6 +180,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     top: position.top,
                     right: position.right,
                     bottom: position.bottom,
+                    width: props.maxWidth + "px",
                 }}
             >
                 <div className="MenuDrawerContentWrapper">{props.children}</div>
