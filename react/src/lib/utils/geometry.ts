@@ -1,5 +1,5 @@
-import { Point } from "../types/point";
-import { Size } from "../types/size";
+import { Point } from "../shared-types/point";
+import { Size } from "../shared-types/size";
 
 export const ORIGIN = Object.freeze({ x: 0, y: 0 });
 export const MANHATTAN_LENGTH = 13.11;

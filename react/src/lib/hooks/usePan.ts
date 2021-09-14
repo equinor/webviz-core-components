@@ -1,7 +1,7 @@
 import { ORIGIN, pointDifference, pointSum } from "../utils/geometry";
 import React from "react";
 
-import { Point } from "../types/point";
+import { Point } from "../shared-types/point";
 
 export const usePan = (ref: React.RefObject<HTMLElement>): Point => {
     const [panPosition, setPanPosition] = React.useState<Point>(ORIGIN);

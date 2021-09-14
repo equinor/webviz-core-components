@@ -5,7 +5,7 @@ import { FilterInput } from "../FilterInput";
 import { Section } from "../Section";
 import { Group } from "../Group";
 import { Page } from "../Page";
-import { ScrollArea } from "../ScrollArea";
+import { ScrollArea } from "../../../ScrollArea";
 
 import {
     NavigationType,

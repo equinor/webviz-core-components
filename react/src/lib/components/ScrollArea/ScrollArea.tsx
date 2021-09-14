@@ -6,7 +6,7 @@ import { usePan } from "../../hooks/usePan";
 import { usePrevious } from "../../hooks/usePrevious";
 import { ORIGIN, pointDifference } from "../../utils/geometry";
 
-import { Point } from "../../types/point";
+import { Point } from "../../shared-types/point";
 
 import "./ScrollArea.css";
 

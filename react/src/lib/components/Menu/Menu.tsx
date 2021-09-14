@@ -5,11 +5,11 @@ import useSize from "@react-hook/size";
 import { TopMenu } from "./components/TopMenu/TopMenu";
 import { MenuBar } from "./components/MenuBar/MenuBar";
 import { MenuDrawer } from "./components/MenuDrawer/MenuDrawer";
-import { Overlay } from "./components/Overlay/Overlay";
+import { Overlay } from "../Overlay/Overlay";
 import { Logo } from "./components/Logo/Logo";
 import { MenuBarPosition, MenuDrawerPosition } from "./types/menu-position";
 import { MenuContent } from "./components/MenuContent/MenuContent";
-import { useWindowSize } from "./hooks/useWindowSize";
+import { useWindowSize } from "../../hooks/useWindowSize";
 
 import {
     PropertyNavigationType,

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Size } from "../types/size";
+import { Size } from "../shared-types/size";
 
 export const useContainerDimensions = (
     ref: React.RefObject<HTMLElement>

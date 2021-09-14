@@ -10,6 +10,8 @@ import { ColorScales } from "./components/ColorScales";
 import Select from "./components/Select";
 import SmartNodeSelector from "./components/SmartNodeSelector";
 import { Menu } from "./components/Menu";
+import { Overlay } from "./components/Overlay";
+import { ScrollArea } from "./components/ScrollArea";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
@@ -20,4 +22,6 @@ export {
     Select,
     SmartNodeSelector,
     Menu,
+    Overlay,
+    ScrollArea,
 };
