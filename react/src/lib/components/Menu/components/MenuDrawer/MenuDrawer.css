@@ -1,4 +1,4 @@
-.Menu .MenuDrawer {
+.Menu__MenuDrawer {
     background-color: white;
     position: fixed;
     height: 100vh;
@@ -8,20 +8,20 @@
     max-width: 300px;
 }
 
-.Menu .MenuDrawerContentWrapper {
+.Menu__MenuDrawerContentWrapper {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-.Menu .MenuDrawerLeft {
+.Menu__MenuDrawerLeft {
     -webkit-box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
     box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
     top: 0;
     left: 0;
 }
 
-.Menu .MenuDrawerRight {
+.Menu__MenuDrawerRight {
     -webkit-box-shadow: -4px 0px 4px 1px rgba(0, 0, 0, 0.05);
     box-shadow: -4px 0px 4px 1px rgba(0, 0, 0, 0.05);
     top: 0;

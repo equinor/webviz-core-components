@@ -28,7 +28,7 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
         return (
             <div
                 ref={ref}
-                className={`MenuBar MenuBar${
+                className={`Menu__MenuBar Menu__MenuBar${
                     props.position.charAt(0).toUpperCase() +
                     props.position.slice(1)
                 }`}

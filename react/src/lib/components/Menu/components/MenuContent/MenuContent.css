@@ -1,44 +1,22 @@
-.Menu .ContentWrapper {
+.Menu__ContentWrapper {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
-.Menu .FilterInputWrapper {
+.Menu__FilterInputWrapper {
     padding: 16px;
 }
 
-.Menu .ScrollArea {
-    overflow: hidden;
-    position: relative;
-    width: 100%;
-    display: block;
-    flex-grow: 1;
-}
-
-.Menu .Content {
+.Menu__Content {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
 }
 
-.Menu .NoResults {
+.Menu__NoResults {
     padding: 16px;
     font-style: italic;
     color: #5c5c5c;
-}
-
-.Menu .VerticalScrollBar {
-    position: absolute;
-    right: 8px;
-    width: 8px;
-    min-height: 80px;
-    background-color: #5c5c5c;
-    border-radius: 4px;
-    z-index: 10;
-}
-
-.Menu .VerticalScrollBar:hover {
-    opacity: 1;
 }

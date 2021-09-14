@@ -1,4 +1,4 @@
-.Menu .ScrollArea {
+.ScrollArea {
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -6,14 +6,14 @@
     flex-grow: 1;
 }
 
-.Menu .ScrollArea .Content {
+.ScrollArea__Content {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
 }
 
-.Menu .VerticalScrollBar {
+.VerticalScrollBar {
     position: absolute;
     right: 8px;
     width: 8px;
@@ -23,6 +23,6 @@
     z-index: 10;
 }
 
-.Menu .VerticalScrollBar:hover {
+.VerticalScrollBar:hover {
     opacity: 1;
 }

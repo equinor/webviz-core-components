@@ -1,10 +1,10 @@
-.TopMenu {
+.Menu__TopMenu {
     text-align: right;
     padding: 16px;
     padding-bottom: 0px;
 }
 
-.TopMenu .PinButton {
+.Menu__TopMenu__PinButton {
     background-repeat: no-repeat;
     background-position: center center;
     width: 16px;
@@ -12,10 +12,10 @@
     display: block;
 }
 
-.TopMenu .pin {
+.Menu__TopMenu__pin {
     background-image: url("./pin.svg");
 }
 
-.TopMenu .unpin {
+.Menu__TopMenu__unpin {
     background-image: url("./unpin.svg");
 }

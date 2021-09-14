@@ -11,13 +11,13 @@ type LogoProps = {
 export const Logo: React.FC<LogoProps> = (props) => {
     return (
         <div
-            className={`Logo${
+            className={`Menu__Logo${
                 props.size.charAt(0).toUpperCase() + props.size.substr(1)
             }`}
         >
             <a
                 href={props.homepage}
-                id={`Logo${
+                id={`Menu__Logo${
                     props.size.charAt(0).toUpperCase() + props.size.substr(1)
                 }`}
             ></a>

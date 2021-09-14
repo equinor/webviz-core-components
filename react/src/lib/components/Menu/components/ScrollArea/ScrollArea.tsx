@@ -189,7 +189,7 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                 onMouseDown={() => setScrollbarSelected(true)}
             ></div>
             <div
-                className="Content"
+                className="ScrollArea__Content"
                 ref={contentRef}
                 style={{ top: scrollPosition.y }}
             >

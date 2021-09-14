@@ -176,13 +176,13 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
     }, [filter, props.content]);
 
     return (
-        <div className="ContentWrapper">
-            <div className="FilterInputWrapper">
+        <div className="Menu__ContentWrapper">
+            <div className="Menu__FilterInputWrapper">
                 <FilterInput filter={filter} onFilterChange={setFilter} />
             </div>
             <ScrollArea>
                 {content.length === 0 ? (
-                    <div className="NoResults">
+                    <div className="Menu__NoResults">
                         No pages matching the query...
                     </div>
                 ) : (

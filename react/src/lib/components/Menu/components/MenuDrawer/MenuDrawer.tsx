@@ -170,7 +170,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
         return (
             <div
                 ref={drawerRef}
-                className={`MenuDrawer MenuDrawer${
+                className={`Menu__MenuDrawer Menu__MenuDrawer${
                     props.position.charAt(0).toUpperCase() +
                     props.position.slice(1)
                 }`}
@@ -183,7 +183,9 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     width: props.maxWidth + "px",
                 }}
             >
-                <div className="MenuDrawerContentWrapper">{props.children}</div>
+                <div className="Menu__MenuDrawerContentWrapper">
+                    {props.children}
+                </div>
             </div>
         );
     }
@@ -197,6 +199,7 @@ MenuDrawer.propTypes = {
         MenuDrawerPosition.Right,
     ]).isRequired,
     open: PropTypes.bool.isRequired,
+    maxWidth: PropTypes.number.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,

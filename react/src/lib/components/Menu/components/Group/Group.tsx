@@ -29,16 +29,18 @@ export const Group: React.FC<GroupProps> = (props) => {
     }, [props.open]);
 
     return (
-        <div className="Group">
+        <div className="Menu__Group">
             <div
-                className="GroupHeader"
+                className="Menu__GroupHeader"
                 onClick={() => setCollapsed(!collapsed)}
             >
                 <div
-                    className="GroupTitle"
+                    className="Menu__GroupTitle"
                     style={{ paddingLeft: 16 * props.level }}
                 >
-                    {props.icon && <Icon className="Icon" icon={props.icon} />}
+                    {props.icon && (
+                        <Icon className="Menu__Icon" icon={props.icon} />
+                    )}
                     {props.title}
                 </div>
                 <div>
@@ -50,7 +52,7 @@ export const Group: React.FC<GroupProps> = (props) => {
                 </div>
             </div>
             <div
-                className="GroupContent"
+                className="Menu__GroupContent"
                 style={{ display: collapsed ? "none" : "block" }}
             >
                 {props.children}

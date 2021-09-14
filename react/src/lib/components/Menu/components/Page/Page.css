@@ -1,4 +1,4 @@
-.Menu .Page {
+.Menu__Page {
     padding: 16px;
     padding-left: 40px;
     text-decoration: none;
@@ -6,11 +6,11 @@
     color: black;
 }
 
-.Menu .Page:hover {
+.Menu__Page:hover {
     background-color: #f7f7f7;
 }
 
-.Menu .CurrentPage,
-.Menu .CurrentPage:hover {
+.Menu__CurrentPage,
+.Menu__CurrentPage:hover {
     background-color: #dcdcdc;
 }

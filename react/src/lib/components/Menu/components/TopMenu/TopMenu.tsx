@@ -11,14 +11,18 @@ type TopMenuProps = {
 
 export const TopMenu: React.FC<TopMenuProps> = (props) => {
     return (
-        <div className="TopMenu">
+        <div className="Menu__TopMenu">
             <Button
                 variant="ghost_icon"
                 onClick={props.onPinnedChange}
                 title={props.pinned ? "Unpin menu" : "Pin menu"}
             >
                 <span
-                    className={`PinButton ${props.pinned ? "unpin" : "pin"}`}
+                    className={`Menu__TopMenu__PinButton ${
+                        props.pinned
+                            ? "Menu__TopMenu__unpin"
+                            : "Menu__TopMenu__pin"
+                    }`}
                 />
             </Button>
         </div>
