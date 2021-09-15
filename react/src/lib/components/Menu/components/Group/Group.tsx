@@ -82,6 +82,7 @@ export const Group: React.FC<GroupProps> = (props) => {
 };
 
 Group.propTypes = {
+    id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     level: PropTypes.number.isRequired,
     icon: PropTypes.string,

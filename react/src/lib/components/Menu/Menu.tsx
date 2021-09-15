@@ -57,7 +57,7 @@ const calculateTextWidth = (text: string): number => {
 const makeNavigationItemsWithAssignedIds = (
     navigationItems: PropertyNavigationType
 ): NavigationType => {
-    let indices = {
+    const indices = {
         section: 0,
         group: 0,
         page: 0,
