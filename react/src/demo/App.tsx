@@ -58,14 +58,20 @@ const App: React.FC = () => {
                         icon: "layers",
                         content: [
                             {
-                                type: "page",
-                                title: "WebvizPluginPlaceholder",
-                                href: "#webviz-plugin-placeholder",
-                            },
-                            {
-                                type: "page",
-                                title: "SmartNodeSelector",
-                                href: "#smart-node-selector",
+                                type: "group",
+                                title: "Group",
+                                content: [
+                                    {
+                                        type: "page",
+                                        title: "WebvizPluginPlaceholder",
+                                        href: "#webviz-plugin-placeholder",
+                                    },
+                                    {
+                                        type: "page",
+                                        title: "SmartNodeSelector",
+                                        href: "#smart-node-selector",
+                                    },
+                                ],
                             },
                         ],
                     },

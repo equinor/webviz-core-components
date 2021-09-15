@@ -10,29 +10,35 @@ EdsIcon.add({ arrow_drop_down, arrow_drop_right });
 import "./Group.css";
 
 type GroupProps = {
+    id: string;
     title: string;
     level: number;
     icon?: string;
-    open?: boolean;
+    forceOpen?: boolean;
     children?: React.ReactNode;
 };
 
 export const Group: React.FC<GroupProps> = (props) => {
     const [collapsed, setCollapsed] = React.useState<boolean>(
-        !props.open || false
+        localStorage.getItem(`${props.id}-${props.title}`) === "true" || false
     );
 
     React.useEffect(() => {
-        if (props.open !== undefined) {
-            setCollapsed(!props.open);
-        }
-    }, [props.open]);
+        localStorage.setItem(
+            `${props.id}-${props.title}`,
+            collapsed ? "true" : "false"
+        );
+    }, [collapsed]);
 
     return (
         <div className="Menu__Group">
             <div
                 className="Menu__GroupHeader"
-                onClick={() => setCollapsed(!collapsed)}
+                onClick={() => {
+                    if (!props.forceOpen) {
+                        setCollapsed(!collapsed);
+                    }
+                }}
             >
                 <div
                     className="Menu__GroupTitle"
@@ -43,17 +49,31 @@ export const Group: React.FC<GroupProps> = (props) => {
                     )}
                     {props.title}
                 </div>
-                <div>
+                <div
+                    className={props.forceOpen ? "Menu__disabled" : ""}
+                    title={
+                        props.forceOpen
+                            ? "Clear filter first to enable group collapse."
+                            : collapsed
+                            ? "Open group"
+                            : "Collapse group"
+                    }
+                >
                     <EdsIcon
                         name={
-                            collapsed ? "arrow_drop_right" : "arrow_drop_down"
+                            !collapsed || props.forceOpen
+                                ? "arrow_drop_down"
+                                : "arrow_drop_right"
                         }
+                        color={props.forceOpen ? "#ccc" : "currentColor"}
                     />
                 </div>
             </div>
             <div
                 className="Menu__GroupContent"
-                style={{ display: collapsed ? "none" : "block" }}
+                style={{
+                    display: !collapsed || props.forceOpen ? "block" : "none",
+                }}
             >
                 {props.children}
             </div>
@@ -65,7 +85,7 @@ Group.propTypes = {
     title: PropTypes.string.isRequired,
     level: PropTypes.number.isRequired,
     icon: PropTypes.string,
-    open: PropTypes.bool,
+    forceOpen: PropTypes.bool,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,

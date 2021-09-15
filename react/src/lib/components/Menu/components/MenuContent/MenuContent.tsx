@@ -52,7 +52,7 @@ const recursivelyFilterNavigation = (
                 title: filterItem.title,
                 icon: filterItem.icon,
                 content: [],
-                uuid: filterItem.uuid,
+                id: filterItem.id,
             };
             if ((filterItem as GroupType).content) {
                 (filterItem as GroupType).content.forEach((el) => {
@@ -77,7 +77,7 @@ const recursivelyFilterNavigation = (
                 title: el.title,
                 icon: el.icon,
                 content: [],
-                uuid: el.uuid,
+                id: el.id,
             };
             (el as GroupType).content.forEach((el) => {
                 test = makeFilteredNavigation(el, newItem) || test;
@@ -92,7 +92,7 @@ const recursivelyFilterNavigation = (
                 title: el.title,
                 icon: el.icon,
                 content: [],
-                uuid: el.uuid,
+                id: el.id,
             };
             if ((el as SectionType).content) {
                 (el as SectionType).content.forEach(
@@ -123,7 +123,7 @@ const makeNavigation = (
                 if (item.type === "section") {
                     return (
                         <Section
-                            key={item.uuid}
+                            key={item.id}
                             title={item.title}
                             icon={item.icon}
                         >
@@ -135,11 +135,12 @@ const makeNavigation = (
                 } else if (item.type === "group") {
                     return (
                         <Group
-                            key={item.uuid}
+                            id={item.id}
+                            key={item.id}
                             level={level}
                             title={item.title}
                             icon={item.icon}
-                            open={filtered}
+                            forceOpen={filtered}
                         >
                             {recursivelyMakeNavigation(
                                 (item as GroupType).content,
@@ -150,7 +151,7 @@ const makeNavigation = (
                 } else if (item.type === "page") {
                     return (
                         <Page
-                            key={item.uuid}
+                            key={item.id}
                             level={level}
                             {...(item as PageType)}
                             onClick={() =>

@@ -39,6 +39,15 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
     const scrollbarRef = React.useRef<HTMLDivElement>(null);
     const offset = usePan(scrollbarRef);
     const previousOffset = usePrevious<Point>(offset) || ORIGIN;
+    const interval = React.useRef<NodeJS.Timeout>();
+
+    React.useEffect(() => {
+        return () => {
+            if (interval.current) {
+                clearInterval(interval.current);
+            }
+        };
+    }, []);
 
     React.useEffect(() => {
         if (scrollAreaHeight > 0) {
@@ -64,10 +73,15 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
     const fadeScrollbarIn = React.useCallback(
         (opacity: number) => {
             if (contentHeight > scrollAreaHeight) {
-                const interval = setInterval(() => {
+                if (interval.current) {
+                    clearInterval(interval.current);
+                }
+                interval.current = setInterval(() => {
                     if (opacity >= 0.75) {
                         setScrollbarOpacity(0.75);
-                        clearInterval(interval);
+                        if (interval.current) {
+                            clearInterval(interval.current);
+                        }
                         return;
                     }
                     opacity += 0.05;
@@ -80,10 +94,15 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 
     const fadeScrollbarOut = React.useCallback(
         (opacity: number) => {
-            const interval = setInterval(() => {
+            if (interval.current) {
+                clearInterval(interval.current);
+            }
+            interval.current = setInterval(() => {
                 if (opacity <= 0) {
                     setScrollbarOpacity(0);
-                    clearInterval(interval);
+                    if (interval.current) {
+                        clearInterval(interval.current);
+                    }
                     return;
                 }
                 opacity -= 0.05;

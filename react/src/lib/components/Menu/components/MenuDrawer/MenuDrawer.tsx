@@ -29,17 +29,29 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
             bottom: 0,
         });
         const [visible, setVisible] = React.useState<boolean>(false);
+        const interval = React.useRef<NodeJS.Timeout>();
 
         const drawerRef =
             (ref as React.RefObject<HTMLDivElement>) ||
             React.useRef<HTMLDivElement>(null);
         const drawerWidth = useSize(drawerRef)[0];
 
+        React.useEffect(() => {
+            return () => {
+                if (interval.current) {
+                    clearInterval(interval.current);
+                }
+            };
+        }, []);
+
         const slideInDrawer = React.useCallback(
             (pos: Position) => {
-                if (props.position === "left") {
+                if (props.position === MenuDrawerPosition.Left) {
                     let currentPosition = pos.left as number;
-                    const interval = setInterval(() => {
+                    if (interval.current) {
+                        clearInterval(interval.current);
+                    }
+                    interval.current = setInterval(() => {
                         if (currentPosition < 0) {
                             currentPosition += Math.min(
                                 10,
@@ -52,12 +64,17 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                                 bottom: pos.bottom,
                             });
                         } else {
-                            clearInterval(interval);
+                            if (interval.current) {
+                                clearInterval(interval.current);
+                            }
                         }
                     }, 10);
-                } else if (props.position === "right") {
+                } else if (MenuDrawerPosition.Right) {
                     let currentPosition = pos.right as number;
-                    const interval = setInterval(() => {
+                    if (interval.current) {
+                        clearInterval(interval.current);
+                    }
+                    interval.current = setInterval(() => {
                         if (currentPosition < 0) {
                             currentPosition += Math.min(
                                 10,
@@ -70,7 +87,9 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                                 bottom: pos.bottom,
                             });
                         } else {
-                            clearInterval(interval);
+                            if (interval.current) {
+                                clearInterval(interval.current);
+                            }
                         }
                     }, 10);
                 }
@@ -80,9 +99,12 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
 
         const slideOutDrawer = React.useCallback(
             (pos: Position) => {
-                if (props.position === "left") {
+                if (props.position === MenuDrawerPosition.Left) {
                     let currentPosition = pos.left as number;
-                    const interval = setInterval(() => {
+                    if (interval.current) {
+                        clearInterval(interval.current);
+                    }
+                    interval.current = setInterval(() => {
                         if (currentPosition > -drawerWidth) {
                             currentPosition -= Math.min(
                                 10,
@@ -96,12 +118,17 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                             });
                         } else {
                             setVisible(false);
-                            clearInterval(interval);
+                            if (interval.current) {
+                                clearInterval(interval.current);
+                            }
                         }
                     }, 10);
-                } else if (props.position === "right") {
+                } else if (props.position === MenuDrawerPosition.Right) {
                     let currentPosition = pos.right as number;
-                    const interval = setInterval(() => {
+                    if (interval.current) {
+                        clearInterval(interval.current);
+                    }
+                    interval.current = setInterval(() => {
                         if (currentPosition > -drawerWidth) {
                             currentPosition -= Math.min(
                                 10,
@@ -115,7 +142,9 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                             });
                         } else {
                             setVisible(false);
-                            clearInterval(interval);
+                            if (interval.current) {
+                                clearInterval(interval.current);
+                            }
                         }
                     }, 10);
                 }
@@ -125,7 +154,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
 
         React.useEffect(() => {
             if (props.open) {
-                if (props.position === "left") {
+                if (props.position === MenuDrawerPosition.Left) {
                     const newPosition: Position = {
                         left: -drawerWidth,
                         top: 0,
@@ -135,7 +164,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     setPosition(newPosition);
                     setVisible(true);
                     slideInDrawer(newPosition);
-                } else if (props.position === "right") {
+                } else if (props.position === MenuDrawerPosition.Right) {
                     const newPosition: Position = {
                         left: "auto",
                         top: 0,
@@ -147,7 +176,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     slideInDrawer(newPosition);
                 }
             } else {
-                if (props.position === "left") {
+                if (props.position === MenuDrawerPosition.Left) {
                     const newPosition: Position = {
                         left: 0,
                         top: 0,
@@ -155,7 +184,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                         bottom: "auto",
                     };
                     slideOutDrawer(newPosition);
-                } else if (props.position === "right") {
+                } else if (props.position === MenuDrawerPosition.Right) {
                     const newPosition: Position = {
                         left: "auto",
                         top: 0,

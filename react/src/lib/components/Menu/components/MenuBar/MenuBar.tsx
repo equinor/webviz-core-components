@@ -40,9 +40,10 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                     style={{
                         flexGrow: 1,
                         textAlign:
-                            props.menuButtonPosition === "right" &&
-                            (props.position === "top" ||
-                                props.position === "bottom")
+                            props.menuButtonPosition ===
+                                MenuDrawerPosition.Right &&
+                            (props.position === MenuBarPosition.Top ||
+                                props.position === MenuBarPosition.Bottom)
                                 ? "right"
                                 : "inherit",
                     }}

@@ -33,20 +33,20 @@ export type PropertyNavigationType =
     | (PropertyGroupType | PropertyPageType)[];
 
 export interface NavigationItemType extends PropertyNavigationItemType {
-    uuid: string;
+    id: string;
 }
 
 export interface PageType extends PropertyPageType {
-    uuid: string;
+    id: string;
 }
 
 export interface GroupType extends PropertyGroupType {
-    uuid: string;
+    id: string;
     content: (GroupType | PageType)[];
 }
 
 export interface SectionType extends PropertySectionType {
-    uuid: string;
+    id: string;
     content: (GroupType | PageType)[];
 }
 

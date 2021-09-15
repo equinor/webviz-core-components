@@ -57,7 +57,11 @@ const calculateTextWidth = (text: string): number => {
 const makeNavigationItemsWithAssignedIds = (
     navigationItems: PropertyNavigationType
 ): NavigationType => {
-    let index = 0;
+    let indices = {
+        section: 0,
+        group: 0,
+        page: 0,
+    };
     const recursivelyAssignUuids = (
         item: PropertyPageType | PropertyGroupType | PropertySectionType
     ): GroupType | PageType | SectionType => {
@@ -68,13 +72,13 @@ const makeNavigationItemsWithAssignedIds = (
                 content: (item as PropertyGroupType).content.map(
                     (el) => recursivelyAssignUuids(el) as GroupType | PageType
                 ),
-                uuid: `${index++}`,
+                id: `group-${indices.group++}`,
             };
         } else if (item.type === "page") {
             return {
                 ...item,
                 type: "page",
-                uuid: `${index++}`,
+                id: `page-${indices.page++}`,
             };
         } else {
             return {
@@ -83,7 +87,7 @@ const makeNavigationItemsWithAssignedIds = (
                 content: (item as PropertySectionType).content.map(
                     (el) => recursivelyAssignUuids(el) as GroupType | PageType
                 ),
-                uuid: `${index++}`,
+                id: `section-${indices.section++}`,
             };
         }
     };
@@ -278,7 +282,7 @@ Menu.propTypes = {
     /**
      * A list of navigation items to show in the menu.
      */
-    navigationItems: PropTypes.any,
+    navigationItems: PropTypes.any.isRequired,
 };
 
 Menu.defaultProps = {
@@ -287,6 +291,7 @@ Menu.defaultProps = {
         return;
     },
     initiallyPinned: false,
+    showLogo: true,
     menuBarPosition: "left",
     menuDrawerPosition: "left",
 };

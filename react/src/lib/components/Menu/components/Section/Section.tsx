@@ -13,10 +13,14 @@ type SectionProps = {
 
 export const Section: React.FC<SectionProps> = (props) => {
     return (
-        <div className="Section">
-            <div className="SectionTitle">
+        <div className="Menu__Section">
+            <div className="Menu__SectionTitle">
                 {props.icon && (
-                    <Icon className="Icon" icon={props.icon} active={false} />
+                    <Icon
+                        className="Menu__Icon"
+                        icon={props.icon}
+                        active={false}
+                    />
                 )}
                 {props.title}
             </div>
