@@ -230,6 +230,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             <MenuDrawer
                 position={menuDrawerPosition as MenuDrawerPosition}
                 open={open || pinned}
+                pinned={pinned}
                 ref={menuDrawerRef}
                 maxWidth={menuWidth}
             >

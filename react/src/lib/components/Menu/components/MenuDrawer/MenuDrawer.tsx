@@ -9,6 +9,7 @@ import "./MenuDrawer.css";
 type MenuDrawerProps = {
     position: MenuDrawerPosition;
     open: boolean;
+    pinned: boolean;
     maxWidth: number;
     children?: React.ReactNode;
 };
@@ -202,6 +203,13 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                 className={`Menu__MenuDrawer Menu__MenuDrawer${
                     props.position.charAt(0).toUpperCase() +
                     props.position.slice(1)
+                } ${
+                    !props.pinned
+                        ? `Menu__MenuDrawer${
+                              props.position.charAt(0).toUpperCase() +
+                              props.position.slice(1)
+                          }__unpinned`
+                        : ""
                 }`}
                 style={{
                     visibility: visible ? "visible" : "hidden",
@@ -212,6 +220,14 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     width: props.maxWidth + "px",
                 }}
             >
+                {props.pinned && (
+                    <div
+                        className={`Menu__MenuDrawer${
+                            props.position.charAt(0).toUpperCase() +
+                            props.position.slice(1)
+                        }__pinned_shadow`}
+                    ></div>
+                )}
                 <div className="Menu__MenuDrawerContentWrapper">
                     {props.children}
                 </div>
@@ -228,6 +244,7 @@ MenuDrawer.propTypes = {
         MenuDrawerPosition.Right,
     ]).isRequired,
     open: PropTypes.bool.isRequired,
+    pinned: PropTypes.bool.isRequired,
     maxWidth: PropTypes.number.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
