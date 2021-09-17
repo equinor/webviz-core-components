@@ -1,0 +1,16 @@
+.Menu__Page {
+    padding: 16px;
+    padding-left: 40px;
+    text-decoration: none;
+    display: block;
+    color: black;
+}
+
+.Menu__Page:hover {
+    background-color: #f7f7f7;
+}
+
+.Menu__CurrentPage,
+.Menu__CurrentPage:hover {
+    background-color: #dcdcdc;
+}

@@ -1,0 +1,28 @@
+.ScrollArea {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    display: block;
+    flex-grow: 1;
+}
+
+.ScrollArea__Content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+}
+
+.VerticalScrollBar {
+    position: absolute;
+    right: 8px;
+    width: 8px;
+    min-height: 80px;
+    background-color: #5c5c5c;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.VerticalScrollBar:hover {
+    opacity: 1;
+}

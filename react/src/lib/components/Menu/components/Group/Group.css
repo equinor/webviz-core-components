@@ -1,0 +1,16 @@
+.Menu__GroupHeader {
+    display: flex;
+    padding: 16px;
+    padding-left: 0px;
+    cursor: pointer;
+    align-items: center;
+}
+
+.Menu__GroupHeader:hover {
+    background-color: #f7f7f7;
+}
+
+.Menu__GroupTitle {
+    font-weight: bold;
+    flex-grow: 4;
+}

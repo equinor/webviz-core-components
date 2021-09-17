@@ -9,6 +9,20 @@
             "webRoot": "${workspaceFolder}/react/"
         },
         {
+            "type": "firefox",
+            "request": "launch",
+            "name": "Launch Firefox against localhost",
+            "reAttach": true,
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}/react/",
+            "pathMappings": [
+                {
+                    "url": "webpack://webviz_core_components/src",
+                    "path": "${workspaceFolder}/react/src"
+                }
+            ]
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "Launch Webpack",

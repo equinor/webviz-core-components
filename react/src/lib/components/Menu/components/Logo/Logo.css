@@ -1,0 +1,12 @@
+.Menu__LogoLarge {
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+}
+
+.Menu__LogoLarge > a,
+.Menu__LogoSmall > a {
+    display: block;
+    background-position: center;
+    margin: auto;
+}

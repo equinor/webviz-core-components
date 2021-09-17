@@ -1,0 +1,57 @@
+.Menu__MenuDrawer {
+    background-color: white;
+    position: fixed;
+    height: 100vh;
+    width: fit-content;
+    z-index: 1001;
+    display: inline-block;
+    max-width: 300px;
+}
+
+.Menu__MenuDrawerContentWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.Menu__MenuDrawerLeft {
+    top: 0;
+    left: 0;
+}
+
+.Menu__MenuDrawerRight {
+    top: 0;
+    right: 0;
+}
+
+.Menu__MenuDrawerLeft__pinned_shadow {
+    -webkit-box-shadow: inset -14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    box-shadow: inset -14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 10px;
+    height: 100%;
+    z-index: 100;
+}
+
+.Menu__MenuDrawerRight__pinned_shadow {
+    -webkit-box-shadow: inset 14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    box-shadow: inset 14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 10px;
+    height: 100%;
+    z-index: 100;
+}
+
+.Menu__MenuDrawerLeft__unpinned {
+    -webkit-box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: 4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+}
+
+.Menu__MenuDrawerRight__unpinned {
+    -webkit-box-shadow: -4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: -4px 0px 4px 1px rgba(0, 0, 0, 0.05);
+}

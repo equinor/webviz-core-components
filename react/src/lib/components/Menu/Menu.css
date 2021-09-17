@@ -1,0 +1,21 @@
+.Menu__effects__unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.Menu__Ruler {
+    font-family: sans-serif;
+}
+
+.Menu__Icon {
+    margin-right: 16px;
+    vertical-align: middle;
+}
+
+.Menu__disabled {
+    cursor: not-allowed;
+}
