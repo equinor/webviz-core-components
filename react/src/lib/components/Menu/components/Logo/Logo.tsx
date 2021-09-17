@@ -17,7 +17,7 @@ export const Logo: React.FC<LogoProps> = (props) => {
         >
             <a
                 href={props.homepage}
-                id={`Menu__Logo${
+                id={`Logo${
                     props.size.charAt(0).toUpperCase() + props.size.substr(1)
                 }`}
             ></a>
