@@ -70,7 +70,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                             }
                         }
                     }, 10);
-                } else if (MenuDrawerPosition.Right) {
+                } else if (props.position === MenuDrawerPosition.Right) {
                     let currentPosition = pos.right as number;
                     if (interval.current) {
                         clearInterval(interval.current);
@@ -154,46 +154,32 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
         );
 
         React.useEffect(() => {
+            const newPosition: Position = {
+                left: "auto",
+                top: "auto",
+                right: "auto",
+                bottom: "auto",
+            };
             if (props.open) {
                 if (props.position === MenuDrawerPosition.Left) {
-                    const newPosition: Position = {
-                        left: -drawerWidth,
-                        top: 0,
-                        right: "auto",
-                        bottom: "auto",
-                    };
-                    setPosition(newPosition);
-                    setVisible(true);
-                    slideInDrawer(newPosition);
+                    newPosition.left = -drawerWidth;
+                    newPosition.top = 0;
                 } else if (props.position === MenuDrawerPosition.Right) {
-                    const newPosition: Position = {
-                        left: "auto",
-                        top: 0,
-                        right: -drawerWidth,
-                        bottom: "auto",
-                    };
-                    setPosition(newPosition);
-                    setVisible(true);
-                    slideInDrawer(newPosition);
+                    newPosition.right = -drawerWidth;
+                    newPosition.top = 0;
                 }
+                setPosition(newPosition);
+                setVisible(true);
+                slideInDrawer(newPosition);
             } else {
                 if (props.position === MenuDrawerPosition.Left) {
-                    const newPosition: Position = {
-                        left: 0,
-                        top: 0,
-                        right: "auto",
-                        bottom: "auto",
-                    };
-                    slideOutDrawer(newPosition);
+                    newPosition.left = 0;
+                    newPosition.top = 0;
                 } else if (props.position === MenuDrawerPosition.Right) {
-                    const newPosition: Position = {
-                        left: "auto",
-                        top: 0,
-                        right: 0,
-                        bottom: "auto",
-                    };
-                    slideOutDrawer(newPosition);
+                    newPosition.right = 0;
+                    newPosition.top = 0;
                 }
+                slideOutDrawer(newPosition);
             }
         }, [props.open]);
 

@@ -36,8 +36,9 @@
 }
 
 .Menu__MenuDrawerRight__pinned_shadow {
-    -webkit-box-shadow: inset 14px 1px 18px 18px rgba(0, 0, 0, 0.32);
-    box-shadow: inset 14px 1px 18px 18px rgba(0, 0, 0, 0.32);
+    -webkit-box-shadow: inset 14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    box-shadow: inset 14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    position: absolute;
     left: 0px;
     top: 0px;
     width: 10px;

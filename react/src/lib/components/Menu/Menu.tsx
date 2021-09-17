@@ -178,20 +178,22 @@ export const Menu: React.FC<MenuProps> = (props) => {
     React.useEffect(() => {
         const bodyMargins = { left: 16, top: 16, right: 16, bottom: 16 };
 
-        if (props.menuBarPosition === "left" && !pinned) {
-            bodyMargins.left = menuBarWidth + menuContentSpacing;
-        } else if (props.menuBarPosition === "top") {
-            bodyMargins.top = menuBarHeight + menuContentSpacing;
-        } else if (props.menuBarPosition === "right" && !pinned) {
-            bodyMargins.right = menuBarWidth + menuContentSpacing;
-        } else if (props.menuBarPosition === "bottom") {
-            bodyMargins.bottom = menuBarHeight + menuContentSpacing;
-        }
-
-        if (props.menuDrawerPosition === "left" && pinned) {
-            bodyMargins.left = menuDrawerWidth + menuContentSpacing;
-        } else if (props.menuDrawerPosition === "right" && pinned) {
-            bodyMargins.right = menuDrawerWidth + menuContentSpacing;
+        if (!pinned) {
+            if (props.menuBarPosition === "left") {
+                bodyMargins.left = menuBarWidth + menuContentSpacing;
+            } else if (props.menuBarPosition === "top") {
+                bodyMargins.top = menuBarHeight + menuContentSpacing;
+            } else if (props.menuBarPosition === "right") {
+                bodyMargins.right = menuBarWidth + menuContentSpacing;
+            } else if (props.menuBarPosition === "bottom") {
+                bodyMargins.bottom = menuBarHeight + menuContentSpacing;
+            }
+        } else {
+            if (props.menuDrawerPosition === "left") {
+                bodyMargins.left += menuDrawerWidth;
+            } else if (props.menuBarPosition === "right") {
+                bodyMargins.right += menuDrawerWidth;
+            }
         }
 
         document.body.style.marginLeft = bodyMargins.left + "px";
@@ -221,7 +223,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             <MenuBar
                 position={menuBarPosition as MenuBarPosition}
                 menuButtonPosition={menuDrawerPosition as MenuDrawerPosition}
-                visible={!open && !pinned}
+                visible={!pinned}
                 onMenuOpen={() => setOpen(true)}
                 ref={menuBarRef}
                 homepage={"/"}
