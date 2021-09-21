@@ -35,6 +35,7 @@ type MenuProps = {
     menuBarPosition?: "top" | "left" | "right" | "bottom";
     menuDrawerPosition?: "left" | "right";
     showLogo?: boolean;
+    url?: string;
     setProps?: (props: ParentProps) => void;
 };
 
@@ -218,7 +219,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
     );
 
     return (
-        <div className="Menu">
+        <div className="Menu" id={props.id}>
             <Overlay visible={open && !pinned} onClick={() => setOpen(false)} />
             <MenuBar
                 position={menuBarPosition as MenuBarPosition}
@@ -286,6 +287,11 @@ Menu.propTypes = {
      * A list of navigation items to show in the menu.
      */
     navigationItems: PropTypes.any.isRequired,
+
+    /**
+     * Currently selected URL. Leave blank.
+     */
+    url: PropTypes.string,
 };
 
 Menu.defaultProps = {
@@ -297,4 +303,5 @@ Menu.defaultProps = {
     showLogo: true,
     menuBarPosition: "left",
     menuDrawerPosition: "left",
+    url: "",
 };
