@@ -43,7 +43,7 @@ export const isPartlyContained = (
     centerPoint2: Point,
     dimensions2: Size
 ): boolean => {
-    if (
+    return !(
         centerPoint1.x + dimensions1.width / 2 <
             centerPoint2.x - dimensions2.width / 2 ||
         centerPoint1.x - dimensions1.width / 2 >
@@ -52,10 +52,20 @@ export const isPartlyContained = (
             centerPoint2.y - dimensions2.height / 2 ||
         centerPoint1.y - dimensions1.height / 2 >
             centerPoint2.y + dimensions2.height / 2
-    ) {
-        return false;
-    }
-    return true;
+    );
+};
+
+export const pointIsContained = (
+    point: Point,
+    dimensions: Size,
+    centerPoint: Point
+): boolean => {
+    return (
+        point.x >= centerPoint.x - dimensions.width / 2 &&
+        point.x <= centerPoint.x + dimensions.width / 2 &&
+        point.y >= centerPoint.y - dimensions.height / 2 &&
+        point.y <= centerPoint.y + dimensions.height / 2
+    );
 };
 
 export const sizeSum = (size1: Size, size2: Size): Size => {
