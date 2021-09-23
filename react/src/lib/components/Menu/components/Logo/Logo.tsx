@@ -6,6 +6,7 @@ import "./Logo.css";
 type LogoProps = {
     size: "small" | "large";
     homepage: string;
+    onClick: (url: string) => void;
 };
 
 export const Logo: React.FC<LogoProps> = (props) => {
@@ -20,6 +21,10 @@ export const Logo: React.FC<LogoProps> = (props) => {
                 id={`Logo${
                     props.size.charAt(0).toUpperCase() + props.size.substr(1)
                 }`}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    props.onClick(props.homepage);
+                    e.preventDefault();
+                }}
             ></a>
         </div>
     );
@@ -28,4 +33,5 @@ export const Logo: React.FC<LogoProps> = (props) => {
 Logo.propTypes = {
     size: PropTypes.oneOf<"small" | "large">(["small", "large"]).isRequired,
     homepage: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired,
 };

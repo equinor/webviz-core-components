@@ -140,6 +140,9 @@ export const Menu: React.FC<MenuProps> = (props) => {
             props.initiallyPinned ||
             false
     );
+    const [currentUrl, setCurrentUrl] = React.useState<string>(
+        window.location.href
+    );
 
     const [menuWidth, setMenuWidth] = React.useState<number>(
         getNavigationMaxWidth(props.navigationItems) + 40
@@ -211,9 +214,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
 
     const handlePageChange = React.useCallback(
         (url: string) => {
-            props.setProps && props.setProps({ url: url });
-            window.history.pushState({}, "", url);
             setOpen(false);
+            setTimeout(() => {
+                props.setProps && props.setProps({ url: url });
+                window.history.pushState({}, "", url);
+                setCurrentUrl(url);
+            }, 350);
         },
         [setOpen]
     );
@@ -229,6 +235,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 ref={menuBarRef}
                 homepage={"/"}
                 showLogo={showLogo}
+                onLogoClick={handlePageChange}
             />
             <MenuDrawer
                 position={menuDrawerPosition as MenuDrawerPosition}
@@ -236,12 +243,19 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 pinned={pinned}
                 ref={menuDrawerRef}
                 maxWidth={menuWidth}
+                currentUrl={currentUrl}
             >
                 <TopMenu
                     pinned={pinned}
                     onPinnedChange={() => setPinned(!pinned)}
                 />
-                {showLogo && <Logo homepage={"/"} size="large" />}
+                {showLogo && (
+                    <Logo
+                        onClick={handlePageChange}
+                        homepage={"/"}
+                        size="large"
+                    />
+                )}
                 <MenuContent
                     content={navigationItemsWithAssignedIds}
                     onPageChange={handlePageChange}
