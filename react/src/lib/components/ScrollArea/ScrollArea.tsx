@@ -4,7 +4,11 @@ import useSize from "@react-hook/size";
 
 import { usePan } from "../../hooks/usePan";
 import { usePrevious } from "../../hooks/usePrevious";
-import { ORIGIN, pointDifference } from "../../utils/geometry";
+import {
+    ORIGIN,
+    pointDifference,
+    pointIsContained,
+} from "../../utils/geometry";
 
 import { Point } from "../../shared-types/point";
 
@@ -40,6 +44,7 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
     const offset = usePan(scrollbarRef);
     const previousOffset = usePrevious<Point>(offset) || ORIGIN;
     const interval = React.useRef<NodeJS.Timeout>();
+    const previousTouchPosition = React.useRef<Point>({ x: 0, y: 0 });
 
     React.useEffect(() => {
         return () => {
@@ -127,6 +132,55 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
     }, [scrollAreaHovered, scrollbarSelected, setScrollbarSelected]);
 
     React.useEffect(() => {
+        const checkIfHovered = (e: MouseEvent) => {
+            if (scrollAreaRef.current) {
+                const boundingRect = scrollAreaRef.current.getBoundingClientRect();
+                const mousePosition = { x: e.pageX, y: e.pageY };
+                if (
+                    pointIsContained(
+                        mousePosition,
+                        {
+                            width: boundingRect.width,
+                            height: boundingRect.height,
+                        },
+                        {
+                            x: boundingRect.x + boundingRect.width / 2,
+                            y: boundingRect.y + boundingRect.height / 2,
+                        }
+                    )
+                ) {
+                    if (!scrollAreaHovered) {
+                        if (!scrollbarSelected) {
+                            fadeScrollbarIn(scrollbarOpacity);
+                        }
+                        setScrollAreaHovered(true);
+                    }
+                } else if (scrollAreaHovered) {
+                    if (!scrollbarSelected) {
+                        fadeScrollbarOut(scrollbarOpacity);
+                    }
+                    setScrollAreaHovered(false);
+                }
+            }
+        };
+
+        if (scrollAreaRef.current) {
+            document.addEventListener("mousemove", checkIfHovered);
+        }
+
+        return () => {
+            document.removeEventListener("mousemove", checkIfHovered);
+        };
+    }, [
+        scrollAreaRef.current,
+        scrollAreaHovered,
+        scrollbarSelected,
+        fadeScrollbarIn,
+        fadeScrollbarOut,
+        setScrollAreaHovered,
+    ]);
+
+    React.useEffect(() => {
         if (
             contentHeight > scrollAreaHeight &&
             (scrollAreaHovered || scrollbarSelected)
@@ -155,8 +209,70 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
             });
         };
 
+        const touchStart = (e: TouchEvent) => {
+            const touches = e.changedTouches;
+            if (touches.length === 1) {
+                if (previousTouchPosition.current) {
+                    previousTouchPosition.current = {
+                        x: touches[0].pageX,
+                        y: touches[0].pageY,
+                    };
+                }
+            }
+        };
+
+        const touchEnd = (e: TouchEvent) => {
+            const touches = e.changedTouches;
+            if (touches.length === 1) {
+                if (previousTouchPosition.current) {
+                    previousTouchPosition.current = {
+                        x: touches[0].pageX,
+                        y: touches[0].pageY,
+                    };
+                }
+                fadeScrollbarOut(scrollbarOpacity);
+            }
+        };
+
+        const touchScroll = (e: TouchEvent) => {
+            const touches = e.changedTouches;
+            if (touches.length === 1 && previousTouchPosition.current) {
+                fadeScrollbarIn(scrollbarOpacity);
+                e.preventDefault();
+                e.stopPropagation();
+                const deltaX =
+                    touches[0].pageX - previousTouchPosition.current.x;
+                const deltaY =
+                    touches[0].pageY - previousTouchPosition.current.y;
+                previousTouchPosition.current = {
+                    x: touches[0].pageX,
+                    y: touches[0].pageY,
+                };
+                setScrollPosition({
+                    y: Math.max(
+                        Math.min(scrollPosition.y + deltaY, 0),
+                        contentHeight > scrollAreaHeight
+                            ? -(contentHeight - scrollAreaHeight)
+                            : 0
+                    ),
+                    x: scrollPosition.x + deltaX,
+                });
+            }
+        };
+
         if (scrollAreaRef.current) {
             scrollAreaRef.current.addEventListener("wheel", scroll, true);
+            scrollAreaRef.current.addEventListener(
+                "touchstart",
+                touchStart,
+                true
+            );
+            scrollAreaRef.current.addEventListener(
+                "touchmove",
+                touchScroll,
+                true
+            );
+            scrollAreaRef.current.addEventListener("touchend", touchEnd, true);
         }
 
         return () => {
@@ -166,27 +282,35 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                     scroll,
                     true
                 );
+                scrollAreaRef.current.removeEventListener(
+                    "touchstart",
+                    touchStart,
+                    true
+                );
+                scrollAreaRef.current.removeEventListener(
+                    "touchmove",
+                    touchScroll,
+                    true
+                );
+                scrollAreaRef.current.removeEventListener(
+                    "touchend",
+                    touchEnd,
+                    true
+                );
             }
         };
-    }, [scrollAreaRef.current, setScrollPosition, scrollPosition]);
+    }, [
+        scrollAreaRef.current,
+        setScrollPosition,
+        scrollPosition,
+        previousTouchPosition,
+        scrollbarOpacity,
+        fadeScrollbarIn,
+        fadeScrollbarOut,
+    ]);
 
     return (
-        <div
-            className="ScrollArea"
-            ref={scrollAreaRef}
-            onMouseEnter={() => {
-                if (!scrollbarSelected) {
-                    fadeScrollbarIn(scrollbarOpacity);
-                }
-                setScrollAreaHovered(true);
-            }}
-            onMouseLeave={() => {
-                if (!scrollbarSelected) {
-                    fadeScrollbarOut(scrollbarOpacity);
-                }
-                setScrollAreaHovered(false);
-            }}
-        >
+        <div className="ScrollArea" ref={scrollAreaRef}>
             <div
                 ref={scrollbarRef}
                 className="VerticalScrollBar"
