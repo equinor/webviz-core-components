@@ -18,6 +18,7 @@ type MenuBarProps = {
     showLogo: boolean;
     homepage: string;
     onMenuOpen: () => void;
+    onLogoClick: (url: string) => void;
 };
 
 type Position = {
@@ -316,7 +317,11 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                 }}
             >
                 {props.showLogo && (
-                    <Logo homepage={props.homepage} size="small" />
+                    <Logo
+                        onClick={props.onLogoClick}
+                        homepage={props.homepage}
+                        size="small"
+                    />
                 )}
                 <div
                     style={{
@@ -359,4 +364,5 @@ MenuBar.propTypes = {
     showLogo: PropTypes.bool.isRequired,
     homepage: PropTypes.string.isRequired,
     onMenuOpen: PropTypes.func.isRequired,
+    onLogoClick: PropTypes.func.isRequired,
 };

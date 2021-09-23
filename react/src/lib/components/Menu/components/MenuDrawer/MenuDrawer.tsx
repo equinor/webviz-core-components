@@ -11,6 +11,7 @@ type MenuDrawerProps = {
     open: boolean;
     pinned: boolean;
     maxWidth: number;
+    currentUrl: string;
     children?: React.ReactNode;
 };
 
@@ -108,7 +109,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     interval.current = setInterval(() => {
                         if (currentPosition > -drawerWidth) {
                             currentPosition -= Math.min(
-                                10,
+                                drawerWidth / 30, // slide out in 300 ms
                                 drawerWidth - Math.abs(currentPosition)
                             );
                             setPosition({
@@ -132,7 +133,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     interval.current = setInterval(() => {
                         if (currentPosition > -drawerWidth) {
                             currentPosition -= Math.min(
-                                10,
+                                drawerWidth / 30, // slide out in 300 ms
                                 drawerWidth - Math.abs(currentPosition)
                             );
                             setPosition({
@@ -232,6 +233,7 @@ MenuDrawer.propTypes = {
     open: PropTypes.bool.isRequired,
     pinned: PropTypes.bool.isRequired,
     maxWidth: PropTypes.number.isRequired,
+    currentUrl: PropTypes.string.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,
