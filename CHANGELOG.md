@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   [#158](https://github.com/equinor/webviz-core-components/pull/158) - Fixed error messages when contact person details not provided to `WebvizPluginPlaceholder`.
 -   [#159](https://github.com/equinor/webviz-core-components/pull/159) - Call `revokeObjectURL` after using `createObjectURL` in `WebvizPluginPlaceholder`.
 -   [#160](https://github.com/equinor/webviz-core-components/pull/160) - Bug fix: `Select` property `value` does not return correct type.
+-   [#172](https://github.com/equinor/webviz-core-components/pull/172) - Bug fix: No margin between plugins.
 
 ### Added
 -   [#154](https://github.com/equinor/webviz-core-components/pull/154) - Implemented new menu component.
