@@ -14,7 +14,7 @@ type SectionProps = {
 export const Section: React.FC<SectionProps> = (props) => {
     return (
         <div className="Menu__Section">
-            <div className="Menu__SectionTitle">
+            <div className="Menu__SectionTitle Menu__Item">
                 {props.icon && (
                     <Icon
                         className="Menu__Icon"
@@ -22,7 +22,7 @@ export const Section: React.FC<SectionProps> = (props) => {
                         active={false}
                     />
                 )}
-                {props.title}
+                <span className={props.icon ? "Icon" : ""}>{props.title}</span>
             </div>
             {props.children}
         </div>

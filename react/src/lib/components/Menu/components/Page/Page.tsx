@@ -19,7 +19,9 @@ export const Page: React.FC<PageProps> = (props) => {
 
     return (
         <a
-            className={`Menu__Page${active ? " Menu__CurrentPage" : ""}`}
+            className={`Menu__Page${
+                active ? " Menu__CurrentPage" : ""
+            } Menu__Item`}
             href={props.href}
             onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 props.onClick();
@@ -34,7 +36,7 @@ export const Page: React.FC<PageProps> = (props) => {
                     active={active}
                 />
             )}
-            {props.title}
+            <span className={props.icon ? "Icon" : ""}>{props.title}</span>
         </a>
     );
 };

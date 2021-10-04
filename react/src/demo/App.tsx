@@ -73,6 +73,20 @@ const App: React.FC = () => {
                                     },
                                 ],
                             },
+                            {
+                                type: "group",
+                                title: "This is a very very long title",
+                                icon: "layers",
+                                content: [
+                                    {
+                                        type: "page",
+                                        title:
+                                            "This is a very very long title as well",
+                                        icon: "layers",
+                                        href: "#webviz-plugin-placeholder",
+                                    },
+                                ],
+                            },
                         ],
                     },
                 ]}

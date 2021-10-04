@@ -105,7 +105,8 @@ const getNavigationMaxWidth = (
         item: PropertyPageType | PropertyGroupType | PropertySectionType,
         depth = 0
     ) => {
-        let maxWidth = depth * 16 + calculateTextWidth(item.title);
+        let maxWidth =
+            depth * 16 + calculateTextWidth(item.title) + (item.icon ? 40 : 0);
         if (item.type !== "page") {
             item.content.forEach(
                 (el) =>
@@ -173,7 +174,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
         );
         setMenuWidth(
             Math.min(
-                getNavigationMaxWidth(props.navigationItems) * 1.1 + 40,
+                getNavigationMaxWidth(props.navigationItems) * 1.1,
                 windowSize.width / 2
             )
         );
