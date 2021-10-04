@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED] - YYYY-MM-DD
 
 ### Changed
-- [#161](https://github.com/equinor/webviz-core-components/pull/161) - Updated to `Dash 2.0`.
+
+-   [#161](https://github.com/equinor/webviz-core-components/pull/161) - Updated to `Dash 2.0`.
+-   [#173](https://github.com/equinor/webviz-core-components/pull/173) - Improved menu layout and auto-width.
 
 ### Fixed
 
@@ -19,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   [#172](https://github.com/equinor/webviz-core-components/pull/172) - Bug fix: No margin between plugins.
 
 ### Added
+
 -   [#154](https://github.com/equinor/webviz-core-components/pull/154) - Implemented new menu component.
 
 ## [0.5.1] - 2021-07-12
