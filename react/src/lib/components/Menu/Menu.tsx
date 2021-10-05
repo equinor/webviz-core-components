@@ -32,6 +32,7 @@ type MenuProps = {
     id?: string;
     navigationItems: PropertyNavigationType;
     initiallyPinned?: boolean;
+    initiallyCollapsed?: boolean;
     menuBarPosition?: "top" | "left" | "right" | "bottom";
     menuDrawerPosition?: "left" | "right";
     showLogo?: boolean;
@@ -269,6 +270,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 )}
                 <MenuContent
                     content={navigationItemsWithAssignedIds}
+                    groupsInitiallyCollapsed={props.initiallyCollapsed}
                     onPageChange={handlePageChange}
                 />
             </MenuDrawer>
@@ -292,6 +294,11 @@ Menu.propTypes = {
      * Set to true if the menu shall be initially shown as pinned.
      */
     initiallyPinned: PropTypes.bool,
+
+    /**
+     * Set to true if you want all groups in the menu to be initially collapsed.
+     */
+    initiallyCollapsed: PropTypes.bool,
 
     /**
      * Define the position the menu bar shall be displayed at.
