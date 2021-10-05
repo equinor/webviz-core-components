@@ -59,7 +59,7 @@ const App: React.FC = () => {
                         content: [
                             {
                                 type: "group",
-                                title: "Group",
+                                title: "Demos",
                                 content: [
                                     {
                                         type: "page",
@@ -70,20 +70,6 @@ const App: React.FC = () => {
                                         type: "page",
                                         title: "SmartNodeSelector",
                                         href: "#smart-node-selector",
-                                    },
-                                ],
-                            },
-                            {
-                                type: "group",
-                                title: "This is a very very long title",
-                                icon: "layers",
-                                content: [
-                                    {
-                                        type: "page",
-                                        title:
-                                            "This is a very very long title as well",
-                                        icon: "layers",
-                                        href: "#webviz-plugin-placeholder",
                                     },
                                 ],
                             },
