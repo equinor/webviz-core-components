@@ -7,6 +7,10 @@
     flex-direction: row;
 }
 
+.Menu__SectionTitle > svg * {
+    fill: #007079;
+}
+
 .Menu__Section {
     padding-bottom: 24px;
     margin-top: 24px;

@@ -8,6 +8,7 @@ import "./Section.css";
 type SectionProps = {
     title: string;
     icon?: string;
+    applyIconIndentation: boolean;
     children?: React.ReactNode;
 };
 
@@ -22,7 +23,17 @@ export const Section: React.FC<SectionProps> = (props) => {
                         active={false}
                     />
                 )}
-                <span className={props.icon ? "Icon" : ""}>{props.title}</span>
+                <span
+                    className={
+                        props.icon
+                            ? "Icon"
+                            : props.applyIconIndentation
+                            ? "IconPlaceholder"
+                            : ""
+                    }
+                >
+                    {props.title}
+                </span>
             </div>
             {props.children}
         </div>
@@ -32,6 +43,7 @@ export const Section: React.FC<SectionProps> = (props) => {
 Section.propTypes = {
     title: PropTypes.string.isRequired,
     icon: PropTypes.string,
+    applyIconIndentation: PropTypes.bool.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,

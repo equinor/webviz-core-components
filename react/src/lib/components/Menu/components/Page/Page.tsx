@@ -11,6 +11,7 @@ type PageProps = {
     href: string;
     level: number;
     icon?: string;
+    applyIconIndentation: boolean;
     onClick: () => void;
 };
 
@@ -36,7 +37,17 @@ export const Page: React.FC<PageProps> = (props) => {
                     active={active}
                 />
             )}
-            <span className={props.icon ? "Icon" : ""}>{props.title}</span>
+            <span
+                className={
+                    props.icon
+                        ? "Icon"
+                        : props.applyIconIndentation
+                        ? "IconPlaceholder"
+                        : ""
+                }
+            >
+                {props.title}
+            </span>
         </a>
     );
 };
@@ -46,5 +57,6 @@ Page.propTypes = {
     href: PropTypes.string.isRequired,
     level: PropTypes.number.isRequired,
     icon: PropTypes.string,
+    applyIconIndentation: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
 };

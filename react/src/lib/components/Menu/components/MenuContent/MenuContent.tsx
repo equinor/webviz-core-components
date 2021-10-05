@@ -116,55 +116,72 @@ const makeNavigation = (
 ): JSX.Element => {
     const recursivelyMakeNavigation = (
         items: NavigationItemType[],
+        iconAtParentLevel?: boolean,
         level = 1
-    ): JSX.Element => (
-        <>
-            {items.map((item) => {
-                if (item.type === "section") {
-                    return (
-                        <Section
-                            key={item.id}
-                            title={item.title}
-                            icon={item.icon}
-                        >
-                            {recursivelyMakeNavigation(
-                                (item as SectionType).content
-                            )}
-                        </Section>
-                    );
-                } else if (item.type === "group") {
-                    return (
-                        <Group
-                            id={item.id}
-                            key={item.id}
-                            level={level}
-                            title={item.title}
-                            icon={item.icon}
-                            forceOpen={filtered}
-                        >
-                            {recursivelyMakeNavigation(
-                                (item as GroupType).content,
-                                level + 1
-                            )}
-                        </Group>
-                    );
-                } else if (item.type === "page") {
-                    return (
-                        <Page
-                            key={item.id}
-                            level={level}
-                            {...(item as PageType)}
-                            onClick={() =>
-                                onPageChange((item as PageType).href)
-                            }
-                        />
-                    );
-                } else {
-                    return null;
-                }
-            })}
-        </>
-    );
+    ): JSX.Element => {
+        const atLeastOneIconUsed = items.some((el) => el.icon !== undefined);
+        return (
+            <>
+                {items.map((item) => {
+                    if (item.type === "section") {
+                        return (
+                            <Section
+                                key={item.id}
+                                title={item.title}
+                                icon={item.icon}
+                                applyIconIndentation={atLeastOneIconUsed}
+                            >
+                                {recursivelyMakeNavigation(
+                                    (item as SectionType).content,
+                                    atLeastOneIconUsed
+                                )}
+                            </Section>
+                        );
+                    } else if (item.type === "group") {
+                        return (
+                            <Group
+                                id={item.id}
+                                key={item.id}
+                                level={level}
+                                title={item.title}
+                                icon={item.icon}
+                                forceOpen={filtered}
+                                applyIconIndentation={
+                                    atLeastOneIconUsed ||
+                                    iconAtParentLevel ||
+                                    false
+                                }
+                            >
+                                {recursivelyMakeNavigation(
+                                    (item as GroupType).content,
+                                    atLeastOneIconUsed,
+                                    level + 1
+                                )}
+                            </Group>
+                        );
+                    } else if (item.type === "page") {
+                        return (
+                            <Page
+                                key={item.id}
+                                level={level}
+                                applyIconIndentation={
+                                    atLeastOneIconUsed ||
+                                    iconAtParentLevel ||
+                                    false
+                                }
+                                {...(item as PageType)}
+                                onClick={() =>
+                                    onPageChange((item as PageType).href)
+                                }
+                            />
+                        );
+                    } else {
+                        return null;
+                    }
+                })}
+            </>
+        );
+    };
     return recursivelyMakeNavigation(navigation);
 };
 

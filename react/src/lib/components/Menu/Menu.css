@@ -40,3 +40,7 @@
 .Menu__Item > span.Icon {
     max-width: calc(100% - 40px);
 }
+
+.Menu__Item > span.IconPlaceholder {
+    padding-left: 40px;
+}
