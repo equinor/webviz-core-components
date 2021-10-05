@@ -8,10 +8,8 @@
 .webviz-config-plugin-wrapper {
     width: 100%;
     box-sizing: border-box;
-    padding: 0;
     display: grid;
     grid-template-columns: 1fr auto;
-    margin: -16px;
     padding: 16px;
 }
 
