@@ -179,9 +179,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
             makeNavigationItemsWithAssignedIds(props.navigationItems)
         );
         setMenuWidth(
-            Math.min(
-                getNavigationMaxWidth(props.navigationItems) + menuPadding,
-                windowSize.width / 2
+            Math.max(
+                250,
+                Math.min(
+                    getNavigationMaxWidth(props.navigationItems) + menuPadding,
+                    windowSize.width / 4,
+                    400
+                )
             )
         );
     }, [props.navigationItems, windowSize.width]);
