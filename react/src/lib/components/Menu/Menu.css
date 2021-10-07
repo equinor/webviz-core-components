@@ -27,10 +27,6 @@
     align-items: center;
 }
 
-.Menu__Item > svg {
-    display: block;
-}
-
 .Menu__Item > span {
     display: inline-block;
     white-space: pre-wrap;
