@@ -205,6 +205,7 @@ export const MenuDrawer = React.forwardRef<HTMLDivElement, MenuDrawerProps>(
                     right: position.right,
                     bottom: position.bottom,
                     width: props.maxWidth + "px",
+                    maxWidth: props.maxWidth + "px",
                 }}
             >
                 {props.pinned && (

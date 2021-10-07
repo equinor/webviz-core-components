@@ -9,6 +9,7 @@
 
 .Menu__Ruler {
     font-family: sans-serif;
+    white-space: nowrap;
 }
 
 .Menu__Icon {
@@ -18,4 +19,24 @@
 
 .Menu__disabled {
     cursor: not-allowed;
+}
+
+.Menu__Item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.Menu__Item > span {
+    display: inline-block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.Menu__Item > span.Icon {
+    max-width: calc(100% - 40px);
+}
+
+.Menu__Item > span.IconPlaceholder {
+    padding-left: 40px;
 }

@@ -14,6 +14,7 @@ type GroupProps = {
     title: string;
     level: number;
     icon?: string;
+    applyIconIndentation: boolean;
     forceOpen?: boolean;
     children?: React.ReactNode;
 };
@@ -41,13 +42,23 @@ export const Group: React.FC<GroupProps> = (props) => {
                 }}
             >
                 <div
-                    className="Menu__GroupTitle"
+                    className="Menu__GroupTitle Menu__Item"
                     style={{ paddingLeft: 16 * props.level }}
                 >
                     {props.icon && (
                         <Icon className="Menu__Icon" icon={props.icon} />
                     )}
-                    {props.title}
+                    <span
+                        className={
+                            props.icon
+                                ? "Icon"
+                                : props.applyIconIndentation
+                                ? "IconPlaceholder"
+                                : ""
+                        }
+                    >
+                        {props.title}
+                    </span>
                 </div>
                 <div
                     className={props.forceOpen ? "Menu__disabled" : ""}
@@ -86,6 +97,7 @@ Group.propTypes = {
     title: PropTypes.string.isRequired,
     level: PropTypes.number.isRequired,
     icon: PropTypes.string,
+    applyIconIndentation: PropTypes.bool.isRequired,
     forceOpen: PropTypes.bool,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),

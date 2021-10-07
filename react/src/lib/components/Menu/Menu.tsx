@@ -102,27 +102,33 @@ const getNavigationMaxWidth = (
     navigationItems: PropertyNavigationType
 ): number => {
     const recursivelyParseItems = (
-        item: PropertyPageType | PropertyGroupType | PropertySectionType,
+        items: (PropertyPageType | PropertyGroupType | PropertySectionType)[],
+        iconAtParentLevel?: boolean,
         depth = 0
     ) => {
-        let maxWidth = depth * 16 + calculateTextWidth(item.title);
-        if (item.type !== "page") {
-            item.content.forEach(
-                (el) =>
-                    (maxWidth = Math.max(
-                        maxWidth,
-                        recursivelyParseItems(el, depth + 1)
-                    ))
+        let maxWidth = 0;
+        const atLeastOneIconUsed = items.some((el) => el.icon !== undefined);
+        items.forEach((item) => {
+            maxWidth = Math.max(
+                maxWidth,
+                depth * 16 +
+                    calculateTextWidth(item.title) +
+                    (item.icon || iconAtParentLevel ? 40 : 0)
             );
-        }
+            if (item.type !== "page") {
+                maxWidth = Math.max(
+                    maxWidth,
+                    recursivelyParseItems(
+                        item.content,
+                        atLeastOneIconUsed,
+                        depth + 1
+                    )
+                );
+            }
+        });
         return maxWidth;
     };
-    let maxWidth = 0;
-    navigationItems.forEach(
-        (el: PropertyPageType | PropertyGroupType | PropertySectionType) =>
-            (maxWidth = Math.max(recursivelyParseItems(el), maxWidth))
-    );
-    return maxWidth;
+    return recursivelyParseItems(navigationItems);
 };
 
 /**
@@ -166,15 +172,20 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const windowSize = useWindowSize();
 
     const menuContentSpacing = 50;
+    const menuPadding = 32;
 
     React.useEffect(() => {
         setNavigationsItemsWithAssignedIds(
             makeNavigationItemsWithAssignedIds(props.navigationItems)
         );
         setMenuWidth(
-            Math.min(
-                getNavigationMaxWidth(props.navigationItems) * 1.1 + 40,
-                windowSize.width / 2
+            Math.max(
+                250,
+                Math.min(
+                    getNavigationMaxWidth(props.navigationItems) + menuPadding,
+                    windowSize.width / 4,
+                    400
+                )
             )
         );
     }, [props.navigationItems, windowSize.width]);

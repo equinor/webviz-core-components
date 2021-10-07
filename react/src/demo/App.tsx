@@ -59,7 +59,7 @@ const App: React.FC = () => {
                         content: [
                             {
                                 type: "group",
-                                title: "Group",
+                                title: "Demos",
                                 content: [
                                     {
                                         type: "page",

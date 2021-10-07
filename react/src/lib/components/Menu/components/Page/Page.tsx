@@ -11,6 +11,7 @@ type PageProps = {
     href: string;
     level: number;
     icon?: string;
+    applyIconIndentation: boolean;
     onClick: () => void;
 };
 
@@ -19,7 +20,9 @@ export const Page: React.FC<PageProps> = (props) => {
 
     return (
         <a
-            className={`Menu__Page${active ? " Menu__CurrentPage" : ""}`}
+            className={`Menu__Page${
+                active ? " Menu__CurrentPage" : ""
+            } Menu__Item`}
             href={props.href}
             onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 props.onClick();
@@ -34,7 +37,17 @@ export const Page: React.FC<PageProps> = (props) => {
                     active={active}
                 />
             )}
-            {props.title}
+            <span
+                className={
+                    props.icon
+                        ? "Icon"
+                        : props.applyIconIndentation
+                        ? "IconPlaceholder"
+                        : ""
+                }
+            >
+                {props.title}
+            </span>
         </a>
     );
 };
@@ -44,5 +57,6 @@ Page.propTypes = {
     href: PropTypes.string.isRequired,
     level: PropTypes.number.isRequired,
     icon: PropTypes.string,
+    applyIconIndentation: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
 };
