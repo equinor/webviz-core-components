@@ -120,8 +120,13 @@ const App: React.FC = () => {
                         key="SmartNodeSelector"
                         numMetaNodes={2}
                         delimiter=":"
+                        placeholder="Add a vector"
+                        caseInsensitiveMatching={true}
                         setProps={setNodeSelectorState}
                         label="Smart Tree Node Selector"
+                        selectedTags={[
+                            "Metadata 2:Submetadata 1:Node 1:Subnode 2",
+                        ]}
                         data={[
                             {
                                 id: "1",

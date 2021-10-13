@@ -39,6 +39,7 @@ export type SmartNodeSelectorPropsType = {
     placeholder?: string;
     numSecondsUntilSuggestionsAreShown: number;
     lineBreakAfterTag?: boolean;
+    caseInsensitiveMatching?: boolean;
     persistence: boolean | string | number;
     persisted_props: "selectedTags"[];
     persistence_type: "local" | "session" | "memory";
@@ -88,6 +89,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected componentIsMounted: boolean;
     protected treeData: TreeData | null;
     protected numValidSelections: number;
+    protected caseInsensitiveMatching: boolean;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -122,8 +124,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.noUserInputSelect = false;
         this.mouseDownElement = null;
         this.componentIsMounted = false;
+        this.caseInsensitiveMatching = props.caseInsensitiveMatching || false;
 
         let error: string | undefined;
+        error = undefined;
         try {
             this.treeData = new TreeData({
                 treeData: props.data,
@@ -131,7 +135,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             });
         } catch (e) {
             this.treeData = null;
-            error = e;
+            error = e as string;
         }
 
         const nodeSelections: TreeNodeSelection[] = [];
@@ -228,7 +232,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 });
             } catch (e) {
                 this.treeData = null;
-                error = e;
+                error = e as string;
             }
             const nodeSelections: TreeNodeSelection[] = [];
             for (const node of this.state.nodeSelections) {
@@ -288,6 +292,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             delimiter: this.props.delimiter,
             numMetaNodes: this.props.numMetaNodes,
             treeData: this.treeData as TreeData,
+            caseInsensitiveMatching: this.caseInsensitiveMatching,
         });
     }
 
@@ -1049,11 +1054,13 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         const eventTarget = e.target as HTMLInputElement;
         const val = eventTarget.value;
         if (e.key === "Enter" && val) {
-            if (this.currentTagIndex() == this.countTags() - 1) {
-                this.focusCurrentTag();
-            } else {
-                this.incrementCurrentTagIndex();
-                this.setFocusOnTagInput(this.currentTagIndex() + 1);
+            if (this.currentNodeSelection().isComplete()) {
+                if (this.currentTagIndex() == this.countTags() - 1) {
+                    this.focusCurrentTag();
+                } else {
+                    this.incrementCurrentTagIndex();
+                    this.setFocusOnTagInput(this.currentTagIndex() + 1);
+                }
             }
         } else if (e.key === "ArrowRight" && val) {
             if (eventTarget.selectionStart == eventTarget.value.length) {
@@ -1116,43 +1123,79 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.selectTag(this.currentTagIndex());
                     this.currentSelectionDirection = Direction.Right;
                 }
+                e.preventDefault();
             } else {
                 if (
-                    this.currentTagIndex() == this.countTags() - 1 &&
-                    !this.hasLastEmptyTag() &&
-                    this.canAddSelection()
+                    this.currentNodeSelection().getFocussedLevel() ===
+                        this.currentNodeSelection().countLevel() - 1 &&
+                    this.currentNodeSelection().isComplete()
                 ) {
-                    this.updateState({
-                        nodeSelections: [
-                            ...this.state.nodeSelections,
-                            this.createNewNodeSelection(),
-                        ],
-                        currentTagIndex: this.currentTagIndex() + 1,
-                    });
+                    if (
+                        this.currentTagIndex() == this.countTags() - 1 &&
+                        !this.hasLastEmptyTag() &&
+                        this.canAddSelection()
+                    ) {
+                        this.updateState({
+                            nodeSelections: [
+                                ...this.state.nodeSelections,
+                                this.createNewNodeSelection(),
+                            ],
+                            currentTagIndex: this.currentTagIndex() + 1,
+                        });
+                    } else {
+                        this.incrementCurrentTagIndex(() =>
+                            this.focusCurrentTag()
+                        );
+                        e.preventDefault();
+                    }
                 } else {
-                    this.incrementCurrentTagIndex(() => this.focusCurrentTag());
+                    this.currentNodeSelection().incrementFocussedLevel();
+                    this.updateState({
+                        forceUpdate: true,
+                        callback: () => {
+                            (e.target as HTMLInputElement).setSelectionRange(
+                                0,
+                                0
+                            );
+                        },
+                    });
                     e.preventDefault();
                 }
             }
-        } else if (
-            e.key === "ArrowLeft" &&
-            eventTarget.selectionStart == 0 &&
-            eventTarget.selectionEnd == 0 &&
-            this.currentTagIndex() > 0 &&
-            !e.repeat
-        ) {
-            if (e.shiftKey) {
+        } else if (e.key === "ArrowLeft" && !e.repeat) {
+            if (
+                e.shiftKey &&
+                eventTarget.selectionStart == 0 &&
+                eventTarget.selectionEnd == 0 &&
+                this.currentTagIndex() > 0
+            ) {
                 if (!this.currentNodeSelection().displayAsTag()) {
                     this.selectTag(this.currentTagIndex() - 1);
                 } else {
                     this.selectTag(this.currentTagIndex());
                 }
                 this.currentSelectionDirection = Direction.Left;
-            } else {
-                this.decrementCurrentTagIndex(() => {
-                    this.focusCurrentTag();
-                });
                 e.preventDefault();
+            } else {
+                if (
+                    eventTarget.selectionStart == 0 &&
+                    eventTarget.selectionEnd == 0
+                ) {
+                    if (this.currentNodeSelection().getFocussedLevel() === 0) {
+                        if (this.currentTagIndex() > 0) {
+                            this.decrementCurrentTagIndex(() => {
+                                this.focusCurrentTag();
+                            });
+                        }
+                        e.preventDefault();
+                    } else {
+                        this.currentNodeSelection().decrementFocussedLevel();
+                        this.updateState({
+                            forceUpdate: true,
+                        });
+                        e.preventDefault();
+                    }
+                }
             }
         } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
             e.preventDefault();
@@ -1176,6 +1219,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.currentTagIndex() == this.countTags() - 1
         ) {
             this.pasteTags(e);
+        } else if (e.key === this.props.delimiter && e.repeat) {
+            e.preventDefault();
         }
     }
 
@@ -1398,6 +1443,11 @@ SmartNodeSelectorComponent.propTypes = {
      * If set to true, tags will be separated by a line break.
      */
     lineBreakAfterTag: PropTypes.bool,
+
+    /**
+     * Set to true if case-wise incorrect values should be accepted anyways.
+     */
+    caseInsensitiveMatching: PropTypes.bool,
 
     /**
      * Used to allow user interactions in this component to be persisted when

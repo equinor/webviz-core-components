@@ -54,6 +54,10 @@ export default class Tag extends Component<TagProps> {
         this.state = { hovered: false };
     }
 
+    componentDidMount(): void {
+        this.forceUpdate();
+    }
+
     private addAdditionalClasses(invalid: boolean): boolean {
         const { currentTag, treeNodeSelection } = this.props;
         return (
@@ -241,9 +245,13 @@ export default class Tag extends Component<TagProps> {
         nodeSelection.setNodeName(subgroups[newPosition]);
         hideSuggestions(() => {
             if (currentSelection[0] !== null && currentSelection[1] !== null) {
-                inputElement.setSelectionRange(
-                    currentSelection[0],
-                    currentSelection[1]
+                window.setTimeout(
+                    () =>
+                        inputElement.setSelectionRange(
+                            currentSelection[0],
+                            currentSelection[1]
+                        ),
+                    20
                 );
             }
         });
@@ -451,7 +459,7 @@ export default class Tag extends Component<TagProps> {
                                 treeNodeSelection.getFocussedNodeName() ===
                                     "" &&
                                 treeNodeSelection.getFocussedLevel() == 0
-                                    ? "Add new tag..."
+                                    ? this.props.placeholder
                                     : ""
                             }
                             value={displayText}

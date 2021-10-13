@@ -16,21 +16,7 @@ import SmartNodeSelectorComponent from "./components/SmartNodeSelectorComponent"
 const SmartNodeSelector = props => {
     return (
         <SmartNodeSelectorComponent
-            id={props.id}
-            maxNumSelectedNodes={props.maxNumSelectedNodes}
-            delimiter={props.delimiter}
-            numMetaNodes={props.numMetaNodes}
-            data={props.data}
-            label={props.label}
-            showSuggestions={props.showSuggestions}
-            setProps={props.setProps}
-            selectedTags={props.selectedTags}
-            placeholder={props.placeholder}
-            numSecondsUntilSuggestionsAreShown={
-                props.numSecondsUntilSuggestionsAreShown
-            }
-            lineBreakAfterTag={props.lineBreakAfterTag}
-            persistence={props.persistence}
+            {...props}
         />
     );
 };
@@ -44,6 +30,7 @@ SmartNodeSelector.defaultProps = {
     placeholder: "Add new tag...",
     numSecondsUntilSuggestionsAreShown: 0.5,
     lineBreakAfterTag: false,
+    caseInsensitiveMatching: false,
     persisted_props: ['selectedTags'],
     persistence_type: 'local',
 };
@@ -110,6 +97,11 @@ SmartNodeSelector.propTypes = {
      * If set to true, tags will be separated by a line break.
      */
     lineBreakAfterTag: PropTypes.bool,
+
+    /**
+     * Set to true if case-wise incorrect values should be accepted anyways.
+     */
+    caseInsensitiveMatching: PropTypes.bool,
 
     /**
      * Used to allow user interactions in this component to be persisted when

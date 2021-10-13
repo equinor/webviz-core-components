@@ -92,18 +92,21 @@ export default class TreeData {
         }
     }
 
-    countMatchedNodes(nodePath: string[]): number {
+    countMatchedNodes(nodePath: string[], exactMatch = false): number {
         let nodePathString = "";
+        const lastNode = this.adjustNodeName(nodePath[nodePath.length - 1]);
         for (let i = 0; i < nodePath.length - 1; i++) {
             nodePathString += `\\{(\\d+)\\}${this.adjustNodeName(nodePath[i])}${
                 this.delimiter
             }`;
         }
 
-        const re = RegExp(
-            `"${nodePathString}\\{(\\d+)\\}([^${this.delimiter}"]*)"`,
-            "g"
-        );
+        const re = exactMatch
+            ? RegExp(`"${nodePathString}\\{(\\d+)\\}${lastNode}"`, "g")
+            : RegExp(
+                  `"${nodePathString}\\{(\\d+)\\}${lastNode}([^${this.delimiter}"]*)"`,
+                  "g"
+              );
         let count = 0;
 
         // Can be replaced with matchAll as soon as ECMAScript 2021 is declared standard in this project.
@@ -115,21 +118,40 @@ export default class TreeData {
     }
 
     private escapeRegExp(string: string): string {
-        return string.replace(/[.+^${}()|[]\\]/g, "\\$&");
+        const newString = string.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
+        return newString;
     }
 
     private replaceAll(str: string, find: string, replace: string): string {
         return str.split(find).join(replace);
     }
 
+    private activateOrStatements(nodeName: string): string {
+        const reg = RegExp("\\((([^:\\|]+){1}(\\|([^:\\|]+)){0,})\\)");
+        const match = nodeName.match(reg);
+        if (match) {
+            if (match[1] !== "") {
+                const orStatements = this.replaceAll(match[1], "\\", "");
+                return `(${orStatements})`;
+            }
+        }
+        return nodeName;
+    }
+
     private adjustNodeName(nodeName: string): string {
         if (nodeName === undefined) {
             console.log(nodeName);
         }
-        return this.replaceAll(
-            this.replaceAll(this.escapeRegExp(nodeName), "*", '[^:"]*'),
-            "?",
-            "."
+        return this.activateOrStatements(
+            this.replaceAll(
+                this.replaceAll(
+                    this.replaceAll(this.escapeRegExp(nodeName), ":", ""),
+                    "*",
+                    '[^:"]*'
+                ),
+                "?",
+                "."
+            )
         );
     }
 
@@ -156,6 +178,15 @@ export default class TreeData {
         return result;
     }
 
+    makeExpressionCaseInsensitive(expression: string): string {
+        let modifiedExpression = "";
+        for (let i = 0; i < expression.length; i++) {
+            const char = expression.substr(i, 1);
+            modifiedExpression += `[${char.toLowerCase()}${char.toUpperCase()}]`;
+        }
+        return modifiedExpression;
+    }
+
     findSuggestions(
         nodePath: string[]
     ): { nodeName: string; metaData: TreeDataNodeMetaData }[] {
@@ -168,7 +199,7 @@ export default class TreeData {
         }
 
         const re = RegExp(
-            `"${nodePathString}\\{(\\d+)\\}(${searchTerm}[^${this.delimiter}"]*)`,
+            `"${nodePathString}\\{(\\d+)\\}([^${this.delimiter}"]*)`,
             "g"
         );
 
@@ -182,17 +213,33 @@ export default class TreeData {
         // see: https://tc39.es/ecma262/#sec-string.prototype.matchall
         let match: RegExpExecArray | null;
         while ((match = re.exec(this.stringifiedData)) !== null) {
-            const count = nodeNames.size;
-            nodeNames.add(match[nodePath.length + 1]);
-            if (count == nodeNames.size) {
-                continue;
-            }
+            const metaData = this.nodeData[
+                parseInt(match[nodePath.length + 0])
+            ];
+            if (
+                match[nodePath.length + 1]
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                (metaData.description &&
+                    metaData.description
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()))
+            ) {
+                const count = nodeNames.size;
+                nodeNames.add(match[nodePath.length + 1]);
+                if (count == nodeNames.size) {
+                    continue;
+                }
 
-            suggestions.push({
-                nodeName: match[nodePath.length + 1],
-                metaData: this.nodeData[parseInt(match[nodePath.length + 0])],
-            });
+                suggestions.push({
+                    nodeName: match[nodePath.length + 1],
+                    metaData: this.nodeData[
+                        parseInt(match[nodePath.length + 0])
+                    ],
+                });
+            }
         }
+
         return suggestions;
     }
 
@@ -237,6 +284,30 @@ export default class TreeData {
 
     cleanNodeName(nodeName: string): string {
         return nodeName.replace(new RegExp(`\\{\\d+\\}`, "g"), "");
+    }
+
+    findNode(nodePath: string[]): string {
+        const lastNode = this.adjustNodeName(nodePath[nodePath.length - 1]);
+        let nodePathString = "";
+        for (let i = 0; i < nodePath.length - 1; i++) {
+            nodePathString += `\\{(\\d+)\\}${this.adjustNodeName(nodePath[i])}${
+                this.delimiter
+            }`;
+        }
+
+        const re = RegExp(
+            `"${nodePathString}\\{(\\d+)\\}(${this.makeExpressionCaseInsensitive(
+                lastNode
+            )})("|${this.delimiter})`
+        );
+
+        // Can be replaced with matchAll as soon as ECMAScript 2021 is declared standard in this project.
+        // see: https://tc39.es/ecma262/#sec-string.prototype.matchall
+        const match = re.exec(this.stringifiedData);
+        if (match) {
+            return match[match.length - 2];
+        }
+        return nodePath[nodePath.length - 1];
     }
 
     findNodes(

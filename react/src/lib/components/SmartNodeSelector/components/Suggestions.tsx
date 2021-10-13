@@ -31,6 +31,8 @@ type SuggestionsState = {
     fromIndex: number;
 };
 
+type Option = { nodeName: string; metaData: TreeDataNodeMetaData };
+
 /**
  * A component for showing a list of suggestions.
  */
@@ -44,7 +46,7 @@ class Suggestions extends Component<SuggestionsProps> {
     private currentlySelectedSuggestionIndex: number;
     private rowHeight: number;
     private upperSpacerHeight: number;
-    private allOptions: { nodeName: string; metaData: TreeDataNodeMetaData }[];
+    private allOptions: Option[];
     private currentNodeLevel: number;
     private currentNodeName: string;
     private lastNodeSelection?: TreeNodeSelection;
@@ -310,16 +312,67 @@ class Suggestions extends Component<SuggestionsProps> {
     }
 
     private decorateOption(
-        option: string,
+        option: Option,
         treeNodeSelection: TreeNodeSelection
     ): React.ReactNode {
+        const regexName = RegExp(
+            `^${treeNodeSelection.getFocussedNodeName()}`,
+            "i"
+        );
+        const regexDescription = RegExp(
+            `${treeNodeSelection.getFocussedNodeName()}`,
+            "i"
+        );
+        const matchName = option.nodeName.match(regexName);
+        const matchDescription = option.metaData.description?.match(
+            regexDescription
+        );
+
+        const matchedNodePart = matchName
+            ? option.nodeName.substring(0, matchName[0].length)
+            : "";
+        const unmatchedNodePart = matchName
+            ? option.nodeName.substring(
+                  matchName[0].length,
+                  option.nodeName.length
+              )
+            : option.nodeName;
+
+        const unmatchedDescriptionPartBefore = matchDescription
+            ? option.metaData.description?.substring(
+                  0,
+                  matchDescription.index as number
+              )
+            : option.metaData.description;
+
+        const matchedDescription = matchDescription
+            ? option.metaData.description?.substring(
+                  matchDescription.index as number,
+                  (matchDescription.index as number) +
+                      matchDescription[0].length
+              )
+            : "";
+
+        const unmatchedDescriptionPartAfter = matchDescription
+            ? option.metaData.description?.substring(
+                  (matchDescription.index as number) +
+                      matchDescription[0].length,
+                  option.metaData.description.length
+              )
+            : "";
+
         return (
             <Fragment>
-                <span className="Suggestions__Match">
-                    {treeNodeSelection.getFocussedNodeName()}
-                </span>
-                {option.substring(
-                    treeNodeSelection.getFocussedNodeName().length
+                <span className="Suggestions__Match">{matchedNodePart}</span>
+                {unmatchedNodePart}
+                {option.metaData.description && (
+                    <>
+                        - {unmatchedDescriptionPartBefore}
+                        <span className="Suggestions__Match">
+                            {matchedDescription}
+                        </span>
+                        {unmatchedDescriptionPartAfter}
+                    </>
                 )}
             </Fragment>
         );
@@ -371,13 +424,7 @@ class Suggestions extends Component<SuggestionsProps> {
                                 this.useSuggestion(e, option.nodeName)
                             }
                         >
-                            {this.decorateOption(
-                                option.nodeName,
-                                treeNodeSelection
-                            )}
-                            {option.metaData.description
-                                ? ` - ${option.metaData.description}`
-                                : ""}
+                            {this.decorateOption(option, treeNodeSelection)}
                         </div>
                     ))}
                 </Fragment>
