@@ -16,6 +16,10 @@ export const Icon: React.FC<IconProps> = (props) => {
         icon = Object.values(edsIcons).find((el) => el.name === props.icon);
     }
 
+    if (!icon) {
+        return <></>;
+    }
+
     return (
         <EdsIcon
             data={icon}
