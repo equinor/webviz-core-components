@@ -12,18 +12,22 @@ export default class TreeData {
     private delimiter: string;
     private stringifiedData: string;
     private nodeData: TreeDataNodeMetaData[];
+    private allowOrOperator: boolean;
 
     constructor({
         treeData,
         delimiter,
+        allowOrOperator,
     }: {
         treeData: TreeDataNode[];
         delimiter: string;
+        allowOrOperator: boolean;
     }) {
         this.treeData = treeData;
         this.delimiter = delimiter;
         this.nodeData = [];
         this.stringifiedData = "";
+        this.allowOrOperator = allowOrOperator;
 
         this.populateNodes();
     }
@@ -127,12 +131,16 @@ export default class TreeData {
     }
 
     private activateOrStatements(nodeName: string): string {
-        const reg = RegExp(`^(([^${this.delimiter}\\|]+\\|)+([^${this.delimiter}\\|]+){1})$`);
-        const match = nodeName.match(reg);
-        if (match) {
-            if (match[1] !== "") {
-                const orStatements = this.replaceAll(match[1], "\\", "");
-                return `(${orStatements})`;
+        if (this.allowOrOperator) {
+            const reg = RegExp(
+                `^(([^${this.delimiter}\\|]+\\|)+([^${this.delimiter}\\|]+){1})$`
+            );
+            const match = nodeName.match(reg);
+            if (match) {
+                if (match[1] !== "") {
+                    const orStatements = this.replaceAll(match[1], "\\", "");
+                    return `(${orStatements})`;
+                }
             }
         }
         return nodeName;

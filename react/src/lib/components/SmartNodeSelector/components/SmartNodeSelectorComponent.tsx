@@ -40,6 +40,7 @@ export type SmartNodeSelectorPropsType = {
     numSecondsUntilSuggestionsAreShown: number;
     lineBreakAfterTag?: boolean;
     caseInsensitiveMatching?: boolean;
+    useBetaFeatures?: boolean;
     persistence: boolean | string | number;
     persisted_props: "selectedTags"[];
     persistence_type: "local" | "session" | "memory";
@@ -102,6 +103,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         placeholder: "Add new tag...",
         numSecondsUntilSuggestionsAreShown: 0.5,
         lineBreakAfterTag: false,
+        useBetaFeatures: false,
         persisted_props: ["selectedTags"],
         persistence_type: "local",
     };
@@ -129,13 +131,15 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         let error: string | undefined = undefined;
 
         if (props.delimiter.length !== 1) {
-            error = "The delimiter must be a single character."
+            error = "The delimiter must be a single character.";
             this.treeData = null;
         }
 
         const prohibitedDelimiters = ["|"];
         if (prohibitedDelimiters.includes(props.delimiter)) {
-            error = "The delimiter must not be any of the following characters:\n" + prohibitedDelimiters.join(", ");
+            error =
+                "The delimiter must not be any of the following characters:\n" +
+                prohibitedDelimiters.join(", ");
             this.treeData = null;
         }
 
@@ -143,6 +147,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.treeData = new TreeData({
                 treeData: props.data,
                 delimiter: props.delimiter,
+                allowOrOperator: props.useBetaFeatures || false,
             });
         } catch (e) {
             this.treeData = null;
@@ -243,6 +248,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 this.treeData = new TreeData({
                     treeData: this.props.data,
                     delimiter: this.props.delimiter,
+                    allowOrOperator: this.props.useBetaFeatures || false,
                 });
             } catch (e) {
                 this.treeData = null;
@@ -307,6 +313,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             numMetaNodes: this.props.numMetaNodes,
             treeData: this.treeData as TreeData,
             caseInsensitiveMatching: this.caseInsensitiveMatching,
+            allowOrOperator: this.props.useBetaFeatures || false,
         });
     }
 

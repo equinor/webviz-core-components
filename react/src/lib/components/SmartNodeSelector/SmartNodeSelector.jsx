@@ -31,6 +31,7 @@ SmartNodeSelector.defaultProps = {
     numSecondsUntilSuggestionsAreShown: 0.5,
     lineBreakAfterTag: false,
     caseInsensitiveMatching: false,
+    useBetaFeatures: false,
     persisted_props: ['selectedTags'],
     persistence_type: 'local',
 };
@@ -102,6 +103,11 @@ SmartNodeSelector.propTypes = {
      * Set to true if case-wise incorrect values should be accepted anyways.
      */
     caseInsensitiveMatching: PropTypes.bool,
+
+    /**
+     * Set to true if case-wise incorrect values should be accepted anyways.
+     */
+    useBetaFeatures: PropTypes.bool,
 
     /**
      * Used to allow user interactions in this component to be persisted when

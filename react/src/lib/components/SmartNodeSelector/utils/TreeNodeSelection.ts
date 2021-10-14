@@ -19,6 +19,7 @@ export default class TreeNodeSelection {
     private numMetaNodes: number;
     private objectIdentifier: number;
     private caseInsensitiveMatching: boolean;
+    private allowOrOperator: boolean;
 
     constructor({
         focussedLevel = 0,
@@ -28,6 +29,7 @@ export default class TreeNodeSelection {
         numMetaNodes = 0,
         treeData,
         caseInsensitiveMatching = false,
+        allowOrOperator = false,
     }: {
         focussedLevel: number;
         nodePath: Array<string>;
@@ -36,6 +38,7 @@ export default class TreeNodeSelection {
         numMetaNodes: number;
         treeData: TreeData;
         caseInsensitiveMatching: boolean;
+        allowOrOperator: boolean;
     }) {
         this.focussedLevel = focussedLevel;
         this.nodePath = nodePath;
@@ -46,6 +49,7 @@ export default class TreeNodeSelection {
         this.numMetaNodes = numMetaNodes;
         this.objectIdentifier = Date.now();
         this.caseInsensitiveMatching = caseInsensitiveMatching;
+        this.allowOrOperator = allowOrOperator;
     }
 
     objectEquals(other: TreeNodeSelection): boolean {
@@ -358,9 +362,15 @@ export default class TreeNodeSelection {
     }
 
     containsWildcard(): boolean {
-        const reg = RegExp(`^(([^${this.delimiter}\\|]+\\|)+([^${this.delimiter}\\|]+){1})$`);
+        const reg = RegExp(
+            `^(([^${this.delimiter}\\|]+\\|)+([^${this.delimiter}\\|]+){1})$`
+        );
         for (const el of this.getNodePath()) {
-            if (el.includes("?") || el.includes("*") || reg.test(el)) {
+            if (
+                el.includes("?") ||
+                el.includes("*") ||
+                (this.allowOrOperator && reg.test(el))
+            ) {
                 return true;
             }
         }
@@ -395,6 +405,7 @@ export default class TreeNodeSelection {
             numMetaNodes: this.numMetaNodes,
             treeData: this.treeData,
             caseInsensitiveMatching: this.caseInsensitiveMatching,
+            allowOrOperator: this.allowOrOperator,
         });
     }
 }
