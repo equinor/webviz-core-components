@@ -127,7 +127,7 @@ export default class TreeData {
     }
 
     private activateOrStatements(nodeName: string): string {
-        const reg = RegExp("\\((([^:\\|]+){1}(\\|([^:\\|]+)){0,})\\)");
+        const reg = RegExp(`^(([^${this.delimiter}\\|]+\\|)+([^${this.delimiter}\\|]+){1})$`);
         const match = nodeName.match(reg);
         if (match) {
             if (match[1] !== "") {

@@ -126,8 +126,19 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.componentIsMounted = false;
         this.caseInsensitiveMatching = props.caseInsensitiveMatching || false;
 
-        let error: string | undefined;
-        error = undefined;
+        let error: string | undefined = undefined;
+
+        if (props.delimiter.length !== 1) {
+            error = "The delimiter must be a single character."
+            this.treeData = null;
+        }
+
+        const prohibitedDelimiters = ["|"];
+        if (prohibitedDelimiters.includes(props.delimiter)) {
+            error = "The delimiter must not be any of the following characters:\n" + prohibitedDelimiters.join(", ");
+            this.treeData = null;
+        }
+
         try {
             this.treeData = new TreeData({
                 treeData: props.data,
@@ -189,6 +200,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             (e) => this.handleGlobalKeyDown(e),
             true
         );
+        if (!this.state.hasError) {
+            this.updateSelectedTagsAndNodes();
+        }
     }
 
     componentWillUnmount(): void {

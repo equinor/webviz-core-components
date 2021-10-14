@@ -358,8 +358,9 @@ export default class TreeNodeSelection {
     }
 
     containsWildcard(): boolean {
+        const reg = RegExp(`^(([^${this.delimiter}\\|]+\\|)+([^${this.delimiter}\\|]+){1})$`);
         for (const el of this.getNodePath()) {
-            if (el.includes("?") || el.includes("*")) {
+            if (el.includes("?") || el.includes("*") || reg.test(el)) {
                 return true;
             }
         }
