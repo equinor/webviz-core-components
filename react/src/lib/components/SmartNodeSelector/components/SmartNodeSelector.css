@@ -159,7 +159,7 @@
     flex-wrap: wrap;
     border-radius: 4px;
     background-color: #fefefe;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
     min-width: 0;
     position: relative;

@@ -4,8 +4,9 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
- 
+
 .Suggestions {
+    box-sizing: border-box;
     position: absolute;
     z-index: 99;
     top: 100%;
@@ -15,8 +16,12 @@
     border-radius: 0px 0px 4px 4px;
     background-color: white;
     overflow-y: auto;
-    -webkit-box-shadow: 0px 4px 5px -1px rgba(0,0,0,0.2); 
-    box-shadow: 0px 4px 5px -1px rgba(0,0,0,0.2);
+    -webkit-box-shadow: 0px 4px 5px -1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 4px 5px -1px rgba(0, 0, 0, 0.2);
+}
+
+.Suggestions__Position {
+    visibility: hidden;
 }
 
 .Suggestions__Ruler {
