@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import * as edsIcons from "@equinor/eds-icons";
 import { IconData } from "@equinor/eds-icons";
 import { Icon as EdsIcon } from "@equinor/eds-core-react";
+import { Tooltip } from "@material-ui/core";
 
 type IconProps = {
     icon: string;
@@ -17,7 +18,17 @@ export const Icon: React.FC<IconProps> = (props) => {
     }
 
     if (!icon) {
-        return <></>;
+        return (
+            <Tooltip
+                title={`An icon with name "${props.icon}" does not exist. Please check the icon name for typos. An overview of all available icons can be found at https://eds.equinor.com/assets/system-icons/library/.`}
+            >
+                <EdsIcon
+                    data={edsIcons.report}
+                    color="hsla(0, 100%, 50%, 1)"
+                    className={(props.className || "") + " Menu__IconNotFound"}
+                />
+            </Tooltip>
+        );
     }
 
     return (

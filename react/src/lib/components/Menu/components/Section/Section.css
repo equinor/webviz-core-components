@@ -7,7 +7,7 @@
     flex-direction: row;
 }
 
-.Menu__SectionTitle > svg * {
+.Menu__SectionTitle > svg:not(.Menu__IconNotFound) * {
     fill: #007079;
 }
 
