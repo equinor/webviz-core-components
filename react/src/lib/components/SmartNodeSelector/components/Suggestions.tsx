@@ -417,6 +417,12 @@ class Suggestions extends Component<SuggestionsProps> {
                   height: 0,
               };
 
+        const zIndex = this.positionRef.current
+            ? parseInt(
+                  window.getComputedStyle(this.positionRef.current, null).zIndex
+              )
+            : 99;
+
         ReactDOM.render(
             <div
                 ref={suggestionsRef}
@@ -428,6 +434,7 @@ class Suggestions extends Component<SuggestionsProps> {
                     top: boundingRect.top,
                     left: boundingRect.left,
                     width: boundingRect.width,
+                    zIndex: zIndex,
                 }}
             >
                 <div

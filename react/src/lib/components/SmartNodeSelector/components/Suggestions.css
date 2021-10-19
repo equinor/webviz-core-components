@@ -8,7 +8,6 @@
 .Suggestions {
     box-sizing: border-box;
     position: absolute;
-    z-index: 99;
     top: 100%;
     left: -1px;
     right: -1px;
