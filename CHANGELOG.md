@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--[#161](https://github.com/equinor/webviz-core-components/pull/161) - Updated to `Dash 2.0`.
+- [#161](https://github.com/equinor/webviz-core-components/pull/161) - Updated to `Dash 2.0`.
 - [#173](https://github.com/equinor/webviz-core-components/pull/173) - Improved menu layout and auto-width.
 
 ### Fixed
