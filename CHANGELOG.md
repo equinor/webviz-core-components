@@ -28,34 +28,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--   [#161](https://github.com/equinor/webviz-core-components/pull/161) - Updated to `Dash 2.0`.
--   [#173](https://github.com/equinor/webviz-core-components/pull/173) - Improved menu layout and auto-width.
+- [#161](https://github.com/equinor/webviz-core-components/pull/161) - Updated to `Dash 2.0`.
+- [#173](https://github.com/equinor/webviz-core-components/pull/173) - Improved menu layout and auto-width.
 
 ### Fixed
 
--   [#157](https://github.com/equinor/webviz-core-components/pull/157) - Added utf8 encoding to Python's `open()` calls.
--   [#158](https://github.com/equinor/webviz-core-components/pull/158) - Fixed error messages when contact person details not provided to `WebvizPluginPlaceholder`.
--   [#159](https://github.com/equinor/webviz-core-components/pull/159) - Call `revokeObjectURL` after using `createObjectURL` in `WebvizPluginPlaceholder`.
--   [#160](https://github.com/equinor/webviz-core-components/pull/160) - Bug fix: `Select` property `value` does not return correct type.
--   [#172](https://github.com/equinor/webviz-core-components/pull/172) - Bug fix: No margin between plugins.
+- [#157](https://github.com/equinor/webviz-core-components/pull/157) - Added utf8 encoding to Python's `open()` calls.
+- [#158](https://github.com/equinor/webviz-core-components/pull/158) - Fixed error messages when contact person details not provided to `WebvizPluginPlaceholder`.
+- [#159](https://github.com/equinor/webviz-core-components/pull/159) - Call `revokeObjectURL` after using `createObjectURL` in `WebvizPluginPlaceholder`.
+- [#160](https://github.com/equinor/webviz-core-components/pull/160) - Bug fix: `Select` property `value` does not return correct type.
+- [#172](https://github.com/equinor/webviz-core-components/pull/172) - Bug fix: No margin between plugins.
 
 ### Added
 
--   [#154](https://github.com/equinor/webviz-core-components/pull/154) - Implemented new menu component.
+- [#154](https://github.com/equinor/webviz-core-components/pull/154) - Implemented new menu component.
 
 ## [0.5.1] - 2021-07-12
 
 ### Changed
 
--   [#140](https://github.com/equinor/webviz-core-components/pull/140) - Improved styling of the `Select` component.
--   [#145](https://github.com/equinor/webviz-core-components/pull/145) - Added wrapper components for typically used Dash components (Dropdown, Slider, etc) with additional styling.
--   [#148](https://github.com/equinor/webviz-core-components/pull/148) - Changed default value of `numSecondsUntilSuggestionsAreShown` to 0.5 in `SmartNodeSelector` component
--   [#150](https://github.com/equinor/webviz-core-components/pull/150) - Changed color of single remove button in `SmartNodeSelector` to the same as for the remove all button.
--   [#151](https://github.com/equinor/webviz-core-components/pull/151) - `SmartNodeSelector`: Changes to `data` and `delimiter` props are considered now and cause the component to update.
+- [#140](https://github.com/equinor/webviz-core-components/pull/140) - Improved styling of the `Select` component.
+- [#145](https://github.com/equinor/webviz-core-components/pull/145) - Added wrapper components for typically used Dash components (Dropdown, Slider, etc) with additional styling.
+- [#148](https://github.com/equinor/webviz-core-components/pull/148) - Changed default value of `numSecondsUntilSuggestionsAreShown` to 0.5 in `SmartNodeSelector` component
+- [#150](https://github.com/equinor/webviz-core-components/pull/150) - Changed color of single remove button in `SmartNodeSelector` to the same as for the remove all button.
+- [#151](https://github.com/equinor/webviz-core-components/pull/151) - `SmartNodeSelector`: Changes to `data` and `delimiter` props are considered now and cause the component to update.
 
 ### Added
 
--   [#148](https://github.com/equinor/webviz-core-components/pull/148) - Added `lineBreakAfterTag` property to `SmartNodeSelector` which defaults to false. If set to true, tags are separated by a line break.
+- [#148](https://github.com/equinor/webviz-core-components/pull/148) - Added `lineBreakAfterTag` property to `SmartNodeSelector` which defaults to false. If set to true, tags are separated by a line break.
 
 ## [0.5.0] - 2021-06-06
 
@@ -78,9 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   [#125](https://github.com/equinor/webviz-core-components/pull/125) - Added `Storybook` for demo of components.
--   [#125](https://github.com/equinor/webviz-core-components/pull/125) - Added `declarations.d.ts` file for ambient declarations for npm modules without type declarations.
--   [#130](https://github.com/equinor/webviz-core-components/pull/130) - Added feedback button to `WebvizPluginPlaceholder`. Added `href` and `target` properties to `WebvizToolbarButton`.
+- [#125](https://github.com/equinor/webviz-core-components/pull/125) - Added `Storybook` for demo of components.
+- [#125](https://github.com/equinor/webviz-core-components/pull/125) - Added `declarations.d.ts` file for ambient declarations for npm modules without type declarations.
+- [#130](https://github.com/equinor/webviz-core-components/pull/130) - Added feedback button to `WebvizPluginPlaceholder`. Added `href` and `target` properties to `WebvizToolbarButton`.
 
 ### Fixed
 
@@ -102,39 +102,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   [#114](https://github.com/equinor/webviz-core-components/pull/114) - Added deprecation warning to `WebvizPluginPlaceholder`.
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Added deprecation warning to `WebvizPluginPlaceholder`.
 
 ### Changed
 
--   [#114](https://github.com/equinor/webviz-core-components/pull/114) - Better alignment of tooltips with icons and pointer cursor when hovering buttons in `WebvizPluginPlaceholder`.
--   [#118](https://github.com/equinor/webviz-core-components/pull/118) - Remove `toImage` from default `modeBarButtonsToRemove` in `wcc.Graph`.
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Better alignment of tooltips with icons and pointer cursor when hovering buttons in `WebvizPluginPlaceholder`.
+- [#118](https://github.com/equinor/webviz-core-components/pull/118) - Remove `toImage` from default `modeBarButtonsToRemove` in `wcc.Graph`.
 
 ### Fixed
 
--   [#114](https://github.com/equinor/webviz-core-components/pull/114) - Fixed bug in `WebvizPluginPlaceholder` preventing tooltips from being shown.
+- [#114](https://github.com/equinor/webviz-core-components/pull/114) - Fixed bug in `WebvizPluginPlaceholder` preventing tooltips from being shown.
 
 ## [0.3.2] - 2021-04-09
 
--   [#115](https://github.com/equinor/webviz-core-components/pull/115) - Removed postinstall script in order to not having npm trying to copy package.json when installing as npm package.
--   [#113](https://github.com/equinor/webviz-core-components/pull/113) - Fixed LGTM warnings caused by SmartNodeSelector component's defaultProps definitions.
--   [#107](https://github.com/equinor/webviz-core-components/pull/107) - Fixed bug in argument modifier method (when input argument is given as positional).
--   [#107](https://github.com/equinor/webviz-core-components/pull/107) - Prevent false positives through LGTM/GitHub CodeQL.
+- [#115](https://github.com/equinor/webviz-core-components/pull/115) - Removed postinstall script in order to not having npm trying to copy package.json when installing as npm package.
+- [#113](https://github.com/equinor/webviz-core-components/pull/113) - Fixed LGTM warnings caused by SmartNodeSelector component's defaultProps definitions.
+- [#107](https://github.com/equinor/webviz-core-components/pull/107) - Fixed bug in argument modifier method (when input argument is given as positional).
+- [#107](https://github.com/equinor/webviz-core-components/pull/107) - Prevent false positives through LGTM/GitHub CodeQL.
 
 ## [0.3.1] - 2021-03-28
 
 ### Fixed
 
--   [#105](https://github.com/equinor/webviz-core-components/pull/105) - Fixed bug when updating Select values from a Dash callback.
+- [#105](https://github.com/equinor/webviz-core-components/pull/105) - Fixed bug when updating Select values from a Dash callback.
 
 ## [0.3.0] - 2021-03-26
 
 ### Fixed
 
--   [#99](https://github.com/equinor/webviz-core-components/pull/99) - Fixed bug which prevented using the download button in `WebvizPluginPlaceholder` and started to download when component was mounting.
+- [#99](https://github.com/equinor/webviz-core-components/pull/99) - Fixed bug which prevented using the download button in `WebvizPluginPlaceholder` and started to download when component was mounting.
 
 ### Added
 
--   [#96](https://github.com/equinor/webviz-core-components/pull/96) - Added publishing of npm package to Github Workflow
+- [#96](https://github.com/equinor/webviz-core-components/pull/96) - Added publishing of npm package to Github Workflow
 
 ### Changed
 
@@ -145,9 +145,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--   [#86](https://github.com/equinor/webviz-core-components/pull/86) - Refactored and converted code to TypeScript (main component files to JSX), adjusted build environment accordingly and added validation of JS/TS to GitHub workflow
+- [#86](https://github.com/equinor/webviz-core-components/pull/86) - Refactored and converted code to TypeScript (main component files to JSX), adjusted build environment accordingly and added validation of JS/TS to GitHub workflow
 
 ### Added
 
--   [#87](https://github.com/equinor/webviz-core-components/pull/87) - Added new SmartNodeSelector component and Jest testing framework
--   [#76](https://github.com/equinor/webviz-core-components/pull/76) - Python 3.9 support formally added (through CI).
+- [#87](https://github.com/equinor/webviz-core-components/pull/87) - Added new SmartNodeSelector component and Jest testing framework
+- [#76](https://github.com/equinor/webviz-core-components/pull/76) - Python 3.9 support formally added (through CI).
