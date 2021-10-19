@@ -20,7 +20,12 @@ export const Icon: React.FC<IconProps> = (props) => {
     if (!icon) {
         return (
             <Tooltip
-                title={`An icon with name "${props.icon}" does not exist. Please check the icon name for typos. An overview of all available icons can be found at https://eds.equinor.com/assets/system-icons/library/.`}
+                title={
+                    `An icon with name "${props.icon}" does not exist.` +
+                    ` Please check the icon name for typos. ` +
+                    `An overview of all available icons can be found at ` +
+                    `https://eds.equinor.com/assets/system-icons/library/.`
+                }
             >
                 <EdsIcon
                     data={edsIcons.report}
