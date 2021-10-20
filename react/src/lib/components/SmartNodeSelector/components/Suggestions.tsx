@@ -9,9 +9,12 @@ import React, { Component, Fragment, MouseEvent } from "react";
 import ReactDOM from "react-dom";
 import classNames from "classnames";
 import PropTypes from "prop-types";
-import "./Suggestions.css";
+
 import TreeNodeSelection from "../utils/TreeNodeSelection";
 import { TreeDataNodeMetaData } from "../utils/TreeDataNodeTypes";
+import { findHighestZIndex } from "../../../utils/dom";
+
+import "./Suggestions.css";
 
 type SuggestionsProps = {
     suggestionsRef: React.RefObject<HTMLDivElement>;
@@ -418,9 +421,7 @@ class Suggestions extends Component<SuggestionsProps> {
               };
 
         const zIndex = this.positionRef.current
-            ? parseInt(
-                  window.getComputedStyle(this.positionRef.current, null).zIndex
-              )
+            ? findHighestZIndex(this.positionRef.current) + 1
             : 99;
 
         ReactDOM.render(
