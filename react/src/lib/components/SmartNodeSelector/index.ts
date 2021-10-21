@@ -6,8 +6,17 @@
  */
 
 import TreeData from "./utils/TreeData";
-import { TreeDataNode } from "./utils/TreeDataNodeTypes";
+import TreeNodeSelection from "./utils/TreeNodeSelection";
+import { TreeDataNode, TreeDataNodeMetaData } from "./utils/TreeDataNodeTypes";
 import { SmartNodeSelectorPropsType } from "./components/SmartNodeSelectorComponent";
+import SmartNodeSelectorComponent from "./components/SmartNodeSelectorComponent";
 
 export { default } from "./SmartNodeSelector";
-export { TreeData, TreeDataNode, SmartNodeSelectorPropsType };
+export {
+    SmartNodeSelectorComponent,
+    TreeData,
+    TreeDataNode,
+    TreeDataNodeMetaData,
+    SmartNodeSelectorPropsType,
+    TreeNodeSelection,
+};

@@ -14,12 +14,13 @@ export default class TreeNodeSelection {
     private nodePath: Array<string>;
     private ref: React.RefObject<HTMLInputElement>;
     private selected: boolean;
-    private delimiter: string;
+    protected delimiter: string;
     private treeData: TreeData;
     private numMetaNodes: number;
     private objectIdentifier: number;
-    private caseInsensitiveMatching: boolean;
-    private allowOrOperator: boolean;
+    protected caseInsensitiveMatching: boolean;
+    protected allowOrOperator: boolean;
+    protected orOperator: string;
 
     constructor({
         focussedLevel = 0,
@@ -50,6 +51,7 @@ export default class TreeNodeSelection {
         this.objectIdentifier = Date.now();
         this.caseInsensitiveMatching = caseInsensitiveMatching;
         this.allowOrOperator = allowOrOperator;
+        this.orOperator = "|";
     }
 
     objectEquals(other: TreeNodeSelection): boolean {
