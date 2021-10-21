@@ -7,7 +7,7 @@
 
 import React from "react";
 import { TreeDataNodeMetaData } from "./TreeDataNodeTypes";
-import TreeData from "./TreeData";
+import TreeData, { MatchType } from "./TreeData";
 
 export default class TreeNodeSelection {
     private focussedLevel: number;
@@ -177,8 +177,10 @@ export default class TreeNodeSelection {
         const level = this.isComplete()
             ? this.countLevel() - 1
             : Math.min(this.focussedLevel - 1, this.numMetaNodes - 1);
-        const allMetaData = this.treeData.findNodes(this.getNodePath(level))
-            .metaData;
+        const allMetaData = this.treeData.findNodes(
+            this.getNodePath(level),
+            MatchType.partialMatch
+        ).metaData;
         for (const metaData of allMetaData) {
             for (let i = 0; i < metaData.length; i++) {
                 if (i >= this.numMetaNodes) {
@@ -195,14 +197,16 @@ export default class TreeNodeSelection {
 
     icons(): Array<string> {
         const icons: string[] = [];
-        if (this.focussedLevel == 0) {
+        if (this.focussedLevel === 0) {
             return [];
         }
         const level = this.isComplete()
             ? this.countLevel() - 1
             : Math.min(this.focussedLevel - 1, this.numMetaNodes - 1);
-        const allMetaData = this.treeData.findNodes(this.getNodePath(level))
-            .metaData;
+        const allMetaData = this.treeData.findNodes(
+            this.getNodePath(level),
+            MatchType.partialMatch
+        ).metaData;
         for (const metaData of allMetaData) {
             for (let i = 0; i < metaData.length; i++) {
                 if (i >= this.numMetaNodes) {
@@ -282,7 +286,10 @@ export default class TreeNodeSelection {
     }
 
     isComplete(): boolean {
-        return this.numberOfExactlyMatchedNodes() > 0;
+        return (
+            this.numberOfExactlyMatchedNodes() > 0 ||
+            !this.hasAvailableChildNodes()
+        );
     }
 
     displayAsTag(): boolean {
@@ -333,7 +340,8 @@ export default class TreeNodeSelection {
     }
 
     exactlyMatchedNodePaths(): Array<string> {
-        return this.treeData.findNodes(this.nodePath, true).nodePaths;
+        return this.treeData.findNodes(this.nodePath, MatchType.fullMatch)
+            .nodePaths;
     }
 
     countExactlyMatchedNodePaths(): number {

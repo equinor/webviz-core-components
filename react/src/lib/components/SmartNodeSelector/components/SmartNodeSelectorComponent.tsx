@@ -92,7 +92,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected numValidSelections: number;
     protected caseInsensitiveMatching: boolean;
     protected keyPressed: boolean;
-    protected storedInputValue: string | undefined;
+    protected justUpdated: boolean;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -131,7 +131,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.componentIsMounted = false;
         this.caseInsensitiveMatching = props.caseInsensitiveMatching || false;
         this.keyPressed = false;
-        this.storedInputValue = undefined;
+        this.justUpdated = false;
 
         let error: string | undefined = undefined;
 
@@ -307,6 +307,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.numValidSelections = this.countValidSelections();
             this.updateState({ nodeSelections: nodeSelections });
         }
+        this.justUpdated = true;
     }
 
     createNewNodeSelection(nodePath: string[] = [""]): TreeNodeSelection {
@@ -1077,6 +1078,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleInputKeyUp(e: React.KeyboardEvent<HTMLInputElement>): void {
+        if (this.justUpdated) {
+            this.justUpdated = false;
+            e.preventDefault();
+            return;
+        }
         const eventTarget = e.target as HTMLInputElement;
         const val = eventTarget.value;
         if (e.key === "Enter" && val) {
@@ -1097,34 +1103,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 this.focusCurrentTag();
             }
         } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            this.preventDefault(e);
-        } else if (e.key === this.props.delimiter && val) {
-            this.preventDefault(e);
-            if (this.currentNodeSelection().isFocusOnMetaData()) {
-                this.currentNodeSelection().setNodeName(val.slice(0, -1));
-                this.currentNodeSelection().incrementFocussedLevel();
-                this.updateState({ forceUpdate: true });
-            } else if (!this.currentNodeSelection().isValid()) {
-                this.currentNodeSelection().setNodeName(
-                    val.split(this.props.delimiter)[
-                        this.currentNodeSelection().getFocussedLevel() -
-                            this.currentNodeSelection().getNumMetaNodes()
-                    ]
-                );
-                this.currentNodeSelection().incrementFocussedLevel();
-                this.updateState({ forceUpdate: true });
-            }
-        } else {
-            this.keyPressed = false;
-            if (this.storedInputValue !== undefined) {
-                this.processInputChange(this.storedInputValue);
-            }
+            e.preventDefault();
         }
-    }
-
-    preventDefault(e: React.KeyboardEvent<HTMLInputElement>): void {
-        e.preventDefault();
-        this.storedInputValue = undefined;
     }
 
     handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
@@ -1159,7 +1139,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.selectTag(this.currentTagIndex());
                     this.currentSelectionDirection = Direction.Right;
                 }
-                this.preventDefault(e);
+                e.preventDefault();
             } else {
                 if (
                     this.currentNodeSelection().getFocussedLevel() ===
@@ -1182,7 +1162,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         this.incrementCurrentTagIndex(() =>
                             this.focusCurrentTag()
                         );
-                        this.preventDefault(e);
+                        e.preventDefault();
                     }
                 } else {
                     this.currentNodeSelection().incrementFocussedLevel();
@@ -1195,7 +1175,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                             );
                         },
                     });
-                    this.preventDefault(e);
+                    e.preventDefault();
                 }
             }
         } else if (e.key === "ArrowLeft" && !e.repeat) {
@@ -1211,7 +1191,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.selectTag(this.currentTagIndex());
                 }
                 this.currentSelectionDirection = Direction.Left;
-                this.preventDefault(e);
+                e.preventDefault();
             } else {
                 if (
                     eventTarget.selectionStart == 0 &&
@@ -1223,18 +1203,18 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                                 this.focusCurrentTag();
                             });
                         }
-                        this.preventDefault(e);
+                        e.preventDefault();
                     } else {
                         this.currentNodeSelection().decrementFocussedLevel();
                         this.updateState({
                             forceUpdate: true,
                         });
-                        this.preventDefault(e);
+                        e.preventDefault();
                     }
                 }
             }
         } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            this.preventDefault(e);
+            e.preventDefault();
         } else if (
             e.key === "Backspace" &&
             this.currentNodeSelection().getFocussedLevel() > 0 &&
@@ -1243,12 +1223,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     val.slice(-1) === this.props.delimiter))
         ) {
             if (e.repeat) {
-                this.preventDefault(e);
+                e.preventDefault();
                 return;
             }
             this.currentNodeSelection().decrementFocussedLevel();
             this.updateState({ forceUpdate: true });
-            this.preventDefault(e);
+            e.preventDefault();
         } else if (
             e.key === "v" &&
             e.ctrlKey &&
@@ -1256,11 +1236,30 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         ) {
             this.pasteTags(e);
         } else if (e.key === this.props.delimiter && e.repeat) {
-            this.preventDefault(e);
+            e.preventDefault();
+        } else if (e.key === this.props.delimiter && val) {
+            if (this.currentNodeSelection().isFocusOnMetaData()) {
+                this.currentNodeSelection().setNodeName(val);
+                this.currentNodeSelection().incrementFocussedLevel();
+                this.updateState({ forceUpdate: true });
+                e.preventDefault();
+            } else if (!this.currentNodeSelection().isValid()) {
+                const modifiedVal = val + this.props.delimiter;
+                this.currentNodeSelection().setNodeName(
+                    modifiedVal.split(this.props.delimiter)[
+                        this.currentNodeSelection().getFocussedLevel() -
+                            this.currentNodeSelection().getNumMetaNodes()
+                    ]
+                );
+                this.currentNodeSelection().incrementFocussedLevel();
+                this.updateState({ forceUpdate: true });
+            }
         }
+        console.log(e.key);
     }
 
-    processInputChange(value: string): void {
+    handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
+        const value = e.target.value;
         const tag = this.currentNodeSelection();
 
         if (tag.isFocusOnMetaData()) {
@@ -1274,16 +1273,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         this.updateState({ forceUpdate: true });
         this.maybeShowSuggestions();
-    }
-
-    handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
-        const value = e.target.value;
-        if (!this.keyPressed) {
-            this.processInputChange(value);
-            this.storedInputValue = undefined;
-        } else {
-            this.storedInputValue = value;
-        }
     }
 
     render(): React.ReactNode {

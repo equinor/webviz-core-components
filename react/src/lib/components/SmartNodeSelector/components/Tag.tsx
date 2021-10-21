@@ -370,13 +370,16 @@ export default class Tag extends Component<TagProps> {
         const { treeNodeSelection, frameless } = this.props;
 
         const colors = treeNodeSelection.colors();
-        const style: { [key: string]: string } = {};
+        const style: { [key: string]: string } = {
+            borderWidth: "1px",
+            borderStyle: "solid"
+        };
 
         if (colors.length >= 2) {
             style["background"] = `linear-gradient(to left, ${colors.join(
                 ", "
             )}) border-box`;
-            style["border"] = "1px solid transparent";
+            style["borderColor"] = "transparent";
         } else {
             style["borderColor"] = colors[0];
         }
@@ -386,6 +389,16 @@ export default class Tag extends Component<TagProps> {
         }
 
         return style;
+    }
+
+    private handleClickEvent(e: React.MouseEvent<HTMLLIElement>): void {
+        const input = (this.props.treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
+            .current as HTMLInputElement;
+        if (input) {
+            input.focus();
+            e.preventDefault();
+            e.stopPropagation();
+        }
     }
 
     render(): React.ReactNode {
@@ -419,6 +432,7 @@ export default class Tag extends Component<TagProps> {
                 style={this.makeStyle()}
                 onMouseEnter={(): void => this.setState({ hovered: true })}
                 onMouseLeave={(): void => this.setState({ hovered: false })}
+                onClick={(e): void => this.handleClickEvent(e)}
             >
                 {this.displayAsTag() && !frameless && (
                     <button

@@ -252,6 +252,7 @@
     position: absolute;
     right: -9px;
     top: -9px;
+    z-index: 11;
     background: #007079;
     border: 1px #fff solid;
     border-radius: 50%;

@@ -7,6 +7,12 @@
 
 import { TreeDataNode, TreeDataNodeMetaData } from "./TreeDataNodeTypes";
 
+export enum MatchType {
+    openMatch = 0,
+    fullMatch,
+    partialMatch,
+}
+
 export default class TreeData {
     private treeData: TreeDataNode[];
     private delimiter: string;
@@ -320,7 +326,7 @@ export default class TreeData {
 
     findNodes(
         nodePath: string[],
-        exactMatch = false
+        matchType = MatchType.openMatch
     ): { nodePaths: string[]; metaData: TreeDataNodeMetaData[][] } {
         let nodePathString = "";
         for (let i = 0; i < nodePath.length; i++) {
@@ -329,9 +335,17 @@ export default class TreeData {
             }
             nodePathString += `\\{(\\d+)\\}${this.adjustNodeName(nodePath[i])}`;
         }
-        const re = exactMatch
-            ? RegExp(`"(${nodePathString})"`, "g")
-            : RegExp(`"(${nodePathString})`, "g");
+        const re =
+            matchType === MatchType.fullMatch
+                ? RegExp(`"(${nodePathString})"`, "g")
+                : matchType === MatchType.partialMatch
+                ? RegExp(
+                      `"(${nodePathString})["${this.escapeRegExp(
+                          this.delimiter
+                      )}]{1}`,
+                      "g"
+                  )
+                : RegExp(`"(${nodePathString})`, "g");
 
         const metaData: TreeDataNodeMetaData[][] = [];
         const nodePaths: string[] = [];
