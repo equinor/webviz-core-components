@@ -1,26 +1,16 @@
 import React from "react";
-import { SmartNodeSelector } from "../src/lib";
-import { PropType } from "./SmartNodeSelector.test";
 
-const initialData = [
-    {
-        id: "1",
-        name: "Data1",
-        description: "Description",
-    },
-    {
-        id: "2",
-        name: "Data2",
-        description: "Description",
-    },
-];
+import { SmartNodeSelector } from "../src/lib";
+import { TreeDataNode } from "../src/lib/components/SmartNodeSelector";
+import { PropType } from "./SmartNodeSelector.test";
 
 export const SmartNodeSelectorInteractiveContainer: React.FC<{
     setProps: (props: PropType) => void;
-}> = (props: { setProps: (props: PropType) => void }): JSX.Element => {
+    data: TreeDataNode[];
+}> = (props): JSX.Element => {
     const { setProps } = props;
     const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
-    const [data, setData] = React.useState(initialData);
+    const [data, setData] = React.useState(props.data);
     const [delimiter, setDelimiter] = React.useState(":");
 
     const handleChangeSelectedTagsButtonClick = () => {
