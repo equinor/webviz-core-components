@@ -120,7 +120,7 @@ const makeNavigation = (
         items: NavigationItemType[],
         iconAtParentLevel?: boolean,
         level = 1
-    ): JSX.Element => (
+    ): JSX.Element => {
         const atLeastOneIconUsed = items.some((el) => el.icon !== undefined);
         return (
             <>
@@ -153,7 +153,7 @@ const makeNavigation = (
                                     iconAtParentLevel ||
                                     false
                                 }
-                            initiallyCollapsed={initiallyCollapsed}
+                                initiallyCollapsed={initiallyCollapsed}
                             >
                                 {recursivelyMakeNavigation(
                                     (item as GroupType).content,
