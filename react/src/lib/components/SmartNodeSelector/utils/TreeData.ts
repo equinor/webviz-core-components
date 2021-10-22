@@ -128,7 +128,7 @@ export default class TreeData {
     }
 
     private escapeRegExp(string: string): string {
-        const newString = string.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
+        const newString = string.replace(/[-[\]{}()+.,\\^$|#]/g, "\\$&");
         return newString;
     }
 
@@ -144,8 +144,8 @@ export default class TreeData {
             const match = nodeName.match(reg);
             if (match) {
                 if (match[1] !== "") {
-                    const orStatements = this.replaceAll(match[1], "\\", "");
-                    return `(${orStatements})`;
+                    const orStatements = this.replaceAll(match[1], "\\|", "|");
+                    return `${orStatements}`;
                 }
             }
         }
@@ -340,9 +340,9 @@ export default class TreeData {
                 ? RegExp(`"(${nodePathString})"`, "g")
                 : matchType === MatchType.partialMatch
                 ? RegExp(
-                      `"(${nodePathString})["${this.escapeRegExp(
+                      `"(${nodePathString})[^"${this.escapeRegExp(
                           this.delimiter
-                      )}]{1}`,
+                      )}]*["${this.escapeRegExp(this.delimiter)}]{1}`,
                       "g"
                   )
                 : RegExp(`"(${nodePathString})`, "g");
@@ -357,6 +357,9 @@ export default class TreeData {
             const nodesInPath: TreeDataNodeMetaData[] = [];
             for (let i = 2; i < match.length; i++) {
                 nodesInPath.push(this.nodeData[parseInt(match[i])]);
+                if (this.nodeData[parseInt(match[i])] === undefined) {
+                    console.log("error");
+                }
             }
             metaData.push(nodesInPath);
             nodePaths.push(this.cleanNodeName(match[1]));

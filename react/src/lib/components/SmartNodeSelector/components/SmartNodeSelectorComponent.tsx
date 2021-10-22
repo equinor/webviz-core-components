@@ -1255,7 +1255,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 this.updateState({ forceUpdate: true });
             }
         }
-        console.log(e.key);
     }
 
     handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
