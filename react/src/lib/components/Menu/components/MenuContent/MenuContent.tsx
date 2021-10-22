@@ -19,6 +19,7 @@ import "./MenuContent.css";
 
 type MenuContentProps = {
     content: NavigationType;
+    groupsInitiallyCollapsed?: boolean;
     onPageChange: (url: string) => void;
 };
 
@@ -112,6 +113,7 @@ const recursivelyFilterNavigation = (
 const makeNavigation = (
     navigation: NavigationType,
     filtered: boolean,
+    initiallyCollapsed: boolean,
     onPageChange: (url: string) => void
 ): JSX.Element => {
     const recursivelyMakeNavigation = (
@@ -151,6 +153,7 @@ const makeNavigation = (
                                     iconAtParentLevel ||
                                     false
                                 }
+                                initiallyCollapsed={initiallyCollapsed}
                             >
                                 {recursivelyMakeNavigation(
                                     (item as GroupType).content,
@@ -204,7 +207,12 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
                         No pages matching the query...
                     </div>
                 ) : (
-                    makeNavigation(content, filter !== "", props.onPageChange)
+                    makeNavigation(
+                        content,
+                        filter !== "",
+                        props.groupsInitiallyCollapsed || false,
+                        props.onPageChange
+                    )
                 )}
             </ScrollArea>
         </div>
@@ -213,5 +221,6 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
 
 MenuContent.propTypes = {
     content: PropTypes.any.isRequired,
+    groupsInitiallyCollapsed: PropTypes.bool,
     onPageChange: PropTypes.func.isRequired,
 };

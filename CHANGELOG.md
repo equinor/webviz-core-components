@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [#154](https://github.com/equinor/webviz-core-components/pull/154) - Implemented new menu component.
+- [#174](https://github.com/equinor/webviz-core-components/pull/174) - Implemented `initiallyCollapsed` setting for menu.
 
 ## [0.5.1] - 2021-07-12
 
