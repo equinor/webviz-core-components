@@ -118,7 +118,6 @@ const App: React.FC = () => {
                     <SmartNodeSelector
                         id="SmartNodeSelector"
                         key="SmartNodeSelector"
-                        maxNumSelectedNodes={1}
                         numMetaNodes={2}
                         delimiter=":"
                         setProps={setNodeSelectorState}

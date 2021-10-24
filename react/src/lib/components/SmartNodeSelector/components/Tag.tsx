@@ -311,8 +311,13 @@ export default class Tag extends Component<TagProps> {
                 width = this.calculateTextWidth(currentText, 0, 0);
                 const splitByCurrentText = [
                     ...splitByDelimiter.filter(
-                        (_, index) => index < treeNodeSelection.getFocussedLevel() - treeNodeSelection.getNumMetaNodes()
-                    ), ""].join(treeNodeSelection.getDelimiter());
+                        (_, index) =>
+                            index <
+                            treeNodeSelection.getFocussedLevel() -
+                                treeNodeSelection.getNumMetaNodes()
+                    ),
+                    "",
+                ].join(treeNodeSelection.getDelimiter());
 
                 if (splitByCurrentText[0] !== undefined) {
                     distanceLeft = this.calculateTextWidth(
