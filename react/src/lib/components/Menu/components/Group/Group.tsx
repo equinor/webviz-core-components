@@ -16,12 +16,15 @@ type GroupProps = {
     icon?: string;
     applyIconIndentation: boolean;
     forceOpen?: boolean;
+    initiallyCollapsed?: boolean;
     children?: React.ReactNode;
 };
 
 export const Group: React.FC<GroupProps> = (props) => {
     const [collapsed, setCollapsed] = React.useState<boolean>(
-        localStorage.getItem(`${props.id}-${props.title}`) === "true" || false
+        localStorage.getItem(`${props.id}-${props.title}`) === "true" ||
+            props.initiallyCollapsed ||
+            false
     );
 
     React.useEffect(() => {
@@ -99,6 +102,7 @@ Group.propTypes = {
     icon: PropTypes.string,
     applyIconIndentation: PropTypes.bool.isRequired,
     forceOpen: PropTypes.bool,
+    initiallyCollapsed: PropTypes.bool,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,

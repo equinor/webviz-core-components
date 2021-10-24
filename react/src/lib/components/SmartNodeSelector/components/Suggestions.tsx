@@ -5,24 +5,31 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { Component, Fragment, MouseEvent } from 'react';
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
-import './Suggestions.css';
-import TreeNodeSelection from '../utils/TreeNodeSelection';
-import { TreeDataNodeMetaData } from '../utils/TreeDataNodeTypes';
+import React, { Component, Fragment, MouseEvent } from "react";
+import ReactDOM from "react-dom";
+import classNames from "classnames";
+import PropTypes from "prop-types";
+
+import TreeNodeSelection from "../utils/TreeNodeSelection";
+import { TreeDataNodeMetaData } from "../utils/TreeDataNodeTypes";
+import { findHighestZIndex } from "../../../utils/dom";
+
+import "./Suggestions.css";
 
 type SuggestionsProps = {
     suggestionsRef: React.RefObject<HTMLDivElement>;
     tagInputFieldRef: React.RefObject<HTMLUListElement>;
     visible: boolean;
-    useSuggestion: (e: globalThis.KeyboardEvent | MouseEvent<HTMLDivElement>, option: string) => void;
+    useSuggestion: (
+        e: globalThis.KeyboardEvent | MouseEvent<HTMLDivElement>,
+        option: string
+    ) => void;
     treeNodeSelection?: TreeNodeSelection;
 };
 
 type SuggestionsState = {
     fromIndex: number;
-}
+};
 
 /**
  * A component for showing a list of suggestions.
@@ -41,6 +48,8 @@ class Suggestions extends Component<SuggestionsProps> {
     private currentNodeLevel: number;
     private currentNodeName: string;
     private lastNodeSelection?: TreeNodeSelection;
+    private positionRef: React.RefObject<HTMLDivElement>;
+    private popup: HTMLDivElement | null;
 
     constructor(props: SuggestionsProps) {
         super(props);
@@ -54,9 +63,11 @@ class Suggestions extends Component<SuggestionsProps> {
         this.currentNodeName = "";
         this.lastNodeSelection = props.treeNodeSelection;
         this.allOptions = [];
+        this.positionRef = React.createRef();
+        this.popup = null;
 
         this.state = {
-            fromIndex: 0
+            fromIndex: 0,
         };
 
         if (this.props.treeNodeSelection) {
@@ -66,44 +77,72 @@ class Suggestions extends Component<SuggestionsProps> {
     }
 
     componentDidMount(): void {
-        document.addEventListener('mousemove', () => this.handleMouseMove(), true);
-        document.addEventListener('keydown', (e) => this.handleGlobalKeyDown(e), true);
+        document.addEventListener(
+            "mousemove",
+            () => this.handleMouseMove(),
+            true
+        );
+        document.addEventListener(
+            "keydown",
+            (e) => this.handleGlobalKeyDown(e),
+            true
+        );
+        window.addEventListener("resize", () => this.renderPopup());
+
+        this.popup = document.createElement("div");
+        document.body.appendChild(this.popup);
     }
 
     componentWillUnmount(): void {
-        document.removeEventListener('mousemove', () => this.handleMouseMove(), true);
-        document.removeEventListener('keydown', (e) => this.handleGlobalKeyDown(e), true);
+        document.removeEventListener(
+            "mousemove",
+            () => this.handleMouseMove(),
+            true
+        );
+        document.removeEventListener(
+            "keydown",
+            (e) => this.handleGlobalKeyDown(e),
+            true
+        );
+        window.removeEventListener("resize", () => this.renderPopup());
+
+        if (this.popup) {
+            document.body.removeChild(this.popup);
+        }
     }
 
     componentDidUpdate(previousProps: SuggestionsProps): void {
         const { visible, treeNodeSelection, suggestionsRef } = this.props;
-        if (previousProps.visible != visible || previousProps.treeNodeSelection != treeNodeSelection) {
+        if (
+            previousProps.visible != visible ||
+            previousProps.treeNodeSelection != treeNodeSelection
+        ) {
             this.upperSpacerHeight = 0;
             (suggestionsRef.current as HTMLDivElement).scrollTop = 0;
             this.currentlySelectedSuggestionIndex = 0;
             this.setState({ fromIndex: 0 });
         }
+
+        if (this.popup) {
+            this.renderPopup();
+        }
     }
 
     private currentlySelectedSuggestion(): Element {
-        return (
-            document.getElementsByClassName("Suggestions__Suggestion")[
+        return document.getElementsByClassName("Suggestions__Suggestion")[
             this.currentlySelectedSuggestionIndex - this.state.fromIndex
-            ]
-        );
+        ];
     }
 
     private maybeLoadNewOptions(): void {
         const { treeNodeSelection, suggestionsRef } = this.props;
-        if (treeNodeSelection !== undefined &&
-            (
-                treeNodeSelection.getFocussedLevel() != this.currentNodeLevel
-                || treeNodeSelection.getFocussedNodeName() != this.currentNodeName
-                || (
-                    this.lastNodeSelection === undefined
-                    || !treeNodeSelection.objectEquals(this.lastNodeSelection)
-                )
-            )
+        if (
+            treeNodeSelection !== undefined &&
+            (treeNodeSelection.getFocussedLevel() != this.currentNodeLevel ||
+                treeNodeSelection.getFocussedNodeName() !=
+                    this.currentNodeName ||
+                this.lastNodeSelection === undefined ||
+                !treeNodeSelection.objectEquals(this.lastNodeSelection))
         ) {
             this.allOptions = treeNodeSelection.getSuggestions();
             this.currentNodeLevel = treeNodeSelection.getFocussedLevel();
@@ -126,16 +165,23 @@ class Suggestions extends Component<SuggestionsProps> {
                 this.markSuggestionAsHoveredAndMakeVisible(
                     Math.max(0, this.currentlySelectedSuggestionIndex - 1)
                 );
-            }
-            else if (e.key === "ArrowDown") {
+            } else if (e.key === "ArrowDown") {
                 this.markSuggestionAsHoveredAndMakeVisible(
-                    Math.min(this.allOptions.length - 1, this.currentlySelectedSuggestionIndex + 1)
+                    Math.min(
+                        this.allOptions.length - 1,
+                        this.currentlySelectedSuggestionIndex + 1
+                    )
                 );
             }
-            if (e.key == "Enter" && this.currentlySelectedSuggestion() !== undefined) {
+            if (
+                e.key == "Enter" &&
+                this.currentlySelectedSuggestion() !== undefined
+            ) {
                 this.useSuggestion(
                     e,
-                    this.currentlySelectedSuggestion().getAttribute("data-use") as string
+                    this.currentlySelectedSuggestion().getAttribute(
+                        "data-use"
+                    ) as string
                 );
             }
         }
@@ -143,18 +189,27 @@ class Suggestions extends Component<SuggestionsProps> {
 
     private handleOnScroll(): void {
         const { tagInputFieldRef, suggestionsRef } = this.props;
-        const maxHeight = window.innerHeight - (tagInputFieldRef.current
-            ? (tagInputFieldRef.current.getBoundingClientRect().bottom + 10)
-            : 200);
-        const height = Math.min(maxHeight, this.allOptions.length * this.rowHeight);
+        const maxHeight =
+            window.innerHeight -
+            (tagInputFieldRef.current
+                ? tagInputFieldRef.current.getBoundingClientRect().bottom + 10
+                : 200);
+        const height = Math.min(
+            maxHeight,
+            this.allOptions.length * this.rowHeight
+        );
         const index = Math.min(
             Math.floor(
-                (suggestionsRef.current as HTMLDivElement).scrollTop / this.rowHeight
+                (suggestionsRef.current as HTMLDivElement).scrollTop /
+                    this.rowHeight
             ),
             this.allOptions.length - Math.floor(height / this.rowHeight)
         );
-        const remainder = (suggestionsRef.current as HTMLDivElement).scrollTop - index * this.rowHeight
-        this.upperSpacerHeight = (suggestionsRef.current as HTMLDivElement).scrollTop - remainder;
+        const remainder =
+            (suggestionsRef.current as HTMLDivElement).scrollTop -
+            index * this.rowHeight;
+        this.upperSpacerHeight =
+            (suggestionsRef.current as HTMLDivElement).scrollTop - remainder;
         this.setState({ fromIndex: index });
     }
 
@@ -170,42 +225,53 @@ class Suggestions extends Component<SuggestionsProps> {
         if (!suggestions) return;
 
         const { tagInputFieldRef } = this.props;
-        const maxHeight = window.innerHeight - (tagInputFieldRef.current
-            ? (tagInputFieldRef.current.getBoundingClientRect().bottom + 10)
-            : 200);
+        const maxHeight =
+            window.innerHeight -
+            (tagInputFieldRef.current
+                ? tagInputFieldRef.current.getBoundingClientRect().bottom + 10
+                : 200);
 
-        const maxNumSuggestions = Math.min(Math.floor(
-            maxHeight / this.rowHeight
-        ), this.allOptions.length - this.state.fromIndex);
+        const maxNumSuggestions = Math.min(
+            Math.floor(maxHeight / this.rowHeight),
+            this.allOptions.length - this.state.fromIndex
+        );
 
         const currentRangeStart = this.state.fromIndex;
         const currentRangeEnd = this.state.fromIndex + maxNumSuggestions;
 
-        if (
-            index >= currentRangeStart
-            && index <= currentRangeEnd
-        ) {
+        if (index >= currentRangeStart && index <= currentRangeEnd) {
             this.markSuggestionAsHovered(index);
             this.scrollSuggestionsToMakeSelectedElementVisible();
-        }
-        else if (index < currentRangeStart) {
+        } else if (index < currentRangeStart) {
             this.currentlySelectedSuggestionIndex = index;
-            suggestions.scroll(0, this.currentlySelectedSuggestionIndex * this.rowHeight);
-        }
-        else if (index > currentRangeEnd) {
+            suggestions.scroll(
+                0,
+                this.currentlySelectedSuggestionIndex * this.rowHeight
+            );
+        } else if (index > currentRangeEnd) {
             this.currentlySelectedSuggestionIndex = index;
-            suggestions.scroll(0, (this.currentlySelectedSuggestionIndex + 1) * this.rowHeight - maxHeight);
+            suggestions.scroll(
+                0,
+                (this.currentlySelectedSuggestionIndex + 1) * this.rowHeight -
+                    maxHeight
+            );
         }
     }
 
     private markSuggestionAsHovered(index: number): void {
         this.currentlySelectedSuggestionIndex = index;
         const newSelectedSuggestion = this.currentlySelectedSuggestion();
-        const selectedSuggestions = document.getElementsByClassName("Suggestions__Suggestion--Selected");
+        const selectedSuggestions = document.getElementsByClassName(
+            "Suggestions__Suggestion--Selected"
+        );
         for (let i = 0; i < selectedSuggestions.length; i++) {
-            selectedSuggestions[i].classList.remove("Suggestions__Suggestion--Selected");
+            selectedSuggestions[i].classList.remove(
+                "Suggestions__Suggestion--Selected"
+            );
         }
-        newSelectedSuggestion.classList.add("Suggestions__Suggestion--Selected");
+        newSelectedSuggestion.classList.add(
+            "Suggestions__Suggestion--Selected"
+        );
     }
 
     private scrollSuggestionsToMakeSelectedElementVisible(): void {
@@ -219,112 +285,183 @@ class Suggestions extends Component<SuggestionsProps> {
         const suggestionsBoundingRect = suggestions.getBoundingClientRect();
 
         if (elementBoundingRect.bottom > suggestionsBoundingRect.bottom) {
-            suggestions.scroll(0, suggestions.scrollTop + elementBoundingRect.bottom - suggestionsBoundingRect.bottom);
-        }
-        else if (elementBoundingRect.top < suggestionsBoundingRect.top) {
-            suggestions.scroll(0, suggestions.scrollTop + elementBoundingRect.top - suggestionsBoundingRect.top);
+            suggestions.scroll(
+                0,
+                suggestions.scrollTop +
+                    elementBoundingRect.bottom -
+                    suggestionsBoundingRect.bottom
+            );
+        } else if (elementBoundingRect.top < suggestionsBoundingRect.top) {
+            suggestions.scroll(
+                0,
+                suggestions.scrollTop +
+                    elementBoundingRect.top -
+                    suggestionsBoundingRect.top
+            );
         }
     }
 
-    private useSuggestion(e: globalThis.KeyboardEvent | React.MouseEvent<HTMLDivElement>, suggestion: string): void {
+    private useSuggestion(
+        e: globalThis.KeyboardEvent | React.MouseEvent<HTMLDivElement>,
+        suggestion: string
+    ): void {
         this.currentlySelectedSuggestionIndex = 0;
         this.props.useSuggestion(e, suggestion);
     }
 
-    private decorateOption(option: string, treeNodeSelection: TreeNodeSelection): React.ReactNode {
+    private decorateOption(
+        option: string,
+        treeNodeSelection: TreeNodeSelection
+    ): React.ReactNode {
         return (
             <Fragment>
-                <span className="Suggestions__Match">{treeNodeSelection.getFocussedNodeName()}</span>
-                {option.substring(treeNodeSelection.getFocussedNodeName().length)}
+                <span className="Suggestions__Match">
+                    {treeNodeSelection.getFocussedNodeName()}
+                </span>
+                {option.substring(
+                    treeNodeSelection.getFocussedNodeName().length
+                )}
             </Fragment>
-        )
+        );
     }
 
-    private createSuggestionsForCurrentTag(maxHeight: number): React.ReactFragment | null {
+    private createSuggestionsForCurrentTag(
+        maxHeight: number
+    ): React.ReactFragment | null {
         const { treeNodeSelection } = this.props;
-        if (treeNodeSelection === undefined)
-            return "";
+        if (treeNodeSelection === undefined) return "";
         if (!treeNodeSelection.focussedNodeNameContainsWildcard()) {
             const options = this.allOptions.slice(
                 this.state.fromIndex,
                 this.state.fromIndex + Math.ceil(maxHeight / this.rowHeight)
             );
-            return (<Fragment>
-                {
-                    options.map((option, i) => (
+            return (
+                <Fragment>
+                    {options.map((option, i) => (
                         <div
                             key={option.nodeName}
-                            onMouseEnter={(): void => this.maybeMarkSuggestionAsHovered(i + this.state.fromIndex)}
-                            data-use={option.nodeName}
-                            data-index={i}
-                            className={
-                                classNames(
-                                    {
-                                        "Suggestions__Suggestion": true,
-                                        "Suggestions__Icon": option.metaData.icon !== undefined,
-                                        "Suggestions__Suggestion--Selected":
-                                            i == this.currentlySelectedSuggestionIndex - this.state.fromIndex
-                                    }
+                            onMouseEnter={(): void =>
+                                this.maybeMarkSuggestionAsHovered(
+                                    i + this.state.fromIndex
                                 )
                             }
+                            data-use={option.nodeName}
+                            data-index={i}
+                            className={classNames({
+                                Suggestions__Suggestion: true,
+                                Suggestions__Icon:
+                                    option.metaData.icon !== undefined,
+                                "Suggestions__Suggestion--Selected":
+                                    i ==
+                                    this.currentlySelectedSuggestionIndex -
+                                        this.state.fromIndex,
+                            })}
                             style={{
-                                color: (option.metaData.color !== undefined ? option.metaData.color : "inherit"),
-                                backgroundImage: (
+                                color:
+                                    option.metaData.color !== undefined
+                                        ? option.metaData.color
+                                        : "inherit",
+                                backgroundImage:
                                     option.metaData.icon !== undefined
                                         ? "url(" + option.metaData.icon + ")"
-                                        : "none"
-                                ),
-                                height: this.rowHeight + "px"
+                                        : "none",
+                                height: this.rowHeight + "px",
                             }}
-                            onClick={(e): void => this.useSuggestion(e, option.nodeName)}>
-                            {this.decorateOption(option.nodeName, treeNodeSelection)}
-                            {option.metaData.description ? ` - ${option.metaData.description}` : ""}
+                            onClick={(e): void =>
+                                this.useSuggestion(e, option.nodeName)
+                            }
+                        >
+                            {this.decorateOption(
+                                option.nodeName,
+                                treeNodeSelection
+                            )}
+                            {option.metaData.description
+                                ? ` - ${option.metaData.description}`
+                                : ""}
                         </div>
-                    ))
-                }</Fragment>);
+                    ))}
+                </Fragment>
+            );
         }
         return null;
     }
 
-    render(): React.ReactNode {
+    renderPopup(): void {
         this.maybeLoadNewOptions();
         const { tagInputFieldRef, visible, suggestionsRef } = this.props;
-        const maxHeight = window.innerHeight - (tagInputFieldRef.current
-            ? (tagInputFieldRef.current.getBoundingClientRect().bottom + 10)
-            : 200);
-        const height = Math.min(maxHeight, this.allOptions.length * this.rowHeight);
-        let lowerSpacerHeight =
+        const maxHeight =
+            window.innerHeight -
+            (tagInputFieldRef.current
+                ? tagInputFieldRef.current.getBoundingClientRect().bottom + 10
+                : 200);
+        const height = Math.min(
+            maxHeight,
             this.allOptions.length * this.rowHeight
-            - this.upperSpacerHeight
-            - Math.floor(height / this.rowHeight) * this.rowHeight;
-        if (Math.ceil(height / this.rowHeight) == this.allOptions.length - this.state.fromIndex) {
+        );
+        let lowerSpacerHeight =
+            this.allOptions.length * this.rowHeight -
+            this.upperSpacerHeight -
+            Math.floor(height / this.rowHeight) * this.rowHeight;
+        if (
+            Math.ceil(height / this.rowHeight) ==
+            this.allOptions.length - this.state.fromIndex
+        ) {
             lowerSpacerHeight = 0;
         }
 
-        return (
+        const boundingRect = this.positionRef.current
+            ? this.positionRef.current.getBoundingClientRect()
+            : {
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  width: 0,
+                  height: 0,
+              };
+
+        const zIndex = this.positionRef.current
+            ? findHighestZIndex(this.positionRef.current) + 1
+            : 99;
+
+        ReactDOM.render(
             <div
                 ref={suggestionsRef}
                 className="Suggestions"
                 onScroll={(): void => this.handleOnScroll()}
-                style={
-                    {
-                        maxHeight: maxHeight,
-                        display: (visible ? "block" : "none")
-                    }
-                }>
+                style={{
+                    maxHeight: maxHeight,
+                    display: visible ? "block" : "none",
+                    top: boundingRect.top,
+                    left: boundingRect.left,
+                    width: boundingRect.width,
+                    zIndex: zIndex,
+                }}
+            >
                 <div
                     className="Suggestions__Spacer"
                     style={{
-                        height: this.upperSpacerHeight + "px"
-                    }}>
-                </div>
-                { this.createSuggestionsForCurrentTag(maxHeight)}
-                <div className="Suggestions__Spacer"
+                        height: this.upperSpacerHeight + "px",
+                    }}
+                ></div>
+                {this.createSuggestionsForCurrentTag(maxHeight)}
+                <div
+                    className="Suggestions__Spacer"
                     style={{
-                        height: lowerSpacerHeight + "px"
-                    }}>
-                </div>
-            </div >
+                        height: lowerSpacerHeight + "px",
+                    }}
+                ></div>
+            </div>,
+            this.popup
+        );
+    }
+
+    render(): React.ReactNode {
+        return (
+            <div
+                ref={this.positionRef}
+                className="Suggestions Suggestions__Position"
+            ></div>
         );
     }
 }
@@ -349,7 +486,7 @@ Suggestions.propTypes = {
     /**
      * Tag data object to show suggestions for.
      */
-    treeNodeSelection: PropTypes.instanceOf(TreeNodeSelection)
+    treeNodeSelection: PropTypes.instanceOf(TreeNodeSelection),
 };
 
 export default Suggestions;
