@@ -145,7 +145,7 @@ export default class TreeData {
             if (match) {
                 if (match[1] !== "") {
                     const orStatements = this.replaceAll(match[1], "\\|", "|");
-                    return `${orStatements}`;
+                    return `(${orStatements})`;
                 }
             }
         }
@@ -227,11 +227,9 @@ export default class TreeData {
         // see: https://tc39.es/ecma262/#sec-string.prototype.matchall
         let match: RegExpExecArray | null;
         while ((match = re.exec(this.stringifiedData)) !== null) {
-            const metaData = this.nodeData[
-                parseInt(match[nodePath.length + 0])
-            ];
+            const metaData = this.nodeData[parseInt(match[match.length - 2])];
             if (
-                match[nodePath.length + 1]
+                match[match.length - 1]
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) ||
                 (metaData.description &&
@@ -240,16 +238,14 @@ export default class TreeData {
                         .includes(searchTerm.toLowerCase()))
             ) {
                 const count = nodeNames.size;
-                nodeNames.add(match[nodePath.length + 1]);
+                nodeNames.add(match[match.length - 1]);
                 if (count == nodeNames.size) {
                     continue;
                 }
 
                 suggestions.push({
-                    nodeName: match[nodePath.length + 1],
-                    metaData: this.nodeData[
-                        parseInt(match[nodePath.length + 0])
-                    ],
+                    nodeName: match[match.length - 1],
+                    metaData: this.nodeData[parseInt(match[match.length - 2])],
                 });
             }
         }
@@ -324,6 +320,20 @@ export default class TreeData {
         return nodePath[nodePath.length - 1];
     }
 
+    findIdIndices(regEx: RegExp): number[] {
+        const indices: number[] = [];
+        const re = RegExp(`\\(([^\\(\\)]+)\\)`, "g");
+        let match: RegExpExecArray | null;
+        let index = 0;
+        while ((match = re.exec(regEx.toString())) !== null) {
+            if (match[1] === "\\d+") {
+                indices.push(index);
+            }
+            index++;
+        }
+        return indices;
+    }
+
     findNodes(
         nodePath: string[],
         matchType = MatchType.openMatch
@@ -349,15 +359,17 @@ export default class TreeData {
 
         const metaData: TreeDataNodeMetaData[][] = [];
         const nodePaths: string[] = [];
+        const idGroupIndices = this.findIdIndices(re);
 
         // Can be replaced with matchAll as soon as ECMAScript 2021 is declared standard in this project.
         // see: https://tc39.es/ecma262/#sec-string.prototype.matchall
         let match: RegExpExecArray | null;
         while ((match = re.exec(this.stringifiedData)) !== null) {
             const nodesInPath: TreeDataNodeMetaData[] = [];
-            for (let i = 2; i < match.length; i++) {
-                nodesInPath.push(this.nodeData[parseInt(match[i])]);
-                if (this.nodeData[parseInt(match[i])] === undefined) {
+            for (let i = 0; i < idGroupIndices.length; i++) {
+                const index = idGroupIndices[i] + 2;
+                nodesInPath.push(this.nodeData[parseInt(match[index])]);
+                if (this.nodeData[parseInt(match[index])] === undefined) {
                     console.log("error");
                 }
             }

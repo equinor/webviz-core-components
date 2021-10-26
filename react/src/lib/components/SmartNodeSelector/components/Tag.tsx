@@ -33,6 +33,7 @@ type TagProps = {
         e: React.SyntheticEvent<HTMLInputElement, Event>,
         index: number
     ) => void;
+    inputBlur: (index: number) => void;
     hideSuggestions: (callback?: () => void) => void;
     removeTag: (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -418,6 +419,7 @@ export default class Tag extends Component<TagProps> {
             inputKeyUp,
             inputChange,
             inputSelect,
+            inputBlur,
             removeTag,
         } = this.props;
 
@@ -479,7 +481,14 @@ export default class Tag extends Component<TagProps> {
                                 treeNodeSelection.getFocussedNodeName() ===
                                     "" &&
                                 treeNodeSelection.getFocussedLevel() == 0
-                                    ? this.props.placeholder
+                                    ? treeNodeSelection.getRef() &&
+                                      (treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
+                                          .current &&
+                                      ((treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
+                                          .current as HTMLInputElement) ===
+                                          document.activeElement
+                                        ? ""
+                                        : this.props.placeholder
                                     : ""
                             }
                             value={displayText}
@@ -493,11 +502,7 @@ export default class Tag extends Component<TagProps> {
                             onKeyUp={(e): void => inputKeyUp(e)}
                             onKeyDown={(e): void => inputKeyDown(e)}
                             onSelect={(e): void => inputSelect(e, index)}
-                            onBlur={(): void =>
-                                treeNodeSelection.setFocussedLevel(
-                                    treeNodeSelection.countLevel() - 1
-                                )
-                            }
+                            onBlur={(): void => inputBlur(index)}
                         />
                         {(currentTag || this.state.hovered) &&
                             !treeNodeSelection.isSelected() &&
@@ -557,6 +562,10 @@ Tag.propTypes = {
      * Function to call on input select event.
      */
     inputSelect: PropTypes.func.isRequired,
+    /**
+     * Function to call on blur event.
+     */
+    inputBlur: PropTypes.func.isRequired,
     /**
      * Function for hiding suggestions list.
      */

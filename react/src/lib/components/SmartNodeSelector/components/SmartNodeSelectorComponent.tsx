@@ -483,10 +483,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 ? this.state.suggestionsVisible
                 : suggestionsVisible;
 
-        const newCurrentTagShaking =
+        let newCurrentTagShaking =
             currentTagShaking === undefined
                 ? this.state.currentTagShaking
                 : currentTagShaking;
+
+        if (newTagIndex !== this.currentTagIndex()) {
+            newCurrentTagShaking = false;
+        }
 
         if (
             forceUpdate ||
@@ -851,8 +855,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     removeTag(
-        e: React.MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
-        index: number
+        index: number,
+        setNewFocus: boolean,
+        e?: React.MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
     ): void {
         let newSelections = [...this.state.nodeSelections];
         let newTagIndex =
@@ -875,10 +880,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.updateState({
             nodeSelections: newSelections,
             currentTagIndex: newTagIndex,
-            callback: () => this.setFocusOnTagInput(newTagIndex),
+            callback: setNewFocus
+                ? () => this.setFocusOnTagInput(newTagIndex)
+                : undefined,
         });
 
-        e.stopPropagation();
+        if (e) {
+            e.stopPropagation();
+        }
     }
 
     clearAllTags(
@@ -1290,7 +1299,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         this.updateState({
                             currentTagShaking: false,
                         }),
-                    2000
+                    300
                 ),
         });
     }
@@ -1307,9 +1316,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             } else if (val) {
                 if (this.currentNodeSelection().isFocusOnMetaData()) {
                     this.currentNodeSelection().setNodeName(val);
-                    this.currentNodeSelection().incrementFocussedLevel();
-                    this.updateState({ forceUpdate: true });
-                    e.preventDefault();
+                    if (this.currentNodeSelection().incrementFocussedLevel()) {
+                        this.updateState({ forceUpdate: true });
+                    } else {
+                        this.letCurrentTagShake();
+                        e.preventDefault();
+                    }
                 } else if (
                     !this.currentNodeSelection().isValid() ||
                     this.currentNodeSelection().containsWildcard()
@@ -1403,6 +1415,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.maybeShowSuggestions();
     }
 
+    handleInputBlur(index: number): void {
+        const nodeSelection = this.state.nodeSelections[index];
+        nodeSelection.setFocussedLevel(nodeSelection.countLevel() - 1);
+        if (nodeSelection.isEmpty() && index < this.countTags() - 1) {
+            this.removeTag(index, false);
+        }
+    }
+
     render(): React.ReactNode {
         const {
             id,
@@ -1487,11 +1507,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                                 inputSelect={(e, index) =>
                                     this.handleInputSelect(e, index)
                                 }
+                                inputBlur={(index) =>
+                                    this.handleInputBlur(index)
+                                }
                                 hideSuggestions={(cb) =>
                                     this.hideSuggestions(cb)
                                 }
                                 removeTag={(e, index) =>
-                                    this.removeTag(e, index)
+                                    this.removeTag(index, true, e)
                                 }
                                 updateSelectedTagsAndNodes={() =>
                                     this.updateSelectedTagsAndNodes()

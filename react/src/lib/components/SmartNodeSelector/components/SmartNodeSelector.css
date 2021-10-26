@@ -170,6 +170,7 @@
     border: 2px transparent solid;
     position: relative;
     white-space: pre;
+    z-index: 11;
 }
 
 .SmartNodeSelector__InnerTag {
