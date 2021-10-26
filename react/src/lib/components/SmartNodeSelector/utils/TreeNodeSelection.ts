@@ -132,7 +132,7 @@ export default class TreeNodeSelection {
         this.tidy();
     }
 
-    incrementFocussedLevel(): void {
+    incrementFocussedLevel(): boolean {
         if (this.caseInsensitiveMatching) {
             this.nodePath[this.focussedLevel] = this.treeData.findNode(
                 this.getNodePath(this.focussedLevel)
@@ -140,16 +140,20 @@ export default class TreeNodeSelection {
         }
         if (this.focussedLevel < this.countLevel() - 1) {
             this.focussedLevel++;
+            return true;
         } else if (!this.isValid()) {
             this.focussedLevel++;
             this.nodePath[this.focussedLevel] = "";
+            return true;
         } else if (
-            this.nodePath.includes("*") &&
+            this.containsWildcard() &&
             this.treeData.findChildNodes(this.nodePath).length > 0
         ) {
             this.focussedLevel++;
             this.nodePath[this.focussedLevel] = "";
+            return true;
         }
+        return false;
     }
 
     decrementFocussedLevel(): void {

@@ -8,16 +8,23 @@
 import React, { Component, MouseEvent } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import "./SmartNodeSelector.css";
+
 import TreeNodeSelection from "../utils/TreeNodeSelection";
 import TreeData from "../utils/TreeData";
 import { TreeDataNode } from "../utils/TreeDataNodeTypes";
 import Suggestions from "./Suggestions";
 import Tag from "./Tag";
 
+import "./SmartNodeSelector.css";
+
 enum Direction {
     Left = 0,
     Right,
+}
+
+enum KeyEventType {
+    KeyUp = 0,
+    KeyDown,
 }
 
 type ParentProps = {
@@ -52,18 +59,21 @@ type SmartNodeSelectorStateType = {
     suggestionsVisible: boolean;
     hasError: boolean;
     error: string;
+    currentTagShaking: boolean;
 };
 
 type SmartNodeSelectorSubStateType = {
     nodeSelections: TreeNodeSelection[];
     currentTagIndex: number;
     suggestionsVisible: boolean;
+    currentTagShaking: boolean;
 };
 
 type SmartNodeSelectorUpdateStateType = {
     nodeSelections?: TreeNodeSelection[];
     currentTagIndex?: number;
     suggestionsVisible?: boolean;
+    currentTagShaking?: boolean;
     callback?: () => void;
     forceUpdate?: boolean;
 };
@@ -179,6 +189,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             suggestionsVisible: false,
             hasError: error !== undefined,
             error: error || "",
+            currentTagShaking: false,
         };
 
         if (error === undefined) {
@@ -270,6 +281,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 {
                     nodeSelections: nodeSelections,
                     currentTagIndex: this.state.currentTagIndex,
+                    currentTagShaking: this.state.currentTagShaking,
                     suggestionsVisible: this.state.suggestionsVisible,
                     hasError: error !== undefined,
                     error: error || "",
@@ -420,6 +432,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         nodeSelections,
         currentTagIndex,
         suggestionsVisible,
+        currentTagShaking,
     }: SmartNodeSelectorSubStateType): boolean {
         let check = nodeSelections.length !== this.state.nodeSelections.length;
         if (nodeSelections.length === this.state.nodeSelections.length) {
@@ -431,6 +444,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
         check = check || currentTagIndex != this.currentTagIndex();
         check = check || suggestionsVisible != this.state.suggestionsVisible;
+        check = check || currentTagShaking != this.state.currentTagShaking;
         return check;
     }
 
@@ -438,6 +452,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         nodeSelections = undefined,
         currentTagIndex = undefined,
         suggestionsVisible = undefined,
+        currentTagShaking = undefined,
         callback = () => {
             return undefined;
         },
@@ -468,12 +483,18 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 ? this.state.suggestionsVisible
                 : suggestionsVisible;
 
+        const newCurrentTagShaking =
+            currentTagShaking === undefined
+                ? this.state.currentTagShaking
+                : currentTagShaking;
+
         if (
             forceUpdate ||
             this.doesStateChange({
                 nodeSelections: newNodeSelections,
                 currentTagIndex: newTagIndex,
                 suggestionsVisible: newSuggestionsVisible,
+                currentTagShaking: newCurrentTagShaking,
             })
         ) {
             this.setState(
@@ -481,6 +502,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     nodeSelections: newNodeSelections,
                     currentTagIndex: newTagIndex,
                     suggestionsVisible: newSuggestionsVisible,
+                    currentTagShaking: newCurrentTagShaking,
                     hasError: this.state.hasError,
                     error: this.state.error,
                 },
@@ -1077,45 +1099,18 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         e.stopPropagation();
     }
 
-    handleInputKeyUp(e: React.KeyboardEvent<HTMLInputElement>): void {
-        if (this.justUpdated) {
-            this.justUpdated = false;
-            e.preventDefault();
-            return;
-        }
+    handleEnterKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
         const eventTarget = e.target as HTMLInputElement;
         const val = eventTarget.value;
-        if (e.key === "Enter" && val) {
-            if (this.currentNodeSelection().isComplete()) {
-                if (this.currentTagIndex() == this.countTags() - 1) {
-                    this.focusCurrentTag();
-                } else {
-                    this.incrementCurrentTagIndex();
-                    this.setFocusOnTagInput(this.currentTagIndex() + 1);
-                }
-            }
-        } else if (e.key === "ArrowRight" && val) {
-            if (eventTarget.selectionStart == eventTarget.value.length) {
-                this.focusCurrentTag();
-            }
-        } else if (e.key === "ArrowLeft") {
-            if (eventTarget.selectionStart == 0) {
-                this.focusCurrentTag();
-            }
-        } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            e.preventDefault();
-        }
-    }
-
-    handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
-        const eventTarget = e.target as HTMLInputElement;
-        const val = eventTarget.value;
-        this.keyPressed = true;
         if (
-            e.key === "Enter" &&
+            eventType === KeyEventType.KeyDown &&
             val &&
             !this.hasLastEmptyTag() &&
-            this.currentTagIndex() == this.countTags() - 1
+            this.currentTagIndex() === this.countTags() - 1 &&
+            this.currentNodeSelection().isComplete()
         ) {
             if (this.canAddSelection()) {
                 this.updateState({
@@ -1123,13 +1118,31 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         ...this.state.nodeSelections,
                         this.createNewNodeSelection(),
                     ],
-                    currentTagIndex: this.currentTagIndex() + 1,
                 });
             } else {
                 this.letMaxNumValuesBlink();
             }
-        } else if (
-            e.key === "ArrowRight" &&
+        } else if (eventType === KeyEventType.KeyUp) {
+            if (this.currentNodeSelection().isComplete()) {
+                if (this.currentTagIndex() === this.countTags() - 1) {
+                    this.focusCurrentTag();
+                } else {
+                    this.incrementCurrentTagIndex(() =>
+                        this.setFocusOnTagInput(this.currentTagIndex())
+                    );
+                }
+            }
+        }
+    }
+
+    handleArrowRightKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        const eventTarget = e.target as HTMLInputElement;
+        const val = eventTarget.value;
+        if (
+            eventType === KeyEventType.KeyDown &&
             eventTarget.selectionEnd == eventTarget.value.length &&
             !e.repeat &&
             val
@@ -1178,7 +1191,19 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     e.preventDefault();
                 }
             }
-        } else if (e.key === "ArrowLeft" && !e.repeat) {
+        } else if (eventType === KeyEventType.KeyUp) {
+            if (eventTarget.selectionStart == eventTarget.value.length) {
+                this.focusCurrentTag();
+            }
+        }
+    }
+
+    handleArrowLeftKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        const eventTarget = e.target as HTMLInputElement;
+        if (eventType === KeyEventType.KeyDown && !e.repeat) {
             if (
                 e.shiftKey &&
                 eventTarget.selectionStart == 0 &&
@@ -1213,12 +1238,23 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     }
                 }
             }
-        } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            e.preventDefault();
-        } else if (
-            e.key === "Backspace" &&
+        } else if (eventType === KeyEventType.KeyUp) {
+            if (eventTarget.selectionStart == 0) {
+                this.focusCurrentTag();
+            }
+        }
+    }
+
+    handleBackspaceKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        const eventTarget = e.target as HTMLInputElement;
+        const val = eventTarget.value;
+        if (
+            eventType === KeyEventType.KeyDown &&
             this.currentNodeSelection().getFocussedLevel() > 0 &&
-            (eventTarget.value === "" ||
+            (val === "" ||
                 (!this.currentNodeSelection().isFocusOnMetaData() &&
                     val.slice(-1) === this.props.delimiter))
         ) {
@@ -1229,31 +1265,124 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.currentNodeSelection().decrementFocussedLevel();
             this.updateState({ forceUpdate: true });
             e.preventDefault();
-        } else if (
-            e.key === "v" &&
+        }
+    }
+
+    handleVKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        if (
+            eventType === KeyEventType.KeyDown &&
             e.ctrlKey &&
             this.currentTagIndex() == this.countTags() - 1
         ) {
             this.pasteTags(e);
-        } else if (e.key === this.props.delimiter && e.repeat) {
-            e.preventDefault();
-        } else if (e.key === this.props.delimiter && val) {
-            if (this.currentNodeSelection().isFocusOnMetaData()) {
-                this.currentNodeSelection().setNodeName(val);
-                this.currentNodeSelection().incrementFocussedLevel();
-                this.updateState({ forceUpdate: true });
+        }
+    }
+
+    letCurrentTagShake(): void {
+        this.updateState({
+            currentTagShaking: true,
+            callback: () =>
+                window.setTimeout(
+                    () =>
+                        this.updateState({
+                            currentTagShaking: false,
+                        }),
+                    2000
+                ),
+        });
+    }
+
+    handleDelimiterKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        const eventTarget = e.target as HTMLInputElement;
+        const val = eventTarget.value;
+        if (eventType === KeyEventType.KeyDown) {
+            if (e.repeat) {
                 e.preventDefault();
-            } else if (!this.currentNodeSelection().isValid()) {
-                const modifiedVal = val + this.props.delimiter;
-                this.currentNodeSelection().setNodeName(
-                    modifiedVal.split(this.props.delimiter)[
-                        this.currentNodeSelection().getFocussedLevel() -
-                            this.currentNodeSelection().getNumMetaNodes()
-                    ]
-                );
-                this.currentNodeSelection().incrementFocussedLevel();
-                this.updateState({ forceUpdate: true });
+            } else if (val) {
+                if (this.currentNodeSelection().isFocusOnMetaData()) {
+                    this.currentNodeSelection().setNodeName(val);
+                    this.currentNodeSelection().incrementFocussedLevel();
+                    this.updateState({ forceUpdate: true });
+                    e.preventDefault();
+                } else if (
+                    !this.currentNodeSelection().isValid() ||
+                    this.currentNodeSelection().containsWildcard()
+                ) {
+                    const modifiedVal = val + this.props.delimiter;
+                    this.currentNodeSelection().setNodeName(
+                        modifiedVal.split(this.props.delimiter)[
+                            this.currentNodeSelection().getFocussedLevel() -
+                                this.currentNodeSelection().getNumMetaNodes()
+                        ]
+                    );
+                    if (this.currentNodeSelection().incrementFocussedLevel()) {
+                        this.updateState({ forceUpdate: true });
+                    } else {
+                        this.letCurrentTagShake();
+                        e.preventDefault();
+                    }
+                } else {
+                    this.letCurrentTagShake();
+                    e.preventDefault();
+                }
             }
+        }
+    }
+
+    handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
+        this.keyPressed = true;
+        switch (e.key) {
+            case "Enter":
+                this.handleEnterKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case "ArrowRight":
+                this.handleArrowRightKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case "ArrowLeft":
+                this.handleArrowLeftKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case "ArrowUp":
+            case "ArrowDown":
+                e.preventDefault();
+                break;
+            case "Backspace":
+                this.handleBackspaceKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case "v":
+                this.handleVKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case this.props.delimiter:
+                this.handleDelimiterKeyEvent(e, KeyEventType.KeyDown);
+                break;
+        }
+    }
+
+    handleInputKeyUp(e: React.KeyboardEvent<HTMLInputElement>): void {
+        if (e.key === this.props.delimiter && this.justUpdated) {
+            this.justUpdated = false;
+            e.preventDefault();
+            return;
+        }
+        switch (e.key) {
+            case "Enter":
+                this.handleEnterKeyEvent(e, KeyEventType.KeyUp);
+                break;
+            case "ArrowRight":
+                this.handleArrowRightKeyEvent(e, KeyEventType.KeyUp);
+                break;
+            case "ArrowLeft":
+                this.handleArrowLeftKeyEvent(e, KeyEventType.KeyUp);
+                break;
+            case "ArrowUp":
+            case "ArrowDown":
+                e.preventDefault();
+                break;
         }
     }
 
@@ -1366,6 +1495,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                                 }
                                 updateSelectedTagsAndNodes={() =>
                                     this.updateSelectedTagsAndNodes()
+                                }
+                                shake={
+                                    this.state.currentTagShaking &&
+                                    index === this.currentTagIndex()
                                 }
                             />
                         ))}

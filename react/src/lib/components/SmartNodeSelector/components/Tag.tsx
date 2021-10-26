@@ -8,6 +8,9 @@
 import React, { Component, ReactFragment } from "react";
 import classNames from "classnames";
 import PropTypes from "prop-types";
+
+import "animate.css";
+
 import TreeNodeSelection from "../utils/TreeNodeSelection";
 import "./SmartNodeSelector.css";
 
@@ -36,6 +39,7 @@ type TagProps = {
         index: number
     ) => void;
     updateSelectedTagsAndNodes: () => void;
+    shake: boolean;
 };
 
 /**
@@ -97,6 +101,8 @@ export default class Tag extends Component<TagProps> {
         return classNames({
             SmartNodeSelector__Tag: true,
             SmartNodeSelector__Border: this.displayAsTag() || frameless,
+            animate__animated: this.props.shake,
+            animate__headShake: this.props.shake,
             [!this.addAdditionalClasses(invalid)
                 ? ""
                 : invalid
@@ -372,7 +378,7 @@ export default class Tag extends Component<TagProps> {
         const colors = treeNodeSelection.colors();
         const style: { [key: string]: string } = {
             borderWidth: "1px",
-            borderStyle: "solid"
+            borderStyle: "solid",
         };
 
         if (colors.length >= 2) {
@@ -563,4 +569,8 @@ Tag.propTypes = {
      * Function for updating selected tags, nodes and ids.
      */
     updateSelectedTagsAndNodes: PropTypes.func.isRequired,
+    /**
+     * Flag stating if the tag should be shaking.
+     */
+    shake: PropTypes.bool,
 };
