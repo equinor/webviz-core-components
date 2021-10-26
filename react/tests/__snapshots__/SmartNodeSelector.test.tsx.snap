@@ -16,6 +16,7 @@ exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapsho
       >
         <li
           class="SmartNodeSelector__Tag "
+          style="border-width: 1px; border-style: solid;"
           title="Enter a new name"
         >
           <div
