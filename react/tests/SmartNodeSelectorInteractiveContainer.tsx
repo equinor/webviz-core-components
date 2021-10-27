@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import { SmartNodeSelector } from "../src/lib";
 import { TreeDataNode } from "../src/lib/components/SmartNodeSelector";
@@ -66,4 +67,9 @@ export const SmartNodeSelectorInteractiveContainer: React.FC<{
             </button>
         </>
     );
+};
+
+SmartNodeSelectorInteractiveContainer.propTypes = {
+    setProps: PropTypes.func.isRequired,
+    data: PropTypes.array.isRequired,
 };
