@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import TreeData from "./utils/TreeData";
+import TreeData, { MatchType } from "./utils/TreeData";
 import TreeNodeSelection from "./utils/TreeNodeSelection";
 import { TreeDataNode, TreeDataNodeMetaData } from "./utils/TreeDataNodeTypes";
 import { SmartNodeSelectorPropsType } from "./components/SmartNodeSelectorComponent";
@@ -15,6 +15,7 @@ export { default } from "./SmartNodeSelector";
 export {
     SmartNodeSelectorComponent,
     TreeData,
+    MatchType,
     TreeDataNode,
     TreeDataNodeMetaData,
     SmartNodeSelectorPropsType,

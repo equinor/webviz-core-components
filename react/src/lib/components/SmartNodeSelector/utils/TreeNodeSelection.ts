@@ -178,9 +178,7 @@ export default class TreeNodeSelection {
         if (this.focussedLevel == 0) {
             return [];
         }
-        const level = this.isComplete()
-            ? this.countLevel() - 1
-            : Math.min(this.focussedLevel - 1, this.numMetaNodes - 1);
+        const level = this.countLevel() - 1;
         const allMetaData = this.treeData.findNodes(
             this.getNodePath(level),
             MatchType.partialMatch
@@ -204,9 +202,7 @@ export default class TreeNodeSelection {
         if (this.focussedLevel === 0) {
             return [];
         }
-        const level = this.isComplete()
-            ? this.countLevel() - 1
-            : Math.min(this.focussedLevel - 1, this.numMetaNodes - 1);
+        const level = this.countLevel() - 1;
         const allMetaData = this.treeData.findNodes(
             this.getNodePath(level),
             MatchType.partialMatch
@@ -317,10 +313,10 @@ export default class TreeNodeSelection {
         );
     }
 
-    private tidy(): void {
+    protected tidy(): void {
         const newData: string[] = [];
         for (let i = 0; i < this.countLevel(); i++) {
-            if (i > this.getFocussedLevel() && this.getNodeName(i) == "") {
+            if (i > this.getFocussedLevel() && this.getNodeName(i) === "") {
                 break;
             }
             newData[i] = this.getNodeName(i) as string;

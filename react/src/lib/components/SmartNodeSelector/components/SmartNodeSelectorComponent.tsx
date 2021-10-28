@@ -103,6 +103,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected caseInsensitiveMatching: boolean;
     protected keyPressed: boolean;
     protected justUpdated: boolean;
+    protected selectedNodes: string[] | null;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -142,6 +143,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.caseInsensitiveMatching = props.caseInsensitiveMatching || false;
         this.keyPressed = false;
         this.justUpdated = false;
+        this.selectedNodes = null;
 
         let error: string | undefined = undefined;
 
@@ -1020,11 +1022,17 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 }
             }
         }
-        setProps({
-            selectedTags: selectedTags,
-            selectedNodes: selectedNodes,
-            selectedIds: selectedIds,
-        });
+        if (
+            !this.selectedNodes ||
+            selectedNodes.length !== this.selectedNodes.length
+        ) {
+            setProps({
+                selectedTags: selectedTags,
+                selectedNodes: selectedNodes,
+                selectedIds: selectedIds,
+            });
+            this.selectedNodes = selectedNodes;
+        }
         this.numValidSelections = this.countValidSelections();
     }
 
@@ -1186,7 +1194,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         );
                         e.preventDefault();
                     }
-                } else {
+                } else if (
+                    this.currentNodeSelection().getFocussedLevel() <
+                    this.currentNodeSelection().countLevel() - 1
+                ) {
                     this.currentNodeSelection().incrementFocussedLevel();
                     this.updateState({
                         forceUpdate: true,
@@ -1320,8 +1331,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         this.updateState({ forceUpdate: true });
                     } else {
                         this.letCurrentTagShake();
-                        e.preventDefault();
                     }
+                    e.preventDefault();
                 } else if (
                     !this.currentNodeSelection().isValid() ||
                     this.currentNodeSelection().containsWildcard()
@@ -1337,8 +1348,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         this.updateState({ forceUpdate: true });
                     } else {
                         this.letCurrentTagShake();
-                        e.preventDefault();
                     }
+                    e.preventDefault();
                 } else {
                     this.letCurrentTagShake();
                     e.preventDefault();
@@ -1462,6 +1473,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         return (
             <div id={id} ref={this.ref}>
+                {this.debugOutput()}
                 {label && <label>{label}</label>}
                 <div
                     className={classNames({
