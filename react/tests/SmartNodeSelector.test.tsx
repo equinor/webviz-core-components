@@ -521,15 +521,8 @@ describe("SmartNodeSelector", () => {
         userEvent.click(lastInput);
         fireEvent.keyDown(lastInput, { key: "v", ctrlKey: true });
 
-        expect(parentProps.selectedTags).toHaveLength(6);
-        expect(parentProps.selectedTags).toEqual([
-            "Data",
-            "Data",
-            "Data",
-            "Data",
-            "Data",
-            "Data",
-        ]);
+        expect(parentProps.selectedTags).toHaveLength(1);
+        expect(parentProps.selectedTags).toEqual(["Data"]);
         expect(parentProps.selectedNodes).toHaveLength(1);
         expect(parentProps.selectedNodes[0]).toMatch("Data");
         expect(parentProps.selectedIds).toHaveLength(1);

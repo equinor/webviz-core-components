@@ -868,7 +868,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 : this.currentTagIndex() -
                   (index < this.currentTagIndex() ? 1 : 0);
         newSelections.splice(index, 1);
-        if (newSelections.length == 0) {
+        if (newSelections.length === 0) {
             newSelections = [this.createNewNodeSelection()];
         } else if (index === this.countTags() - 1) {
             if (!this.hasLastEmptyTag()) {
@@ -944,6 +944,26 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 if (this.firstSelectedTagIndex > this.lastSelectedTagIndex) {
                     this.focusCurrentTag();
                 }
+            }
+        } else if (this.countSelectedTags() > 0) {
+            if (e.key === "ArrowRight") {
+                const firstNotSelectedTagIndex = this.lastSelectedTagIndex + 1;
+                if (firstNotSelectedTagIndex > this.countTags() - 1) {
+                    this.updateState({
+                        nodeSelections: [
+                            ...this.state.nodeSelections,
+                            this.createNewNodeSelection(),
+                        ],
+                        currentTagIndex: this.currentTagIndex() + 1,
+                    });
+                } else {
+                    this.updateState({
+                        currentTagIndex: firstNotSelectedTagIndex,
+                        callback: () => this.focusCurrentTag(),
+                    });
+                }
+                e.preventDefault();
+                e.stopPropagation();
             }
         }
     }
@@ -1160,7 +1180,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         const val = eventTarget.value;
         if (
             eventType === KeyEventType.KeyDown &&
-            eventTarget.selectionEnd == eventTarget.value.length &&
+            eventTarget.selectionEnd === eventTarget.value.length &&
             !e.repeat &&
             val
         ) {
@@ -1173,13 +1193,13 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             } else {
                 if (
                     this.currentNodeSelection().getFocussedLevel() ===
-                        this.currentNodeSelection().countLevel() - 1 &&
-                    this.currentNodeSelection().isComplete()
+                    this.currentNodeSelection().countLevel() - 1
                 ) {
                     if (
                         this.currentTagIndex() == this.countTags() - 1 &&
                         !this.hasLastEmptyTag() &&
-                        this.canAddSelection()
+                        this.canAddSelection() &&
+                        this.currentNodeSelection().isComplete()
                     ) {
                         this.updateState({
                             nodeSelections: [
@@ -1271,20 +1291,28 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     ): void {
         const eventTarget = e.target as HTMLInputElement;
         const val = eventTarget.value;
-        if (
-            eventType === KeyEventType.KeyDown &&
-            this.currentNodeSelection().getFocussedLevel() > 0 &&
-            (val === "" ||
-                (!this.currentNodeSelection().isFocusOnMetaData() &&
-                    val.slice(-1) === this.props.delimiter))
-        ) {
-            if (e.repeat) {
+        if (eventType === KeyEventType.KeyDown) {
+            if (
+                this.currentNodeSelection().getFocussedLevel() > 0 &&
+                (val === "" ||
+                    (!this.currentNodeSelection().isFocusOnMetaData() &&
+                        val.slice(-1) === this.props.delimiter))
+            ) {
+                if (e.repeat) {
+                    e.preventDefault();
+                    return;
+                }
+                this.currentNodeSelection().decrementFocussedLevel();
+                this.updateState({ forceUpdate: true });
                 e.preventDefault();
-                return;
+            } else if (
+                this.currentNodeSelection().getFocussedLevel() === 0 &&
+                val === "" &&
+                !e.repeat &&
+                this.currentTagIndex() > 0
+            ) {
+                this.decrementCurrentTagIndex(() => this.focusCurrentTag());
             }
-            this.currentNodeSelection().decrementFocussedLevel();
-            this.updateState({ forceUpdate: true });
-            e.preventDefault();
         }
     }
 
@@ -1358,6 +1386,68 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
     }
 
+    handleTabKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        if (eventType === KeyEventType.KeyDown) {
+            if (e.shiftKey) {
+                this.decrementCurrentTagIndex(() => this.focusCurrentTag());
+            } else {
+                this.incrementCurrentTagIndex(() => this.focusCurrentTag());
+            }
+        }
+        e.preventDefault();
+    }
+
+    handleHomeKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        const eventTarget = e.target as HTMLInputElement;
+        const val = eventTarget.value;
+        if (eventType === KeyEventType.KeyDown) {
+            if (
+                e.shiftKey &&
+                this.currentNodeSelection().getCompleteNodePathAsString() ===
+                    "" &&
+                val === ""
+            ) {
+                this.firstSelectedTagIndex = 0;
+                this.lastSelectedTagIndex = this.currentTagIndex() - 1;
+                this.markTagsAsSelected(
+                    this.firstSelectedTagIndex,
+                    this.lastSelectedTagIndex
+                );
+                this.blurActiveElement();
+                this.hideSuggestions();
+            }
+        }
+        e.preventDefault();
+    }
+
+    handleEndKeyEvent(
+        e: React.KeyboardEvent<HTMLInputElement>,
+        eventType: KeyEventType
+    ): void {
+        const eventTarget = e.target as HTMLInputElement;
+        const val = eventTarget.value;
+        if (eventType === KeyEventType.KeyDown) {
+            if (e.shiftKey && eventTarget.selectionEnd === val.length) {
+                this.firstSelectedTagIndex = this.currentTagIndex();
+                this.lastSelectedTagIndex =
+                    this.countTags() - (this.hasLastEmptyTag() ? 2 : 1);
+                this.markTagsAsSelected(
+                    this.firstSelectedTagIndex,
+                    this.lastSelectedTagIndex
+                );
+                this.blurActiveElement();
+                this.hideSuggestions();
+            }
+        }
+        e.preventDefault();
+    }
+
     handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
         this.keyPressed = true;
         switch (e.key) {
@@ -1383,6 +1473,15 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             case this.props.delimiter:
                 this.handleDelimiterKeyEvent(e, KeyEventType.KeyDown);
                 break;
+            case "Tab":
+                this.handleTabKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case "Home":
+                this.handleHomeKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case "End":
+                this.handleEndKeyEvent(e, KeyEventType.KeyDown);
+                break;
         }
     }
 
@@ -1406,6 +1505,15 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             case "ArrowDown":
                 e.preventDefault();
                 break;
+            case "Tab":
+                this.handleTabKeyEvent(e, KeyEventType.KeyUp);
+                break;
+            case "Home":
+                this.handleHomeKeyEvent(e, KeyEventType.KeyUp);
+                break;
+            case "End":
+                this.handleEndKeyEvent(e, KeyEventType.KeyUp);
+                break;
         }
     }
 
@@ -1422,7 +1530,24 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             }
         }
 
-        this.updateState({ forceUpdate: true });
+        if (
+            tag.getCompleteNodePathAsString() === "" &&
+            this.currentTagIndex() === this.countTags() - 2 &&
+            this.lastNodeSelection().getCompleteNodePathAsString() === ""
+        ) {
+            this.removeTag(this.currentTagIndex(), true);
+        } else {
+            this.updateState({ forceUpdate: true });
+        }
+
+        if (
+            !tag.hasAvailableChildNodes() &&
+            !tag.isValid() &&
+            tag.getFocussedNodeName().length < value.length
+        ) {
+            this.letCurrentTagShake();
+        }
+
         this.maybeShowSuggestions();
     }
 
@@ -1501,6 +1626,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                                 key={`${index}`}
                                 index={index}
                                 frameless={frameless}
+                                active={index === this.currentTagIndex()}
                                 placeholder={
                                     placeholder ? placeholder : "Add new tag"
                                 }

@@ -22,6 +22,7 @@ type TagProps = {
     countTags: number;
     currentTag: boolean;
     frameless: boolean;
+    active: boolean;
     checkIfDuplicate: (
         nodeSelection: TreeNodeSelection,
         index: number
@@ -414,6 +415,7 @@ export default class Tag extends Component<TagProps> {
             treeNodeSelection,
             currentTag,
             frameless,
+            active,
             checkIfDuplicate,
             inputKeyDown,
             inputKeyUp,
@@ -481,12 +483,7 @@ export default class Tag extends Component<TagProps> {
                                 treeNodeSelection.getFocussedNodeName() ===
                                     "" &&
                                 treeNodeSelection.getFocussedLevel() == 0
-                                    ? treeNodeSelection.getRef() &&
-                                      (treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
-                                          .current &&
-                                      ((treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
-                                          .current as HTMLInputElement) ===
-                                          document.activeElement
+                                    ? treeNodeSelection.getRef() && active
                                         ? ""
                                         : this.props.placeholder
                                     : ""
@@ -542,6 +539,10 @@ Tag.propTypes = {
      * (no border, no remove button).
      */
     frameless: PropTypes.bool.isRequired,
+    /**
+     * Flag stating if the tag is the currently active tag.
+     */
+    active: PropTypes.bool.isRequired,
     /**
      * Function to check if this tag is a duplicate.
      */
