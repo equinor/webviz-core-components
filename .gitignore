@@ -5,6 +5,8 @@ webviz_core_components/**/*
 !webviz_core_components/wrapped_components
 !webviz_core_components/wrapped_components/*
 
+react/webviz_core_components/
+
 react/storybook-static/**/*
 !react/storybook-static/favicon.ico
 
