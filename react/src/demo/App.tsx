@@ -9,7 +9,6 @@
 import React from "react";
 
 import { WebvizPluginPlaceholder, SmartNodeSelector, Menu } from "../lib";
-import VectorSelector from "../lib/components/VectorSelector";
 
 const steps = [
     {
@@ -72,11 +71,6 @@ const App: React.FC = () => {
                                         title: "SmartNodeSelector",
                                         href: "#smart-node-selector",
                                     },
-                                    {
-                                        type: "page",
-                                        title: "VectorSelector",
-                                        href: "#vector-selector",
-                                    },
                                 ],
                             },
                         ],
@@ -116,60 +110,6 @@ const App: React.FC = () => {
                             },
                         ]}
                     />
-                </>
-            )}
-            {currentPage.url.split("#")[1] === "vector-selector" && (
-                <>
-                    <VectorSelector
-                        id="vector_selector"
-                        delimiter=":"
-                        selectedTags={nodeSelectorState.selectedTags}
-                        numMetaNodes={1}
-                        customVectorDefinitions={{
-                            Test: { type: "calculated", description: "Test" },
-                        }}
-                        label="Select a vector"
-                        data={[
-                            {
-                                id: "0",
-                                name: "iter-0",
-                                color: "#0095FF",
-                                description: "Iteration 0",
-                                children: [
-                                    {
-                                        id: "0-0",
-                                        name: "WGOR",
-                                        description: "Gas-Oil Ratio",
-                                        children: [
-                                            {
-                                                id: "0-0-0",
-                                                name: "OP_1",
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        id: "0-1",
-                                        name: "Test",
-                                        description: "Test",
-                                        children: [
-                                            {
-                                                id: "0-0-0",
-                                                name: "OP_1",
-                                            },
-                                        ],
-                                    },
-                                ],
-                            },
-                        ]}
-                        setProps={setNodeSelectorState}
-                    />
-                    Selected vectors:
-                    <br />
-                    {nodeSelectorState.selectedNodes.length > 0 &&
-                        nodeSelectorState.selectedNodes.map((node, index) => (
-                            <div key={`node-${index}`}>{node}</div>
-                        ))}
-                    {nodeSelectorState.selectedNodes.length == 0 && <i>None</i>}
                 </>
             )}
             {currentPage.url.split("#")[1] === "smart-node-selector" && (
