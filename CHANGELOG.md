@@ -22,7 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#182](https://github.com/equinor/webviz-core-components/pull/182) - Added option to wrap `SelectWithLabel` in a `Details` collapsible widget.
 - [#174](https://github.com/equinor/webviz-core-components/pull/174) - Implemented `initiallyCollapsed` setting for menu.
-- [#178](https://github.com/equinor/webviz-core-components/pull/178) - Implemented case-insensitive and description search in `SmartNodeSelector`. Also added export of data types and implemented `OR` operator in nodes as beta feature.
+- [#178](https://github.com/equinor/webviz-core-components/pull/178) - Implemented case-insensitive and description search in `SmartNodeSelector`. 
+    Also added export of data types and implemented `OR` operator in nodes as beta feature. Implemented better visual feedback, tab and end/home navigation.
 
 ## [0.5.2] - 2021-10-08
 
