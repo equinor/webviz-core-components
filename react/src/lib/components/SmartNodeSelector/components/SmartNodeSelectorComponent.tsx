@@ -1598,7 +1598,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         return (
             <div id={id} ref={this.ref}>
-                {this.debugOutput()}
                 {label && <label>{label}</label>}
                 <div
                     className={classNames({
