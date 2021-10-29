@@ -5,24 +5,6 @@ exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapsho
   <div
     id="SmartNodeSelector"
   >
-    <div>
-      <label>
-        Current Tag Index: 
-        0
-        <br />
-      </label>
-      <label>
-        Current Node Selection:
-         
-        
-        <br />
-      </label>
-      <label>
-        Currently Focussed Level:
-         
-        0
-      </label>
-    </div>
     <label>
       Smart Node Selector
     </label>

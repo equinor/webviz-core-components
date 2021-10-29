@@ -409,7 +409,7 @@ export default class TreeNodeSelection {
     clone(): TreeNodeSelection {
         return new TreeNodeSelection({
             focussedLevel: this.getFocussedLevel(),
-            nodePath: this.getNodePath() as Array<string>,
+            nodePath: this.getNodePath().map((x) => x) as Array<string>,
             selected: false,
             delimiter: this.delimiter,
             numMetaNodes: this.numMetaNodes,

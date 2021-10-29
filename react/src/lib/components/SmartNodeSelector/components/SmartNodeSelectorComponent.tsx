@@ -984,14 +984,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             for (const selection of selections) {
                 if (
                     newSelections.length < this.props.maxNumSelectedNodes ||
-                    this.props.maxNumSelectedNodes == -1
+                    this.props.maxNumSelectedNodes === -1
                 ) {
                     newSelections.push(selection.clone());
                 }
             }
             if (
                 newSelections.length < this.props.maxNumSelectedNodes ||
-                this.props.maxNumSelectedNodes == -1
+                this.props.maxNumSelectedNodes === -1
             ) {
                 newSelections.push(this.createNewNodeSelection());
             }
@@ -1010,7 +1010,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     canAddSelection(): boolean {
         return (
             (this.countValidSelections() < this.props.maxNumSelectedNodes ||
-                this.props.maxNumSelectedNodes == -1) &&
+                this.props.maxNumSelectedNodes === -1) &&
             this.props.maxNumSelectedNodes !== 1
         );
     }
@@ -1520,6 +1520,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
         const value = e.target.value;
         const tag = this.currentNodeSelection();
+        const oldValue = tag.getFocussedNodeName();
 
         if (tag.isFocusOnMetaData()) {
             tag.setNodeName(value);
@@ -1543,7 +1544,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (
             !tag.hasAvailableChildNodes() &&
             !tag.isValid() &&
-            tag.getFocussedNodeName().length < value.length
+            oldValue.length < value.length
         ) {
             this.letCurrentTagShake();
         }
