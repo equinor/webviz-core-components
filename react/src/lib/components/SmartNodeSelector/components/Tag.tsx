@@ -89,7 +89,7 @@ export default class Tag extends Component<TagProps> {
                     ? "SmartNodeSelector__InnerDuplicate"
                     : icons.length > 1
                     ? "SmartNodeSelector__Unknown"
-                    : ""]: true,
+                    : "SmartNodeSelector__Valid"]: true,
             });
         }
         return classNames(ret);

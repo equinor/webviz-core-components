@@ -41,7 +41,7 @@
     position: relative;
     margin-top: 8px;
     margin-bottom: 8px;
-    min-height: 20px;
+    min-height: 24px;
     min-width: 200px;
 }
 
@@ -300,6 +300,10 @@
     border: 2px #ff9200 solid !important;
 }
 
+.SmartNodeSelector__Valid {
+    border: 1px transparent solid;
+}
+
 .SmartNodeSelector__InnerInvalid,
 .SmartNodeSelector__InnerMissingSubgroup {
     background-color: #ffc1c1 !important;
@@ -312,5 +316,6 @@
 }
 
 .SmartNodeSelector__Unknown {
+    border: 1px transparent solid;
     background-image: url("./images/unknown.svg");
 }
