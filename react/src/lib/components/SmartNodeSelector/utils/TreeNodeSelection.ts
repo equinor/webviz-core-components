@@ -141,7 +141,7 @@ export default class TreeNodeSelection {
         if (this.focussedLevel < this.countLevel() - 1) {
             this.focussedLevel++;
             return true;
-        } else if (!this.isValid()) {
+        } else if (this.hasAvailableChildNodesOnNextLevel()) {
             this.focussedLevel++;
             this.nodePath[this.focussedLevel] = "";
             return true;
@@ -346,6 +346,12 @@ export default class TreeNodeSelection {
 
     countExactlyMatchedNodePaths(): number {
         return this.exactlyMatchedNodePaths().length;
+    }
+
+    hasAvailableChildNodesOnNextLevel(): boolean {
+        const adjustedNodePath = this.getNodePath(this.focussedLevel);
+        adjustedNodePath.push("");
+        return this.treeData.findSuggestions(adjustedNodePath).length > 0;
     }
 
     hasAvailableChildNodes(): boolean {

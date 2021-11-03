@@ -1089,6 +1089,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             return;
         }
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         const val = eventTarget.value;
         const tag = this.nodeSelection(index);
         const previouslyFocussedLevel = tag.getFocussedLevel();
@@ -1141,6 +1144,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         const val = eventTarget.value;
         if (
             eventType === KeyEventType.KeyDown &&
@@ -1177,6 +1183,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         const val = eventTarget.value;
         if (
             eventType === KeyEventType.KeyDown &&
@@ -1232,7 +1241,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 }
             }
         } else if (eventType === KeyEventType.KeyUp) {
-            if (eventTarget.selectionStart == eventTarget.value.length) {
+            if (eventTarget.selectionStart === eventTarget.value.length) {
                 this.focusCurrentTag();
             }
         }
@@ -1243,6 +1252,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         if (eventType === KeyEventType.KeyDown && !e.repeat) {
             if (
                 e.shiftKey &&
@@ -1290,6 +1302,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         const val = eventTarget.value;
         if (eventType === KeyEventType.KeyDown) {
             if (
@@ -1348,6 +1363,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         const val = eventTarget.value;
         if (eventType === KeyEventType.KeyDown) {
             if (e.repeat) {
@@ -1405,6 +1423,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         const val = eventTarget.value;
         if (eventType === KeyEventType.KeyDown) {
             if (
@@ -1421,9 +1442,29 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 );
                 this.blurActiveElement();
                 this.hideSuggestions();
+                e.preventDefault();
+            } else if (!e.shiftKey) {
+                let cursorPosition = eventTarget.selectionStart;
+                if (cursorPosition !== null) {
+                    cursorPosition = Math.max(0, cursorPosition - 1);
+                    while (cursorPosition > 0) {
+                        if (
+                            val.substr(cursorPosition, 1) ===
+                            this.props.delimiter
+                        ) {
+                            cursorPosition++;
+                            break;
+                        }
+                        cursorPosition--;
+                    }
+                    eventTarget.setSelectionRange(
+                        cursorPosition,
+                        cursorPosition
+                    );
+                    e.preventDefault();
+                }
             }
         }
-        e.preventDefault();
     }
 
     handleEndKeyEvent(
@@ -1431,6 +1472,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         const eventTarget = e.target as HTMLInputElement;
+        if (!eventTarget) {
+            return;
+        }
         const val = eventTarget.value;
         if (eventType === KeyEventType.KeyDown) {
             if (e.shiftKey && eventTarget.selectionEnd === val.length) {
@@ -1443,9 +1487,27 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 );
                 this.blurActiveElement();
                 this.hideSuggestions();
+                e.preventDefault();
+            } else if (!e.shiftKey) {
+                let cursorPosition = eventTarget.selectionStart;
+                if (cursorPosition !== null) {
+                    while (cursorPosition < val.length) {
+                        if (
+                            val.substr(cursorPosition, 1) ===
+                            this.props.delimiter
+                        ) {
+                            break;
+                        }
+                        cursorPosition++;
+                    }
+                    eventTarget.setSelectionRange(
+                        cursorPosition,
+                        cursorPosition
+                    );
+                    e.preventDefault();
+                }
             }
         }
-        e.preventDefault();
     }
 
     handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
@@ -1481,6 +1543,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 break;
             case "End":
                 this.handleEndKeyEvent(e, KeyEventType.KeyDown);
+                break;
+            case "z":
+            case "y":
+                if (e.ctrlKey) e.preventDefault();
                 break;
         }
     }
@@ -1518,6 +1584,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
+        if (!e.target) {
+            return;
+        }
         const value = e.target.value;
         const tag = this.currentNodeSelection();
         const oldValue = tag.getFocussedNodeName();
