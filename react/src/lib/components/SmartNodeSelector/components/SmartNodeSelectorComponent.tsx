@@ -1430,9 +1430,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (eventType === KeyEventType.KeyDown) {
             if (
                 e.shiftKey &&
-                this.currentNodeSelection().getCompleteNodePathAsString() ===
-                    "" &&
-                val === ""
+                eventTarget.selectionStart === 0 &&
+                this.currentNodeSelection().getFocussedLevel() === 0
             ) {
                 this.firstSelectedTagIndex = 0;
                 this.lastSelectedTagIndex = this.currentTagIndex() - 1;
@@ -1477,8 +1476,13 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
         const val = eventTarget.value;
         if (eventType === KeyEventType.KeyDown) {
-            if (e.shiftKey && eventTarget.selectionEnd === val.length) {
-                this.firstSelectedTagIndex = this.currentTagIndex();
+            if (
+                e.shiftKey &&
+                eventTarget.selectionEnd === val.length &&
+                this.currentNodeSelection().getFocussedLevel() ===
+                    this.currentNodeSelection().countLevel() - 1
+            ) {
+                this.firstSelectedTagIndex = this.currentTagIndex() + 1;
                 this.lastSelectedTagIndex =
                     this.countTags() - (this.hasLastEmptyTag() ? 2 : 1);
                 this.markTagsAsSelected(
