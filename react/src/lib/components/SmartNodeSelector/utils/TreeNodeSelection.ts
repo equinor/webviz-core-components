@@ -371,10 +371,14 @@ export default class TreeNodeSelection {
         return this.treeData.findSuggestions(nodePath).length;
     }
 
-    getSuggestions(): { nodeName: string; metaData: TreeDataNodeMetaData }[] {
-        return this.treeData.findSuggestions(
-            this.getNodePath(this.focussedLevel)
-        );
+    getSuggestions(
+        showAll = false
+    ): { nodeName: string; metaData: TreeDataNodeMetaData }[] {
+        const nodePath = this.getNodePath(this.focussedLevel);
+        if (showAll) {
+            nodePath[nodePath.length - 1] = "";
+        }
+        return this.treeData.findSuggestions(nodePath);
     }
 
     containsWildcard(): boolean {

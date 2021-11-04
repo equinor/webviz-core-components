@@ -141,7 +141,7 @@ const App: React.FC = () => {
                                         children: [
                                             {
                                                 id: "1.1.1",
-                                                name: "Node 1",
+                                                name: "Node-1",
                                                 description:
                                                     "A first data node",
                                                 children: [

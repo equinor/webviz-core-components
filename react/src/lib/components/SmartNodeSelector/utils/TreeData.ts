@@ -153,9 +153,6 @@ export default class TreeData {
     }
 
     private adjustNodeName(nodeName: string): string {
-        if (nodeName === undefined) {
-            console.log(nodeName);
-        }
         return this.activateOrStatements(
             this.replaceAll(
                 this.replaceAll(
@@ -204,7 +201,7 @@ export default class TreeData {
     findSuggestions(
         nodePath: string[]
     ): { nodeName: string; metaData: TreeDataNodeMetaData }[] {
-        const searchTerm = this.adjustNodeName(nodePath[nodePath.length - 1]);
+        const searchTerm = nodePath[nodePath.length - 1];
         let nodePathString = "";
         for (let i = 0; i < nodePath.length - 1; i++) {
             nodePathString += `\\{(\\d+)\\}${this.adjustNodeName(nodePath[i])}${

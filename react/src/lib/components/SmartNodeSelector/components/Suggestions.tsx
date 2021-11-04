@@ -25,6 +25,7 @@ type SuggestionsProps = {
         option: string
     ) => void;
     treeNodeSelection?: TreeNodeSelection;
+    showAllSuggestions: boolean;
 };
 
 type SuggestionsState = {
@@ -90,6 +91,7 @@ class Suggestions extends Component<SuggestionsProps> {
             true
         );
         window.addEventListener("resize", () => this.renderPopup());
+        window.addEventListener("scroll", () => this.renderPopup(), true);
 
         this.popup = document.createElement("div");
         document.body.appendChild(this.popup);
@@ -107,6 +109,7 @@ class Suggestions extends Component<SuggestionsProps> {
             true
         );
         window.removeEventListener("resize", () => this.renderPopup());
+        window.removeEventListener("scroll", () => this.renderPopup(), true);
 
         if (this.popup) {
             document.body.removeChild(this.popup);
@@ -120,7 +123,9 @@ class Suggestions extends Component<SuggestionsProps> {
             previousProps.treeNodeSelection != treeNodeSelection
         ) {
             this.upperSpacerHeight = 0;
-            (suggestionsRef.current as HTMLDivElement).scrollTop = 0;
+            if (suggestionsRef.current) {
+                (suggestionsRef.current as HTMLDivElement).scrollTop = 0;
+            }
             this.currentlySelectedSuggestionIndex = 0;
             this.setState({ fromIndex: 0 });
         }
@@ -137,16 +142,23 @@ class Suggestions extends Component<SuggestionsProps> {
     }
 
     private maybeLoadNewOptions(): void {
-        const { treeNodeSelection, suggestionsRef } = this.props;
+        const {
+            treeNodeSelection,
+            suggestionsRef,
+            showAllSuggestions,
+        } = this.props;
         if (
             treeNodeSelection !== undefined &&
             (treeNodeSelection.getFocussedLevel() != this.currentNodeLevel ||
                 treeNodeSelection.getFocussedNodeName() !=
                     this.currentNodeName ||
                 this.lastNodeSelection === undefined ||
-                !treeNodeSelection.objectEquals(this.lastNodeSelection))
+                !treeNodeSelection.objectEquals(this.lastNodeSelection) ||
+                this.props.showAllSuggestions)
         ) {
-            this.allOptions = treeNodeSelection.getSuggestions();
+            this.allOptions = treeNodeSelection.getSuggestions(
+                showAllSuggestions
+            );
             this.currentNodeLevel = treeNodeSelection.getFocussedLevel();
             this.lastNodeSelection = treeNodeSelection;
             this.currentNodeName = treeNodeSelection.getFocussedNodeName();
@@ -534,6 +546,10 @@ Suggestions.propTypes = {
      * Tag data object to show suggestions for.
      */
     treeNodeSelection: PropTypes.instanceOf(TreeNodeSelection),
+    /**
+     * Boolean stating if all suggestions for node shall be shown.
+     */
+    showAllSuggestions: PropTypes.bool,
 };
 
 export default Suggestions;
