@@ -368,7 +368,7 @@ export default class Tag extends Component<TagProps> {
             treeNodeSelection.getFocussedNodeName() === "" &&
             treeNodeSelection.getFocussedLevel() == 0
         ) {
-            return "100px";
+            return this.calculateTextWidth(this.props.placeholder) + "px";
         } else {
             return this.calculateTextWidth(displayText) + "px";
         }

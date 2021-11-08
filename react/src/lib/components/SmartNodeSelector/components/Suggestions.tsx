@@ -53,6 +53,7 @@ class Suggestions extends Component<SuggestionsProps> {
     private lastNodeSelection?: TreeNodeSelection;
     private positionRef: React.RefObject<HTMLDivElement>;
     private popup: HTMLDivElement | null;
+    private showingAllSuggestions: boolean;
 
     constructor(props: SuggestionsProps) {
         super(props);
@@ -68,6 +69,7 @@ class Suggestions extends Component<SuggestionsProps> {
         this.allOptions = [];
         this.positionRef = React.createRef();
         this.popup = null;
+        this.showingAllSuggestions = false;
 
         this.state = {
             fromIndex: 0,
@@ -149,13 +151,14 @@ class Suggestions extends Component<SuggestionsProps> {
         } = this.props;
         if (
             treeNodeSelection !== undefined &&
-            (treeNodeSelection.getFocussedLevel() != this.currentNodeLevel ||
-                treeNodeSelection.getFocussedNodeName() !=
+            (treeNodeSelection.getFocussedLevel() !== this.currentNodeLevel ||
+                treeNodeSelection.getFocussedNodeName() !==
                     this.currentNodeName ||
                 this.lastNodeSelection === undefined ||
                 !treeNodeSelection.objectEquals(this.lastNodeSelection) ||
-                this.props.showAllSuggestions)
+                this.props.showAllSuggestions !== this.showingAllSuggestions)
         ) {
+            this.showingAllSuggestions = this.props.showAllSuggestions;
             this.allOptions = treeNodeSelection.getSuggestions(
                 showAllSuggestions
             );

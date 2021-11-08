@@ -120,6 +120,7 @@ const App: React.FC = () => {
                         key="SmartNodeSelector"
                         numMetaNodes={2}
                         delimiter=":"
+                        placeholder="This is a very long placeholder..."
                         selectedTags={nodeSelectorState.selectedTags}
                         caseInsensitiveMatching={true}
                         setProps={setNodeSelectorState}
@@ -166,6 +167,54 @@ const App: React.FC = () => {
                                                     {
                                                         id: "1.1.1.4",
                                                         name: "Subnode 4",
+                                                        description:
+                                                            "A fourth sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.5",
+                                                        name: "Subnode 5",
+                                                        description:
+                                                            "A first sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.6",
+                                                        name: "Subnode 6",
+                                                        description:
+                                                            "A second sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.7",
+                                                        name: "Subnode 7",
+                                                        description:
+                                                            "A third sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.8",
+                                                        name: "Subnode 8",
+                                                        description:
+                                                            "A fourth sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.9",
+                                                        name: "Subnode 9",
+                                                        description:
+                                                            "A first sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.10",
+                                                        name: "Subnode 10",
+                                                        description:
+                                                            "A second sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.11",
+                                                        name: "Subnode 11",
+                                                        description:
+                                                            "A third sub node",
+                                                    },
+                                                    {
+                                                        id: "1.1.1.12",
+                                                        name: "Subnode 12",
                                                         description:
                                                             "A fourth sub node",
                                                     },

@@ -190,7 +190,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         this.state = {
             nodeSelections,
-            currentTagIndex: 0,
+            currentTagIndex: -1,
             suggestionsVisible: false,
             showAllSuggestions: false,
             hasError: error !== undefined,
@@ -488,14 +488,23 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             currentTagIndex === undefined
                 ? this.currentTagIndex()
                 : currentTagIndex;
-        const newSuggestionsVisible =
+        let newSuggestionsVisible =
             suggestionsVisible === undefined
                 ? this.state.suggestionsVisible
                 : suggestionsVisible;
-        const newShowAllSuggestions =
-            showAllSuggestions === undefined
-                ? this.state.showAllSuggestions
-                : showAllSuggestions;
+        let newShowAllSuggestions = currentTagIndex !== this.currentTagIndex();
+
+        if (!newShowAllSuggestions) {
+            newShowAllSuggestions =
+                showAllSuggestions === undefined
+                    ? this.state.showAllSuggestions
+                    : showAllSuggestions;
+        }
+
+        if (suggestionsVisible === undefined) {
+            newSuggestionsVisible =
+                newSuggestionsVisible || newShowAllSuggestions;
+        }
 
         let newCurrentTagShaking =
             currentTagShaking === undefined
@@ -1070,7 +1079,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
         if (
             !this.selectedNodes ||
-            selectedNodes.length !== this.selectedNodes.length
+            selectedNodes.length !== this.selectedNodes.length ||
+            JSON.stringify(this.selectedNodes) !== JSON.stringify(selectedNodes)
         ) {
             setProps({
                 selectedTags: selectedTags,
@@ -1155,6 +1165,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             }
             this.state.nodeSelections.forEach((v) => v.setSelected(false));
             this.updateState({
+                showAllSuggestions:
+                    previouslyFocussedLevel !== tag.getFocussedLevel(),
                 currentTagIndex: index,
                 callback: () => {
                     this.maybeShowSuggestions();
@@ -1255,6 +1267,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 ) {
                     this.currentNodeSelection().incrementFocussedLevel();
                     this.updateState({
+                        showAllSuggestions: true,
                         forceUpdate: true,
                         callback: () => {
                             (e.target as HTMLInputElement).setSelectionRange(
@@ -1310,6 +1323,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     } else {
                         this.currentNodeSelection().decrementFocussedLevel();
                         this.updateState({
+                            showAllSuggestions: true,
                             forceUpdate: true,
                         });
                         e.preventDefault();
@@ -1344,7 +1358,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     return;
                 }
                 this.currentNodeSelection().decrementFocussedLevel();
-                this.updateState({ forceUpdate: true });
+                this.updateState({
+                    showAllSuggestions: true,
+                    forceUpdate: true,
+                });
                 e.preventDefault();
             } else if (
                 this.currentNodeSelection().getFocussedLevel() === 0 &&
@@ -1618,11 +1635,33 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
     }
 
+    getSelectedInputNode(value: string, selectionStart: number | null): string {
+        const split = value.split(this.props.delimiter);
+        if (selectionStart) {
+            let index = 0;
+            let charCount = 0;
+            while (index < split.length) {
+                if (charCount + split[index].length >= selectionStart) {
+                    return split[index];
+                }
+                charCount += split[index].length + 1;
+                index++;
+            }
+            return value;
+        } else {
+            return split[split.length - 1];
+        }
+    }
+
     handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
         if (!e.target) {
             return;
         }
         const value = e.target.value;
+        const focussedValue = this.getSelectedInputNode(
+            e.target.value,
+            e.target.selectionStart
+        );
         const tag = this.currentNodeSelection();
         const oldValue = tag.getFocussedNodeName();
 
@@ -1648,7 +1687,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (
             !tag.hasAvailableChildNodes() &&
             !tag.isValid() &&
-            oldValue.length < value.length
+            oldValue.length < focussedValue.length
         ) {
             this.letCurrentTagShake();
         }
@@ -1657,7 +1696,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleInputBlur(index: number): void {
-        this.updateState({ showAllSuggestions: false });
         const nodeSelection = this.state.nodeSelections[index];
         nodeSelection.setFocussedLevel(nodeSelection.countLevel() - 1);
         if (nodeSelection.isEmpty() && index < this.countTags() - 1) {

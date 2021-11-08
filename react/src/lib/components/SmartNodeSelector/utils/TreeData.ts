@@ -366,9 +366,6 @@ export default class TreeData {
             for (let i = 0; i < idGroupIndices.length; i++) {
                 const index = idGroupIndices[i] + 2;
                 nodesInPath.push(this.nodeData[parseInt(match[index])]);
-                if (this.nodeData[parseInt(match[index])] === undefined) {
-                    console.log("error");
-                }
             }
             metaData.push(nodesInPath);
             nodePaths.push(this.cleanNodeName(match[1]));
