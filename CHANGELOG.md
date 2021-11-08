@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+## [0.5.3] - 2021-11-08
+
 ### Changed
 
 - [#181](https://github.com/equinor/webviz-core-components/pull/181) - `SmartNodeSelector` suggestions window is now attached at top level of DOM tree. This improves usability when used in a scroll area.
