@@ -492,7 +492,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             suggestionsVisible === undefined
                 ? this.state.suggestionsVisible
                 : suggestionsVisible;
-        let newShowAllSuggestions = currentTagIndex !== this.currentTagIndex();
+        let newShowAllSuggestions = newTagIndex !== this.currentTagIndex();
 
         if (!newShowAllSuggestions) {
             newShowAllSuggestions =
