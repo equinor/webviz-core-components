@@ -472,7 +472,23 @@ class Suggestions extends Component<SuggestionsProps> {
         }
 
         const boundingRect = this.positionRef.current
-            ? this.positionRef.current.getBoundingClientRect()
+            ? {
+                  top:
+                      this.positionRef.current.getBoundingClientRect().top +
+                      window.scrollY,
+                  left:
+                      this.positionRef.current.getBoundingClientRect().left +
+                      window.scrollX,
+                  bottom:
+                      this.positionRef.current.getBoundingClientRect().bottom +
+                      window.scrollY,
+                  right:
+                      this.positionRef.current.getBoundingClientRect().right +
+                      window.scrollX,
+                  width: this.positionRef.current.getBoundingClientRect().width,
+                  height: this.positionRef.current.getBoundingClientRect()
+                      .height,
+              }
             : {
                   top: 0,
                   left: 0,
