@@ -435,13 +435,20 @@ class Suggestions extends Component<SuggestionsProps> {
                                         : "none",
                                 height: this.rowHeight + "px",
                             }}
-                            onClick={(e): void =>
-                                this.useSuggestion(e, option.nodeName)
-                            }
+                            onMouseDown={(e): void => {
+                                this.useSuggestion(e, option.nodeName);
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
                         >
                             {this.decorateOption(option, treeNodeSelection)}
                         </div>
                     ))}
+                    {options.length === 0 && (
+                        <div className="Suggestions__NoSuggestions">
+                            No options available...
+                        </div>
+                    )}
                 </Fragment>
             );
         }

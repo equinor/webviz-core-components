@@ -562,6 +562,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
     showSuggestions(showAll = false): void {
         if (!document.activeElement || this.currentTagIndex() < 0) return;
+        if (this.state.suggestionsVisible) {
+            return;
+        }
         if (
             (this.currentNodeSelection().getRef() as React.RefObject<HTMLInputElement>)
                 .current === document.activeElement
@@ -1743,6 +1746,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         return (
             <div id={id} ref={this.ref}>
+                {this.debugOutput()}
                 {label && <label>{label}</label>}
                 <div
                     className={classNames({
