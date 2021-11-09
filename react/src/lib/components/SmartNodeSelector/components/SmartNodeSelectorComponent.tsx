@@ -562,7 +562,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
     showSuggestions(showAll = false): void {
         if (!document.activeElement || this.currentTagIndex() < 0) return;
-        if (this.state.suggestionsVisible) {
+        if (this.state.suggestionsVisible && !showAll) {
             return;
         }
         if (
