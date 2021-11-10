@@ -135,7 +135,7 @@
 
 .SmartNodeSelector input {
     border: none;
-    background: none;
+    background: transparent;
     outline: none;
     padding: 0px;
     width: 50px;
@@ -158,7 +158,6 @@
     display: flex;
     flex-wrap: wrap;
     border-radius: 4px;
-    background-color: #fefefe;
     justify-content: left;
     align-items: center;
     min-width: 0;
@@ -177,7 +176,6 @@
     display: flex;
     flex: 1;
     border-radius: 4px;
-    background-color: #fefefe;
     white-space: nowrap;
     padding: 8px;
     color: #565656;
@@ -191,6 +189,7 @@
 
 .SmartNodeSelector__Border {
     border: 2px #ccc solid;
+    background-color: #fefefe;
 }
 
 .SmartNodeSelector__Ruler {

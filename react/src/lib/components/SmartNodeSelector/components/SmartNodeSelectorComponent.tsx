@@ -17,17 +17,17 @@ import Tag from "./Tag";
 
 import "./SmartNodeSelector.css";
 
-enum Direction {
+export enum Direction {
     Left = 0,
     Right,
 }
 
-enum KeyEventType {
+export enum KeyEventType {
     KeyUp = 0,
     KeyDown,
 }
 
-type ParentProps = {
+export type ParentProps = {
     selectedTags: string[];
     selectedNodes: string[];
     selectedIds: string[];
@@ -1288,12 +1288,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         showAllSuggestions: true,
                         forceUpdate: true,
                         callback: () => {
-                            const inputField = (this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>)?.current;
+                            const inputField = (this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>)
+                                ?.current;
                             if (inputField) {
-                                inputField.setSelectionRange(
-                                    0,
-                                    0
-                                );
+                                inputField.setSelectionRange(0, 0);
                             }
                         },
                     });
@@ -1318,8 +1316,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (eventType === KeyEventType.KeyDown && !e.repeat) {
             if (
                 e.shiftKey &&
-                eventTarget.selectionStart == 0 &&
-                eventTarget.selectionEnd == 0 &&
+                eventTarget.selectionStart === 0 &&
+                eventTarget.selectionEnd === 0 &&
                 this.currentTagIndex() > 0
             ) {
                 if (!this.currentNodeSelection().displayAsTag()) {
@@ -1334,7 +1332,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     eventTarget.selectionStart === 0 &&
                     eventTarget.selectionEnd === 0
                 ) {
-                    if (this.currentNodeSelection().getFocussedLevel() === 0) {
+                    if (
+                        this.currentNodeSelection() &&
+                        this.currentNodeSelection().getFocussedLevel() === 0
+                    ) {
                         if (this.currentTagIndex() > 0) {
                             this.decrementCurrentTagIndex(() => {
                                 this.focusCurrentTag(Direction.Right);
