@@ -709,6 +709,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.countSelectedTags() > 0
         ) {
             this.removeSelectedTags();
+            e.preventDefault();
+            e.stopPropagation();
         } else if (e.key === "c" && e.ctrlKey) {
             this.copyAllSelectedTags();
         }
@@ -1365,6 +1367,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     ): void {
         const eventTarget = e.target as HTMLInputElement;
         if (!eventTarget) {
+            return;
+        }
+        if (this.countSelectedTags() > 0) {
+            e.preventDefault();
             return;
         }
         const val = eventTarget.value;
