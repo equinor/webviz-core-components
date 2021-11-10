@@ -360,13 +360,28 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.selectionHasStarted = false;
     }
 
-    setFocusOnTagInput(index: number): void {
+    setFocusOnTagInput(
+        index: number,
+        setSelection: Direction | undefined = undefined
+    ): void {
         if (index >= 0 && index < this.countTags()) {
             if (this.state.nodeSelections.length > index && index >= 0) {
-                ((this.state.nodeSelections[
+                const inputField = (this.state.nodeSelections[
                     index
-                ].getRef() as React.RefObject<HTMLInputElement>)
-                    .current as HTMLInputElement).focus();
+                ]?.getRef() as React.RefObject<HTMLInputElement>).current;
+                if (inputField) {
+                    inputField.focus();
+                    if (setSelection !== undefined) {
+                        inputField.setSelectionRange(
+                            setSelection === Direction.Left
+                                ? 0
+                                : inputField.value.length,
+                            setSelection === Direction.Left
+                                ? 0
+                                : inputField.value.length
+                        );
+                    }
+                }
             }
             this.maybeShowSuggestions();
         }
@@ -431,8 +446,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         return count;
     }
 
-    focusCurrentTag(): void {
-        this.setFocusOnTagInput(this.currentTagIndex());
+    focusCurrentTag(setSelection: Direction | undefined = undefined): void {
+        this.setFocusOnTagInput(this.currentTagIndex(), setSelection);
     }
 
     doesStateChange({
@@ -1260,7 +1275,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         });
                     } else {
                         this.incrementCurrentTagIndex(() =>
-                            this.focusCurrentTag()
+                            this.focusCurrentTag(Direction.Left)
                         );
                         e.preventDefault();
                     }
@@ -1273,10 +1288,13 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         showAllSuggestions: true,
                         forceUpdate: true,
                         callback: () => {
-                            (e.target as HTMLInputElement).setSelectionRange(
-                                0,
-                                0
-                            );
+                            const inputField = (this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>)?.current;
+                            if (inputField) {
+                                inputField.setSelectionRange(
+                                    0,
+                                    0
+                                );
+                            }
                         },
                     });
                     e.preventDefault();
@@ -1313,13 +1331,13 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 e.preventDefault();
             } else {
                 if (
-                    eventTarget.selectionStart == 0 &&
-                    eventTarget.selectionEnd == 0
+                    eventTarget.selectionStart === 0 &&
+                    eventTarget.selectionEnd === 0
                 ) {
                     if (this.currentNodeSelection().getFocussedLevel() === 0) {
                         if (this.currentTagIndex() > 0) {
                             this.decrementCurrentTagIndex(() => {
-                                this.focusCurrentTag();
+                                this.focusCurrentTag(Direction.Right);
                             });
                         }
                         e.preventDefault();
@@ -1334,7 +1352,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 }
             }
         } else if (eventType === KeyEventType.KeyUp) {
-            if (eventTarget.selectionStart == 0) {
+            if (eventTarget.selectionStart === 0) {
                 this.focusCurrentTag();
             }
         }

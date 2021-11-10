@@ -91,6 +91,10 @@ export default class Tag extends Component<TagProps> {
                     ? "SmartNodeSelector__Unknown"
                     : "SmartNodeSelector__Valid"]: true,
             });
+        } else {
+            ret = Object.assign({}, ret, {
+                SmartNodeSelector__Valid: true,
+            });
         }
         return classNames(ret);
     }
