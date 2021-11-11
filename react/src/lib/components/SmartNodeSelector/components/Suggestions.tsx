@@ -26,6 +26,8 @@ type SuggestionsProps = {
     ) => void;
     treeNodeSelection?: TreeNodeSelection;
     showAllSuggestions: boolean;
+    enableInputBlur: () => void;
+    disableInputBlur: () => void;
 };
 
 type SuggestionsState = {
@@ -396,7 +398,11 @@ class Suggestions extends Component<SuggestionsProps> {
     private createSuggestionsForCurrentTag(
         maxHeight: number
     ): React.ReactFragment | null {
-        const { treeNodeSelection } = this.props;
+        const {
+            treeNodeSelection,
+            enableInputBlur,
+            disableInputBlur,
+        } = this.props;
         if (treeNodeSelection === undefined) return "";
         if (!treeNodeSelection.focussedNodeNameContainsWildcard()) {
             const options = this.allOptions.slice(
@@ -435,7 +441,9 @@ class Suggestions extends Component<SuggestionsProps> {
                                         : "none",
                                 height: this.rowHeight + "px",
                             }}
-                            onMouseDown={(e): void => {
+                            onMouseDown={() => disableInputBlur()}
+                            onMouseUp={() => enableInputBlur()}
+                            onClick={(e): void => {
                                 this.useSuggestion(e, option.nodeName);
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -576,6 +584,14 @@ Suggestions.propTypes = {
      * Boolean stating if all suggestions for node shall be shown.
      */
     showAllSuggestions: PropTypes.bool,
+    /**
+     * Function for disabling input blur in parent. Prevents the input field from losing focus when clicking outside on a suggestion.
+     */
+    disableInputBlur: PropTypes.func,
+    /**
+     * Function for enabling input blur in parent.
+     */
+    enableInputBlur: PropTypes.func,
 };
 
 export default Suggestions;

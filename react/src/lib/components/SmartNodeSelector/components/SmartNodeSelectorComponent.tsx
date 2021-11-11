@@ -87,6 +87,7 @@ type SmartNodeSelectorUpdateStateType = {
  */
 export default class SmartNodeSelectorComponent extends Component<SmartNodeSelectorPropsType> {
     protected suggestionTimer: ReturnType<typeof setTimeout> | undefined;
+    protected shakingTimer: ReturnType<typeof setTimeout> | undefined;
     protected ref: React.RefObject<HTMLDivElement>;
     protected suggestionsRef: React.RefObject<HTMLDivElement>;
     protected refNumberOfTags: React.RefObject<HTMLDivElement>;
@@ -107,6 +108,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected keyPressed: boolean;
     protected justUpdated: boolean;
     protected selectedNodes: string[] | null;
+    protected blurEnabled: boolean;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -129,6 +131,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         super(props);
 
         this.suggestionTimer = undefined;
+        this.shakingTimer = undefined;
         this.ref = React.createRef();
         this.suggestionsRef = React.createRef();
         this.refNumberOfTags = React.createRef();
@@ -147,6 +150,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.keyPressed = false;
         this.justUpdated = false;
         this.selectedNodes = null;
+        this.blurEnabled = true;
 
         let error: string | undefined = undefined;
 
@@ -235,6 +239,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     componentWillUnmount(): void {
         this.componentIsMounted = false;
         if (this.suggestionTimer) clearTimeout(this.suggestionTimer);
+        if (this.shakingTimer) clearTimeout(this.shakingTimer);
         document.removeEventListener(
             "click",
             (e) => this.handleClickOutside(e),
@@ -353,7 +358,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     selectLastInput(
         e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
     ): void {
-        if (!this.selectionHasStarted && this.countSelectedTags() == 0) {
+        if (!this.selectionHasStarted && this.countSelectedTags() === 0) {
             this.setFocusOnTagInput(this.countTags() - 1);
             e.preventDefault();
         }
@@ -613,7 +618,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         let struct: SmartNodeSelectorUpdateStateType = {};
         if (
             nodeSelection.isValid() &&
-            this.currentTagIndex() == this.countTags() - 1 &&
+            this.currentTagIndex() === this.countTags() - 1 &&
             this.canAddSelection()
         ) {
             struct = {
@@ -641,7 +646,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 .current as HTMLDivElement;
             const blinkTimer = setInterval(() => {
                 numBlinks++;
-                if (numBlinks % 2 == 0) {
+                if (numBlinks % 2 === 0) {
                     numberOfTagsDiv.classList.add("SmartNodeSelector__Warning");
                 } else {
                     numberOfTagsDiv.classList.remove(
@@ -757,7 +762,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         const currentTarget = document.elementFromPoint(e.clientX, e.clientY);
         if (
             currentTarget &&
-            currentTarget == this.mouseDownElement &&
+            currentTarget === this.mouseDownElement &&
             currentTarget.nodeName === "INPUT"
         ) {
             return;
@@ -777,11 +782,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         const top = Math.min(this.mouseDownPosition[1], e.clientY);
         const bottom = Math.max(this.mouseDownPosition[1], e.clientY);
         let left =
-            this.mouseDownPosition[1] == top
+            this.mouseDownPosition[1] === top
                 ? this.mouseDownPosition[0]
                 : e.clientX;
         let right =
-            this.mouseDownPosition[1] == top
+            this.mouseDownPosition[1] === top
                 ? e.clientX
                 : this.mouseDownPosition[0];
         if (Math.abs(top - bottom) < 30) {
@@ -840,7 +845,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.lastSelectedTagIndex = index;
         this.firstSelectedTagIndex = index;
         this.state.nodeSelections.map((nodeSelection, i) => {
-            if (i == index) {
+            if (i === index) {
                 nodeSelection.setSelected(true);
             }
         });
@@ -897,7 +902,14 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (newTagIndex >= this.firstSelectedTagIndex) {
             newTagIndex = Math.max(0, newTagIndex - numRemovedTags);
         }
-        if (newSelections.length == 0 || !this.hasLastEmptyTag()) {
+        if (
+            newTagIndex === this.countTags() - this.selectedTags().length - 2 &&
+            this.hasLastEmptyTag()
+        ) {
+            newTagIndex = this.countTags() - this.selectedTags().length - 1;
+        }
+        if (newSelections.length === 0 || !this.hasLastEmptyTag()) {
+            newTagIndex = 0;
             newSelections = [...newSelections, this.createNewNodeSelection()];
         }
         this.updateState({
@@ -967,7 +979,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             if (this.countSelectedTags() > 0) {
                 let selectionChanged = false;
                 if (e.key === "ArrowLeft") {
-                    if (this.currentSelectionDirection == Direction.Left) {
+                    if (this.currentSelectionDirection === Direction.Left) {
                         this.firstSelectedTagIndex = Math.max(
                             0,
                             this.firstSelectedTagIndex - 1
@@ -978,7 +990,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     }
                     selectionChanged = true;
                 } else if (e.key === "ArrowRight") {
-                    if (this.currentSelectionDirection == Direction.Left) {
+                    if (this.currentSelectionDirection === Direction.Left) {
                         this.firstSelectedTagIndex =
                             this.firstSelectedTagIndex + 1;
                     } else {
@@ -1263,7 +1275,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.currentNodeSelection().countLevel() - 1
                 ) {
                     if (
-                        this.currentTagIndex() == this.countTags() - 1 &&
+                        this.currentTagIndex() === this.countTags() - 1 &&
                         !this.hasLastEmptyTag() &&
                         this.canAddSelection() &&
                         this.currentNodeSelection().isComplete()
@@ -1409,7 +1421,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (
             eventType === KeyEventType.KeyDown &&
             e.ctrlKey &&
-            this.currentTagIndex() == this.countTags() - 1
+            this.currentTagIndex() === this.countTags() - 1
         ) {
             this.pasteTags(e);
         }
@@ -1418,14 +1430,16 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     letCurrentTagShake(): void {
         this.updateState({
             currentTagShaking: true,
-            callback: () =>
-                window.setTimeout(
+            callback: () => {
+                if (this.shakingTimer) clearTimeout(this.shakingTimer);
+                this.shakingTimer = setTimeout(
                     () =>
                         this.updateState({
                             currentTagShaking: false,
                         }),
                     300
-                ),
+                );
+            },
         });
     }
 
@@ -1724,6 +1738,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleInputBlur(index: number): void {
+        if (!this.blurEnabled) {
+            return;
+        }
         const nodeSelection = this.state.nodeSelections[index];
         nodeSelection.setFocussedLevel(nodeSelection.countLevel() - 1);
         if (nodeSelection.isEmpty() && index < this.countTags() - 1) {
@@ -1859,6 +1876,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                             }
                             treeNodeSelection={this.currentNodeSelection()}
                             showAllSuggestions={showAllSuggestions}
+                            enableInputBlur={() => (this.blurEnabled = true)}
+                            disableInputBlur={() => (this.blurEnabled = false)}
                         />
                     )}
                 </div>

@@ -225,14 +225,14 @@ export default class TreeData {
         let match: RegExpExecArray | null;
         while ((match = re.exec(this.stringifiedData)) !== null) {
             const metaData = this.nodeData[parseInt(match[match.length - 2])];
+            const searchTermRe = RegExp(
+                `.*?(${this.adjustNodeName(searchTerm)}).*?`,
+                "i"
+            );
             if (
-                match[match.length - 1]
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
+                searchTermRe.test(match[match.length - 1]) ||
                 (metaData.description &&
-                    metaData.description
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()))
+                    searchTermRe.test(metaData.description))
             ) {
                 const count = nodeNames.size;
                 nodeNames.add(match[match.length - 1]);
