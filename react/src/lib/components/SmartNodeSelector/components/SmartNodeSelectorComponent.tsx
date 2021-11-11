@@ -1302,10 +1302,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         showAllSuggestions: true,
                         forceUpdate: true,
                         callback: () => {
-                            const inputField = (this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>)
+                            const input = (this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>)
                                 ?.current;
-                            if (inputField) {
-                                inputField.setSelectionRange(0, 0);
+                            if (input) {
+                                input.setSelectionRange(0, 0);
                             }
                         },
                     });

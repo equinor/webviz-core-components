@@ -585,7 +585,8 @@ Suggestions.propTypes = {
      */
     showAllSuggestions: PropTypes.bool,
     /**
-     * Function for disabling input blur in parent. Prevents the input field from losing focus when clicking outside on a suggestion.
+     * Function for disabling input blur in parent.
+     * Prevents the input field from losing focus when clicking outside on a suggestion.
      */
     disableInputBlur: PropTypes.func,
     /**
