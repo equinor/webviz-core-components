@@ -20,7 +20,7 @@ exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapsho
           title="Enter a new name"
         >
           <div
-            class="SmartNodeSelector__InnerTag"
+            class="SmartNodeSelector__InnerTag SmartNodeSelector__Valid"
           >
             <div
               class="SmartNodeSelector__InputContainer"
