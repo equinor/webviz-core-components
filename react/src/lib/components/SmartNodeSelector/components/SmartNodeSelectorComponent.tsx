@@ -8,6 +8,7 @@
 import React, { Component, MouseEvent } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
+import _ from "lodash";
 
 import TreeNodeSelection from "../utils/TreeNodeSelection";
 import TreeData from "../utils/TreeData";
@@ -109,6 +110,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected justUpdated: boolean;
     protected selectedNodes: string[] | null;
     protected blurEnabled: boolean;
+    protected updateFromWithin: boolean;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -151,6 +153,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.justUpdated = false;
         this.selectedNodes = null;
         this.blurEnabled = true;
+        this.updateFromWithin = false;
 
         let error: string | undefined = undefined;
 
@@ -263,6 +266,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     componentDidUpdate(prevProps: SmartNodeSelectorPropsType): void {
+        if (this.updateFromWithin) {
+            this.updateFromWithin = false;
+            return;
+        }
         if (
             (this.props.data &&
                 JSON.stringify(this.props.data) !==
@@ -443,10 +450,13 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
     countValidSelections(): number {
         let count = 0;
+        let i = 0;
         for (const nodeSelection of this.state.nodeSelections) {
-            count += nodeSelection.isValid()
-                ? nodeSelection.countExactlyMatchedNodePaths()
-                : 0;
+            count +=
+                nodeSelection.isValid() &&
+                !this.checkIfSelectionIsDuplicate(nodeSelection, i++)
+                    ? nodeSelection.countExactlyMatchedNodePaths()
+                    : 0;
         }
         return count;
     }
@@ -470,10 +480,10 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     (v, i) => !v.trulyEquals(this.state.nodeSelections[i])
                 );
         }
-        check = check || currentTagIndex != this.currentTagIndex();
-        check = check || suggestionsVisible != this.state.suggestionsVisible;
-        check = check || showAllSuggestions != this.state.showAllSuggestions;
-        check = check || currentTagShaking != this.state.currentTagShaking;
+        check = check || currentTagIndex !== this.currentTagIndex();
+        check = check || suggestionsVisible !== this.state.suggestionsVisible;
+        check = check || showAllSuggestions !== this.state.showAllSuggestions;
+        check = check || currentTagShaking !== this.state.currentTagShaking;
         return check;
     }
 
@@ -494,7 +504,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             this.currentTagIndex() > 0 &&
             currentTagIndex !== undefined &&
             this.currentNodeSelection() !== undefined &&
-            currentTagIndex != this.currentTagIndex()
+            currentTagIndex !== this.currentTagIndex()
         ) {
             this.nodeSelection(this.currentTagIndex()).setFocussedLevel(
                 this.nodeSelection(this.currentTagIndex()).countLevel() - 1
@@ -508,22 +518,17 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             currentTagIndex === undefined
                 ? this.currentTagIndex()
                 : currentTagIndex;
-        let newSuggestionsVisible =
+        const newSuggestionsVisible =
             suggestionsVisible === undefined
                 ? this.state.suggestionsVisible
                 : suggestionsVisible;
-        let newShowAllSuggestions = newTagIndex !== this.currentTagIndex();
+        const newShowAllSuggestions =
+            showAllSuggestions === undefined
+                ? this.state.showAllSuggestions
+                : showAllSuggestions;
 
-        if (!newShowAllSuggestions) {
-            newShowAllSuggestions =
-                showAllSuggestions === undefined
-                    ? this.state.showAllSuggestions
-                    : showAllSuggestions;
-        }
-
-        if (suggestionsVisible === undefined) {
-            newSuggestionsVisible =
-                newSuggestionsVisible || newShowAllSuggestions;
+        if (showAllSuggestions) {
+            console.log("test");
         }
 
         let newCurrentTagShaking =
@@ -566,15 +571,16 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
     }
 
-    maybeShowSuggestions(): void {
+    maybeShowSuggestions(showAll = false): void {
         const { numSecondsUntilSuggestionsAreShown } = this.props;
         if (this.suggestionTimer) clearTimeout(this.suggestionTimer);
         if (
-            this.currentNodeSelection() !== undefined &&
-            !this.currentNodeSelection().isValid()
+            (this.currentNodeSelection() !== undefined &&
+                !this.currentNodeSelection().isValid()) ||
+            showAll
         ) {
             this.suggestionTimer = setTimeout(
-                () => this.showSuggestions(),
+                () => this.showSuggestions(showAll),
                 numSecondsUntilSuggestionsAreShown * 1000
             );
         }
@@ -596,12 +602,19 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
     }
 
-    hideSuggestions(callback?: () => void): void {
+    hideSuggestions({
+        callback = undefined,
+        forceUpdate = undefined,
+    }: {
+        callback?: () => void;
+        forceUpdate?: boolean;
+    }): void {
         if (this.suggestionTimer) clearTimeout(this.suggestionTimer);
         this.updateState({
             suggestionsVisible: false,
             showAllSuggestions: false,
             callback: callback,
+            forceUpdate: forceUpdate,
         });
     }
 
@@ -627,10 +640,16 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.createNewNodeSelection(),
                 ],
                 currentTagIndex: this.currentTagIndex() + 1,
-                callback: () => this.focusCurrentTag(),
+                callback: () => {
+                    this.focusCurrentTag();
+                    this.maybeShowSuggestions();
+                },
             };
         } else {
             this.focusCurrentTag();
+            struct.callback = () => {
+                this.maybeShowSuggestions();
+            };
         }
         struct.suggestionsVisible = false;
         struct.showAllSuggestions = false;
@@ -694,13 +713,16 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             (!domNode || !domNode.contains(eventTarget)) &&
             (!suggestions || !suggestions.contains(eventTarget))
         ) {
-            this.hideSuggestions();
-            if (!this.selectionHasStarted) {
-                this.unselectAllTags({});
+            this.hideSuggestions({
+                callback: () => {
+                    if (!this.selectionHasStarted) {
+                        this.unselectAllTags({});
 
-                this.updateState({ currentTagIndex: -1 });
-            }
-            this.selectionHasStarted = false;
+                        this.updateState({ currentTagIndex: -1 });
+                    }
+                    this.selectionHasStarted = false;
+                },
+            });
         }
     }
 
@@ -725,7 +747,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.mouseButtonDown = false;
         document.body.classList.remove("SmartNodeSelector__unselectable");
         if (this.countSelectedTags() > 0) {
-            this.hideSuggestions();
+            this.hideSuggestions({});
             this.blurActiveElement();
             e.stopPropagation();
             e.preventDefault();
@@ -768,7 +790,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             return;
         }
 
-        this.hideSuggestions();
+        this.hideSuggestions({});
         this.blurActiveElement();
 
         const domNode = this.tagFieldRef.current;
@@ -849,11 +871,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 nodeSelection.setSelected(true);
             }
         });
-        this.updateState({
-            suggestionsVisible: false,
-            showAllSuggestions: false,
-            forceUpdate: true,
-        });
+        this.hideSuggestions({ forceUpdate: true });
     }
 
     markTagsAsSelected(startIndex: number, endIndex: number): void {
@@ -1043,7 +1061,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (this.clipboardData === null) return;
         const selections = this.clipboardData;
         if (selections && selections.length > 0) {
-            const newSelections = this.state.nodeSelections;
+            const newSelections = _.cloneDeep(this.state.nodeSelections);
             if (this.lastNodeSelection().isEmpty()) {
                 newSelections.pop();
             }
@@ -1076,7 +1094,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
     canAddSelection(): boolean {
         return (
-            (this.countValidSelections() < this.props.maxNumSelectedNodes ||
+            ((this.countValidSelections() < this.props.maxNumSelectedNodes &&
+                this.countTags() < this.props.maxNumSelectedNodes) ||
                 this.props.maxNumSelectedNodes === -1) &&
             this.props.maxNumSelectedNodes !== 1
         );
@@ -1114,6 +1133,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             selectedNodes.length !== this.selectedNodes.length ||
             JSON.stringify(this.selectedNodes) !== JSON.stringify(selectedNodes)
         ) {
+            this.updateFromWithin = true;
             setProps({
                 selectedTags: selectedTags,
                 selectedNodes: selectedNodes,
@@ -1160,12 +1180,13 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         if (!eventTarget) {
             return;
         }
+        this.hideSuggestions({});
         const val = eventTarget.value;
         const tag = this.nodeSelection(index);
         const previouslyFocussedLevel = tag.getFocussedLevel();
         if (
-            eventTarget.selectionStart != null &&
-            eventTarget.selectionEnd != null
+            eventTarget.selectionStart !== null &&
+            eventTarget.selectionEnd !== null
         ) {
             if (!tag.isFocusOnMetaData()) {
                 tag.setFocussedLevel(
@@ -1196,12 +1217,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 }
             }
             this.state.nodeSelections.forEach((v) => v.setSelected(false));
+            const showAllSuggestions =
+                previouslyFocussedLevel !== tag.getFocussedLevel();
             this.updateState({
-                showAllSuggestions:
-                    previouslyFocussedLevel !== tag.getFocussedLevel(),
                 currentTagIndex: index,
                 callback: () => {
-                    this.maybeShowSuggestions();
+                    this.maybeShowSuggestions(showAllSuggestions);
                 },
                 forceUpdate: tag.getFocussedLevel() !== previouslyFocussedLevel,
             });
@@ -1525,7 +1546,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.lastSelectedTagIndex
                 );
                 this.blurActiveElement();
-                this.hideSuggestions();
+                this.hideSuggestions({});
                 e.preventDefault();
             } else if (!e.shiftKey) {
                 let cursorPosition = eventTarget.selectionStart;
@@ -1575,7 +1596,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.lastSelectedTagIndex
                 );
                 this.blurActiveElement();
-                this.hideSuggestions();
+                this.hideSuggestions({});
                 e.preventDefault();
             } else if (!e.shiftKey) {
                 let cursorPosition = eventTarget.selectionStart;
@@ -1705,6 +1726,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             e.target.selectionStart
         );
         const tag = this.currentNodeSelection();
+        if (!tag) {
+            return;
+        }
         const oldValue = tag.getFocussedNodeName();
 
         if (tag.isFocusOnMetaData()) {
@@ -1788,6 +1812,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         return (
             <div id={id} ref={this.ref}>
+                {this.debugOutput()}
                 {label && <label>{label}</label>}
                 <div
                     className={classNames({
@@ -1838,7 +1863,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                                     this.handleInputBlur(index)
                                 }
                                 hideSuggestions={(cb) =>
-                                    this.hideSuggestions(cb)
+                                    this.hideSuggestions({ callback: cb })
                                 }
                                 removeTag={(e, index) =>
                                     this.removeTag(index, true, e)
@@ -1849,6 +1874,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                                 shake={
                                     this.state.currentTagShaking &&
                                     index === this.currentTagIndex()
+                                }
+                                enableInputBlur={() =>
+                                    (this.blurEnabled = true)
+                                }
+                                disableInputBlur={() =>
+                                    (this.blurEnabled = false)
                                 }
                             />
                         ))}

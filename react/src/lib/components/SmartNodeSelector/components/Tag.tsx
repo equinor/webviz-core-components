@@ -135,6 +135,8 @@ export default class Tag extends Component<TagProps> {
         if (input) {
             const fontSize = window.getComputedStyle(input).fontSize;
             span.style.fontSize = fontSize;
+        } else {
+            span.style.fontSize = "13.3333px";
         }
         const textNode = document.createTextNode(text.replace(/ /g, "\u00A0"));
         span.appendChild(textNode);
@@ -197,7 +199,7 @@ export default class Tag extends Component<TagProps> {
                     <button
                         key={"TagPreviousButton_" + index}
                         className="SmartNodeSelector__ShiftNode SmartNodeSelector__ShiftUp"
-                        disabled={position == 0}
+                        disabled={position === 0}
                         title="Previous option"
                         onMouseDown={(e): void =>
                             this.shiftOption(e, nodeSelection, false)
@@ -239,6 +241,8 @@ export default class Tag extends Component<TagProps> {
         nodeSelection: TreeNodeSelection,
         up: boolean
     ): void {
+        e.preventDefault();
+        e.stopPropagation();
         const { hideSuggestions, updateSelectedTagsAndNodes } = this.props;
         const inputElement = (nodeSelection.getRef() as React.RefObject<HTMLInputElement>)
             .current as HTMLInputElement;
@@ -257,18 +261,14 @@ export default class Tag extends Component<TagProps> {
         nodeSelection.setNodeName(subgroups[newPosition]);
         hideSuggestions(() => {
             if (currentSelection[0] !== null && currentSelection[1] !== null) {
-                window.setTimeout(
-                    () =>
-                        inputElement.setSelectionRange(
-                            currentSelection[0],
-                            currentSelection[1]
-                        ),
-                    20
-                );
+                window.setTimeout(() => {
+                    inputElement.setSelectionRange(
+                        currentSelection[0],
+                        currentSelection[1]
+                    );
+                }, 20);
             }
         });
-        e.preventDefault();
-        e.stopPropagation();
         updateSelectedTagsAndNodes();
     }
 
