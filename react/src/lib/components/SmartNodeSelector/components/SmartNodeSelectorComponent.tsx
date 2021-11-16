@@ -527,10 +527,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 ? this.state.showAllSuggestions
                 : showAllSuggestions;
 
-        if (showAllSuggestions) {
-            console.log("test");
-        }
-
         let newCurrentTagShaking =
             currentTagShaking === undefined
                 ? this.state.currentTagShaking
@@ -1352,15 +1348,20 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             if (
                 e.shiftKey &&
                 eventTarget.selectionStart === 0 &&
-                eventTarget.selectionEnd === 0 &&
-                this.currentTagIndex() > 0
+                eventTarget.selectionEnd === 0
             ) {
-                if (!this.currentNodeSelection().displayAsTag()) {
-                    this.selectTag(this.currentTagIndex() - 1);
+                if (this.currentTagIndex() > 0) {
+                    if (!this.currentNodeSelection().displayAsTag()) {
+                        this.selectTag(this.currentTagIndex() - 1);
+                    } else {
+                        this.selectTag(this.currentTagIndex());
+                    }
+                    this.currentSelectionDirection = Direction.Left;
                 } else {
-                    this.selectTag(this.currentTagIndex());
+                    if (this.currentNodeSelection().displayAsTag()) {
+                        this.selectTag(this.currentTagIndex());
+                    }
                 }
-                this.currentSelectionDirection = Direction.Left;
                 e.preventDefault();
             } else {
                 if (
@@ -1534,13 +1535,19 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
         const val = eventTarget.value;
         if (eventType === KeyEventType.KeyDown) {
-            if (
-                e.shiftKey &&
-                eventTarget.selectionStart === 0 &&
-                this.currentNodeSelection().getFocussedLevel() === 0
-            ) {
+            if (e.shiftKey && eventTarget.selectionStart === 0) {
                 this.firstSelectedTagIndex = 0;
-                this.lastSelectedTagIndex = this.currentTagIndex() - 1;
+                if (
+                    this.currentNodeSelection().getCompleteNodePathAsString() ===
+                        "" ||
+                    this.currentNodeSelection().getFocussedLevel() === 0
+                ) {
+                    this.lastSelectedTagIndex = this.currentTagIndex() - 1;
+                } else {
+                    this.lastSelectedTagIndex = this.currentTagIndex();
+                }
+                console.log(this.firstSelectedTagIndex);
+                console.log(this.lastSelectedTagIndex);
                 this.markTagsAsSelected(
                     this.firstSelectedTagIndex,
                     this.lastSelectedTagIndex
@@ -1700,7 +1707,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
     getSelectedInputNode(value: string, selectionStart: number | null): string {
         const split = value.split(this.props.delimiter);
-        if (selectionStart) {
+        if (selectionStart !== null) {
             let index = 0;
             let charCount = 0;
             while (index < split.length) {
@@ -1762,6 +1769,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleInputBlur(index: number): void {
+        return;
         if (!this.blurEnabled) {
             return;
         }

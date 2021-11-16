@@ -274,7 +274,7 @@ export default class TreeNodeSelection {
                     break;
                 } else if (i >= this.numMetaNodes) {
                     if (el === "" && this.getFocussedLevel() < i) break;
-                    text += text === "" ? el : this.delimiter + el;
+                    text += i <= this.numMetaNodes ? el : this.delimiter + el;
                 }
             }
             return text;
