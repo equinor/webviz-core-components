@@ -235,7 +235,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             true
         );
         if (!this.state.hasError) {
-            this.updateSelectedTagsAndNodes();
+            this.updateSelectedTagsAndNodes(true);
         }
     }
 
@@ -1099,7 +1099,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         );
     }
 
-    updateSelectedTagsAndNodes(): void {
+    updateSelectedTagsAndNodes(initialUpdate = false): void {
         const { setProps, maxNumSelectedNodes } = this.props;
         const selectedTags: string[] = [];
         const selectedNodes: string[] = [];
@@ -1131,7 +1131,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             selectedNodes.length !== this.selectedNodes.length ||
             JSON.stringify(this.selectedNodes) !== JSON.stringify(selectedNodes)
         ) {
-            this.updateFromWithin = true;
+            if (!initialUpdate) {
+                this.updateFromWithin = true;
+            }
             setProps({
                 selectedTags: selectedTags,
                 selectedNodes: selectedNodes,
@@ -1769,7 +1771,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     handleInputBlur(index: number): void {
-        return;
         if (!this.blurEnabled) {
             return;
         }
