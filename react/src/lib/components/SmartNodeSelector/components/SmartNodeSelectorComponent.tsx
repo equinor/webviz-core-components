@@ -719,6 +719,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     this.selectionHasStarted = false;
                 },
             });
+        } else if (this.countSelectedTags() > 0) {
+            this.updateState({ forceUpdate: true });
         }
     }
 
@@ -1546,8 +1548,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 } else {
                     this.lastSelectedTagIndex = this.currentTagIndex();
                 }
-                console.log(this.firstSelectedTagIndex);
-                console.log(this.lastSelectedTagIndex);
                 this.markTagsAsSelected(
                     this.firstSelectedTagIndex,
                     this.lastSelectedTagIndex
@@ -1820,7 +1820,6 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
 
         return (
             <div id={id} ref={this.ref}>
-                {this.debugOutput()}
                 {label && <label>{label}</label>}
                 <div
                     className={classNames({
