@@ -8,6 +8,9 @@
 import React, { Component, ReactFragment } from "react";
 import classNames from "classnames";
 import PropTypes from "prop-types";
+
+import "animate.css";
+
 import TreeNodeSelection from "../utils/TreeNodeSelection";
 import "./SmartNodeSelector.css";
 
@@ -19,6 +22,7 @@ type TagProps = {
     countTags: number;
     currentTag: boolean;
     frameless: boolean;
+    active: boolean;
     checkIfDuplicate: (
         nodeSelection: TreeNodeSelection,
         index: number
@@ -30,12 +34,14 @@ type TagProps = {
         e: React.SyntheticEvent<HTMLInputElement, Event>,
         index: number
     ) => void;
+    inputBlur: (index: number) => void;
     hideSuggestions: (callback?: () => void) => void;
     removeTag: (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
         index: number
     ) => void;
     updateSelectedTagsAndNodes: () => void;
+    shake: boolean;
 };
 
 /**
@@ -52,6 +58,10 @@ export default class Tag extends Component<TagProps> {
 
         this.props = props;
         this.state = { hovered: false };
+    }
+
+    componentDidMount(): void {
+        this.forceUpdate();
     }
 
     private addAdditionalClasses(invalid: boolean): boolean {
@@ -79,7 +89,11 @@ export default class Tag extends Component<TagProps> {
                     ? "SmartNodeSelector__InnerDuplicate"
                     : icons.length > 1
                     ? "SmartNodeSelector__Unknown"
-                    : ""]: true,
+                    : "SmartNodeSelector__Valid"]: true,
+            });
+        } else {
+            ret = Object.assign({}, ret, {
+                SmartNodeSelector__Valid: true,
             });
         }
         return classNames(ret);
@@ -93,6 +107,8 @@ export default class Tag extends Component<TagProps> {
         return classNames({
             SmartNodeSelector__Tag: true,
             SmartNodeSelector__Border: this.displayAsTag() || frameless,
+            animate__animated: this.props.shake,
+            animate__headShake: this.props.shake,
             [!this.addAdditionalClasses(invalid)
                 ? ""
                 : invalid
@@ -119,6 +135,8 @@ export default class Tag extends Component<TagProps> {
         if (input) {
             const fontSize = window.getComputedStyle(input).fontSize;
             span.style.fontSize = fontSize;
+        } else {
+            span.style.fontSize = "13.3333px";
         }
         const textNode = document.createTextNode(text.replace(/ /g, "\u00A0"));
         span.appendChild(textNode);
@@ -181,7 +199,7 @@ export default class Tag extends Component<TagProps> {
                     <button
                         key={"TagPreviousButton_" + index}
                         className="SmartNodeSelector__ShiftNode SmartNodeSelector__ShiftUp"
-                        disabled={position == 0}
+                        disabled={position === 0}
                         title="Previous option"
                         onMouseDown={(e): void =>
                             this.shiftOption(e, nodeSelection, false)
@@ -223,6 +241,8 @@ export default class Tag extends Component<TagProps> {
         nodeSelection: TreeNodeSelection,
         up: boolean
     ): void {
+        e.preventDefault();
+        e.stopPropagation();
         const { hideSuggestions, updateSelectedTagsAndNodes } = this.props;
         const inputElement = (nodeSelection.getRef() as React.RefObject<HTMLInputElement>)
             .current as HTMLInputElement;
@@ -241,14 +261,14 @@ export default class Tag extends Component<TagProps> {
         nodeSelection.setNodeName(subgroups[newPosition]);
         hideSuggestions(() => {
             if (currentSelection[0] !== null && currentSelection[1] !== null) {
-                inputElement.setSelectionRange(
-                    currentSelection[0],
-                    currentSelection[1]
-                );
+                window.setTimeout(() => {
+                    inputElement.setSelectionRange(
+                        currentSelection[0],
+                        currentSelection[1]
+                    );
+                }, 20);
             }
         });
-        e.preventDefault();
-        e.stopPropagation();
         updateSelectedTagsAndNodes();
     }
 
@@ -352,7 +372,7 @@ export default class Tag extends Component<TagProps> {
             treeNodeSelection.getFocussedNodeName() === "" &&
             treeNodeSelection.getFocussedLevel() == 0
         ) {
-            return "100px";
+            return this.calculateTextWidth(this.props.placeholder) + "px";
         } else {
             return this.calculateTextWidth(displayText) + "px";
         }
@@ -362,13 +382,16 @@ export default class Tag extends Component<TagProps> {
         const { treeNodeSelection, frameless } = this.props;
 
         const colors = treeNodeSelection.colors();
-        const style: { [key: string]: string } = {};
+        const style: { [key: string]: string } = {
+            borderWidth: "1px",
+            borderStyle: "solid",
+        };
 
         if (colors.length >= 2) {
             style["background"] = `linear-gradient(to left, ${colors.join(
                 ", "
             )}) border-box`;
-            style["border"] = "1px solid transparent";
+            style["borderColor"] = "transparent";
         } else {
             style["borderColor"] = colors[0];
         }
@@ -380,17 +403,29 @@ export default class Tag extends Component<TagProps> {
         return style;
     }
 
+    private handleClickEvent(e: React.MouseEvent<HTMLLIElement>): void {
+        const input = (this.props.treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
+            .current as HTMLInputElement;
+        if (input) {
+            input.focus();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
+
     render(): React.ReactNode {
         const {
             index,
             treeNodeSelection,
             currentTag,
             frameless,
+            active,
             checkIfDuplicate,
             inputKeyDown,
             inputKeyUp,
             inputChange,
             inputSelect,
+            inputBlur,
             removeTag,
         } = this.props;
 
@@ -411,6 +446,7 @@ export default class Tag extends Component<TagProps> {
                 style={this.makeStyle()}
                 onMouseEnter={(): void => this.setState({ hovered: true })}
                 onMouseLeave={(): void => this.setState({ hovered: false })}
+                onClick={(e): void => this.handleClickEvent(e)}
             >
                 {this.displayAsTag() && !frameless && (
                     <button
@@ -451,7 +487,9 @@ export default class Tag extends Component<TagProps> {
                                 treeNodeSelection.getFocussedNodeName() ===
                                     "" &&
                                 treeNodeSelection.getFocussedLevel() == 0
-                                    ? "Add new tag..."
+                                    ? treeNodeSelection.getRef() && active
+                                        ? ""
+                                        : this.props.placeholder
                                     : ""
                             }
                             value={displayText}
@@ -465,11 +503,7 @@ export default class Tag extends Component<TagProps> {
                             onKeyUp={(e): void => inputKeyUp(e)}
                             onKeyDown={(e): void => inputKeyDown(e)}
                             onSelect={(e): void => inputSelect(e, index)}
-                            onBlur={(): void =>
-                                treeNodeSelection.setFocussedLevel(
-                                    treeNodeSelection.countLevel() - 1
-                                )
-                            }
+                            onBlur={(): void => inputBlur(index)}
                         />
                         {(currentTag || this.state.hovered) &&
                             !treeNodeSelection.isSelected() &&
@@ -510,6 +544,10 @@ Tag.propTypes = {
      */
     frameless: PropTypes.bool.isRequired,
     /**
+     * Flag stating if the tag is the currently active tag.
+     */
+    active: PropTypes.bool.isRequired,
+    /**
      * Function to check if this tag is a duplicate.
      */
     checkIfDuplicate: PropTypes.func.isRequired,
@@ -530,6 +568,10 @@ Tag.propTypes = {
      */
     inputSelect: PropTypes.func.isRequired,
     /**
+     * Function to call on blur event.
+     */
+    inputBlur: PropTypes.func.isRequired,
+    /**
      * Function for hiding suggestions list.
      */
     hideSuggestions: PropTypes.func.isRequired,
@@ -541,4 +583,8 @@ Tag.propTypes = {
      * Function for updating selected tags, nodes and ids.
      */
     updateSelectedTagsAndNodes: PropTypes.func.isRequired,
+    /**
+     * Flag stating if the tag should be shaking.
+     */
+    shake: PropTypes.bool,
 };

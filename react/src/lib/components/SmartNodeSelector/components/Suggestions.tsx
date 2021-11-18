@@ -25,11 +25,16 @@ type SuggestionsProps = {
         option: string
     ) => void;
     treeNodeSelection?: TreeNodeSelection;
+    showAllSuggestions: boolean;
+    enableInputBlur: () => void;
+    disableInputBlur: () => void;
 };
 
 type SuggestionsState = {
     fromIndex: number;
 };
+
+type Option = { nodeName: string; metaData: TreeDataNodeMetaData };
 
 /**
  * A component for showing a list of suggestions.
@@ -44,12 +49,13 @@ class Suggestions extends Component<SuggestionsProps> {
     private currentlySelectedSuggestionIndex: number;
     private rowHeight: number;
     private upperSpacerHeight: number;
-    private allOptions: { nodeName: string; metaData: TreeDataNodeMetaData }[];
+    private allOptions: Option[];
     private currentNodeLevel: number;
     private currentNodeName: string;
     private lastNodeSelection?: TreeNodeSelection;
     private positionRef: React.RefObject<HTMLDivElement>;
     private popup: HTMLDivElement | null;
+    private showingAllSuggestions: boolean;
 
     constructor(props: SuggestionsProps) {
         super(props);
@@ -65,6 +71,7 @@ class Suggestions extends Component<SuggestionsProps> {
         this.allOptions = [];
         this.positionRef = React.createRef();
         this.popup = null;
+        this.showingAllSuggestions = false;
 
         this.state = {
             fromIndex: 0,
@@ -88,6 +95,7 @@ class Suggestions extends Component<SuggestionsProps> {
             true
         );
         window.addEventListener("resize", () => this.renderPopup());
+        window.addEventListener("scroll", () => this.renderPopup(), true);
 
         this.popup = document.createElement("div");
         document.body.appendChild(this.popup);
@@ -105,6 +113,7 @@ class Suggestions extends Component<SuggestionsProps> {
             true
         );
         window.removeEventListener("resize", () => this.renderPopup());
+        window.removeEventListener("scroll", () => this.renderPopup(), true);
 
         if (this.popup) {
             document.body.removeChild(this.popup);
@@ -118,7 +127,9 @@ class Suggestions extends Component<SuggestionsProps> {
             previousProps.treeNodeSelection != treeNodeSelection
         ) {
             this.upperSpacerHeight = 0;
-            (suggestionsRef.current as HTMLDivElement).scrollTop = 0;
+            if (suggestionsRef.current) {
+                (suggestionsRef.current as HTMLDivElement).scrollTop = 0;
+            }
             this.currentlySelectedSuggestionIndex = 0;
             this.setState({ fromIndex: 0 });
         }
@@ -135,16 +146,24 @@ class Suggestions extends Component<SuggestionsProps> {
     }
 
     private maybeLoadNewOptions(): void {
-        const { treeNodeSelection, suggestionsRef } = this.props;
+        const {
+            treeNodeSelection,
+            suggestionsRef,
+            showAllSuggestions,
+        } = this.props;
         if (
             treeNodeSelection !== undefined &&
-            (treeNodeSelection.getFocussedLevel() != this.currentNodeLevel ||
-                treeNodeSelection.getFocussedNodeName() !=
+            (treeNodeSelection.getFocussedLevel() !== this.currentNodeLevel ||
+                treeNodeSelection.getFocussedNodeName() !==
                     this.currentNodeName ||
                 this.lastNodeSelection === undefined ||
-                !treeNodeSelection.objectEquals(this.lastNodeSelection))
+                !treeNodeSelection.objectEquals(this.lastNodeSelection) ||
+                this.props.showAllSuggestions !== this.showingAllSuggestions)
         ) {
-            this.allOptions = treeNodeSelection.getSuggestions();
+            this.showingAllSuggestions = this.props.showAllSuggestions;
+            this.allOptions = treeNodeSelection.getSuggestions(
+                showAllSuggestions
+            );
             this.currentNodeLevel = treeNodeSelection.getFocussedLevel();
             this.lastNodeSelection = treeNodeSelection;
             this.currentNodeName = treeNodeSelection.getFocussedNodeName();
@@ -310,16 +329,67 @@ class Suggestions extends Component<SuggestionsProps> {
     }
 
     private decorateOption(
-        option: string,
+        option: Option,
         treeNodeSelection: TreeNodeSelection
     ): React.ReactNode {
+        const regexName = RegExp(
+            `^${treeNodeSelection.getFocussedNodeName()}`,
+            "i"
+        );
+        const regexDescription = RegExp(
+            `${treeNodeSelection.getFocussedNodeName()}`,
+            "i"
+        );
+        const matchName = option.nodeName.match(regexName);
+        const matchDescription = option.metaData.description?.match(
+            regexDescription
+        );
+
+        const matchedNodePart = matchName
+            ? option.nodeName.substring(0, matchName[0].length)
+            : "";
+        const unmatchedNodePart = matchName
+            ? option.nodeName.substring(
+                  matchName[0].length,
+                  option.nodeName.length
+              )
+            : option.nodeName;
+
+        const unmatchedDescriptionPartBefore = matchDescription
+            ? option.metaData.description?.substring(
+                  0,
+                  matchDescription.index as number
+              )
+            : option.metaData.description;
+
+        const matchedDescription = matchDescription
+            ? option.metaData.description?.substring(
+                  matchDescription.index as number,
+                  (matchDescription.index as number) +
+                      matchDescription[0].length
+              )
+            : "";
+
+        const unmatchedDescriptionPartAfter = matchDescription
+            ? option.metaData.description?.substring(
+                  (matchDescription.index as number) +
+                      matchDescription[0].length,
+                  option.metaData.description.length
+              )
+            : "";
+
         return (
             <Fragment>
-                <span className="Suggestions__Match">
-                    {treeNodeSelection.getFocussedNodeName()}
-                </span>
-                {option.substring(
-                    treeNodeSelection.getFocussedNodeName().length
+                <span className="Suggestions__Match">{matchedNodePart}</span>
+                {unmatchedNodePart}
+                {option.metaData.description && (
+                    <>
+                        - {unmatchedDescriptionPartBefore}
+                        <span className="Suggestions__Match">
+                            {matchedDescription}
+                        </span>
+                        {unmatchedDescriptionPartAfter}
+                    </>
                 )}
             </Fragment>
         );
@@ -328,7 +398,11 @@ class Suggestions extends Component<SuggestionsProps> {
     private createSuggestionsForCurrentTag(
         maxHeight: number
     ): React.ReactFragment | null {
-        const { treeNodeSelection } = this.props;
+        const {
+            treeNodeSelection,
+            enableInputBlur,
+            disableInputBlur,
+        } = this.props;
         if (treeNodeSelection === undefined) return "";
         if (!treeNodeSelection.focussedNodeNameContainsWildcard()) {
             const options = this.allOptions.slice(
@@ -367,19 +441,23 @@ class Suggestions extends Component<SuggestionsProps> {
                                         : "none",
                                 height: this.rowHeight + "px",
                             }}
-                            onClick={(e): void =>
-                                this.useSuggestion(e, option.nodeName)
-                            }
+                            onMouseDown={() => disableInputBlur()}
+                            onMouseUp={() => enableInputBlur()}
+                            onClick={(e): void => {
+                                this.useSuggestion(e, option.nodeName);
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                            title={`${option.nodeName} - ${option.metaData.description}`}
                         >
-                            {this.decorateOption(
-                                option.nodeName,
-                                treeNodeSelection
-                            )}
-                            {option.metaData.description
-                                ? ` - ${option.metaData.description}`
-                                : ""}
+                            {this.decorateOption(option, treeNodeSelection)}
                         </div>
                     ))}
+                    {options.length === 0 && (
+                        <div className="Suggestions__NoSuggestions">
+                            No options available...
+                        </div>
+                    )}
                 </Fragment>
             );
         }
@@ -410,7 +488,23 @@ class Suggestions extends Component<SuggestionsProps> {
         }
 
         const boundingRect = this.positionRef.current
-            ? this.positionRef.current.getBoundingClientRect()
+            ? {
+                  top:
+                      this.positionRef.current.getBoundingClientRect().top +
+                      window.scrollY,
+                  left:
+                      this.positionRef.current.getBoundingClientRect().left +
+                      window.scrollX,
+                  bottom:
+                      this.positionRef.current.getBoundingClientRect().bottom +
+                      window.scrollY,
+                  right:
+                      this.positionRef.current.getBoundingClientRect().right +
+                      window.scrollX,
+                  width: this.positionRef.current.getBoundingClientRect().width,
+                  height: this.positionRef.current.getBoundingClientRect()
+                      .height,
+              }
             : {
                   top: 0,
                   left: 0,
@@ -487,6 +581,19 @@ Suggestions.propTypes = {
      * Tag data object to show suggestions for.
      */
     treeNodeSelection: PropTypes.instanceOf(TreeNodeSelection),
+    /**
+     * Boolean stating if all suggestions for node shall be shown.
+     */
+    showAllSuggestions: PropTypes.bool,
+    /**
+     * Function for disabling input blur in parent.
+     * Prevents the input field from losing focus when clicking outside on a suggestion.
+     */
+    disableInputBlur: PropTypes.func,
+    /**
+     * Function for enabling input blur in parent.
+     */
+    enableInputBlur: PropTypes.func,
 };
 
 export default Suggestions;

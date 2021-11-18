@@ -8,7 +8,14 @@
 import WebvizPluginPlaceholder from "./components/WebvizPluginPlaceholder";
 import { ColorScales } from "./components/ColorScales";
 import Select from "./components/Select";
-import SmartNodeSelector from "./components/SmartNodeSelector";
+import SmartNodeSelector, {
+    TreeData,
+    TreeDataNode,
+    TreeDataNodeMetaData,
+    TreeNodeSelection,
+    SmartNodeSelectorPropsType,
+    SmartNodeSelectorComponent,
+} from "./components/SmartNodeSelector";
 import { Menu } from "./components/Menu";
 import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
@@ -21,6 +28,12 @@ export {
     ColorScales,
     Select,
     SmartNodeSelector,
+    TreeData,
+    TreeDataNode,
+    TreeNodeSelection,
+    TreeDataNodeMetaData,
+    SmartNodeSelectorComponent,
+    SmartNodeSelectorPropsType,
     Menu,
     Overlay,
     ScrollArea,

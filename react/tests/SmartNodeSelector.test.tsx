@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, RenderResult } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SmartNodeSelector } from "../src/lib";
+import { TreeDataNode } from "../src/lib/components/SmartNodeSelector";
 import { SmartNodeSelectorInteractiveContainer } from "./SmartNodeSelectorInteractiveContainer";
 
 export type PropType = {
@@ -22,6 +23,7 @@ const setProps = (props: PropType): void => {
 
 enum RenderDataStructure {
     Flat = 1,
+    FlatTwoNodes,
     Deep,
     DeepWithMetaData,
     InvalidData,
@@ -35,18 +37,9 @@ const clearParentProps = () => {
     };
 };
 
-const renderSmartNodeSelector = (
-    renderDataStructure: RenderDataStructure,
-    options: {
-        showSuggestions?: boolean;
-        initialTags?: string[];
-        maxNumSelectedNodes?: number;
-    } = {
-        showSuggestions: true,
-        initialTags: [],
-        maxNumSelectedNodes: -1,
-    }
-): RenderResult => {
+const createDataStructure = (
+    renderDataStructure: RenderDataStructure
+): TreeDataNode[] => {
     let data = [];
     switch (renderDataStructure) {
         case RenderDataStructure.Flat:
@@ -54,6 +47,20 @@ const renderSmartNodeSelector = (
                 {
                     id: "1",
                     name: "Data",
+                    description: "Description",
+                },
+            ];
+            break;
+        case RenderDataStructure.FlatTwoNodes:
+            data = [
+                {
+                    id: "1",
+                    name: "Data1",
+                    description: "Description",
+                },
+                {
+                    id: "2",
+                    name: "Data2",
                     description: "Description",
                 },
             ];
@@ -114,7 +121,22 @@ const renderSmartNodeSelector = (
                 },
             ];
     }
+    return data;
+};
 
+const renderSmartNodeSelector = (
+    renderDataStructure: RenderDataStructure,
+    options: {
+        showSuggestions?: boolean;
+        initialTags?: string[];
+        maxNumSelectedNodes?: number;
+    } = {
+        showSuggestions: true,
+        initialTags: [],
+        maxNumSelectedNodes: -1,
+    }
+): RenderResult => {
+    const data = createDataStructure(renderDataStructure);
     return render(
         <SmartNodeSelector
             id="SmartNodeSelector"
@@ -130,9 +152,15 @@ const renderSmartNodeSelector = (
     );
 };
 
-const renderInteractiveSmartNodeSelector = (): RenderResult => {
+const renderInteractiveSmartNodeSelector = (
+    renderDataStructure: RenderDataStructure
+): RenderResult => {
+    const data = createDataStructure(renderDataStructure);
     return render(
-        <SmartNodeSelectorInteractiveContainer setProps={setProps} />
+        <SmartNodeSelectorInteractiveContainer
+            setProps={setProps}
+            data={data}
+        />
     );
 };
 
@@ -493,15 +521,8 @@ describe("SmartNodeSelector", () => {
         userEvent.click(lastInput);
         fireEvent.keyDown(lastInput, { key: "v", ctrlKey: true });
 
-        expect(parentProps.selectedTags).toHaveLength(6);
-        expect(parentProps.selectedTags).toEqual([
-            "Data",
-            "Data",
-            "Data",
-            "Data",
-            "Data",
-            "Data",
-        ]);
+        expect(parentProps.selectedTags).toHaveLength(1);
+        expect(parentProps.selectedTags).toEqual(["Data"]);
         expect(parentProps.selectedNodes).toHaveLength(1);
         expect(parentProps.selectedNodes[0]).toMatch("Data");
         expect(parentProps.selectedIds).toHaveLength(1);
@@ -537,7 +558,9 @@ describe("SmartNodeSelector", () => {
     });
 
     it("Check if selected tags can be dynamically changed", () => {
-        const { container } = renderInteractiveSmartNodeSelector();
+        const { container } = renderInteractiveSmartNodeSelector(
+            RenderDataStructure.FlatTwoNodes
+        );
 
         const smartNodeSelector = container.querySelector("#SmartNodeSelector");
         expect(smartNodeSelector).toBeDefined();
@@ -564,7 +587,9 @@ describe("SmartNodeSelector", () => {
     });
 
     it("Check if data can be dynamically changed", () => {
-        const { container } = renderInteractiveSmartNodeSelector();
+        const { container } = renderInteractiveSmartNodeSelector(
+            RenderDataStructure.FlatTwoNodes
+        );
 
         const smartNodeSelector = container.querySelector("#SmartNodeSelector");
         expect(smartNodeSelector).toBeDefined();
@@ -618,6 +643,27 @@ describe("SmartNodeSelector", () => {
             firstTag.classList.contains("SmartNodeSelector__Border")
         ).toBeTruthy();
         expect(firstTag.title === firstInput.value).toBeTruthy();
+
+        clearParentProps();
+    });
+
+    it("Check that SmartNodeSelector is working well when used as a controlled component", () => {
+        const { container } = renderInteractiveSmartNodeSelector(
+            RenderDataStructure.Deep
+        );
+
+        const smartNodeSelector = container.querySelector("#SmartNodeSelector");
+        expect(smartNodeSelector).toBeDefined();
+
+        const firstInput = smartNodeSelector.querySelector(
+            "input"
+        ) as HTMLInputElement;
+
+        userEvent.type(firstInput, "Data");
+        fireEvent.keyDown(firstInput, { key: ":" });
+        fireEvent.keyUp(firstInput, { key: ":" });
+
+        expect(firstInput.value === "Data:").toBeTruthy();
 
         clearParentProps();
     });

@@ -13,26 +13,8 @@ import SmartNodeSelectorComponent from "./components/SmartNodeSelectorComponent"
  * SmartNodeSelector is a component that allows to create tags by selecting data from a tree structure.
  * The tree structure can also provide meta data that is displayed as color or icon.
  */
-const SmartNodeSelector = props => {
-    return (
-        <SmartNodeSelectorComponent
-            id={props.id}
-            maxNumSelectedNodes={props.maxNumSelectedNodes}
-            delimiter={props.delimiter}
-            numMetaNodes={props.numMetaNodes}
-            data={props.data}
-            label={props.label}
-            showSuggestions={props.showSuggestions}
-            setProps={props.setProps}
-            selectedTags={props.selectedTags}
-            placeholder={props.placeholder}
-            numSecondsUntilSuggestionsAreShown={
-                props.numSecondsUntilSuggestionsAreShown
-            }
-            lineBreakAfterTag={props.lineBreakAfterTag}
-            persistence={props.persistence}
-        />
-    );
+const SmartNodeSelector = (props) => {
+    return <SmartNodeSelectorComponent {...props} />;
 };
 
 SmartNodeSelector.defaultProps = {
@@ -44,8 +26,10 @@ SmartNodeSelector.defaultProps = {
     placeholder: "Add new tag...",
     numSecondsUntilSuggestionsAreShown: 0.5,
     lineBreakAfterTag: false,
-    persisted_props: ['selectedTags'],
-    persistence_type: 'local',
+    caseInsensitiveMatching: false,
+    useBetaFeatures: false,
+    persisted_props: ["selectedTags"],
+    persistence_type: "local",
 };
 
 SmartNodeSelector.propTypes = {
@@ -112,6 +96,16 @@ SmartNodeSelector.propTypes = {
     lineBreakAfterTag: PropTypes.bool,
 
     /**
+     * Set to true if case-wise incorrect values should be accepted anyways.
+     */
+    caseInsensitiveMatching: PropTypes.bool,
+
+    /**
+     * Set to true to enable beta features.
+     */
+    useBetaFeatures: PropTypes.bool,
+
+    /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
      * hasn't changed from its previous value, a `value` that the user has
@@ -119,15 +113,17 @@ SmartNodeSelector.propTypes = {
      * the new `value` also matches what was given originally.
      * Used in conjunction with `persistence_type`.
      */
-    persistence: PropTypes.oneOfType(
-        [PropTypes.bool, PropTypes.string, PropTypes.number]
-    ),
+    persistence: PropTypes.oneOfType([
+        PropTypes.bool,
+        PropTypes.string,
+        PropTypes.number,
+    ]),
 
     /**
      * Properties whose user interactions will persist after refreshing the
      * component or the page.
      */
-    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(['selectedTags'])),
+    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(["selectedTags"])),
 
     /**
      * Where persisted user changes will be stored:
@@ -135,7 +131,7 @@ SmartNodeSelector.propTypes = {
      * local: window.localStorage, data is kept after the browser quit.
      * session: window.sessionStorage, data is cleared once the browser quit.
      */
-    persistence_type: PropTypes.oneOf(['local', 'session', 'memory']),
+    persistence_type: PropTypes.oneOf(["local", "session", "memory"]),
 };
 
 export default SmartNodeSelector;

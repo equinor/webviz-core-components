@@ -59,3 +59,8 @@
     font-weight: bold;
     text-decoration: underline;
 }
+
+.Suggestions__NoSuggestions {
+    padding: 16px;
+    font-style: italic;
+}

@@ -41,7 +41,7 @@
     position: relative;
     margin-top: 8px;
     margin-bottom: 8px;
-    min-height: 20px;
+    min-height: 24px;
     min-width: 200px;
 }
 
@@ -135,7 +135,7 @@
 
 .SmartNodeSelector input {
     border: none;
-    background: none;
+    background: transparent;
     outline: none;
     padding: 0px;
     width: 50px;
@@ -158,7 +158,6 @@
     display: flex;
     flex-wrap: wrap;
     border-radius: 4px;
-    background-color: #fefefe;
     justify-content: left;
     align-items: center;
     min-width: 0;
@@ -170,13 +169,13 @@
     border: 2px transparent solid;
     position: relative;
     white-space: pre;
+    z-index: 11;
 }
 
 .SmartNodeSelector__InnerTag {
     display: flex;
     flex: 1;
     border-radius: 4px;
-    background-color: #fefefe;
     white-space: nowrap;
     padding: 8px;
     color: #565656;
@@ -190,6 +189,7 @@
 
 .SmartNodeSelector__Border {
     border: 2px #ccc solid;
+    background-color: #fefefe;
 }
 
 .SmartNodeSelector__Ruler {
@@ -245,12 +245,14 @@
     position: relative;
     text-align: center;
     line-height: 20px;
+    font-size: 12px;
 }
 
 .SmartNodeSelector__RemoveButton {
     position: absolute;
     right: -9px;
     top: -9px;
+    z-index: 11;
     background: #007079;
     border: 1px #fff solid;
     border-radius: 50%;
@@ -297,6 +299,10 @@
     border: 2px #ff9200 solid !important;
 }
 
+.SmartNodeSelector__Valid {
+    border: 1px transparent solid;
+}
+
 .SmartNodeSelector__InnerInvalid,
 .SmartNodeSelector__InnerMissingSubgroup {
     background-color: #ffc1c1 !important;
@@ -309,5 +315,6 @@
 }
 
 .SmartNodeSelector__Unknown {
+    border: 1px transparent solid;
     background-image: url("./images/unknown.svg");
 }

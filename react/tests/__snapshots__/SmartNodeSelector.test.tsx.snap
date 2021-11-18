@@ -16,10 +16,11 @@ exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapsho
       >
         <li
           class="SmartNodeSelector__Tag "
+          style="border-width: 1px; border-style: solid;"
           title="Enter a new name"
         >
           <div
-            class="SmartNodeSelector__InnerTag"
+            class="SmartNodeSelector__InnerTag SmartNodeSelector__Valid"
           >
             <div
               class="SmartNodeSelector__InputContainer"
@@ -27,7 +28,7 @@ exports[`SmartNodeSelector Renders correctly (compare to snapshot in ./__snapsho
               <input
                 placeholder="Add new tag..."
                 spellcheck="false"
-                style="width: 100px;"
+                style="width: 50px;"
                 type="text"
                 value=""
               />
