@@ -448,6 +448,7 @@ class Suggestions extends Component<SuggestionsProps> {
                                 e.preventDefault();
                                 e.stopPropagation();
                             }}
+                            title={`${option.nodeName} - ${option.metaData.description}`}
                         >
                             {this.decorateOption(option, treeNodeSelection)}
                         </div>
