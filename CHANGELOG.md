@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+### Changed
+
+- [#191](https://github.com/equinor/webviz-core-components/pull/191) - Removed `pointer` cursor from `webviz-selectors` class.
+
 ## [0.5.3] - 2021-11-08
 
 ### Changed
