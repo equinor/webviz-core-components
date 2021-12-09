@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
-### Changed
+## [0.5.4] - 2021-12-09
 
+### Fixed
+
+- [#178](https://github.com/equinor/webviz-core-components/pull/178) - Bug fixes in `SmartNodeSelector`: Placeholder not applied, text width not calculated correctly initially, jump to next node when pressing `Enter`, bug fixes and improvements when navigating with arrows. Node names containing `-` were breaking the code.
 - [#191](https://github.com/equinor/webviz-core-components/pull/191) - Removed `pointer` cursor from `webviz-selectors` class.
+
+### Added
+
+- [#178](https://github.com/equinor/webviz-core-components/pull/178) - Implemented case-insensitive and description search in `SmartNodeSelector`. 
+    Also added export of data types and implemented `OR` operator in nodes as beta feature. Implemented better visual feedback, tab and end/home navigation. Implemented visual feedback and possibility to show all suggestions.
 
 ## [0.5.3] - 2021-11-08
 
@@ -19,15 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- [#178](https://github.com/equinor/webviz-core-components/pull/178) - Bug fixes in `SmartNodeSelector`: Placeholder not applied, text width not calculated correctly initially, jump to next node when pressing `Enter`, bug fixes and improvements when navigating with arrows. Node names containing `-` were breaking the code.
 - [#177](https://github.com/equinor/webviz-core-components/pull/177) - Bug fix: Menu missing if using non-existent icon.
 
 ### Added
 
 - [#182](https://github.com/equinor/webviz-core-components/pull/182) - Added option to wrap `SelectWithLabel` in a `Details` collapsible widget.
 - [#174](https://github.com/equinor/webviz-core-components/pull/174) - Implemented `initiallyCollapsed` setting for menu.
-- [#178](https://github.com/equinor/webviz-core-components/pull/178) - Implemented case-insensitive and description search in `SmartNodeSelector`. 
-    Also added export of data types and implemented `OR` operator in nodes as beta feature. Implemented better visual feedback, tab and end/home navigation. Implemented visual feedback and possibility to show all suggestions.
 
 ## [0.5.2] - 2021-10-08
 
