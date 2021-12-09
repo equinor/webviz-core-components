@@ -1,9 +1,7 @@
 .webviz-selectors {
-    cursor: pointer;
     color: #555;
     margin-top: 0.5vh;
-    margin-bottom: 0.5vh; 
-    
+    margin-bottom: 0.5vh;
 }
 
 .webviz-selectors:hover {
