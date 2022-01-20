@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+### Changed
+
+- [#197](https://github.com/equinor/webviz-core-components/pull/197) - Updated `@equinor/eds-icons` (and associated `@equinor/eds-core-react` dependencies) in order to use new icons upstream in the application menu.
+
 ## [0.5.4] - 2021-12-09
 
 ### Fixed
