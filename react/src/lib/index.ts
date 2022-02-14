@@ -19,6 +19,7 @@ import SmartNodeSelector, {
 import { Menu } from "./components/Menu";
 import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
+import { Dialog } from "./components/Dialog/Dialog";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
@@ -37,4 +38,5 @@ export {
     Menu,
     Overlay,
     ScrollArea,
+    Dialog,
 };
