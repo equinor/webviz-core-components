@@ -8,7 +8,6 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    Typography,
 } from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 
@@ -52,9 +51,13 @@ const propTypes = {
      */
     actions: PropTypes.arrayOf(PropTypes.string),
     /**
-     *
+     * The name of the action that was called last.
      */
-    action_called: PropTypes.string,
+    last_action_called: PropTypes.string,
+    /**
+     * A counter for how often actions have been called so far.
+     */
+    actions_called: PropTypes.number,
     /**
      * Dash-assigned callback that should be called whenever any of the
      * properties change.
@@ -67,7 +70,8 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     draggable: false,
     children: null,
     actions: [],
-    action_called: null,
+    last_action_called: null,
+    actions_called: 0,
     setProps: () => {
         return;
     },
@@ -86,14 +90,11 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
         adjustedProps.open || false
     );
 
-    React.useEffect(() => {
-        setOpen(adjustedProps.open || false);
-        adjustedProps.setProps({ action_called: null });
-    }, [adjustedProps.open]);
+    const [actionsCalled, setActionsCalled] = React.useState<number>(0);
 
     React.useEffect(() => {
-        adjustedProps.setProps({ action_called: null });
-    }, [adjustedProps.action_called]);
+        setOpen(adjustedProps.open || false);
+    }, [adjustedProps.open]);
 
     const handleClose = () => {
         setOpen(false);
@@ -101,7 +102,12 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
     };
 
     const handleButtonClick = (action: string) => {
-        adjustedProps.setProps({ action_called: action });
+        adjustedProps.setProps({
+            action_called: action,
+            open: open,
+            actions_called: actionsCalled + 1,
+        });
+        setActionsCalled(actionsCalled + 1);
     };
 
     return (
@@ -115,10 +121,13 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
             aria-labelledby="dialog-title"
         >
             <DialogTitle
-                style={{ cursor: adjustedProps.draggable ? "move" : "default" }}
+                style={{
+                    cursor: adjustedProps.draggable ? "move" : "default",
+                    marginRight: 32,
+                }}
                 id="draggable-dialog-title"
             >
-                <Typography variant="h6">{adjustedProps.title}</Typography>
+                {adjustedProps.title}
                 <IconButton
                     aria-label="close"
                     onClick={() => handleClose()}
