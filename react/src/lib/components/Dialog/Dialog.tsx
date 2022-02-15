@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes, { InferProps } from "prop-types";
 
 import {
     Button,
@@ -17,125 +17,13 @@ import { close } from "@equinor/eds-icons";
 
 Icon.add({ close });
 
+import {
+    getPropsWithMissingValuesSetToDefault,
+    Optionals,
+} from "../../utils/DefaultPropsHelpers";
 import { DraggablePaperComponent } from "./components/DraggablePaperComponent";
 
-type DialogProps = {
-    id: string;
-    open?: boolean;
-    draggable?: boolean;
-    title: string;
-    children?: React.ReactNode;
-    onClose?: (reason: string) => void;
-    onCancel?: () => void;
-    onSave?: () => void;
-    onOk?: () => void;
-    onAgree?: () => void;
-    onDisagree?: () => void;
-};
-
-/**
- * A modal dialog component with optional buttons. Can be set to be draggable.
- */
-export const Dialog: React.FC<DialogProps> = (props) => {
-    const [open, setOpen] = React.useState<boolean>(props.open || false);
-
-    React.useEffect(() => {
-        setOpen(props.open || false);
-    }, [props.open]);
-
-    const handleClose = (reason: string) => {
-        setOpen(false);
-        if (props.onClose) {
-            props.onClose(reason);
-        }
-    };
-
-    return (
-        <MuiDialog
-            id={props.id}
-            open={open}
-            onClose={(_: React.MouseEvent<HTMLAnchorElement>, reason: string) =>
-                handleClose(reason)
-            }
-            PaperComponent={props.draggable ? DraggablePaperComponent : Paper}
-            aria-labelledby="dialog-title"
-        >
-            <DialogTitle
-                style={{ cursor: props.draggable ? "move" : "default" }}
-                id="draggable-dialog-title"
-            >
-                <Typography variant="h6">{props.title}</Typography>
-                <IconButton
-                    aria-label="close"
-                    onClick={() => handleClose("dialog-button-click")}
-                    style={{
-                        position: "absolute",
-                        right: 8,
-                        top: 8,
-                        color: "#ccc",
-                    }}
-                >
-                    <Icon name="close" />
-                </IconButton>
-            </DialogTitle>
-            <DialogContent>{props.children}</DialogContent>
-            <DialogActions>
-                {props.onClose && (
-                    <Button
-                        component="button"
-                        onClick={() =>
-                            props.onClose && props.onClose("button-click")
-                        }
-                    >
-                        Close
-                    </Button>
-                )}
-                {props.onCancel && (
-                    <Button
-                        component="button"
-                        onClick={() => props.onCancel && props.onCancel()}
-                    >
-                        Cancel
-                    </Button>
-                )}
-                {props.onDisagree && (
-                    <Button
-                        component="button"
-                        onClick={() => props.onDisagree && props.onDisagree()}
-                    >
-                        Disagree
-                    </Button>
-                )}
-                {props.onAgree && (
-                    <Button
-                        component="button"
-                        onClick={() => props.onAgree && props.onAgree()}
-                    >
-                        Agree
-                    </Button>
-                )}
-                {props.onOk && (
-                    <Button
-                        component="button"
-                        onClick={() => props.onOk && props.onOk()}
-                    >
-                        OK
-                    </Button>
-                )}
-                {props.onSave && (
-                    <Button
-                        component="button"
-                        onClick={() => props.onSave && props.onSave()}
-                    >
-                        Save
-                    </Button>
-                )}
-            </DialogActions>
-        </MuiDialog>
-    );
-};
-
-Dialog.propTypes = {
+const propTypes = {
     /**
      * The ID used to identify this component in Dash callbacks.
      */
@@ -160,27 +48,104 @@ Dialog.propTypes = {
         PropTypes.node,
     ]),
     /**
-     * If defined, a "close" button is shown. Called when the dialog is closed.
+     * A list of actions to be displayed as buttons in the lower right corner of the dialog.
      */
-    onClose: PropTypes.func,
+    actions: PropTypes.arrayOf(PropTypes.string),
     /**
-     * If defined, a "cancel" button is shown. Called when the cancel button is pressed.
+     *
      */
-    onCancel: PropTypes.func,
+    action_called: PropTypes.string,
     /**
-     * If defined, a "disagree" button is shown. Called when the disagree button is pressed.
+     * Dash-assigned callback that should be called whenever any of the
+     * properties change.
      */
-    onDisagree: PropTypes.func,
-    /**
-     * If defined, a "save" button is shown. Called when the save button is pressed.
-     */
-    onSave: PropTypes.func,
-    /**
-     * If defined, an "ok" button is shown. Called when the ok button is pressed.
-     */
-    onOk: PropTypes.func,
-    /**
-     * If defined, an "agree" button is shown. Called when the agree button is pressed.
-     */
-    onAgree: PropTypes.func,
+    setProps: PropTypes.func,
 };
+
+const defaultProps: Optionals<InferProps<typeof propTypes>> = {
+    open: false,
+    draggable: false,
+    children: null,
+    actions: [],
+    action_called: null,
+    setProps: () => {
+        return;
+    },
+};
+
+/**
+ * A modal dialog component with optional buttons. Can be set to be draggable.
+ */
+export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
+    const adjustedProps = getPropsWithMissingValuesSetToDefault(
+        props,
+        defaultProps
+    );
+
+    const [open, setOpen] = React.useState<boolean>(
+        adjustedProps.open || false
+    );
+
+    React.useEffect(() => {
+        setOpen(adjustedProps.open || false);
+        adjustedProps.setProps({ action_called: null });
+    }, [adjustedProps.open]);
+
+    React.useEffect(() => {
+        adjustedProps.setProps({ action_called: null });
+    }, [adjustedProps.action_called]);
+
+    const handleClose = () => {
+        setOpen(false);
+        adjustedProps.setProps({ open: false });
+    };
+
+    const handleButtonClick = (action: string) => {
+        adjustedProps.setProps({ action_called: action });
+    };
+
+    return (
+        <MuiDialog
+            id={props.id}
+            open={open}
+            onClose={() => handleClose()}
+            PaperComponent={
+                adjustedProps.draggable ? DraggablePaperComponent : Paper
+            }
+            aria-labelledby="dialog-title"
+        >
+            <DialogTitle
+                style={{ cursor: adjustedProps.draggable ? "move" : "default" }}
+                id="draggable-dialog-title"
+            >
+                <Typography variant="h6">{adjustedProps.title}</Typography>
+                <IconButton
+                    aria-label="close"
+                    onClick={() => handleClose()}
+                    style={{
+                        position: "absolute",
+                        right: 8,
+                        top: 8,
+                        color: "#ccc",
+                    }}
+                >
+                    <Icon name="close" />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent>{adjustedProps.children}</DialogContent>
+            <DialogActions>
+                {adjustedProps.actions.map((action) => (
+                    <Button
+                        key={action}
+                        component="button"
+                        onClick={() => handleButtonClick(action as string)}
+                    >
+                        {action}
+                    </Button>
+                ))}
+            </DialogActions>
+        </MuiDialog>
+    );
+};
+
+Dialog.propTypes = propTypes;
