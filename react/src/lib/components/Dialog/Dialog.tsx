@@ -32,6 +32,14 @@ const propTypes = {
      */
     open: PropTypes.bool,
     /**
+     * Width of the dialog. Can be one of 'xs' | 'sm' | 'md' | 'lg' | 'xl'.
+     */
+    max_width: PropTypes.oneOf(["xs", "sm", "md", "lg", "xl"]),
+    /**
+     * Set to true to show the dialog fullscreen.
+     */
+    full_screen: PropTypes.bool,
+    /**
      * Set to true if the dialog shall be draggable.
      */
     draggable: PropTypes.bool,
@@ -67,7 +75,9 @@ const propTypes = {
 
 const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     open: false,
+    max_width: null,
     draggable: false,
+    full_screen: false,
     children: null,
     actions: [],
     last_action_called: null,
@@ -119,6 +129,17 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
                 adjustedProps.draggable ? DraggablePaperComponent : Paper
             }
             aria-labelledby="dialog-title"
+            maxWidth={
+                (adjustedProps.max_width as
+                    | "xs"
+                    | "sm"
+                    | "md"
+                    | "lg"
+                    | "xl"
+                    | null) || false
+            }
+            fullScreen={adjustedProps.full_screen}
+            scroll="body"
         >
             <DialogTitle
                 style={{
