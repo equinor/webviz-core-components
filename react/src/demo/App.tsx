@@ -6,9 +6,15 @@
  */
 
 /* eslint no-magic-numbers: 0 */
+import { Button } from "@material-ui/core";
 import React from "react";
 
-import { WebvizPluginPlaceholder, SmartNodeSelector, Menu } from "../lib";
+import {
+    WebvizPluginPlaceholder,
+    SmartNodeSelector,
+    Menu,
+    Dialog,
+} from "../lib";
 
 const steps = [
     {
@@ -45,6 +51,8 @@ const App: React.FC = () => {
         url: "",
     });
 
+    const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
+
     return (
         <div>
             <Menu
@@ -71,6 +79,11 @@ const App: React.FC = () => {
                                         title: "SmartNodeSelector",
                                         href: "#smart-node-selector",
                                     },
+                                    {
+                                        type: "page",
+                                        title: "Dialog",
+                                        href: "#dialog",
+                                    },
                                 ],
                             },
                         ],
@@ -83,6 +96,33 @@ const App: React.FC = () => {
                     <h1>webviz-core-components - Demo page</h1>Please select a
                     component from the menu to view its demo application.
                 </div>
+            )}
+            {currentPage.url.split("#")[1] === "dialog" && (
+                <>
+                    <h1>Dialog</h1>
+                    <Button
+                        component="button"
+                        onClick={() => setDialogOpen(true)}
+                    >
+                        Open Dialog
+                    </Button>
+                    <Dialog
+                        title="Dialog title"
+                        id="dialog"
+                        max_width="xl"
+                        open={dialogOpen}
+                        draggable={true}
+                        setProps={(newProps) => {
+                            console.log(newProps);
+                            setDialogOpen(newProps.open);
+                        }}
+                        actions={["Cancel", "OK"]}
+                    >
+                        <div style={{ width: 2000 }}>
+                            This is the content of the dialog.
+                        </div>
+                    </Dialog>
+                </>
             )}
             {currentPage.url.split("#")[1] === "webviz-plugin-placeholder" && (
                 <>
@@ -122,7 +162,7 @@ const App: React.FC = () => {
                         delimiter=":"
                         placeholder="This is a very long placeholder..."
                         selectedTags={nodeSelectorState.selectedTags}
-                        caseInsensitiveMatching={true}
+                        caseInsensitiveMatching={false}
                         setProps={setNodeSelectorState}
                         label="Smart Tree Node Selector"
                         data={[
