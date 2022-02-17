@@ -42,6 +42,8 @@ const propTypes = {
     setProps: PropTypes.func,
 };
 
+export type ColorScalesProps = InferProps<typeof propTypes>;
+
 /**
  * ColorScales is a Dash wrapper for `react-colorscales`.
  * It takes an array of colors, `colorscale`, and
@@ -52,21 +54,13 @@ export const ColorScales: React.FC<InferProps<typeof propTypes>> = (
 ): JSX.Element => {
     const { id, setProps, colorscale, nSwatches, fixSwatches } = props;
 
-
     const [showColorScalePicker, setShowColorScalePicker] = useState(false);
     const [colorScale, setColorScale] = useState(colorscale || DEFAULT_SCALE);
 
     return (
         <div id={id}>
-            <div
-                onClick={() =>
-                    setShowColorScalePicker(!showColorScalePicker)
-                }
-            >
-                <Colorscale
-                    colorscale={colorScale}
-                    width={150}
-                />
+            <div onClick={() => setShowColorScalePicker(!showColorScalePicker)}>
+                <Colorscale colorscale={colorScale} width={150} />
             </div>
             {showColorScalePicker && (
                 <ColorscalePicker

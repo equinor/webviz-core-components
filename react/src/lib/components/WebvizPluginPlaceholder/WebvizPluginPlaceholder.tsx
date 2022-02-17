@@ -12,14 +12,15 @@ import Tour from "reactour";
 import { SnackbarProvider, useSnackbar } from "notistack";
 
 import {
-    faAddressCard,
-    faQuestionCircle,
-    faCameraRetro,
-    faExpand,
-    faDownload,
-    faExclamationTriangle,
-    faCommentAlt,
-} from "@fortawesome/free-solid-svg-icons";
+    contact_email,
+    help_outline,
+    fullscreen,
+    fullscreen_exit,
+    camera,
+    download as download_icon,
+    warning_filled,
+    comment_more,
+} from "@equinor/eds-icons";
 
 import {
     getPropsWithMissingValuesSetToDefault,
@@ -239,7 +240,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                 <div className="webviz-config-plugin-buttonbar">
                     {buttons && buttons.includes("screenshot") && (
                         <WebvizToolbarButton
-                            icon={faCameraRetro}
+                            icon={camera}
                             tooltip="Take screenshot"
                             onClick={() => {
                                 ref.current &&
@@ -250,7 +251,8 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                                         canvas.toBlob((blob) => {
                                             if (blob !== null) {
                                                 downloadFile({
-                                                    filename: screenshot_filename,
+                                                    filename:
+                                                        screenshot_filename,
                                                     data: blob,
                                                     mimeType: "image/png",
                                                 });
@@ -262,8 +264,8 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                     )}
                     {buttons && buttons.includes("expand") && (
                         <WebvizToolbarButton
-                            icon={faExpand}
-                            tooltip="Expand"
+                            icon={expanded ? fullscreen_exit : fullscreen}
+                            tooltip={expanded ? "Collapse" : "Expand"}
                             selected={expanded}
                             onClick={() => {
                                 setExpanded(!expanded);
@@ -276,7 +278,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                     )}
                     {buttons && buttons.includes("download") && (
                         <WebvizToolbarButton
-                            icon={faDownload}
+                            icon={download_icon}
                             tooltip="Download data"
                             onClick={() =>
                                 setProps({
@@ -287,7 +289,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                     )}
                     {showTour && (
                         <WebvizToolbarButton
-                            icon={faQuestionCircle}
+                            icon={help_outline}
                             tooltip="Guided tour"
                             onClick={() => setTourIsOpen(true)}
                         />
@@ -297,7 +299,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                         contact_person &&
                         Object.keys(contact_person).length > 0 && (
                             <WebvizToolbarButton
-                                icon={faAddressCard}
+                                icon={contact_email}
                                 tooltip="Contact person"
                                 selected={showOverlay}
                                 onClick={() => setShowOverlay(!showOverlay)}
@@ -307,7 +309,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                         buttons.includes("feedback") &&
                         feedback_url && (
                             <WebvizToolbarButton
-                                icon={faCommentAlt}
+                                icon={comment_more}
                                 tooltip="Report issue / suggest improvement"
                                 href={feedback_url}
                                 target="blank"
@@ -315,7 +317,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                         )}
                     {deprecation_warnings.length > 0 && (
                         <WebvizToolbarButton
-                            icon={faExclamationTriangle}
+                            icon={warning_filled}
                             tooltip="This plugin has deprecation warnings"
                             important={true}
                             onClick={() => showDeprecationWarnings()}
@@ -345,7 +347,7 @@ InnerWebvizPluginPlaceholder.defaultProps = defaultProps;
  * It takes a property, `label`, and displays it.
  * It renders an input with the property `value` which is editable by the user.
  */
-const WebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
+export const WebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
     props: InferProps<typeof propTypes>
 ): JSX.Element => {
     return (
@@ -357,5 +359,3 @@ const WebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
 
 WebvizPluginPlaceholder.propTypes = propTypes;
 WebvizPluginPlaceholder.defaultProps = defaultProps;
-
-export default WebvizPluginPlaceholder;

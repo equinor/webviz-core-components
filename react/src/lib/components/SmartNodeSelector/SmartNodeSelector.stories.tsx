@@ -4,7 +4,6 @@ import { Meta, Story } from "@storybook/react";
 
 import SmartNodeSelector from "./SmartNodeSelector";
 import SmartNodeSelectorComponent, {
-    ParentProps,
     SmartNodeSelectorPropsType,
 } from "./components/SmartNodeSelectorComponent";
 
@@ -27,7 +26,7 @@ OneDimensional.args = {
     showSuggestions: true,
     numSecondsUntilSuggestionsAreShown: 1,
     caseInsensitiveMatching: false,
-    setProps: (props: ParentProps) => {
+    setProps: () => {
         return;
     },
     data: [

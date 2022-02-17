@@ -19,7 +19,7 @@ import SmartNodeSelector, {
 import { Menu } from "./components/Menu";
 import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
-import { Dialog } from "./components/Dialog/Dialog";
+import { Dialog } from "./components/Dialog";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
