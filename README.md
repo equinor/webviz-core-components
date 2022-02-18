@@ -10,7 +10,7 @@
 
 # Webviz core components
 
-`webviz_core_components` is a Dash component library for use in `webviz`.
+`webviz_core_components` is a Dash component library for use in `webviz`. A storybook showing all available components is available at https://equinor.github.io/webviz-core-components/storybook-static.
 
 You can quickly get started with:
 
