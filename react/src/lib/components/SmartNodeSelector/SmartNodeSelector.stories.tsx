@@ -16,16 +16,33 @@ const Template: Story<SmartNodeSelectorPropsType> = (args) => (
     <SmartNodeSelectorComponent {...args} />
 );
 
-export const OneDimensional = Template.bind({});
-OneDimensional.args = {
+export const Basic = Template.bind({});
+Basic.args = {
     id: "SmartNodeSelector",
-    delimiter: ":",
-    maxNumSelectedNodes: 1,
-    numMetaNodes: 0,
+    delimiter: SmartNodeSelector.defaultProps?.delimiter || ":",
+    maxNumSelectedNodes:
+        SmartNodeSelector.defaultProps?.maxNumSelectedNodes || 1,
+    numMetaNodes: 2,
     label: "SmartNodeSelector",
-    showSuggestions: true,
-    numSecondsUntilSuggestionsAreShown: 1,
-    caseInsensitiveMatching: false,
+    showSuggestions: SmartNodeSelector.defaultProps?.showSuggestions || true,
+    numSecondsUntilSuggestionsAreShown:
+        SmartNodeSelector.defaultProps?.numSecondsUntilSuggestionsAreShown || 1,
+    caseInsensitiveMatching:
+        SmartNodeSelector.defaultProps?.caseInsensitiveMatching || false,
+    placeholder:
+        SmartNodeSelector.defaultProps?.placeholder || "Add new tag...",
+    lineBreakAfterTag:
+        SmartNodeSelector.defaultProps?.lineBreakAfterTag || false,
+    useBetaFeatures: SmartNodeSelector.defaultProps?.useBetaFeatures || false,
+    persistence: SmartNodeSelector.defaultProps?.persistence || false,
+    persisted_props: SmartNodeSelector.defaultProps?.persisted_props || [
+        "selectedTags",
+    ],
+    persistence_type:
+        (SmartNodeSelector.defaultProps?.persistence_type as
+            | "local"
+            | "session"
+            | "memory") || "local",
     setProps: () => {
         return;
     },

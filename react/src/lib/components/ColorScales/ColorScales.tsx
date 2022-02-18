@@ -5,7 +5,7 @@ import PropTypes, { InferProps } from "prop-types";
 import ColorscalePicker, { Colorscale } from "react-colorscales";
 
 // Use "Viridis" as the default scale
-const DEFAULT_SCALE = [
+export const DEFAULT_SCALE = [
     "#fafa6e",
     "#9cdf7c",
     "#4abd8c",
@@ -23,7 +23,7 @@ const propTypes = {
     /**
      * Optional: Initial colorscale to display. Default is Viridis.
      */
-    colorscale: PropTypes.array,
+    colorscale: PropTypes.arrayOf(PropTypes.string.isRequired),
 
     /**
      * Optional: Initial number of colors in scale to display.

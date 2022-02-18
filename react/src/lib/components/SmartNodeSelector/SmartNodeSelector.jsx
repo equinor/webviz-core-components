@@ -28,6 +28,7 @@ SmartNodeSelector.defaultProps = {
     lineBreakAfterTag: false,
     caseInsensitiveMatching: false,
     useBetaFeatures: false,
+    persistence: false,
     persisted_props: ["selectedTags"],
     persistence_type: "local",
 };
@@ -39,7 +40,7 @@ SmartNodeSelector.propTypes = {
     id: PropTypes.string.isRequired,
 
     /**
-     * The max number of tags that can be selected.
+     * The max number of tags that can be selected. Set to '-1' in order to not have any limits.
      */
     maxNumSelectedNodes: PropTypes.number,
 
@@ -123,7 +124,7 @@ SmartNodeSelector.propTypes = {
      * Properties whose user interactions will persist after refreshing the
      * component or the page.
      */
-    persisted_props: PropTypes.arrayOf(PropTypes.oneOf(["selectedTags"])),
+    persisted_props: PropTypes.arrayOf(PropTypes.string.isRequired),
 
     /**
      * Where persisted user changes will be stored:

@@ -1,98 +1,120 @@
 name: webviz-core-components
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-  release:
-    types:
-      - published
-  schedule:
-    # Run CI daily and check that tests are working with latest dependencies
-    - cron: "0 0 * * *"
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
+    release:
+        types:
+            - published
+    schedule:
+        # Run CI daily and check that tests are working with latest dependencies
+        - cron: "0 0 * * *"
 
 jobs:
-  webviz-core-components:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
+    webviz-core-components:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python-version: ["3.6", "3.7", "3.8", "3.9"]
 
-    steps:
-      - name: 📖 Checkout commit locally
-        uses: actions/checkout@v2
+        steps:
+            - name: 📖 Checkout commit locally
+              uses: actions/checkout@v2
 
-      - name: 🐍 Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+            - name: 🐍 Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
 
-      - name: 📦 Install build dependencies
-        run: |
-          npm ci --ignore-scripts --prefix ./react
-          npm run copy-package-json --prefix ./react
-          pip install .[dependencies]
-          pip install dash[dev]
+            - name: 📦 Install build dependencies
+              run: |
+                  npm ci --ignore-scripts --prefix ./react
+                  npm run copy-package-json --prefix ./react
+                  pip install .[dependencies]
+                  pip install dash[dev]
 
-      - name: 🏗️ Build JavaScript part
-        run: |
-          npm run build --prefix ./react
+            - name: 🏗️ Build JavaScript part
+              run: |
+                  npm run build --prefix ./react
 
-      - name: 📦 Install webviz-core-components with dependencies
-        run: |
-          pip install --upgrade pip
-          pip install .
+            - name: 📦 Install webviz-core-components with dependencies
+              run: |
+                  pip install --upgrade pip
+                  pip install .
 
-      - name: 📦 Install test dependencies
-        run: |
-          pip install .[tests]
-          pip install dash[testing]
-          wget https://chromedriver.storage.googleapis.com/$(wget https://chromedriver.storage.googleapis.com/LATEST_RELEASE -q -O -)/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
+            - name: 📦 Install test dependencies
+              run: |
+                  pip install .[tests]
+                  pip install dash[testing]
+                  wget https://chromedriver.storage.googleapis.com/$(wget https://chromedriver.storage.googleapis.com/LATEST_RELEASE -q -O -)/chromedriver_linux64.zip
+                  unzip chromedriver_linux64.zip
 
-      - name: 🧾 List all installed packages
-        run: pip freeze
+            - name: 🧾 List all installed packages
+              run: pip freeze
 
-      - name: 🕵️ Check code style & linting
-        if: matrix.python-version == '3.8'
-        run: |
-          npm run validate --prefix ./react
-          black --check webviz_core_components tests setup.py usage.py
-          pylint webviz_core_components/ tests/*.py setup.py usage.py
-          bandit -r -c ./bandit.yml webviz_core_components tests setup.py usage.py
+            - name: 🕵️ Check code style & linting
+              if: matrix.python-version == '3.8'
+              run: |
+                  npm run validate --prefix ./react
+                  black --check webviz_core_components tests setup.py usage.py
+                  pylint webviz_core_components/ tests/*.py setup.py usage.py
+                  bandit -r -c ./bandit.yml webviz_core_components tests setup.py usage.py
 
-      - name: 🤖 Run tests
-        run: |
-          npm run test --prefix ./react
-          pytest ./tests --headless
+            - name: 🤖 Run tests
+              run: |
+                  npm run test --prefix ./react
+                  pytest ./tests --headless
 
-      - name: ⏭️ Set next as npm publish tag if prerelease
-        if: github.event.release.prerelease
-        run: echo "NPM_PUBLISH_TAG=next" >> $GITHUB_ENV
+            - name: ⏭️ Set next as npm publish tag if prerelease
+              if: github.event.release.prerelease
+              run: echo "NPM_PUBLISH_TAG=next" >> $GITHUB_ENV
 
-      - name: 🔼 Build and publish Node.js package
-        if: github.event_name == 'release' && matrix.python-version == '3.6'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        working-directory: ./react
-        run: |
-          cp ../README.md .
-          npm version --no-git-tag-version ${GITHUB_REF//refs\/tags\//}
-          npm config set '//registry.npmjs.org/:_authToken' '${NPM_TOKEN}'
-          npm config set always-auth true
-          # Use 'latest' tag if $NPM_PUBLISH_TAG is not set:
-          npm publish --access public --tag ${NPM_PUBLISH_TAG:-latest}
+            - name: 🔼 Build and publish Node.js package
+              if: github.event_name == 'release' && matrix.python-version == '3.6'
+              env:
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+              working-directory: ./react
+              run: |
+                  cp ../README.md .
+                  npm version --no-git-tag-version ${GITHUB_REF//refs\/tags\//}
+                  npm config set '//registry.npmjs.org/:_authToken' '${NPM_TOKEN}'
+                  npm config set always-auth true
+                  # Use 'latest' tag if $NPM_PUBLISH_TAG is not set:
+                  npm publish --access public --tag ${NPM_PUBLISH_TAG:-latest}
 
-      - name: 🚢 Build and deploy Python package
-        if: github.event_name == 'release' && matrix.python-version == '3.6'
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.pypi_webviz_token }}
-        run: |
-          export SETUPTOOLS_SCM_PRETEND_VERSION=${GITHUB_REF//refs\/tags\//}
-          python -m pip install --upgrade setuptools wheel twine
-          python setup.py sdist bdist_wheel
-          twine upload dist/*
+            - name: 🚢 Build and deploy Python package
+              if: github.event_name == 'release' && matrix.python-version == '3.6'
+              env:
+                  TWINE_USERNAME: __token__
+                  TWINE_PASSWORD: ${{ secrets.pypi_webviz_token }}
+              run: |
+                  export SETUPTOOLS_SCM_PRETEND_VERSION=${GITHUB_REF//refs\/tags\//}
+                  python -m pip install --upgrade setuptools wheel twine
+                  python setup.py sdist bdist_wheel
+                  twine upload dist/*
+
+            - name: 📚 Build Storybook
+              run: npm run build-storybook --prefix ./react
+
+            - name: 📚 Update Storybook
+              if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || contains(github.event.head_commit.message, '[deploy test]')) && matrix.python-version == '3.6'
+              run: |
+                  cp -r ./react/storybook-static ..
+                  git config --local user.email "webviz-github-action"
+                  git config --local user.name "webviz-github-action"
+                  git fetch origin gh-pages
+                  git checkout --track origin/gh-pages
+                  git clean -f -f -d -x
+                  git rm -r --ignore-unmatch *
+                  mv ../storybook-static .
+                  git add .
+                  if git diff-index --quiet HEAD; then
+                    echo "No changes in documentation. Skip documentation deploy."
+                  else
+                    git commit -m "Update Github Pages"
+                    git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+                  fi
