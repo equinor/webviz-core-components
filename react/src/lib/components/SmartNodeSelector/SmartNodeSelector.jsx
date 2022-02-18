@@ -13,7 +13,7 @@ import SmartNodeSelectorComponent from "./components/SmartNodeSelectorComponent"
  * SmartNodeSelector is a component that allows to create tags by selecting data from a tree structure.
  * The tree structure can also provide meta data that is displayed as color or icon.
  */
-const SmartNodeSelector = (props) => {
+export const SmartNodeSelector = (props) => {
     return <SmartNodeSelectorComponent {...props} />;
 };
 
@@ -134,5 +134,3 @@ SmartNodeSelector.propTypes = {
      */
     persistence_type: PropTypes.oneOf(["local", "session", "memory"]),
 };
-
-export default SmartNodeSelector;

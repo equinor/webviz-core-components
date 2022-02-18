@@ -2,7 +2,7 @@ import React from "react";
 
 import { Meta, Story } from "@storybook/react";
 
-import SmartNodeSelector from "./SmartNodeSelector";
+import { SmartNodeSelector } from "./SmartNodeSelector";
 import SmartNodeSelectorComponent, {
     SmartNodeSelectorPropsType,
 } from "./components/SmartNodeSelectorComponent";

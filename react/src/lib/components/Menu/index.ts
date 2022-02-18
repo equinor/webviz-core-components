@@ -5,4 +5,4 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-export { Menu } from "./Menu";
+export { Menu, MenuProps } from "./Menu";
