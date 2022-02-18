@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 - [#207](https://github.com/equinor/webviz-core-components/pull/207) - Added `storybook` and stories for each component. Added publishment of `storybook` to GitHub workflow. Added `storybook` link to README.
-
-### Added
 - [#201](https://github.com/equinor/webviz-core-components/pull/201) - Implemented wrapper around `MaterialUI's` draggable dialog. Makes a new `Dialog` component available in `Dash`.
 
 ## [0.5.5] - 2022-02-09
