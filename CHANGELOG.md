@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - [#201](https://github.com/equinor/webviz-core-components/pull/201) - Implemented wrapper around `MaterialUI's` draggable dialog. Makes a new `Dialog` component available in `Dash`.
+- [#210](https://github.com/equinor/webviz-core-components/pull/210) - Added `backdrop` property to `Dialog`. This allows to disable the backdrop behind a dialog and makes all other elements remain clickable.
 
 ## [0.5.5] - 2022-02-09
 
