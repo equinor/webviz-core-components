@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - [#202](https://github.com/equinor/webviz-core-components/pull/202) - Adjusted `z-index` of suggestions of `SmartNodeSelector` to a hard-coded value of `1500`.
+- [#201](https://github.com/equinor/webviz-core-components/pull/201) - Implemented wrapper around `MaterialUI's` draggable dialog. Makes a new `Dialog` component available in `Dash`.
 
 ## [0.5.5] - 2022-02-09
 
