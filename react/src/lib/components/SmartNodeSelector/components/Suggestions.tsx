@@ -12,7 +12,6 @@ import PropTypes from "prop-types";
 
 import TreeNodeSelection from "../utils/TreeNodeSelection";
 import { TreeDataNodeMetaData } from "../utils/TreeDataNodeTypes";
-import { findHighestZIndex } from "../../../utils/dom";
 
 import "./Suggestions.css";
 
@@ -514,10 +513,6 @@ class Suggestions extends Component<SuggestionsProps> {
                   height: 0,
               };
 
-        const zIndex = this.positionRef.current
-            ? findHighestZIndex(this.positionRef.current) + 1
-            : 99;
-
         ReactDOM.render(
             <div
                 ref={suggestionsRef}
@@ -529,7 +524,6 @@ class Suggestions extends Component<SuggestionsProps> {
                     top: boundingRect.top,
                     left: boundingRect.left,
                     width: boundingRect.width,
-                    zIndex: zIndex,
                 }}
             >
                 <div
