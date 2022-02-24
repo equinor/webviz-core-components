@@ -22,7 +22,6 @@ import {
     Optionals,
 } from "../../utils/DefaultPropsHelpers";
 import { DraggablePaperComponent } from "./components/DraggablePaperComponent";
-import { PseudoBackdropComponent } from "./components/PseudoBackdropComponent";
 
 const propTypes = {
     /**
