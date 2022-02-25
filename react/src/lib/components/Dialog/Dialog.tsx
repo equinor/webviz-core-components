@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes, { InferProps } from "prop-types";
 
 import {
+    withStyles,
     Button,
     Dialog as MuiDialog,
     DialogActions,
@@ -55,6 +56,10 @@ const propTypes = {
         PropTypes.node,
     ]),
     /**
+     * Set to false if you do not want to have a backdrop behind the dialog.
+     */
+    backdrop: PropTypes.bool,
+    /**
      * A list of actions to be displayed as buttons in the lower right corner of the dialog.
      */
     actions: PropTypes.arrayOf(PropTypes.string),
@@ -79,6 +84,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     draggable: false,
     full_screen: false,
     children: null,
+    backdrop: true,
     actions: [],
     last_action_called: null,
     actions_called: 0,
@@ -86,6 +92,12 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
         return;
     },
 };
+
+const StyledMuiDialog = withStyles({
+    root: {
+        pointerEvents: "none",
+    },
+})(MuiDialog);
 
 /**
  * A modal dialog component with optional buttons. Can be set to be draggable.
@@ -106,7 +118,10 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
         setOpen(adjustedProps.open || false);
     }, [adjustedProps.open]);
 
-    const handleClose = () => {
+    const handleClose = (reason: string) => {
+        if (reason === "backdropClick" && !adjustedProps.backdrop) {
+            return;
+        }
         setOpen(false);
         adjustedProps.setProps({ open: false });
     };
@@ -120,27 +135,8 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
         setActionsCalled(actionsCalled + 1);
     };
 
-    return (
-        <MuiDialog
-            id={props.id}
-            open={open}
-            onClose={() => handleClose()}
-            PaperComponent={
-                adjustedProps.draggable ? DraggablePaperComponent : Paper
-            }
-            aria-labelledby="dialog-title"
-            maxWidth={
-                (adjustedProps.max_width as
-                    | "xs"
-                    | "sm"
-                    | "md"
-                    | "lg"
-                    | "xl"
-                    | null) || false
-            }
-            fullScreen={adjustedProps.full_screen}
-            scroll="body"
-        >
+    const content = (
+        <>
             <DialogTitle
                 style={{
                     cursor: adjustedProps.draggable ? "move" : "default",
@@ -151,7 +147,7 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
                 {adjustedProps.title}
                 <IconButton
                     aria-label="close"
-                    onClick={() => handleClose()}
+                    onClick={() => handleClose("buttonClick")}
                     style={{
                         position: "absolute",
                         right: 8,
@@ -174,8 +170,61 @@ export const Dialog: React.FC<InferProps<typeof propTypes>> = (props) => {
                     </Button>
                 ))}
             </DialogActions>
-        </MuiDialog>
+        </>
     );
+
+    if (adjustedProps.backdrop) {
+        return (
+            <MuiDialog
+                id={props.id}
+                open={open}
+                onClose={(_, reason) => handleClose(reason)}
+                PaperComponent={
+                    adjustedProps.draggable ? DraggablePaperComponent : Paper
+                }
+                aria-labelledby="dialog-title"
+                maxWidth={
+                    (adjustedProps.max_width as
+                        | "xs"
+                        | "sm"
+                        | "md"
+                        | "lg"
+                        | "xl"
+                        | null) || false
+                }
+                fullScreen={adjustedProps.full_screen}
+                scroll="body"
+            >
+                {content}
+            </MuiDialog>
+        );
+    } else {
+        return (
+            <StyledMuiDialog
+                id={props.id}
+                open={open}
+                onClose={(_, reason) => handleClose(reason)}
+                hideBackdrop={true}
+                PaperComponent={
+                    adjustedProps.draggable ? DraggablePaperComponent : Paper
+                }
+                aria-labelledby="dialog-title"
+                maxWidth={
+                    (adjustedProps.max_width as
+                        | "xs"
+                        | "sm"
+                        | "md"
+                        | "lg"
+                        | "xl"
+                        | null) || false
+                }
+                fullScreen={adjustedProps.full_screen}
+                scroll="paper"
+            >
+                {content}
+            </StyledMuiDialog>
+        );
+    }
 };
 
 Dialog.propTypes = propTypes;
