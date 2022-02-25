@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED] - YYYY-MM-DD
 
 ### Added
+- [#202](https://github.com/equinor/webviz-core-components/pull/202) - Adjusted `z-index` of suggestions of `SmartNodeSelector` to a hard-coded value of `1500`.
 - [#201](https://github.com/equinor/webviz-core-components/pull/201) - Implemented wrapper around `MaterialUI's` draggable dialog. Makes a new `Dialog` component available in `Dash`.
 - [#210](https://github.com/equinor/webviz-core-components/pull/210) - Added `backdrop` property to `Dialog`. This allows to disable the backdrop behind a dialog and makes all other elements remain clickable.
 
