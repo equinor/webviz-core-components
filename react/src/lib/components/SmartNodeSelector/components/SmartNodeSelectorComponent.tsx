@@ -378,9 +378,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     ): void {
         if (index >= 0 && index < this.countTags()) {
             if (this.state.nodeSelections.length > index && index >= 0) {
-                const inputField = (this.state.nodeSelections[
-                    index
-                ]?.getRef() as React.RefObject<HTMLInputElement>).current;
+                const inputField = (
+                    this.state.nodeSelections[
+                        index
+                    ]?.getRef() as React.RefObject<HTMLInputElement>
+                ).current;
                 if (inputField) {
                     inputField.focus();
                     if (setSelection !== undefined) {
@@ -404,9 +406,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     hasLastEmptyTag(): boolean {
-        const lastTag = this.state.nodeSelections[
-            this.state.nodeSelections.length - 1
-        ];
+        const lastTag =
+            this.state.nodeSelections[this.state.nodeSelections.length - 1];
         return !(lastTag.displayAsTag() || lastTag.isValid());
     }
 
@@ -588,8 +589,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             return;
         }
         if (
-            (this.currentNodeSelection().getRef() as React.RefObject<HTMLInputElement>)
-                .current === document.activeElement
+            (
+                this.currentNodeSelection().getRef() as React.RefObject<HTMLInputElement>
+            ).current === document.activeElement
         ) {
             this.updateState({
                 suggestionsVisible: true,
@@ -656,9 +658,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     letMaxNumValuesBlink(): void {
         if (this.props.maxNumSelectedNodes !== 1) {
             let numBlinks = 0;
-            const numberOfTagsDiv = (this
-                .refNumberOfTags as React.RefObject<HTMLDivElement>)
-                .current as HTMLDivElement;
+            const numberOfTagsDiv = (
+                this.refNumberOfTags as React.RefObject<HTMLDivElement>
+            ).current as HTMLDivElement;
             const blinkTimer = setInterval(() => {
                 numBlinks++;
                 if (numBlinks % 2 === 0) {
@@ -701,9 +703,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
         const domNode = (this.tagFieldRef as React.RefObject<HTMLUListElement>)
             .current as HTMLUListElement;
-        const suggestions = (this
-            .suggestionsRef as React.RefObject<HTMLDivElement>)
-            .current as HTMLDivElement;
+        const suggestions = (
+            this.suggestionsRef as React.RefObject<HTMLDivElement>
+        ).current as HTMLDivElement;
         const eventTarget = event.target as Element;
         if (
             (!domNode || !domNode.contains(eventTarget)) &&
@@ -982,8 +984,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             suggestionsVisible: false,
             showAllSuggestions: false,
             callback: () => {
-                ((this.state.nodeSelections[0].getRef() as React.RefObject<HTMLInputElement>)
-                    .current as HTMLInputElement).focus();
+                (
+                    (
+                        this.state.nodeSelections[0].getRef() as React.RefObject<HTMLInputElement>
+                    ).current as HTMLInputElement
+                ).focus();
             },
         });
         e.stopPropagation();
@@ -1119,7 +1124,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 nodeSelection.isValid() &&
                 !this.checkIfSelectionIsDuplicate(nodeSelection, i)
             ) {
-                const matchedNodePaths = nodeSelection.exactlyMatchedNodePaths();
+                const matchedNodePaths =
+                    nodeSelection.exactlyMatchedNodePaths();
                 for (let j = 0; j < matchedNodePaths.length; j++) {
                     if (
                         selectedNodes.length >= maxNumSelectedNodes &&
@@ -1332,8 +1338,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         showAllSuggestions: true,
                         forceUpdate: true,
                         callback: () => {
-                            const input = (this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>)
-                                ?.current;
+                            const input = (
+                                this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>
+                            )?.current;
                             if (input) {
                                 input.setSelectionRange(0, 0);
                             }
@@ -1563,6 +1570,12 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         e: React.KeyboardEvent<HTMLInputElement>,
         eventType: KeyEventType
     ): void {
+        if (e.shiftKey && this.currentTagIndex() === 0) {
+            return;
+        }
+        if (!e.shiftKey && this.currentTagIndex() === this.countTags() - 1) {
+            return;
+        }
         if (eventType === KeyEventType.KeyDown) {
             if (e.shiftKey) {
                 this.decrementCurrentTagIndex(() => this.focusCurrentTag());
@@ -1873,7 +1886,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     className={classNames({
                         SmartNodeSelector: true,
                         "SmartNodeSelector--frameless": frameless,
-                        "SmartNodeSelector--SuggestionsActive": suggestionsVisible,
+                        "SmartNodeSelector--SuggestionsActive":
+                            suggestionsVisible,
                         "SmartNodeSelector--Invalid":
                             maxNumSelectedNodes > 0 &&
                             this.countValidSelections() > maxNumSelectedNodes,
