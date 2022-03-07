@@ -1571,9 +1571,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         if (e.shiftKey && this.currentTagIndex() === 0) {
+            this.hideSuggestions({});
             return;
         }
         if (!e.shiftKey && this.currentTagIndex() === this.countTags() - 1) {
+            this.hideSuggestions({});
             return;
         }
         if (eventType === KeyEventType.KeyDown) {
