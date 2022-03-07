@@ -8,6 +8,7 @@
 /* eslint no-magic-numbers: 0 */
 import { Button } from "@material-ui/core";
 import React from "react";
+import { WebvizContentWrapper } from "../lib/components/WebvizContentWrapper/webviz-content-wrapper";
 
 import {
     WebvizPluginPlaceholder,
@@ -38,14 +39,12 @@ type MenuProps = {
 };
 
 const App: React.FC = () => {
-    const [
-        nodeSelectorState,
-        setNodeSelectorState,
-    ] = React.useState<SmartNodeSelectorProps>({
-        selectedNodes: [],
-        selectedIds: [],
-        selectedTags: [],
-    });
+    const [nodeSelectorState, setNodeSelectorState] =
+        React.useState<SmartNodeSelectorProps>({
+            selectedNodes: [],
+            selectedIds: [],
+            selectedTags: [],
+        });
 
     const [currentPage, setCurrentPage] = React.useState<MenuProps>({
         url: "",
@@ -55,47 +54,96 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <Menu
-                menuBarPosition="left"
-                menuDrawerPosition="left"
-                showLogo={true}
-                navigationItems={[
-                    {
-                        type: "section",
-                        title: "Components",
-                        icon: "layers",
-                        content: [
-                            {
-                                type: "group",
-                                title: "Demos",
-                                content: [
-                                    {
-                                        type: "page",
-                                        title: "WebvizPluginPlaceholder",
-                                        href: "#webviz-plugin-placeholder",
-                                    },
-                                    {
-                                        type: "page",
-                                        title: "SmartNodeSelector",
-                                        href: "#smart-node-selector",
-                                    },
-                                    {
-                                        type: "page",
-                                        title: "Dialog",
-                                        href: "#dialog",
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ]}
-                setProps={setCurrentPage}
-            />
             {currentPage.url.split("#").length === 1 && (
+                /*(
                 <div>
                     <h1>webviz-core-components - Demo page</h1>Please select a
                     component from the menu to view its demo application.
                 </div>
+            )*/ <WebvizContentWrapper
+                    menuBarPosition="top"
+                    menuDrawerPosition="left"
+                    showLogo={true}
+                    navigationItems={[
+                        {
+                            type: "section",
+                            title: "Components",
+                            icon: "layers",
+                            content: [
+                                {
+                                    type: "group",
+                                    title: "Demos",
+                                    content: [
+                                        {
+                                            type: "page",
+                                            title: "WebvizRefactoring",
+                                            href: "#webviz-refactoring",
+                                        },
+                                        {
+                                            type: "page",
+                                            title: "WebvizPluginPlaceholder",
+                                            href: "#webviz-plugin-placeholder",
+                                        },
+                                        {
+                                            type: "page",
+                                            title: "SmartNodeSelector",
+                                            href: "#smart-node-selector",
+                                        },
+                                        {
+                                            type: "page",
+                                            title: "Dialog",
+                                            href: "#dialog",
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ]}
+                    setProps={setCurrentPage}
+                />
+            )}
+            {currentPage.url.split("#")[1] === "webviz-refactoring" && (
+                <WebvizContentWrapper
+                    menuBarPosition="left"
+                    menuDrawerPosition="left"
+                    showLogo={true}
+                    navigationItems={[
+                        {
+                            type: "section",
+                            title: "Components",
+                            icon: "layers",
+                            content: [
+                                {
+                                    type: "group",
+                                    title: "Demos",
+                                    content: [
+                                        {
+                                            type: "page",
+                                            title: "WebvizRefactoring",
+                                            href: "#webviz-refactoring",
+                                        },
+                                        {
+                                            type: "page",
+                                            title: "WebvizPluginPlaceholder",
+                                            href: "#webviz-plugin-placeholder",
+                                        },
+                                        {
+                                            type: "page",
+                                            title: "SmartNodeSelector",
+                                            href: "#smart-node-selector",
+                                        },
+                                        {
+                                            type: "page",
+                                            title: "Dialog",
+                                            href: "#dialog",
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ]}
+                    setProps={setCurrentPage}
+                />
             )}
             {currentPage.url.split("#")[1] === "dialog" && (
                 <>
@@ -140,13 +188,11 @@ const App: React.FC = () => {
                         deprecation_warnings={[
                             {
                                 message: "Deprecated 1",
-                                url:
-                                    "https://github.com/equinor/webviz-core-components",
+                                url: "https://github.com/equinor/webviz-core-components",
                             },
                             {
                                 message: "Deprecated 2",
-                                url:
-                                    "https://github.com/equinor/webviz-core-components",
+                                url: "https://github.com/equinor/webviz-core-components",
                             },
                         ]}
                     />

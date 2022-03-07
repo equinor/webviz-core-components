@@ -20,11 +20,13 @@ import { Menu } from "./components/Menu";
 import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
 import { Dialog } from "./components/Dialog/Dialog";
+import { WebvizContentWrapper } from "./components/WebvizContentWrapper";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
 
 export {
+    WebvizContentWrapper,
     WebvizPluginPlaceholder,
     ColorScales,
     Select,
