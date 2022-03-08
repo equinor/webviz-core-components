@@ -26,6 +26,11 @@ type ActionMap<
           };
 };
 
+export type View = {
+    id: string;
+    name: string;
+};
+
 export enum StoreActions {
     SetActiveView = "set_active_view",
     SetActivePlugin = "set_active_plugin",
@@ -36,6 +41,7 @@ export type StoreState = {
     activePluginId: string;
     activeViewId: string;
     bodyMargins: Margins;
+    views: View[];
     position: DrawerPosition;
     pluginsData: string[];
 };
@@ -59,6 +65,11 @@ export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
 const initialState: StoreState = {
     activePluginId: "",
     activeViewId: "",
+    views: [
+        { name: "View1", id: "view1_id" },
+        { name: "View2", id: "view2_id" },
+        { name: "View3", id: "view3_id" },
+    ],
     bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     position: DrawerPosition.Left,
     pluginsData: [],

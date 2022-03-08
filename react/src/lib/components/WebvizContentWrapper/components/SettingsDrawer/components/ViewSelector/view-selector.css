@@ -1,0 +1,26 @@
+.WebvizViewSelector {
+    display: flex;
+    align-items: center;
+    border: 1px transparent solid;
+    border-radius: 4px;
+    cursor: pointer;
+    justify-content: space-evenly;
+    padding-left: 16px;
+    padding-right: 16px;
+    height: 40px;
+}
+
+.WebvizViewSelector:hover {
+    border-color: #ccc;
+}
+
+.WebvizViewSelector > div {
+    transition: opacity 1s ease-in-out;
+}
+
+.WebvizViewSelector__ViewName {
+    color: #007079;
+    flex-grow: 4;
+    text-align: center;
+    font-weight: bold;
+}

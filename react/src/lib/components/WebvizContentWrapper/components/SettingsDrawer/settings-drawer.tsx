@@ -7,6 +7,7 @@ Icon.add({ settings, chevron_right, chevron_left });
 import { DrawerPosition } from "../../shared-types/drawer-position";
 
 import { useStore } from "../ContentManager";
+import { ViewSelector } from "./components/ViewSelector/view-selector";
 
 import "./settings-drawer.css";
 import { Button } from "@material-ui/core";
@@ -29,6 +30,9 @@ export const SettingsDrawer: React.FC = () => {
     const store = useStore();
     const drawerRef = React.useRef<HTMLDivElement>(null);
     const drawerSize = useSize(drawerRef);
+    const [oldDrawerSize, setOldDrawerSize] = React.useState<number>(0);
+    const expandedWidth = 300;
+    const collapsedWidth = 64;
 
     React.useLayoutEffect(() => {
         let top: "auto" | number = 0;
@@ -56,15 +60,21 @@ export const SettingsDrawer: React.FC = () => {
     }, [store.state.bodyMargins, store.state.position]);
 
     React.useLayoutEffect(() => {
-        const bodyMargins = store.state.bodyMargins;
+        const bodyMargins = { ...store.state.bodyMargins };
         if (store.state.position === DrawerPosition.Left) {
-            bodyMargins.left += drawerSize[0];
+            bodyMargins.left = bodyMargins.left + drawerSize[0];
         } else if (store.state.position === DrawerPosition.Right) {
-            bodyMargins.right += drawerSize[0];
+            bodyMargins.right = bodyMargins.right + drawerSize[0];
         }
         document.body.style.marginLeft = bodyMargins.left + "px";
         document.body.style.marginRight = bodyMargins.right + "px";
-    }, [drawerSize, store.state.position, store.state.bodyMargins]);
+        setOldDrawerSize(drawerSize[0]);
+    }, [
+        drawerSize,
+        store.state.position,
+        store.state.bodyMargins,
+        oldDrawerSize,
+    ]);
 
     return (
         <div
@@ -74,6 +84,7 @@ export const SettingsDrawer: React.FC = () => {
                 store.state.position.slice(1)
             }`}
             style={{
+                width: open ? expandedWidth : collapsedWidth,
                 left: position.left,
                 top: position.top,
                 right: position.right,
@@ -87,17 +98,24 @@ export const SettingsDrawer: React.FC = () => {
                 }px)`,
             }}
         >
-            <Button
-                className={
-                    !open
-                        ? "WebvizSettingsDrawer__ToggleOpen"
-                        : "WebvizSettingsDrawer__ToggleClose"
-                }
-                onClick={() => setOpen(!open)}
-            >
-                <Icon name="chevron_left" />
-                <Icon name="settings" />
-            </Button>
+            <div className="WebvizSettingsDrawer__TopButtons">
+                <Button
+                    className={`WebvizSettingsDrawer__Toggle ${
+                        !open
+                            ? "WebvizSettingsDrawer__ToggleOpen"
+                            : "WebvizSettingsDrawer__ToggleClose"
+                    }`}
+                    onClick={() => setOpen(!open)}
+                >
+                    <Icon name="chevron_left" />
+                    <Icon name="settings" />
+                </Button>
+            </div>
+            <ViewSelector
+                open={open}
+                views={["Test1", "Test2"]}
+                width={expandedWidth}
+            />
         </div>
     );
 };

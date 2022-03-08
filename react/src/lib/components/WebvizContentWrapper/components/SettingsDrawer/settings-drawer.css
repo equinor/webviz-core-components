@@ -2,10 +2,15 @@
     position: fixed;
     background-color: #f8f8f8;
     height: 100vh;
-    min-width: 100px;
+    overflow: hidden;
     top: 0;
     left: 0;
     z-index: 99;
+    transition: width 1s ease-in-out;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .WebvizSettingsDrawer__Left {
@@ -18,14 +23,19 @@
     box-shadow: inset 14px 1px 18px -18px rgba(0, 0, 0, 0.32);
 }
 
+.WebvizSettingsDrawer__TopButtons {
+    text-align: right;
+    margin-bottom: 16px;
+}
+
 .WebvizSettingsDrawer__ToggleOpen,
 .WebvizSettingsDrawer__ToggleOpen:hover {
-    transform: rotateY(0);
+    transform: rotateY(180deg);
     transition: all 0.5s ease-in-out;
 }
 
 .WebvizSettingsDrawer__ToggleClose,
 .WebvizSettingsDrawer__ToggleClose:hover {
-    transform: rotateY(180deg);
+    transform: rotateY(0deg);
     transition: all 0.5s ease-in-out;
 }

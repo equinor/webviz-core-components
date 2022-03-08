@@ -1,1 +1,2 @@
-export { ContentManager, useStore } from "./content-manager";
+export { ContentManager, StoreActions, useStore } from "./content-manager";
+export { View } from "./content-manager";

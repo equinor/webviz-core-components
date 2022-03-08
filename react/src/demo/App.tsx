@@ -61,7 +61,7 @@ const App: React.FC = () => {
                     component from the menu to view its demo application.
                 </div>
             )*/ <WebvizContentWrapper
-                    menuBarPosition="top"
+                    menuBarPosition="left"
                     menuDrawerPosition="left"
                     showLogo={true}
                     navigationItems={[
