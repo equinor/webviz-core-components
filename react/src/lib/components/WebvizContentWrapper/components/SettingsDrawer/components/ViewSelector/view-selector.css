@@ -1,17 +1,16 @@
 .WebvizViewSelector {
     display: flex;
     align-items: center;
-    border: 1px transparent solid;
     border-radius: 4px;
     cursor: pointer;
     justify-content: space-evenly;
-    padding-left: 16px;
+    padding-left: 20px;
     padding-right: 16px;
-    height: 40px;
+    height: 56px;
 }
 
 .WebvizViewSelector:hover {
-    border-color: #ccc;
+    background-color: rgba(196, 196, 196, 0.22);
 }
 
 .WebvizViewSelector > div {

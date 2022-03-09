@@ -26,9 +26,31 @@ type ActionMap<
           };
 };
 
+export type ViewElement = {
+    id: string;
+    layout: React.ReactChild;
+    settings?: React.ReactChild;
+};
+
+export type SettingsGroup = {
+    id: string;
+    title: string;
+    content: React.ReactChild;
+};
+
+export type Plugin = {
+    id: string;
+    name: string;
+    views: View[];
+    sharedSettings?: SettingsGroup[];
+    activeViewId: string;
+};
+
 export type View = {
     id: string;
     name: string;
+    settings?: SettingsGroup[];
+    elements: ViewElement[];
 };
 
 export enum StoreActions {
@@ -39,11 +61,9 @@ export enum StoreActions {
 
 export type StoreState = {
     activePluginId: string;
-    activeViewId: string;
     bodyMargins: Margins;
-    views: View[];
     position: DrawerPosition;
-    pluginsData: string[];
+    pluginsData: Plugin[];
 };
 
 type Payload = {
@@ -63,16 +83,165 @@ type Payload = {
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
 const initialState: StoreState = {
-    activePluginId: "",
-    activeViewId: "",
-    views: [
-        { name: "View1", id: "view1_id" },
-        { name: "View2", id: "view2_id" },
-        { name: "View3", id: "view3_id" },
+    activePluginId: "1",
+    pluginsData: [
+        {
+            id: "1",
+            name: "Example plugin",
+            activeViewId: "view1_id",
+            views: [
+                {
+                    name: "View1",
+                    id: "view1_id",
+                    settings: [
+                        {
+                            id: "2",
+                            title: "Preferences",
+                            content: (
+                                <select>
+                                    <option>First option</option>
+                                </select>
+                            ),
+                        },
+                    ],
+                    elements: [
+                        {
+                            id: "plot",
+                            layout: (
+                                <svg width="400px" height="400px">
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        style={{ fill: "green" }}
+                                        id="green-rect"
+                                    />
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        x="200px"
+                                        style={{ fill: "blue" }}
+                                        id="blue-rect"
+                                    />
+                                </svg>
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: "View2",
+                    id: "view2_id",
+                    elements: [
+                        {
+                            id: "plot",
+                            layout: (
+                                <svg width="400px" height="400px">
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        style={{ fill: "red" }}
+                                        id="red-rect"
+                                    />
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        x="200px"
+                                        style={{ fill: "yellow" }}
+                                        id="yellow-rect"
+                                    />
+                                </svg>
+                            ),
+                        },
+                    ],
+                },
+            ],
+            sharedSettings: [
+                {
+                    id: "1",
+                    title: "Filter",
+                    content: <input name="test" />,
+                },
+            ],
+        },
+        {
+            id: "2",
+            name: "Example plugin 2",
+            activeViewId: "view1_id",
+            views: [
+                {
+                    name: "View1",
+                    id: "view1_id",
+                    settings: [
+                        {
+                            id: "2",
+                            title: "Preferences",
+                            content: (
+                                <select>
+                                    <option>First option</option>
+                                </select>
+                            ),
+                        },
+                    ],
+                    elements: [
+                        {
+                            id: "plot",
+                            layout: (
+                                <svg width="400px" height="400px">
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        style={{ fill: "green" }}
+                                        id="green-rect"
+                                    />
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        x="200px"
+                                        style={{ fill: "blue" }}
+                                        id="blue-rect"
+                                    />
+                                </svg>
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: "View2",
+                    id: "view2_id",
+                    elements: [
+                        {
+                            id: "plot",
+                            layout: (
+                                <svg width="400px" height="400px">
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        style={{ fill: "red" }}
+                                        id="red-rect"
+                                    />
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        x="200px"
+                                        style={{ fill: "yellow" }}
+                                        id="yellow-rect"
+                                    />
+                                </svg>
+                            ),
+                        },
+                    ],
+                },
+            ],
+            sharedSettings: [
+                {
+                    id: "1",
+                    title: "Filter",
+                    content: <input name="test" />,
+                },
+            ],
+        },
     ],
     bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     position: DrawerPosition.Left,
-    pluginsData: [],
 };
 
 export const StoreReducer = (
@@ -80,7 +249,16 @@ export const StoreReducer = (
     action: Actions
 ): StoreState => {
     if (action.type === StoreActions.SetActiveView) {
-        return { ...state, activeViewId: action.payload.viewId };
+        return {
+            ...state,
+            pluginsData: [
+                ...state.pluginsData.map((plugin) =>
+                    plugin.id === state.activePluginId
+                        ? { ...plugin, activeViewId: action.payload.viewId }
+                        : plugin
+                ),
+            ],
+        };
     } else if (action.type === StoreActions.SetActivePlugin) {
         return { ...state, activePluginId: action.payload.pluginId };
     } else if (action.type === StoreActions.SetMenuPosition) {

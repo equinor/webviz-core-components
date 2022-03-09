@@ -4,13 +4,16 @@ import { settings, chevron_right, chevron_left } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({ settings, chevron_right, chevron_left });
 
+import { Button } from "@material-ui/core";
+
 import { DrawerPosition } from "../../shared-types/drawer-position";
 
 import { useStore } from "../ContentManager";
 import { ViewSelector } from "./components/ViewSelector/view-selector";
 
 import "./settings-drawer.css";
-import { Button } from "@material-ui/core";
+import { Settings } from "./components/Settings/settings";
+import { PluginActions } from "./components/PluginActions/plugin-actions";
 
 type Position = {
     left: number | "auto";
@@ -111,11 +114,9 @@ export const SettingsDrawer: React.FC = () => {
                     <Icon name="settings" />
                 </Button>
             </div>
-            <ViewSelector
-                open={open}
-                views={["Test1", "Test2"]}
-                width={expandedWidth}
-            />
+            <ViewSelector open={open} width={expandedWidth} />
+            <Settings visible={open} />
+            <PluginActions open={open} />
         </div>
     );
 };

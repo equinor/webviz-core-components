@@ -1,0 +1,32 @@
+.WebvizSettingsGroup {
+}
+
+.WebvizSettingsGroup__Title {
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    padding-right: 4px;
+    cursor: pointer;
+}
+
+.WebvizSettingsGroup__TitleText {
+    flex-grow: 4;
+    text-align: left;
+    font-weight: bold;
+}
+
+.WebvizSettingsGroup__Content {
+    -webkit-box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.32) inset;
+    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.32) inset;
+    border-bottom: 1px #ccc solid;
+    background-color: rgba(208, 208, 208, 0.35);
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+}
+
+.WebvizSettingsGroup__Content > div {
+    padding: 8px;
+    padding-left: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+}

@@ -13,7 +13,6 @@ import ReactDOM from "react-dom";
 
 type ViewSelectorProps = {
     open: boolean;
-    views: string[];
     width: number;
 };
 
@@ -51,8 +50,18 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                     />
                     <ViewList
                         open={menuOpen}
-                        views={store.state.views}
-                        activeViewId={store.state.activeViewId}
+                        views={
+                            store.state.pluginsData.find(
+                                (plugin) =>
+                                    plugin.id === store.state.activePluginId
+                            )?.views || []
+                        }
+                        activeViewId={
+                            store.state.pluginsData.find(
+                                (plugin) =>
+                                    plugin.id === store.state.activePluginId
+                            )?.activeViewId || ""
+                        }
                         anchorElement={
                             props.open
                                 ? viewNameRef.current
@@ -69,8 +78,8 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
         menuOpen,
         popupContainer,
         props.open,
-        store.state.activeViewId,
-        store.state.views,
+        store.state.activePluginId,
+        store.state.pluginsData,
     ]);
 
     React.useEffect(() => {
@@ -107,10 +116,14 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
         [store]
     );
 
+    const plugin = store.state.pluginsData.find(
+        (plugin) => plugin.id === store.state.activePluginId
+    );
+
     return (
         <div
             className="WebvizViewSelector"
-            style={{ width: isCollapsed ? "auto" : props.width - 32 }}
+            style={{ width: isCollapsed ? "auto" : props.width - 36 }}
             onClick={() => setMenuOpen(true)}
         >
             <div ref={viewCarouselRef}>
@@ -124,9 +137,8 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                     width: isCollapsed ? 0 : "auto",
                 }}
             >
-                {store.state.views.find(
-                    (elm) => elm.id === store.state.activeViewId
-                )?.name || "No active view"}
+                {plugin?.views.find((elm) => elm.id === plugin.activeViewId)
+                    ?.name || "No active view"}
             </div>
             <div
                 style={{
