@@ -65,12 +65,16 @@ export const SettingsDrawer: React.FC = () => {
     React.useLayoutEffect(() => {
         const bodyMargins = { ...store.state.bodyMargins };
         if (store.state.position === DrawerPosition.Left) {
-            bodyMargins.left = bodyMargins.left + drawerSize[0];
+            bodyMargins.left = bodyMargins.left - 50 + drawerSize[0];
+            bodyMargins.right = 0;
         } else if (store.state.position === DrawerPosition.Right) {
-            bodyMargins.right = bodyMargins.right + drawerSize[0];
+            bodyMargins.left = 0;
+            bodyMargins.right = bodyMargins.right - 50 + drawerSize[0];
         }
         document.body.style.marginLeft = bodyMargins.left + "px";
         document.body.style.marginRight = bodyMargins.right + "px";
+        document.body.style.marginTop = "0px";
+        document.body.style.marginBottom = "0px";
         setOldDrawerSize(drawerSize[0]);
     }, [
         drawerSize,
@@ -78,7 +82,6 @@ export const SettingsDrawer: React.FC = () => {
         store.state.bodyMargins,
         oldDrawerSize,
     ]);
-
     return (
         <div
             ref={drawerRef}

@@ -168,12 +168,12 @@ const initialState: StoreState = {
             activeViewId: "view1_id",
             views: [
                 {
-                    name: "View1",
+                    name: "View3",
                     id: "view1_id",
                     settings: [
                         {
                             id: "2",
-                            title: "Preferences",
+                            title: "Preferences 2",
                             content: (
                                 <select>
                                     <option>First option</option>
@@ -202,10 +202,30 @@ const initialState: StoreState = {
                                 </svg>
                             ),
                         },
+                        {
+                            id: "plot2",
+                            layout: (
+                                <svg width="400px" height="400px">
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        style={{ fill: "green" }}
+                                        id="green-rect"
+                                    />
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        x="200px"
+                                        style={{ fill: "blue" }}
+                                        id="blue-rect"
+                                    />
+                                </svg>
+                            ),
+                        },
                     ],
                 },
                 {
-                    name: "View2",
+                    name: "View4",
                     id: "view2_id",
                     elements: [
                         {
@@ -234,7 +254,58 @@ const initialState: StoreState = {
             sharedSettings: [
                 {
                     id: "1",
-                    title: "Filter",
+                    title: "Filter 2",
+                    content: <input name="test" />,
+                },
+            ],
+        },
+        {
+            id: "3",
+            name: "Example plugin 3",
+            activeViewId: "view5_id",
+            views: [
+                {
+                    name: "View5",
+                    id: "view5_id",
+                    settings: [
+                        {
+                            id: "3",
+                            title: "Preferences 3",
+                            content: (
+                                <select>
+                                    <option>First option</option>
+                                </select>
+                            ),
+                        },
+                    ],
+                    elements: [
+                        {
+                            id: "plot",
+                            layout: (
+                                <svg width="400px" height="400px">
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        style={{ fill: "green" }}
+                                        id="green-rect"
+                                    />
+                                    <rect
+                                        width="100px"
+                                        height="100px"
+                                        x="200px"
+                                        style={{ fill: "orange" }}
+                                        id="orange-rect"
+                                    />
+                                </svg>
+                            ),
+                        },
+                    ],
+                },
+            ],
+            sharedSettings: [
+                {
+                    id: "1",
+                    title: "Filter 3",
                     content: <input name="test" />,
                 },
             ],

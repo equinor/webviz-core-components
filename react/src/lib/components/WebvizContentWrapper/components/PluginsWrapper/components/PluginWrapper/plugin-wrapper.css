@@ -1,20 +1,14 @@
 .WebvizPluginWrapper {
-    border: 1px rgb(202, 202, 202) dashed;
-    padding: 8px;
-    margin-top: 32px;
-    border-radius: 4px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.WebvizPluginWrapper {
+    border-bottom: 1px rgb(202, 202, 202) solid;
+    opacity: 0.4;
 }
 
 .WebvizPluginWrapper__Active {
-    border-color: rgba(255, 0, 0, 0.3);
-}
-
-.WebvizPluginWrapper > span {
-    color: rgba(0, 0, 0, 0.3);
-    font-size: 0.8em;
-}
-
-.WebvizPluginWrapper__Active > span {
-    color: red;
-    font-size: 0.8em;
+    background-color: rgba(255, 255, 255, 1);
+    opacity: 1;
 }

@@ -50,7 +50,6 @@ export const PluginWrapper: React.FC<PluginWrapperProps> = (
             }`}
             onClick={() => handlePluginClick()}
         >
-            <span>{props.name}</span>
             {viewElements.map((viewElement) => (
                 <ViewElement
                     key={viewElement.id}

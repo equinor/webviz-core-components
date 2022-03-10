@@ -42,37 +42,41 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
 
     React.useEffect(() => {
         if (popupContainer) {
-            const ViewListElements = () => (
-                <>
-                    <Overlay
-                        visible={menuOpen}
-                        onClick={() => setMenuOpen(false)}
-                    />
-                    <ViewList
-                        open={menuOpen}
-                        views={
-                            store.state.pluginsData.find(
-                                (plugin) =>
-                                    plugin.id === store.state.activePluginId
-                            )?.views || []
-                        }
-                        activeViewId={
-                            store.state.pluginsData.find(
-                                (plugin) =>
-                                    plugin.id === store.state.activePluginId
-                            )?.activeViewId || ""
-                        }
-                        anchorElement={
-                            props.open
-                                ? viewNameRef.current
-                                : viewCarouselRef.current
-                        }
-                        location={props.open ? "bottom" : "right"}
-                        onActiveViewChange={handleSelectViewClick}
-                    />
-                </>
-            );
-            ReactDOM.render(<ViewListElements />, popupContainer);
+            if (menuOpen) {
+                const ViewListElements = () => (
+                    <>
+                        <Overlay
+                            visible={menuOpen}
+                            onClick={() => setMenuOpen(false)}
+                        />
+                        <ViewList
+                            open={menuOpen}
+                            views={
+                                store.state.pluginsData.find(
+                                    (plugin) =>
+                                        plugin.id === store.state.activePluginId
+                                )?.views || []
+                            }
+                            activeViewId={
+                                store.state.pluginsData.find(
+                                    (plugin) =>
+                                        plugin.id === store.state.activePluginId
+                                )?.activeViewId || ""
+                            }
+                            anchorElement={
+                                props.open
+                                    ? viewNameRef.current
+                                    : viewCarouselRef.current
+                            }
+                            location={props.open ? "bottom" : "right"}
+                            onActiveViewChange={handleSelectViewClick}
+                        />
+                    </>
+                );
+                ReactDOM.render(<ViewListElements />, popupContainer);
+            } else {
+                ReactDOM.render(<></>, popupContainer);
+            }
         }
     }, [
         menuOpen,
@@ -120,10 +124,18 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
         (plugin) => plugin.id === store.state.activePluginId
     );
 
+    const activeViewName =
+        plugin?.views.find((elm) => elm.id === plugin.activeViewId)?.name ||
+        "No active view";
+
     return (
         <div
             className="WebvizViewSelector"
-            style={{ width: isCollapsed ? "auto" : props.width - 36 }}
+            style={{
+                width: isCollapsed ? "auto" : props.width - 36,
+                height: plugin?.views && plugin.views.length > 1 ? 56 : 0,
+                opacity: plugin?.views && plugin.views.length > 1 ? 1 : 0,
+            }}
             onClick={() => setMenuOpen(true)}
         >
             <div ref={viewCarouselRef}>
@@ -137,8 +149,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                     width: isCollapsed ? 0 : "auto",
                 }}
             >
-                {plugin?.views.find((elm) => elm.id === plugin.activeViewId)
-                    ?.name || "No active view"}
+                {plugin?.views && plugin.views.length > 1 && activeViewName}
             </div>
             <div
                 style={{

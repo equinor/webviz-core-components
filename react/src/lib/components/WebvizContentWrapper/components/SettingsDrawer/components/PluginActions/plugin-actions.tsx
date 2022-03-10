@@ -54,7 +54,11 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                 currentTransitionTime = 0;
             }
             const totalTransitionTime =
-                direction === "down" && props.open ? 300 : 600;
+                direction === "down" && props.open
+                    ? 300
+                    : direction === "up" && !props.open
+                    ? 380
+                    : 600;
 
             if (direction === "down") {
                 currentMargin =

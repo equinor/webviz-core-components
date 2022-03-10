@@ -6,7 +6,8 @@
     justify-content: space-evenly;
     padding-left: 20px;
     padding-right: 16px;
-    height: 56px;
+    overflow: hidden;
+    transition: height 1s ease-in-out, opacity 0.5s ease-in-out;
 }
 
 .WebvizViewSelector:hover {

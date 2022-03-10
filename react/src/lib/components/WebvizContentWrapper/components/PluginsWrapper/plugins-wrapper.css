@@ -1,0 +1,13 @@
+.WebvizPluginsWrapper {
+    height: 100vh;
+    overflow: auto;
+}
+
+.WebvizPluginsWrapper__Notification {
+    background-color: white;
+    padding: 12px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0px 10px 21px -5px rgba(0, 0, 0, 0.33);
+    -moz-box-shadow: 0px 10px 21px -5px rgba(0, 0, 0, 0.33);
+    box-shadow: 0px 10px 21px -5px rgba(0, 0, 0, 0.33);
+}
