@@ -111,6 +111,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected selectedNodes: string[] | null;
     protected blurEnabled: boolean;
     protected updateFromWithin: boolean;
+    protected tabbedInFromOutside: boolean;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -154,6 +155,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.selectedNodes = null;
         this.blurEnabled = true;
         this.updateFromWithin = false;
+        this.tabbedInFromOutside = false;
 
         let error: string | undefined = undefined;
 
@@ -677,6 +679,19 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
     }
 
+    containsActiveElement(): boolean {
+        if (
+            document.activeElement &&
+            document.activeElement instanceof HTMLElement &&
+            this.ref.current
+        ) {
+            return this.ref.current.contains(
+                document.activeElement as HTMLElement
+            );
+        }
+        return false;
+    }
+
     checkIfSelectionIsDuplicate(
         nodeSelection: TreeNodeSelection,
         index: number
@@ -740,6 +755,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             e.stopPropagation();
         } else if (e.key === "c" && e.ctrlKey) {
             this.copyAllSelectedTags();
+        } else if (e.key === "Tab" && !this.containsActiveElement()) {
+            this.tabbedInFromOutside = true;
         }
     }
 
@@ -1570,20 +1587,57 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         e: React.KeyboardEvent<HTMLInputElement>,
         eventType: KeyEventType
     ): void {
-        if (e.shiftKey && this.currentTagIndex() === 0) {
-            this.hideSuggestions({});
-            return;
-        }
-        if (!e.shiftKey && this.currentTagIndex() === this.countTags() - 1) {
-            this.hideSuggestions({});
-            return;
-        }
         if (eventType === KeyEventType.KeyDown) {
-            if (e.shiftKey) {
-                this.decrementCurrentTagIndex(() => this.focusCurrentTag());
-            } else {
-                this.incrementCurrentTagIndex(() => this.focusCurrentTag());
+            if (this.containsActiveElement()) {
+                if (e.shiftKey && this.currentTagIndex() === 0) {
+                    this.hideSuggestions({
+                        callback: () => {
+                            if (!this.selectionHasStarted) {
+                                this.unselectAllTags({});
+
+                                this.updateState({ currentTagIndex: -1 });
+                            }
+                            this.selectionHasStarted = false;
+                        },
+                    });
+                    return;
+                }
+                if (
+                    !e.shiftKey &&
+                    this.currentTagIndex() === this.countTags() - 1
+                ) {
+                    this.hideSuggestions({
+                        callback: () => {
+                            if (!this.selectionHasStarted) {
+                                this.unselectAllTags({});
+
+                                this.updateState({ currentTagIndex: -1 });
+                            }
+                            this.selectionHasStarted = false;
+                        },
+                    });
+                    return;
+                }
+
+                if (e.shiftKey) {
+                    this.decrementCurrentTagIndex(() => this.focusCurrentTag());
+                } else {
+                    this.incrementCurrentTagIndex(() => this.focusCurrentTag());
+                }
             }
+        } else if (this.tabbedInFromOutside) {
+            if (e.shiftKey) {
+                this.updateState({
+                    currentTagIndex: this.countTags() - 1,
+                    callback: () => this.focusCurrentTag(Direction.Right),
+                });
+            } else {
+                this.updateState({
+                    currentTagIndex: 0,
+                    callback: () => this.focusCurrentTag(Direction.Right),
+                });
+            }
+            this.tabbedInFromOutside = false;
         }
         e.preventDefault();
     }
