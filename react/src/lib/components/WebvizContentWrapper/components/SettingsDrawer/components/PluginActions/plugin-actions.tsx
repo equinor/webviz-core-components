@@ -4,10 +4,16 @@ import { fullscreen, camera, comment_solid, help } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({ fullscreen, camera, comment_solid, help });
 
+import { Animation } from "../../../../../../utils/Animation";
+
 import "./plugin-actions.css";
 
 type PluginActionsProps = {
     open: boolean;
+};
+
+type AnimationParameters = {
+    marginBottom: number;
 };
 
 const quadEaseIn = (t: number): number => {
@@ -23,6 +29,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 ) => {
     const [marginBottom, setMarginBottom] = React.useState<number>(0);
     const [open, setOpen] = React.useState<boolean>(props.open);
+    const animation = React.useRef<Animation<AnimationParameters> | null>(null);
     const transitionInterval =
         React.useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -30,8 +37,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 
     React.useEffect(() => {
         return () => {
-            if (transitionInterval.current) {
-                clearInterval(transitionInterval.current);
+            if (animation.current) {
+                animation.current.reset();
             }
         };
     }, []);
@@ -40,47 +47,37 @@ export const PluginActions: React.FC<PluginActionsProps> = (
         if (props.open === open) {
             return;
         }
-        if (transitionInterval.current) {
-            clearInterval(transitionInterval.current);
+        if (animation.current) {
+            animation.current.reset();
         }
-        let direction = "down";
-        let currentMargin = marginBottom;
-        let currentTransitionTime = 0;
-        const transitionDeltaT = 20;
-        transitionInterval.current = setInterval(() => {
-            if (currentMargin === -closedHeight && direction === "down") {
-                direction = "up";
-                setOpen(!open);
-                currentTransitionTime = 0;
-            }
-            const totalTransitionTime =
-                direction === "down" && props.open
-                    ? 300
-                    : direction === "up" && !props.open
-                    ? 380
-                    : 600;
 
-            if (direction === "down") {
-                currentMargin =
-                    quadEaseIn(currentTransitionTime / totalTransitionTime) *
-                    -closedHeight;
-            } else {
-                currentMargin =
-                    (1 -
-                        quadEaseOut(
-                            currentTransitionTime / totalTransitionTime
-                        )) *
-                    -closedHeight;
-            }
-
-            setMarginBottom(currentMargin);
-            if (direction === "up" && currentMargin === 0) {
-                if (transitionInterval.current) {
-                    clearInterval(transitionInterval.current);
+        animation.current = new Animation<AnimationParameters>(
+            900,
+            20,
+            [
+                {
+                    t: 0,
+                    state: { marginBottom: 0 },
+                },
+                {
+                    t: 2 / 3,
+                    state: { marginBottom: -closedHeight },
+                },
+                {
+                    t: 1,
+                    state: { marginBottom: 0 },
+                },
+            ],
+            Animation.Bezier,
+            (values, t) => {
+                if (t === 2 / 3) {
+                    setOpen(!open);
                 }
+                setMarginBottom(values.marginBottom);
             }
-            currentTransitionTime += transitionDeltaT;
-        }, transitionDeltaT);
+        );
+
+        animation.current.start();
     }, [props.open]);
 
     return (

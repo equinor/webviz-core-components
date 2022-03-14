@@ -5,73 +5,28 @@ import {
     download,
     camera,
     fullscreen,
-    block,
     fullscreen_exit,
 } from "@equinor/eds-icons";
 import React from "react";
+
+import { Animation } from "../../../../../../utils/Animation";
 
 import "./view-element.css";
 
 Icon.add({ settings, download, camera, fullscreen, fullscreen_exit });
 
-class Animation {
-    private duration: number;
-    private startValues: { [key: string]: number };
-    private endValues: { [key: string]: number };
-    private animationFunction: (t: number) => number;
-
-    constructor(
-        duration: number,
-        startValues: { [key: string]: number },
-        endValues: { [key: string]: number },
-        animationFunction: (t: number) => number
-    ) {
-        this.duration = duration;
-        this.startValues = startValues;
-        this.endValues = endValues;
-        this.animationFunction = animationFunction;
-
-        if (
-            JSON.stringify(Object.keys(this.startValues)) !==
-            JSON.stringify(Object.keys(this.endValues))
-        ) {
-            throw "Start and end values lists must have the same keys!";
-        }
-    }
-
-    getValues(time: number): { [key: string]: number } {
-        const values: { [key: string]: number } = {};
-        const t = time / this.duration;
-
-        Object.keys(this.startValues).forEach((key) => {
-            const delta = this.endValues[key] - this.startValues[key];
-            values[key] =
-                this.startValues[key] + this.animationFunction(t) * delta;
-        });
-
-        return values;
-    }
-
-    static quadEaseInOut(t: number): number {
-        if (t <= 0.5) {
-            return t * t;
-        }
-        return -(t - 1) * (t - 1) + 1;
-    }
-
-    static linear(t: number): number {
-        return t;
-    }
-
-    static bezier(t: number): number {
-        return t * t * (3 - 2 * t);
-    }
-}
-
 export type ViewElementProps = {
     id: string;
     children: React.ReactChild;
     settings?: React.ReactChild;
+};
+
+type AnimationParameters = {
+    left: number;
+    top: number;
+    height: number;
+    width: number;
+    backdropOpacity: number;
 };
 
 export const ViewElement: React.FC<ViewElementProps> = (
@@ -87,20 +42,20 @@ export const ViewElement: React.FC<ViewElementProps> = (
         React.useState<React.CSSProperties>({});
     const contentRef = React.useRef<HTMLDivElement>(null);
     const fullScreenContainerRef = React.useRef<HTMLDivElement>(null);
-    const fullScreenAnimationInterval =
-        React.useRef<ReturnType<typeof setInterval> | null>(null);
+    const fullScreenAnimation =
+        React.useRef<Animation<AnimationParameters> | null>(null);
 
     React.useEffect(() => {
         return () => {
-            if (fullScreenAnimationInterval.current) {
-                clearInterval(fullScreenAnimationInterval.current);
+            if (fullScreenAnimation.current) {
+                fullScreenAnimation.current.reset();
             }
         };
     }, []);
 
     const handleFullScreenClick = () => {
-        if (fullScreenAnimationInterval.current) {
-            clearInterval(fullScreenAnimationInterval.current);
+        if (fullScreenAnimation.current) {
+            fullScreenAnimation.current.reset();
         }
         if (contentRef.current && fullScreenContainerRef.current) {
             const rect = contentRef.current.getBoundingClientRect();
@@ -135,62 +90,66 @@ export const ViewElement: React.FC<ViewElementProps> = (
                 zIndex: "auto",
             });
 
-            const animation = new Animation(
-                1000,
-                {
-                    left: rect.left,
-                    top: rect.top,
-                    height: contentHeightWithoutPadding,
-                    width: contentWidthWithoutPadding,
-                    backdropOpacity: 0,
-                },
-                {
-                    left: 0,
-                    top: 0,
-                    height: window.innerHeight,
-                    width: window.innerWidth,
-                    backdropOpacity: 1,
-                },
-                Animation.bezier
-            );
-
-            let currentTime = 0;
-
-            fullScreenAnimationInterval.current = setInterval(() => {
-                if (currentTime > 1000 && fullScreenAnimationInterval.current) {
+            fullScreenAnimation.current = new Animation<AnimationParameters>(
+                600,
+                10,
+                [
+                    {
+                        t: 0,
+                        state: {
+                            left: rect.left,
+                            top: rect.top,
+                            height: contentHeightWithoutPadding,
+                            width: contentWidthWithoutPadding,
+                            backdropOpacity: 0,
+                        },
+                    },
+                    {
+                        t: 1,
+                        state: {
+                            left: 0,
+                            top: 0,
+                            height: window.innerHeight,
+                            width: window.innerWidth,
+                            backdropOpacity: 1,
+                        },
+                    },
+                ],
+                Animation.Bezier,
+                (values: AnimationParameters, t: number) => {
+                    if (t === 1) {
+                        const newStyle: React.CSSProperties = {
+                            ...style,
+                            left: 0,
+                            top: 0,
+                            width: "100vw",
+                            height: "100vh",
+                        };
+                        setFullScreenContainerStyle(newStyle);
+                        setIsHovered(false);
+                        return;
+                    }
                     const newStyle: React.CSSProperties = {
                         ...style,
-                        left: 0,
-                        top: 0,
-                        width: "100vw",
-                        height: "100vh",
+                        left: values.left,
+                        top: values.top,
+                        width: values.width,
+                        height: values.height,
                     };
                     setFullScreenContainerStyle(newStyle);
-                    clearInterval(fullScreenAnimationInterval.current);
-                    setIsHovered(false);
-                    return;
+                    setBackdropStyle({
+                        opacity: values.backdropOpacity,
+                        display: "block",
+                    });
                 }
-                const values = animation.getValues(currentTime);
-                const newStyle: React.CSSProperties = {
-                    ...style,
-                    left: values["left"],
-                    top: values["top"],
-                    width: values["width"],
-                    height: values["height"],
-                };
-                setFullScreenContainerStyle(newStyle);
-                setBackdropStyle({
-                    opacity: values["backdropOpacity"],
-                    display: "block",
-                });
-                currentTime += 10;
-            }, 10);
+            );
+            fullScreenAnimation.current.start();
         }
     };
 
     const handleLeaveFullScreenClick = () => {
-        if (fullScreenAnimationInterval.current) {
-            clearInterval(fullScreenAnimationInterval.current);
+        if (fullScreenAnimation.current) {
+            fullScreenAnimation.current.reset();
         }
         if (contentRef.current && fullScreenContainerRef.current) {
             const rect = contentRef.current.getBoundingClientRect();
@@ -205,50 +164,54 @@ export const ViewElement: React.FC<ViewElementProps> = (
 
             const style = fullScreenContainerStyle;
 
-            const animation = new Animation(
-                1000,
-                {
-                    left: 0,
-                    top: 0,
-                    height: window.innerHeight,
-                    width: window.innerWidth,
-                    backdropOpacity: 1,
-                },
-                {
-                    left: rect.left,
-                    top: rect.top,
-                    height: contentHeightWithoutPadding,
-                    width: contentWidthWithoutPadding,
-                    backdropOpacity: 0,
-                },
-                Animation.bezier
-            );
-
-            let currentTime = 0;
-
-            fullScreenAnimationInterval.current = setInterval(() => {
-                if (currentTime > 1000 && fullScreenAnimationInterval.current) {
-                    setFullScreenContainerStyle({});
-                    clearInterval(fullScreenAnimationInterval.current);
-                    setBackdropStyle({});
-                    setContentStyle({});
-                    return;
+            fullScreenAnimation.current = new Animation<AnimationParameters>(
+                600,
+                10,
+                [
+                    {
+                        t: 0,
+                        state: {
+                            left: 0,
+                            top: 0,
+                            height: window.innerHeight,
+                            width: window.innerWidth,
+                            backdropOpacity: 1,
+                        },
+                    },
+                    {
+                        t: 1,
+                        state: {
+                            left: rect.left,
+                            top: rect.top,
+                            height: contentHeightWithoutPadding,
+                            width: contentWidthWithoutPadding,
+                            backdropOpacity: 0,
+                        },
+                    },
+                ],
+                Animation.Bezier,
+                (values: AnimationParameters, t: number) => {
+                    if (t === 1) {
+                        setFullScreenContainerStyle({});
+                        setBackdropStyle({});
+                        setContentStyle({});
+                        return;
+                    }
+                    const newStyle: React.CSSProperties = {
+                        ...style,
+                        left: values.left,
+                        top: values.top,
+                        width: values.width,
+                        height: values.height,
+                    };
+                    setFullScreenContainerStyle(newStyle);
+                    setBackdropStyle({
+                        opacity: values.backdropOpacity,
+                        display: "block",
+                    });
                 }
-                const values = animation.getValues(currentTime);
-                const newStyle: React.CSSProperties = {
-                    ...style,
-                    left: values["left"],
-                    top: values["top"],
-                    width: values["width"],
-                    height: values["height"],
-                };
-                setFullScreenContainerStyle(newStyle);
-                setBackdropStyle({
-                    opacity: values["backdropOpacity"],
-                    display: "block",
-                });
-                currentTime += 10;
-            }, 10);
+            );
+            fullScreenAnimation.current.start();
         }
     };
 
