@@ -12,7 +12,7 @@ export type SettingsGroupProps = {
     id: string;
     title: string;
     open: boolean;
-    children: React.ReactChild;
+    children: React.ReactNode;
     onToggle: (id: string) => void;
 };
 

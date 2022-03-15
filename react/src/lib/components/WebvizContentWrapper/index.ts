@@ -1,1 +1,1 @@
-export { WebvizContentWrapper } from "./webviz-content-wrapper";
+export { WebvizContentWrapper } from "./WebvizContentWrapper";

@@ -1,7 +1,7 @@
 import { ScrollArea } from "../../../../../ScrollArea";
 import React from "react";
 import { useStore } from "../../../ContentManager";
-import { SettingsGroup as SettingsGroupType } from "../../../ContentManager/content-manager";
+import { SettingsGroup as SettingsGroupType } from "../../../../shared-types/webviz";
 import { SettingsGroup } from "../SettingsGroup/settings-group";
 
 import "./settings.css";

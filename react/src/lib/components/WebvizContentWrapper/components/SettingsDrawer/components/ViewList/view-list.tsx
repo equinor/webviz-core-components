@@ -3,7 +3,7 @@ import { Icon } from "@equinor/eds-core-react";
 import { check } from "@equinor/eds-icons";
 Icon.add({ check });
 
-import { View } from "../../../ContentManager";
+import { View } from "../../../../shared-types/webviz";
 
 import { Point } from "../../../../../../shared-types/point";
 

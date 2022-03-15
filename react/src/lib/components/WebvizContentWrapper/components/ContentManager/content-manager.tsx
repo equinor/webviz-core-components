@@ -1,6 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
-
 import {
     MenuBarPosition,
     MenuDrawerPosition,
@@ -8,11 +6,18 @@ import {
 
 import { DrawerPosition } from "../../shared-types/drawer-position";
 import { Margins } from "../../../../shared-types/margins";
+import { Plugin } from "../../shared-types/webviz";
 
 type ActionMap<
     M extends {
         [index: string]: {
-            [key: string]: string | Margins | number | null | boolean;
+            [key: string]:
+                | string
+                | Margins
+                | number
+                | null
+                | boolean
+                | Plugin[];
         };
     }
 > = {
@@ -26,37 +31,11 @@ type ActionMap<
           };
 };
 
-export type ViewElement = {
-    id: string;
-    layout: React.ReactChild;
-    settings?: React.ReactChild;
-};
-
-export type SettingsGroup = {
-    id: string;
-    title: string;
-    content: React.ReactChild;
-};
-
-export type Plugin = {
-    id: string;
-    name: string;
-    views: View[];
-    sharedSettings?: SettingsGroup[];
-    activeViewId: string;
-};
-
-export type View = {
-    id: string;
-    name: string;
-    settings?: SettingsGroup[];
-    elements: ViewElement[];
-};
-
 export enum StoreActions {
     SetActiveView = "set_active_view",
     SetActivePlugin = "set_active_plugin",
     SetMenuPosition = "set_menu_position",
+    SetPlugins = "set_plugins",
 }
 
 export type StoreState = {
@@ -79,9 +58,13 @@ type Payload = {
         menuDrawerPosition: MenuDrawerPosition;
         bodyMargins: Margins;
     };
+    [StoreActions.SetPlugins]: {
+        plugins: Plugin[];
+    };
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
+/*
 const initialState: StoreState = {
     activePluginId: "1",
     pluginsData: [
@@ -314,6 +297,17 @@ const initialState: StoreState = {
     bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     position: DrawerPosition.Left,
 };
+*/
+
+const setInitialState = (plugins: Plugin[]): StoreState => {
+    const activePluginId = plugins.length > 0 ? plugins[0]["id"] : "";
+    return {
+        activePluginId: activePluginId,
+        pluginsData: plugins,
+        bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
+        position: DrawerPosition.Left,
+    };
+};
 
 export const StoreReducer = (
     state: StoreState,
@@ -354,6 +348,11 @@ export const StoreReducer = (
             position: position,
             bodyMargins: action.payload.bodyMargins,
         };
+    } else if (action.type === StoreActions.SetPlugins) {
+        return {
+            ...state,
+            pluginsData: action.payload.plugins,
+        };
     }
     return state;
 };
@@ -366,21 +365,32 @@ type StoreContext = {
 const storeContext = React.createContext<StoreContext | undefined>(undefined);
 
 type ContentManagerProps = {
+    plugins: Plugin[];
     children: React.ReactNode;
 };
 
-export const ContentManager: React.FC<ContentManagerProps> = (props) => {
-    const [state, dispatch] = React.useReducer(StoreReducer, initialState);
+export const ContentManager: React.FC<ContentManagerProps> = (
+    props: ContentManagerProps
+) => {
+    const [state, dispatch] = React.useReducer(
+        StoreReducer,
+        props.plugins,
+        setInitialState
+    );
+
+    React.useEffect(() => {
+        console.log(props.plugins);
+        dispatch({
+            type: StoreActions.SetPlugins,
+            payload: { plugins: props.plugins },
+        });
+    }, [props.plugins]);
 
     return (
         <storeContext.Provider value={{ state, dispatch }}>
             {props.children}
         </storeContext.Provider>
     );
-};
-
-ContentManager.propTypes = {
-    children: PropTypes.node,
 };
 
 export const useStore = (): StoreContext =>

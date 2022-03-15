@@ -16,22 +16,12 @@ type AnimationParameters = {
     marginBottom: number;
 };
 
-const quadEaseIn = (t: number): number => {
-    return t * t;
-};
-
-const quadEaseOut = (t: number): number => {
-    return -(t - 1) * (t - 1) + 1;
-};
-
 export const PluginActions: React.FC<PluginActionsProps> = (
     props: PluginActionsProps
 ) => {
     const [marginBottom, setMarginBottom] = React.useState<number>(0);
     const [open, setOpen] = React.useState<boolean>(props.open);
     const animation = React.useRef<Animation<AnimationParameters> | null>(null);
-    const transitionInterval =
-        React.useRef<ReturnType<typeof setInterval> | null>(null);
 
     const closedHeight = 4 * (12 * 2 + 24);
 

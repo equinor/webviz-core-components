@@ -1,9 +1,7 @@
 import React from "react";
-import {
-    useStore,
-    ViewElement as ViewElementType,
-} from "../../../ContentManager/content-manager";
+import { useStore } from "../../../ContentManager/content-manager";
 import { ViewElement } from "../ViewElement";
+import { ViewElement as ViewElementType } from "../../../../shared-types/webviz";
 
 import "./plugin-wrapper.css";
 import { StoreActions } from "../../../ContentManager/content-manager";

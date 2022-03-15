@@ -17,8 +17,8 @@ Icon.add({ settings, download, camera, fullscreen, fullscreen_exit });
 
 export type ViewElementProps = {
     id: string;
-    children: React.ReactChild;
-    settings?: React.ReactChild;
+    children: React.ReactNode;
+    settings?: React.ReactNode;
 };
 
 type AnimationParameters = {
