@@ -20,14 +20,26 @@ import { Menu } from "./components/Menu";
 import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
 import { Dialog } from "./components/Dialog/Dialog";
-import { WebvizContentWrapper } from "./components/WebvizContentWrapper";
+import { WebvizContentWrapper } from "./components/WebvizContentWrapper__DEPRECATED";
+import { WebvizContentManager } from "./components/WebvizContentManager";
+import { WebvizPluginsWrapper } from "./components/WebvizPluginsWrapper";
+import { WebvizPluginWrapper } from "./components/WebvizPluginWrapper";
+import { WebvizSettingsDrawer } from "./components/WebvizSettingsDrawer";
+import { WebvizViewElement } from "./components/WebvizViewElement";
+import { WebvizSettingsGroup } from "./components/WebvizSettingsGroup";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
 
 export {
     WebvizContentWrapper,
+    WebvizContentManager,
+    WebvizPluginWrapper,
+    WebvizPluginsWrapper,
+    WebvizSettingsDrawer,
+    WebvizViewElement,
     WebvizPluginPlaceholder,
+    WebvizSettingsGroup,
     ColorScales,
     Select,
     SmartNodeSelector,

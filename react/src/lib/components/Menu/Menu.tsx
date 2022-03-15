@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import useSize from "@react-hook/size";
 
-import { useStore } from "../WebvizContentWrapper/components/ContentManager";
+import { useStore } from "../WebvizContentManager";
 
 import { TopMenu } from "./components/TopMenu/TopMenu";
 import { MenuBar } from "./components/MenuBar/MenuBar";
@@ -25,7 +25,7 @@ import {
 } from "./types/navigation";
 
 import "./Menu.css";
-import { StoreActions } from "../WebvizContentWrapper/components/ContentManager/content-manager";
+import { StoreActions } from "../WebvizContentManager/WebvizContentManager";
 import { Margins } from "lib/shared-types/margins";
 
 export type ParentProps = {
