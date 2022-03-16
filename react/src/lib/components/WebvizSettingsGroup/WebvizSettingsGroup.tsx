@@ -42,11 +42,13 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
     }
 
     return (
-        <div className="WebvizSettingsGroup">
+        <div
+            className="WebvizSettingsGroup"
+            style={{ display: visible ? "block" : "none" }}
+        >
             <div
                 className="WebvizSettingsGroup__Title"
                 onClick={() => props.onToggle && props.onToggle(props.id)}
-                style={{ display: visible ? "flex" : "none" }}
             >
                 <div className="WebvizSettingsGroup__TitleText">
                     {props.title}

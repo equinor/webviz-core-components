@@ -123,8 +123,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                 store.state.activePluginWrapperRef.current.getElementsByClassName(
                                     "WebvizViewElement__Content"
                                 );
-                            for (const viewElement of viewElements) {
-                                viewElement.className =
+                            for (let i = 0; i < viewElements.length; i++) {
+                                viewElements[i].className =
                                     "WebvizViewElement__Content__flat";
                             }
                             flash.style.opacity = "0";
@@ -152,8 +152,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                 store.state.activePluginWrapperRef.current.getElementsByClassName(
                                     "WebvizViewElement__Content__flat"
                                 );
-                            for (const viewElement of viewElements) {
-                                viewElement.className =
+                            for (let i = 0; i < viewElements.length; i++) {
+                                viewElements[i].className =
                                     "WebvizViewElement__Content";
                             }
                         }

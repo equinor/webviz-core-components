@@ -53,17 +53,3 @@ export const Settings: React.FC<SettingsProps> = (props: SettingsProps) => {
         </div>
     );
 };
-
-/*
-{settingsGroups.map((group) => (
-                    <SettingsGroup
-                        key={group.id}
-                        title={group.title}
-                        open={activeGroup === group.id}
-                        id={group.id}
-                        onToggle={handleGroupToggle}
-                    >
-                        {group.content}
-                    </SettingsGroup>
-                ))}
-                */

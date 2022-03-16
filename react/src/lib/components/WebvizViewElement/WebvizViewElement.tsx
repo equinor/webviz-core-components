@@ -254,6 +254,14 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 (values, t) => {
                     if (fullScreenContainerRef.current) {
                         if (t === 0.5) {
+                            const actions =
+                                fullScreenContainerRef.current.getElementsByClassName(
+                                    "WebvizViewElement__FullScreenActions"
+                                );
+                            for (const action of actions) {
+                                (action as HTMLDivElement).style.display =
+                                    "none";
+                            }
                             flash.style.opacity = "0";
                             html2canvas(fullScreenContainerRef.current, {
                                 scrollX: -window.scrollX,
@@ -271,6 +279,10 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                                     }
                                 })
                             );
+                            for (const action of actions) {
+                                (action as HTMLDivElement).style.display =
+                                    "block";
+                            }
                             flash.style.opacity = "1";
                         }
                         if (t === 1) {
