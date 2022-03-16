@@ -10,12 +10,7 @@ import { Button } from "@material-ui/core";
 import React from "react";
 import { WebvizContentWrapper } from "../lib/components/WebvizContentWrapper__DEPRECATED";
 
-import {
-    WebvizPluginPlaceholder,
-    SmartNodeSelector,
-    Menu,
-    Dialog,
-} from "../lib";
+import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog } from "../lib";
 
 const steps = [
     {
@@ -62,7 +57,15 @@ const App: React.FC = () => {
                 </div>
             )*/ <WebvizContentWrapper
                     id="content-wrapper"
-                    plugins={[]}
+                    plugins={[
+                        {
+                            activeViewId: "",
+                            id: "plugin-wrapper",
+                            name: "My Plugin",
+                            screenshotFilename: "MyScreenshot",
+                            views: [],
+                        },
+                    ]}
                     menuProps={{
                         menuBarPosition: "left",
                         menuDrawerPosition: "left",

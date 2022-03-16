@@ -4,6 +4,7 @@ import { Menu, MenuProps } from "../Menu";
 
 import { WebvizContentManager } from "../WebvizContentManager";
 import { WebvizPluginsWrapper } from "../WebvizPluginsWrapper";
+import { WebvizPluginWrapper } from "../WebvizPluginWrapper";
 import { WebvizSettingsDrawer } from "../WebvizSettingsDrawer/WebvizSettingsDrawer";
 import {
     Plugin,
@@ -12,6 +13,7 @@ import {
 
 import "./webviz-content-wrapper.css";
 import PropTypes from "prop-types";
+import { WebvizViewElement } from "../WebvizViewElement";
 
 type DashProps = {
     url: string;
@@ -45,7 +47,13 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                 }
             />
             <WebvizSettingsDrawer id="drawer" />
-            <WebvizPluginsWrapper id="test" />
+            <WebvizPluginsWrapper id="plugins-wrapper">
+                <WebvizPluginWrapper name="MyPlugin" id="plugin-wrapper">
+                    <WebvizViewElement id="view-element">
+                        <h1>Test plugin view element</h1>
+                    </WebvizViewElement>
+                </WebvizPluginWrapper>
+            </WebvizPluginsWrapper>
         </WebvizContentManager>
     );
 };

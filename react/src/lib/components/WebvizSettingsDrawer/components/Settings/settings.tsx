@@ -12,36 +12,6 @@ export type SettingsProps = {
 export const Settings: React.FC<SettingsProps> = (props: SettingsProps) => {
     const [activeGroup, setActiveGroup] = React.useState<string>("");
 
-    /*
-    const [settingsGroups, setSettingsGroups] = React.useState<
-        SettingsGroupType[]
-    >([]);
-
-    const store = useStore();
-
-    React.useEffect(() => {
-        const settings: SettingsGroupType[] = [];
-
-        const plugin = store.state.pluginsData.find(
-            (plugin) => plugin.id === store.state.activePluginId
-        );
-
-        settings.push(
-            ...(store.state.pluginsData.find(
-                (plugin) => plugin.id === store.state.activePluginId
-            )?.sharedSettings || [])
-        );
-
-        settings.push(
-            ...(plugin?.views.find((view) => view.id === plugin.activeViewId)
-                ?.settings || [])
-        );
-
-        setSettingsGroups(settings);
-    }, [store.state.activePluginId, store.state.pluginsData]);
-
-    */
-
     const handleGroupToggle = React.useCallback(
         (id: string) => {
             if (activeGroup === id) {

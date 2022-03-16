@@ -28,7 +28,7 @@ import {
 
 import WebvizToolbarButton from "./components/WebvizToolbarButton";
 import WebvizContentOverlay from "./components/WebvizContentOverlay";
-import downloadFile from "./utils/downloadFile";
+import downloadFile from "../../utils/downloadFile";
 
 import "./webviz_plugin_component.css";
 
@@ -250,7 +250,8 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                                         canvas.toBlob((blob) => {
                                             if (blob !== null) {
                                                 downloadFile({
-                                                    filename: screenshot_filename,
+                                                    filename:
+                                                        screenshot_filename,
                                                     data: blob,
                                                     mimeType: "image/png",
                                                 });

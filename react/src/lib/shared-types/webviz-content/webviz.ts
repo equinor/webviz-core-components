@@ -39,6 +39,7 @@ export type Plugin = {
     name: string;
     activeViewId: string;
     views: View[];
+    screenshotFilename: string;
 };
 
 export const PluginPropTypes = {
@@ -47,4 +48,5 @@ export const PluginPropTypes = {
     views: PropTypes.arrayOf(PropTypes.shape(ViewPropTypes).isRequired)
         .isRequired,
     activeViewId: PropTypes.string.isRequired,
+    screenshotFilename: PropTypes.string.isRequired,
 };

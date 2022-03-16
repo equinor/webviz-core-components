@@ -44,3 +44,13 @@
     margin-top: -50px;
     transition: all 0.05s ease-in-out;
 }
+
+.WebvizCameraFlash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #fff;
+    z-index: 5000;
+}

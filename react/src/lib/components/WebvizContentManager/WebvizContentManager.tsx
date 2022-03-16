@@ -21,7 +21,8 @@ type ActionMap<
                 | number
                 | null
                 | boolean
-                | Plugin[];
+                | Plugin[]
+                | React.RefObject<HTMLDivElement>;
         };
     }
 > = {
@@ -40,6 +41,7 @@ export enum StoreActions {
     SetActivePlugin = "set_active_plugin",
     SetMenuPosition = "set_menu_position",
     SetPlugins = "set_plugins",
+    SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
 }
 
 export type StoreState = {
@@ -47,6 +49,7 @@ export type StoreState = {
     bodyMargins: Margins;
     position: DrawerPosition;
     pluginsData: Plugin[];
+    activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
 };
 
 type Payload = {
@@ -65,243 +68,12 @@ type Payload = {
     [StoreActions.SetPlugins]: {
         plugins: Plugin[];
     };
+    [StoreActions.SetActivePluginWrapperRef]: {
+        ref: React.RefObject<HTMLDivElement>;
+    };
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
-/*
-const initialState: StoreState = {
-    activePluginId: "1",
-    pluginsData: [
-        {
-            id: "1",
-            name: "Example plugin",
-            activeViewId: "view1_id",
-            views: [
-                {
-                    name: "View1",
-                    id: "view1_id",
-                    settings: [
-                        {
-                            id: "2",
-                            title: "Preferences",
-                            content: (
-                                <select>
-                                    <option>First option</option>
-                                </select>
-                            ),
-                        },
-                    ],
-                    elements: [
-                        {
-                            id: "plot",
-                            layout: (
-                                <svg width="400px" height="400px">
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        style={{ fill: "green" }}
-                                        id="green-rect"
-                                    />
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        x="200px"
-                                        style={{ fill: "blue" }}
-                                        id="blue-rect"
-                                    />
-                                </svg>
-                            ),
-                        },
-                    ],
-                },
-                {
-                    name: "View2",
-                    id: "view2_id",
-                    elements: [
-                        {
-                            id: "plot",
-                            layout: (
-                                <svg width="400px" height="400px">
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        style={{ fill: "red" }}
-                                        id="red-rect"
-                                    />
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        x="200px"
-                                        style={{ fill: "yellow" }}
-                                        id="yellow-rect"
-                                    />
-                                </svg>
-                            ),
-                        },
-                    ],
-                },
-            ],
-            sharedSettings: [
-                {
-                    id: "1",
-                    title: "Filter",
-                    content: <input name="test" />,
-                },
-            ],
-        },
-        {
-            id: "2",
-            name: "Example plugin 2",
-            activeViewId: "view1_id",
-            views: [
-                {
-                    name: "View3",
-                    id: "view1_id",
-                    settings: [
-                        {
-                            id: "2",
-                            title: "Preferences 2",
-                            content: (
-                                <select>
-                                    <option>First option</option>
-                                </select>
-                            ),
-                        },
-                    ],
-                    elements: [
-                        {
-                            id: "plot",
-                            layout: (
-                                <svg width="400px" height="400px">
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        style={{ fill: "green" }}
-                                        id="green-rect"
-                                    />
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        x="200px"
-                                        style={{ fill: "blue" }}
-                                        id="blue-rect"
-                                    />
-                                </svg>
-                            ),
-                        },
-                        {
-                            id: "plot2",
-                            layout: (
-                                <svg width="400px" height="400px">
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        style={{ fill: "green" }}
-                                        id="green-rect"
-                                    />
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        x="200px"
-                                        style={{ fill: "blue" }}
-                                        id="blue-rect"
-                                    />
-                                </svg>
-                            ),
-                        },
-                    ],
-                },
-                {
-                    name: "View4",
-                    id: "view2_id",
-                    elements: [
-                        {
-                            id: "plot",
-                            layout: (
-                                <svg width="400px" height="400px">
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        style={{ fill: "red" }}
-                                        id="red-rect"
-                                    />
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        x="200px"
-                                        style={{ fill: "yellow" }}
-                                        id="yellow-rect"
-                                    />
-                                </svg>
-                            ),
-                        },
-                    ],
-                },
-            ],
-            sharedSettings: [
-                {
-                    id: "1",
-                    title: "Filter 2",
-                    content: <input name="test" />,
-                },
-            ],
-        },
-        {
-            id: "3",
-            name: "Example plugin 3",
-            activeViewId: "view5_id",
-            views: [
-                {
-                    name: "View5",
-                    id: "view5_id",
-                    settings: [
-                        {
-                            id: "3",
-                            title: "Preferences 3",
-                            content: (
-                                <select>
-                                    <option>First option</option>
-                                </select>
-                            ),
-                        },
-                    ],
-                    elements: [
-                        {
-                            id: "plot",
-                            layout: (
-                                <svg width="400px" height="400px">
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        style={{ fill: "green" }}
-                                        id="green-rect"
-                                    />
-                                    <rect
-                                        width="100px"
-                                        height="100px"
-                                        x="200px"
-                                        style={{ fill: "orange" }}
-                                        id="orange-rect"
-                                    />
-                                </svg>
-                            ),
-                        },
-                    ],
-                },
-            ],
-            sharedSettings: [
-                {
-                    id: "1",
-                    title: "Filter 3",
-                    content: <input name="test" />,
-                },
-            ],
-        },
-    ],
-    bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-    position: DrawerPosition.Left,
-};
-*/
 
 const setInitialState = (plugins: Plugin[]): StoreState => {
     const activePluginId = plugins.length > 0 ? plugins[0]["id"] : "";
@@ -310,6 +82,7 @@ const setInitialState = (plugins: Plugin[]): StoreState => {
         pluginsData: plugins,
         bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
         position: DrawerPosition.Left,
+        activePluginWrapperRef: null,
     };
 };
 
@@ -362,6 +135,11 @@ export const StoreReducer = (
             activePluginId: activePluginId,
             pluginsData: action.payload.plugins,
         };
+    } else if (action.type === StoreActions.SetActivePluginWrapperRef) {
+        return {
+            ...state,
+            activePluginWrapperRef: action.payload.ref,
+        };
     }
     return state;
 };
@@ -404,10 +182,6 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
             });
         }
     }, [state.pluginsData, state.activePluginId]);
-
-    React.useEffect(() => {
-        console.log(JSON.stringify(state));
-    }, [state]);
 
     React.useEffect(() => {
         dispatch({

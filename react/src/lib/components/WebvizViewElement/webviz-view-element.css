@@ -21,11 +21,18 @@
     background-color: white;
     padding: 16px;
     flex-grow: 4;
-    transition: all 5s ease-in-out;
+    transition: width 5s ease-in-out;
     z-index: 1;
 }
 
-.WebvizViewElement__LeaveFullScreen {
+.WebvizViewElement__Content__flat {
+    background-color: white;
+    padding: 16px;
+    flex-grow: 4;
+    z-index: 1;
+}
+
+.WebvizViewElement__FullScreenActions {
     position: fixed;
     top: 0;
     right: 0;
@@ -50,13 +57,23 @@
 }
 
 .WebvizViewElement__ActionsContent {
-    width: 48px;
+    width: 54px;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: absolute;
     right: 0px;
     height: 100%;
+    min-height: 100px;
+}
+
+.WebvizViewElement__ActionsContent > div {
+    text-align: center;
+}
+
+.WebvizViewElement__ActionsContent .VerticalScrollBar {
+    width: 4px;
+    border-radius: 2px;
 }
 
 .WebvizViewElement__Actions__Spacer {
