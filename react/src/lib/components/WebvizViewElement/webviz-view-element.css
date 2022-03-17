@@ -43,28 +43,28 @@
     display: none;
 }
 
-.WebvizViewElement__LeaveFullScreen:hover {
+.WebvizViewElement__FullScreenActions:hover {
     background-color: rgba(196, 196, 196, 0.22);
 }
 
-.WebvizViewElement__Actions {
+.WebvizViewElement__Actions,
+.WebvizViewElement__Actions__hover {
     background-color: #f8f8f8;
     -webkit-box-shadow: 1px 2px 3px 1px rgba(0, 0, 0, 0.08);
     box-shadow: 1px 2px 3px 1px rgba(0, 0, 0, 0.08);
-    transition: width 0.2s ease-in-out;
     overflow: hidden;
-    position: relative;
-}
-
-.WebvizViewElement__ActionsContent {
-    width: 54px;
+    width: 32px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: absolute;
-    right: 0px;
-    height: 100%;
-    min-height: 100px;
+}
+
+.WebvizViewElement__Actions > div {
+    opacity: 0.5;
+}
+
+.WebvizViewElement__Actions__hover > div {
+    opacity: 1;
 }
 
 .WebvizViewElement__ActionsContent > div {

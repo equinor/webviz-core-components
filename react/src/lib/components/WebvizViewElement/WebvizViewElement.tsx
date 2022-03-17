@@ -13,7 +13,6 @@ import { Animation } from "../../utils/Animation";
 
 import "./webviz-view-element.css";
 import PropTypes from "prop-types";
-import { ScrollArea } from "../ScrollArea";
 import html2canvas from "html2canvas";
 import downloadFile from "../../utils/downloadFile";
 
@@ -332,35 +331,34 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 </div>
             </div>
             <div
-                className="WebvizViewElement__Actions"
-                style={{ width: isHovered ? 54 : 0 }}
+                className={
+                    isHovered
+                        ? "WebvizViewElement__Actions__hover"
+                        : "WebvizViewElement__Actions"
+                }
             >
-                <div className="WebvizViewElement__ActionsContent">
-                    <ScrollArea>
-                        {false && (
-                            <div>
-                                <IconButton>
-                                    <Icon name="settings" />
-                                </IconButton>
-                            </div>
-                        )}
-                        <div className="WebvizViewElement__Actions__Spacer" />
-                        <div>
-                            <IconButton>
-                                <Icon name="download" />
-                            </IconButton>
-                        </div>
-                        <div>
-                            <IconButton onClick={handleScreenShotClick}>
-                                <Icon name="camera" />
-                            </IconButton>
-                        </div>
-                        <div>
-                            <IconButton onClick={handleFullScreenClick}>
-                                <Icon name="fullscreen" />
-                            </IconButton>
-                        </div>
-                    </ScrollArea>
+                {false && (
+                    <div>
+                        <IconButton>
+                            <Icon name="settings" size={16} />
+                        </IconButton>
+                    </div>
+                )}
+                <div className="WebvizViewElement__Actions__Spacer" />
+                <div>
+                    <IconButton>
+                        <Icon name="download" size={16} />
+                    </IconButton>
+                </div>
+                <div>
+                    <IconButton onClick={handleScreenShotClick}>
+                        <Icon name="camera" size={16} />
+                    </IconButton>
+                </div>
+                <div>
+                    <IconButton onClick={handleFullScreenClick}>
+                        <Icon name="fullscreen" size={16} />
+                    </IconButton>
                 </div>
             </div>
         </div>

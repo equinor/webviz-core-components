@@ -119,14 +119,17 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                 (values, t) => {
                     if (store.state.activePluginWrapperRef?.current) {
                         if (t === 0.5) {
-                            let viewElements =
+                            const viewElements = Array.from(
                                 store.state.activePluginWrapperRef.current.getElementsByClassName(
                                     "WebvizViewElement__Content"
-                                );
-                            for (let i = 0; i < viewElements.length; i++) {
-                                viewElements[i].className =
-                                    "WebvizViewElement__Content__flat";
-                            }
+                                )
+                            );
+                            viewElements.forEach((el) =>
+                                el.classList.replace(
+                                    "WebvizViewElement__Content",
+                                    "WebvizViewElement__Content__flat"
+                                )
+                            );
                             flash.style.opacity = "0";
                             html2canvas(
                                 store.state.activePluginWrapperRef.current,
@@ -148,14 +151,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                 })
                             );
                             flash.style.opacity = "1";
-                            viewElements =
-                                store.state.activePluginWrapperRef.current.getElementsByClassName(
-                                    "WebvizViewElement__Content__flat"
-                                );
-                            for (let i = 0; i < viewElements.length; i++) {
-                                viewElements[i].className =
-                                    "WebvizViewElement__Content";
-                            }
+                            viewElements.forEach((el) =>
+                                el.classList.replace(
+                                    "WebvizViewElement__Content__flat",
+                                    "WebvizViewElement__Content"
+                                )
+                            );
                         }
                         if (t === 1) {
                             document.body.removeChild(flash);

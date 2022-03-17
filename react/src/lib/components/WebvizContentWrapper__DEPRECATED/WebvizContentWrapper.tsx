@@ -49,8 +49,19 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
             <WebvizSettingsDrawer id="drawer" />
             <WebvizPluginsWrapper id="plugins-wrapper">
                 <WebvizPluginWrapper name="MyPlugin" id="plugin-wrapper">
-                    <WebvizViewElement id="view-element">
-                        <h1>Test plugin view element</h1>
+                    <WebvizViewElement id="view-element-1">
+                        <h1>Test plugin view element 1</h1>
+                    </WebvizViewElement>
+                    <WebvizViewElement id="view-element-2">
+                        <h1>Test plugin view element 2</h1>
+                    </WebvizViewElement>
+                </WebvizPluginWrapper>
+                <WebvizPluginWrapper name="MyPlugin" id="plugin-wrapper-2">
+                    <WebvizViewElement id="view-element-3">
+                        <h1>Test plugin view element 3</h1>
+                    </WebvizViewElement>
+                    <WebvizViewElement id="view-element-4">
+                        <h1>Test plugin view element 4</h1>
                     </WebvizViewElement>
                 </WebvizPluginWrapper>
             </WebvizPluginsWrapper>
