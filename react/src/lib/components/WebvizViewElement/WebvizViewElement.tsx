@@ -29,7 +29,7 @@ export interface ParentProps {
 export type WebvizViewElementProps = {
     id: string;
     flexGrow?: number;
-    showDownload: boolean;
+    showDownload?: boolean;
     screenshotFilename?: string;
     children?: React.ReactNode;
     download?: DownloadData;
@@ -52,25 +52,19 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const { download } = props;
     const [isHovered, setIsHovered] = React.useState<boolean>(false);
     const [downloadRequests, setDownloadRequested] = React.useState<number>(0);
-    const [
-        fullScreenContainerStyle,
-        setFullScreenContainerStyle,
-    ] = React.useState<React.CSSProperties>({});
+    const [fullScreenContainerStyle, setFullScreenContainerStyle] =
+        React.useState<React.CSSProperties>({});
     const [contentStyle, setContentStyle] = React.useState<React.CSSProperties>(
         {}
     );
-    const [
-        backdropStyle,
-        setBackdropStyle,
-    ] = React.useState<React.CSSProperties>({});
+    const [backdropStyle, setBackdropStyle] =
+        React.useState<React.CSSProperties>({});
     const contentRef = React.useRef<HTMLDivElement>(null);
     const fullScreenContainerRef = React.useRef<HTMLDivElement>(null);
-    const fullScreenAnimation = React.useRef<Animation<FullScreenAnimationParameters> | null>(
-        null
-    );
-    const flashAnimation = React.useRef<Animation<FlashAnimationParameters> | null>(
-        null
-    );
+    const fullScreenAnimation =
+        React.useRef<Animation<FullScreenAnimationParameters> | null>(null);
+    const flashAnimation =
+        React.useRef<Animation<FlashAnimationParameters> | null>(null);
 
     React.useEffect(() => {
         return () => {
@@ -112,8 +106,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 position: "fixed",
                 left: rect.left,
                 top: rect.top,
-                width: contentWidthWithoutPadding,
-                height: contentHeightWithoutPadding,
+                minWidth: contentWidthWithoutPadding,
+                minHeight: contentHeightWithoutPadding,
                 zIndex: 1300,
                 padding: parseInt(
                     getComputedStyle(contentRef.current)?.padding || "0"
@@ -130,59 +124,60 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 zIndex: "auto",
             });
 
-            fullScreenAnimation.current = new Animation<FullScreenAnimationParameters>(
-                600,
-                10,
-                [
-                    {
-                        t: 0,
-                        state: {
-                            left: rect.left,
-                            top: rect.top,
-                            height: contentHeightWithoutPadding,
-                            width: contentWidthWithoutPadding,
-                            backdropOpacity: 0,
+            fullScreenAnimation.current =
+                new Animation<FullScreenAnimationParameters>(
+                    600,
+                    10,
+                    [
+                        {
+                            t: 0,
+                            state: {
+                                left: rect.left,
+                                top: rect.top,
+                                height: contentHeightWithoutPadding,
+                                width: contentWidthWithoutPadding,
+                                backdropOpacity: 0,
+                            },
                         },
-                    },
-                    {
-                        t: 1,
-                        state: {
-                            left: 0,
-                            top: 0,
-                            height: window.innerHeight,
-                            width: window.innerWidth,
-                            backdropOpacity: 1,
+                        {
+                            t: 1,
+                            state: {
+                                left: 0,
+                                top: 0,
+                                height: window.innerHeight,
+                                width: window.innerWidth,
+                                backdropOpacity: 1,
+                            },
                         },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    if (t === 1) {
+                    ],
+                    Animation.Bezier,
+                    (values, t) => {
+                        if (t === 1) {
+                            const newStyle: React.CSSProperties = {
+                                ...style,
+                                left: 0,
+                                top: 0,
+                                width: "100vw",
+                                height: "100vh",
+                            };
+                            setFullScreenContainerStyle(newStyle);
+                            setIsHovered(false);
+                            return;
+                        }
                         const newStyle: React.CSSProperties = {
                             ...style,
-                            left: 0,
-                            top: 0,
-                            width: "100vw",
-                            height: "100vh",
+                            left: values.left,
+                            top: values.top,
+                            width: values.width,
+                            height: values.height,
                         };
                         setFullScreenContainerStyle(newStyle);
-                        setIsHovered(false);
-                        return;
+                        setBackdropStyle({
+                            opacity: values.backdropOpacity,
+                            display: "block",
+                        });
                     }
-                    const newStyle: React.CSSProperties = {
-                        ...style,
-                        left: values.left,
-                        top: values.top,
-                        width: values.width,
-                        height: values.height,
-                    };
-                    setFullScreenContainerStyle(newStyle);
-                    setBackdropStyle({
-                        opacity: values.backdropOpacity,
-                        display: "block",
-                    });
-                }
-            );
+                );
             fullScreenAnimation.current.start();
         }
     };
@@ -204,53 +199,54 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
 
             const style = fullScreenContainerStyle;
 
-            fullScreenAnimation.current = new Animation<FullScreenAnimationParameters>(
-                600,
-                10,
-                [
-                    {
-                        t: 0,
-                        state: {
-                            left: 0,
-                            top: 0,
-                            height: window.innerHeight,
-                            width: window.innerWidth,
-                            backdropOpacity: 1,
+            fullScreenAnimation.current =
+                new Animation<FullScreenAnimationParameters>(
+                    600,
+                    10,
+                    [
+                        {
+                            t: 0,
+                            state: {
+                                left: 0,
+                                top: 0,
+                                height: window.innerHeight,
+                                width: window.innerWidth,
+                                backdropOpacity: 1,
+                            },
                         },
-                    },
-                    {
-                        t: 1,
-                        state: {
-                            left: rect.left,
-                            top: rect.top,
-                            height: contentHeightWithoutPadding,
-                            width: contentWidthWithoutPadding,
-                            backdropOpacity: 0,
+                        {
+                            t: 1,
+                            state: {
+                                left: rect.left,
+                                top: rect.top,
+                                height: contentHeightWithoutPadding,
+                                width: contentWidthWithoutPadding,
+                                backdropOpacity: 0,
+                            },
                         },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    if (t === 1) {
-                        setFullScreenContainerStyle({});
-                        setBackdropStyle({});
-                        setContentStyle({});
-                        return;
+                    ],
+                    Animation.Bezier,
+                    (values, t) => {
+                        if (t === 1) {
+                            setFullScreenContainerStyle({});
+                            setBackdropStyle({});
+                            setContentStyle({});
+                            return;
+                        }
+                        const newStyle: React.CSSProperties = {
+                            ...style,
+                            left: values.left,
+                            top: values.top,
+                            width: values.width,
+                            height: values.height,
+                        };
+                        setFullScreenContainerStyle(newStyle);
+                        setBackdropStyle({
+                            opacity: values.backdropOpacity,
+                            display: "block",
+                        });
                     }
-                    const newStyle: React.CSSProperties = {
-                        ...style,
-                        left: values.left,
-                        top: values.top,
-                        width: values.width,
-                        height: values.height,
-                    };
-                    setFullScreenContainerStyle(newStyle);
-                    setBackdropStyle({
-                        opacity: values.backdropOpacity,
-                        display: "block",
-                    });
-                }
-            );
+                );
             fullScreenAnimation.current.start();
         }
     };
@@ -377,33 +373,21 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                         : "WebvizViewElement__Actions"
                 }
             >
-                        {false && (
-                            <div>
-                                <IconButton>
-                                    <Icon name="settings" />
-                                </IconButton>
-                            </div>
-                        )}
-                        <div className="WebvizViewElement__Actions__Spacer" />
-                        {props.showDownload && (
-                            <div>
-                                <IconButton
-                                    onClick={() => handleDownloadClick()}
-                                >
-                                    <Icon name="download" />
-                                </IconButton>
-                            </div>
-                        )}
-                        <div>
-                            <IconButton onClick={handleScreenShotClick}>
-                                <Icon name="camera" />
-                            </IconButton>
-                        </div>
-                        <div>
-                            <IconButton onClick={handleFullScreenClick}>
-                                <Icon name="fullscreen" />
-                            </IconButton>
-                </div>
+                {false && (
+                    <div>
+                        <IconButton>
+                            <Icon name="settings" size={16} />
+                        </IconButton>
+                    </div>
+                )}
+                <div className="WebvizViewElement__Actions__Spacer" />
+                {props.showDownload && (
+                    <div>
+                        <IconButton onClick={() => handleDownloadClick()}>
+                            <Icon name="download" size={16} />
+                        </IconButton>
+                    </div>
+                )}
                 <div>
                     <IconButton onClick={handleScreenShotClick}>
                         <Icon name="camera" size={16} />
@@ -422,7 +406,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
 WebvizViewElement.propTypes = {
     id: PropTypes.string.isRequired,
     flexGrow: PropTypes.number,
-    showDownload: PropTypes.bool.isRequired,
+    showDownload: PropTypes.bool,
     screenshotFilename: PropTypes.string,
     children: PropTypes.node,
     download: PropTypes.shape(DownloadDataPropTypes),
