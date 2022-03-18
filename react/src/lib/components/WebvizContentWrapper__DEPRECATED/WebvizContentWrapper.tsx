@@ -10,6 +10,7 @@ import { WebvizSettingsDrawer } from "../WebvizSettingsDrawer/WebvizSettingsDraw
 import "./webviz-content-wrapper.css";
 import PropTypes from "prop-types";
 import { WebvizViewElement } from "../WebvizViewElement";
+import { WebvizPluginLayoutRow } from "../WebvizPluginLayoutRow";
 
 type DashProps = {
     url: string;
@@ -68,9 +69,20 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                         "new?title=New+feedback&body=Feedback+text&labels=userfeedback"
                     }
                 >
-                    <WebvizViewElement id="view-element" showDownload={false}>
-                        <h1>Test plugin view element</h1>
-                    </WebvizViewElement>
+                    <WebvizPluginLayoutRow>
+                        <WebvizViewElement
+                            id="view-element1"
+                            showDownload={false}
+                        >
+                            <h1>Test plugin view element 1</h1>
+                        </WebvizViewElement>
+                        <WebvizViewElement
+                            id="view-element2"
+                            showDownload={false}
+                        >
+                            <h1>Test plugin view element 2</h1>
+                        </WebvizViewElement>
+                    </WebvizPluginLayoutRow>
                 </WebvizPluginWrapper>
                 <WebvizPluginWrapper
                     name="MyPlugin2"

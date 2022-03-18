@@ -49,16 +49,13 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 ) => {
     const [marginBottom, setMarginBottom] = React.useState<number>(0);
     const [open, setOpen] = React.useState<boolean>(props.open);
-    const [openAuthorDialog, setOpenAuthorDialog] = React.useState<boolean>(
-        false
-    );
+    const [openAuthorDialog, setOpenAuthorDialog] =
+        React.useState<boolean>(false);
     const { enqueueSnackbar } = useSnackbar();
-    const openCloseAnimation = React.useRef<Animation<OpenCloseAnimationParameters> | null>(
-        null
-    );
-    const flashAnimation = React.useRef<Animation<FlashAnimationParameters> | null>(
-        null
-    );
+    const openCloseAnimation =
+        React.useRef<Animation<OpenCloseAnimationParameters> | null>(null);
+    const flashAnimation =
+        React.useRef<Animation<FlashAnimationParameters> | null>(null);
 
     const store = useStore();
 
@@ -119,31 +116,32 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             openCloseAnimation.current.reset();
         }
 
-        openCloseAnimation.current = new Animation<OpenCloseAnimationParameters>(
-            900,
-            20,
-            [
-                {
-                    t: 0,
-                    state: { marginBottom: 0 },
-                },
-                {
-                    t: 2 / 3,
-                    state: { marginBottom: -closedHeight },
-                },
-                {
-                    t: 1,
-                    state: { marginBottom: 0 },
-                },
-            ],
-            Animation.Bezier,
-            (values, t) => {
-                if (t === 2 / 3) {
-                    setOpen(!open);
+        openCloseAnimation.current =
+            new Animation<OpenCloseAnimationParameters>(
+                900,
+                20,
+                [
+                    {
+                        t: 0,
+                        state: { marginBottom: 0 },
+                    },
+                    {
+                        t: 2 / 3,
+                        state: { marginBottom: -closedHeight },
+                    },
+                    {
+                        t: 1,
+                        state: { marginBottom: 0 },
+                    },
+                ],
+                Animation.Bezier,
+                (values, t) => {
+                    if (t === 2 / 3) {
+                        setOpen(!open);
+                    }
+                    setMarginBottom(values.marginBottom);
                 }
-                setMarginBottom(values.marginBottom);
-            }
-        );
+            );
 
         openCloseAnimation.current.start();
     }, [props.open]);
@@ -182,10 +180,21 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                     "WebvizViewElement__Content"
                                 )
                             );
+                            const viewElementActions = Array.from(
+                                store.state.activePluginWrapperRef.current.getElementsByClassName(
+                                    "WebvizViewElement__Actions"
+                                )
+                            );
                             viewElements.forEach((el) =>
                                 el.classList.replace(
                                     "WebvizViewElement__Content",
                                     "WebvizViewElement__Content__flat"
+                                )
+                            );
+                            viewElementActions.forEach((el) =>
+                                el.classList.replace(
+                                    "WebvizViewElement__Actions",
+                                    "WebvizViewElement__Actions__hidden"
                                 )
                             );
                             flash.style.opacity = "0";
@@ -213,6 +222,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                 el.classList.replace(
                                     "WebvizViewElement__Content__flat",
                                     "WebvizViewElement__Content"
+                                )
+                            );
+                            viewElementActions.forEach((el) =>
+                                el.classList.replace(
+                                    "WebvizViewElement__Actions__hidden",
+                                    "WebvizViewElement__Actions"
                                 )
                             );
                         }

@@ -57,6 +57,9 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const [contentStyle, setContentStyle] = React.useState<React.CSSProperties>(
         {}
     );
+    const [spacerStyle, setSpacerStyle] = React.useState<React.CSSProperties>(
+        {}
+    );
     const [backdropStyle, setBackdropStyle] =
         React.useState<React.CSSProperties>({});
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -106,8 +109,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 position: "fixed",
                 left: rect.left,
                 top: rect.top,
-                minWidth: contentWidthWithoutPadding,
-                minHeight: contentHeightWithoutPadding,
+                width: contentWidthWithoutPadding,
+                height: contentHeightWithoutPadding,
                 zIndex: 1300,
                 padding: parseInt(
                     getComputedStyle(contentRef.current)?.padding || "0"
@@ -119,9 +122,18 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
             setFullScreenContainerStyle(style);
             setBackdropStyle({ display: "block" });
             setContentStyle({
-                width: contentWidthWithoutPadding,
-                height: contentHeightWithoutPadding,
                 zIndex: "auto",
+            });
+
+            setSpacerStyle({
+                width: parseInt(
+                    getComputedStyle(fullScreenContainerRef.current)?.width ||
+                        "0"
+                ),
+                height: parseInt(
+                    getComputedStyle(fullScreenContainerRef.current)?.height ||
+                        "0"
+                ),
             });
 
             fullScreenAnimation.current =
@@ -231,6 +243,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                             setFullScreenContainerStyle({});
                             setBackdropStyle({});
                             setContentStyle({});
+                            setSpacerStyle({});
                             return;
                         }
                         const newStyle: React.CSSProperties = {
@@ -347,6 +360,10 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 ref={contentRef}
                 style={contentStyle}
             >
+                <div
+                    style={spacerStyle}
+                    className="WebvizViewElement__Content__Spacer"
+                />
                 <div
                     ref={fullScreenContainerRef}
                     style={fullScreenContainerStyle}
