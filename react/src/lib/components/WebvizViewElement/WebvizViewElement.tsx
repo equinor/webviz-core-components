@@ -20,6 +20,7 @@ Icon.add({ settings, download, camera, fullscreen, fullscreen_exit });
 
 export type WebvizViewElementProps = {
     id: string;
+    flexGrow?: number;
     screenshotFilename?: string;
     children?: React.ReactNode;
 };
@@ -299,6 +300,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     return (
         <div
             className="WebvizViewElement"
+            style={{ flexGrow: props.flexGrow || 1 }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -367,6 +369,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
 
 WebvizViewElement.propTypes = {
     id: PropTypes.string.isRequired,
+    flexGrow: PropTypes.number,
     screenshotFilename: PropTypes.string,
     children: PropTypes.node,
 };

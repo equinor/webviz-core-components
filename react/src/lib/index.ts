@@ -27,6 +27,8 @@ import { WebvizPluginWrapper } from "./components/WebvizPluginWrapper";
 import { WebvizSettingsDrawer } from "./components/WebvizSettingsDrawer";
 import { WebvizViewElement } from "./components/WebvizViewElement";
 import { WebvizSettingsGroup } from "./components/WebvizSettingsGroup";
+import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn/WebvizPluginLayoutColumn";
+import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow/WebvizPluginLayoutRow";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
@@ -40,6 +42,8 @@ export {
     WebvizViewElement,
     WebvizPluginPlaceholder,
     WebvizSettingsGroup,
+    WebvizPluginLayoutColumn,
+    WebvizPluginLayoutRow,
     ColorScales,
     Select,
     SmartNodeSelector,

@@ -12,3 +12,10 @@
     background-color: rgba(255, 255, 255, 1);
     opacity: 1;
 }
+
+.WebvizPluginWrapper__Layout__Row {
+    display: flex;
+}
+
+.WebvizPluginWrapper__Layout__Column {
+}

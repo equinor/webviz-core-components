@@ -1,0 +1,4 @@
+.Webviz_PluginLayout__Column {
+    display: flex;
+    flex-direction: column;
+}
