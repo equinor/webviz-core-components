@@ -11,10 +11,14 @@ import { DrawerPosition } from "../../shared-types/webviz-content/drawer-positio
 import { useStore } from "../WebvizContentManager";
 import { ViewSelector } from "./components/ViewSelector/view-selector";
 
-import "./webviz-settings-drawer.css";
 import { Settings } from "./components/Settings/settings";
 import { PluginActions } from "./components/PluginActions/plugin-actions";
+
+import { SnackbarProvider } from "notistack";
+
 import PropTypes from "prop-types";
+
+import "./webviz-settings-drawer.css";
 
 type Position = {
     left: number | "auto";
@@ -42,7 +46,7 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
     const drawerRef = React.useRef<HTMLDivElement>(null);
     const drawerSize = useSize(drawerRef);
     const [oldDrawerSize, setOldDrawerSize] = React.useState<number>(0);
-    const expandedWidth = 300;
+    const expandedWidth = 320;
     const collapsedWidth = 64;
 
     React.useLayoutEffect(() => {
@@ -130,7 +134,9 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
             <Settings visible={open} width={expandedWidth}>
                 {props.children}
             </Settings>
-            <PluginActions open={open} />
+            <SnackbarProvider maxSnack={3}>
+                <PluginActions open={open} />
+            </SnackbarProvider>
         </div>
     );
 };

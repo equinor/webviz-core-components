@@ -1,4 +1,7 @@
 import React from "react";
+
+import PropTypes from "prop-types";
+
 import {
     MenuBarPosition,
     MenuDrawerPosition,
@@ -6,23 +9,23 @@ import {
 
 import { DrawerPosition } from "../../shared-types/webviz-content/drawer-position";
 import { Margins } from "../../shared-types/margins";
-import {
-    Plugin,
-    PluginPropTypes,
-} from "../../shared-types/webviz-content/webviz";
-import PropTypes from "prop-types";
+import { PluginData, View } from "../../shared-types/webviz-content/webviz";
+import { ContactPerson } from "../../shared-types/webviz-content/contact-person";
+import { DeprecationWarning } from "../../shared-types/webviz-content/deprecation-warning";
 
 type ActionMap<
     M extends {
         [index: string]: {
             [key: string]:
+                | ContactPerson
+                | DeprecationWarning[]
                 | string
                 | Margins
                 | number
                 | null
                 | boolean
-                | Plugin[]
-                | React.RefObject<HTMLDivElement>;
+                | React.RefObject<HTMLDivElement>
+                | View[];
         };
     }
 > = {
@@ -37,22 +40,38 @@ type ActionMap<
 };
 
 export enum StoreActions {
+    RegisterPlugin = "register_plugin",
+    UnregisterPlugin = "unregister_plugin",
     SetActiveView = "set_active_view",
     SetActivePlugin = "set_active_plugin",
     SetMenuPosition = "set_menu_position",
-    SetPlugins = "set_plugins",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
+    SetPluginDownloadRequested = "set_plugin_download_requested",
 }
 
 export type StoreState = {
     activePluginId: string;
     bodyMargins: Margins;
     position: DrawerPosition;
-    pluginsData: Plugin[];
+    pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
+    pluginDownloadRequested: boolean;
 };
 
 type Payload = {
+    [StoreActions.RegisterPlugin]: {
+        id: string;
+        name: string;
+        views: View[];
+        showDownload: boolean;
+        deprecationWarnings?: DeprecationWarning[];
+        contactPerson?: ContactPerson;
+        screenshotFilename?: string;
+        feedbackUrl?: string;
+    };
+    [StoreActions.UnregisterPlugin]: {
+        id: string;
+    };
     [StoreActions.SetActiveView]: {
         viewId: string;
     };
@@ -65,24 +84,24 @@ type Payload = {
         menuDrawerPosition: MenuDrawerPosition;
         bodyMargins: Margins;
     };
-    [StoreActions.SetPlugins]: {
-        plugins: Plugin[];
-    };
     [StoreActions.SetActivePluginWrapperRef]: {
         ref: React.RefObject<HTMLDivElement>;
+    };
+    [StoreActions.SetPluginDownloadRequested]: {
+        request: boolean;
     };
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
 
-const setInitialState = (plugins: Plugin[]): StoreState => {
-    const activePluginId = plugins.length > 0 ? plugins[0]["id"] : "";
+const setInitialState = (): StoreState => {
     return {
-        activePluginId: activePluginId,
-        pluginsData: plugins,
+        activePluginId: "",
+        pluginsData: [],
         bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
+        pluginDownloadRequested: false,
     };
 };
 
@@ -90,7 +109,43 @@ export const StoreReducer = (
     state: StoreState,
     action: Actions
 ): StoreState => {
-    if (action.type === StoreActions.SetActiveView) {
+    if (action.type === StoreActions.RegisterPlugin) {
+        return {
+            ...state,
+            activePluginId:
+                state.activePluginId === ""
+                    ? action.payload.id
+                    : state.activePluginId,
+            pluginsData: [
+                ...state.pluginsData,
+                {
+                    id: action.payload.id,
+                    name: action.payload.name,
+                    views: action.payload.views,
+                    showDownload: action.payload.showDownload,
+                    activeViewId:
+                        action.payload.views.find((_, index) => index === 0)
+                            ?.id || "",
+                    contactPerson: action.payload.contactPerson,
+                    deprecationWarnings: action.payload.deprecationWarnings,
+                    screenshotFilename: action.payload.screenshotFilename,
+                    feedbackUrl: action.payload.feedbackUrl,
+                },
+            ],
+        };
+    } else if (action.type === StoreActions.UnregisterPlugin) {
+        return {
+            ...state,
+            activePluginId:
+                state.activePluginId === action.payload.id
+                    ? state.pluginsData.find((_, index) => index === 0)?.id ||
+                      ""
+                    : state.activePluginId,
+            pluginsData: state.pluginsData.filter(
+                (plugin) => plugin.id !== action.payload.id
+            ),
+        };
+    } else if (action.type === StoreActions.SetActiveView) {
         return {
             ...state,
             pluginsData: [
@@ -106,18 +161,18 @@ export const StoreReducer = (
     } else if (action.type === StoreActions.SetMenuPosition) {
         let position = DrawerPosition.Left;
         if (action.payload.pinned) {
-            position = action.payload
-                .menuDrawerPosition as string as DrawerPosition;
+            position = (action.payload
+                .menuDrawerPosition as string) as DrawerPosition;
         } else {
             if (
                 action.payload.menuBarPosition === MenuBarPosition.Top ||
                 action.payload.menuBarPosition === MenuBarPosition.Bottom
             ) {
-                position = action.payload
-                    .menuDrawerPosition as string as DrawerPosition;
+                position = (action.payload
+                    .menuDrawerPosition as string) as DrawerPosition;
             } else {
-                position = action.payload
-                    .menuBarPosition as string as DrawerPosition;
+                position = (action.payload
+                    .menuBarPosition as string) as DrawerPosition;
             }
         }
         return {
@@ -125,21 +180,13 @@ export const StoreReducer = (
             position: position,
             bodyMargins: action.payload.bodyMargins,
         };
-    } else if (action.type === StoreActions.SetPlugins) {
-        const activePluginId =
-            action.payload.plugins.length > 0
-                ? action.payload.plugins[0]["id"]
-                : "";
-        return {
-            ...state,
-            activePluginId: activePluginId,
-            pluginsData: action.payload.plugins,
-        };
     } else if (action.type === StoreActions.SetActivePluginWrapperRef) {
         return {
             ...state,
             activePluginWrapperRef: action.payload.ref,
         };
+    } else if (action.type === StoreActions.SetPluginDownloadRequested) {
+        return { ...state, pluginDownloadRequested: action.payload.request };
     }
     return state;
 };
@@ -157,10 +204,8 @@ type WebvizContentManagerParentProps = {
 
 type WebvizContentManagerProps = {
     id: string;
-    pluginsMetadata: Plugin[];
     children?: React.ReactNode;
     setProps?: (props: WebvizContentManagerParentProps) => void;
-    activeViewId?: string;
 };
 
 export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
@@ -168,7 +213,7 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
 ) => {
     const [state, dispatch] = React.useReducer(
         StoreReducer,
-        props.pluginsMetadata,
+        null,
         setInitialState
     );
 
@@ -183,13 +228,6 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         }
     }, [state.pluginsData, state.activePluginId]);
 
-    React.useEffect(() => {
-        dispatch({
-            type: StoreActions.SetPlugins,
-            payload: { plugins: props.pluginsMetadata },
-        });
-    }, [props.pluginsMetadata]);
-
     return (
         <storeContext.Provider value={{ state, dispatch }}>
             {props.children}
@@ -202,10 +240,6 @@ export const useStore = (): StoreContext =>
 
 WebvizContentManager.propTypes = {
     id: PropTypes.string.isRequired,
-    pluginsMetadata: PropTypes.arrayOf(
-        PropTypes.shape(PluginPropTypes).isRequired
-    ).isRequired,
     children: PropTypes.node,
     setProps: PropTypes.func,
-    activeViewId: PropTypes.string,
 };
