@@ -14,14 +14,17 @@ export const WebvizPluginsWrapper: React.FC<WebvizPluginsWrapperProps> = (
     props
 ) => {
     const store = useStore();
-    const [notificationVisible, setNotificationVisible] =
-        React.useState<boolean>(false);
+    const [
+        notificationVisible,
+        setNotificationVisible,
+    ] = React.useState<boolean>(false);
     const [activePluginId, setActivePluginId] = React.useState<string>(
         store.state.activePluginId
     );
 
-    const notificationTimer =
-        React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const notificationTimer = React.useRef<ReturnType<
+        typeof setTimeout
+    > | null>(null);
 
     React.useEffect(() => {
         return () => {

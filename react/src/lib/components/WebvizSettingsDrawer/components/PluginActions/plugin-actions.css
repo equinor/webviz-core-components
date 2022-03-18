@@ -8,6 +8,11 @@
     flex-grow: 4;
 }
 
+.WebvizPluginActions__Button_Badge > .MuiBadge-colorPrimary {
+    color: #ffff;
+    background-color: orange;
+}
+
 .WebvizPluginActions__Button {
     cursor: pointer;
     padding: 12px;

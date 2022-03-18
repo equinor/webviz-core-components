@@ -1,5 +1,8 @@
 import PropTypes from "prop-types";
 
+import { ContactPerson } from "./contact-person";
+import { DeprecationWarning } from "./deprecation-warning";
+
 export type ViewElement = {
     id: string;
     layout: React.ReactNode;
@@ -34,19 +37,14 @@ export const ViewPropTypes = {
     name: PropTypes.string.isRequired,
 };
 
-export type Plugin = {
+export type PluginData = {
     id: string;
     name: string;
     activeViewId: string;
     views: View[];
-    screenshotFilename: string;
-};
-
-export const PluginPropTypes = {
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    views: PropTypes.arrayOf(PropTypes.shape(ViewPropTypes).isRequired)
-        .isRequired,
-    activeViewId: PropTypes.string.isRequired,
-    screenshotFilename: PropTypes.string.isRequired,
+    showDownload: boolean;
+    screenshotFilename?: string;
+    contactPerson?: ContactPerson;
+    deprecationWarnings?: DeprecationWarning[];
+    feedbackUrl?: string;
 };
