@@ -49,13 +49,16 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 ) => {
     const [marginBottom, setMarginBottom] = React.useState<number>(0);
     const [open, setOpen] = React.useState<boolean>(props.open);
-    const [openAuthorDialog, setOpenAuthorDialog] =
-        React.useState<boolean>(false);
+    const [openAuthorDialog, setOpenAuthorDialog] = React.useState<boolean>(
+        false
+    );
     const { enqueueSnackbar } = useSnackbar();
-    const openCloseAnimation =
-        React.useRef<Animation<OpenCloseAnimationParameters> | null>(null);
-    const flashAnimation =
-        React.useRef<Animation<FlashAnimationParameters> | null>(null);
+    const openCloseAnimation = React.useRef<Animation<OpenCloseAnimationParameters> | null>(
+        null
+    );
+    const flashAnimation = React.useRef<Animation<FlashAnimationParameters> | null>(
+        null
+    );
 
     const store = useStore();
 
@@ -79,35 +82,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
         };
     }, []);
 
-    const enqueueDeprecationWarnings = React.useCallback(() => {
-        if (!deprecationWarnings) {
-            return;
-        }
-        for (const warning of deprecationWarnings) {
-            enqueueSnackbar(warning.message, {
-                variant: "warning",
-                action: (
-                    <a
-                        className="webviz-config-plugin-deprecation-link"
-                        href={warning.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        More info
-                    </a>
-                ),
-                anchorOrigin: {
-                    vertical: "bottom",
-                    horizontal: "right",
-                },
-            });
-        }
-    }, [deprecationWarnings]);
-
-    React.useEffect(() => {
-        enqueueDeprecationWarnings();
-    }, [store.state.activePluginId]);
-
     React.useLayoutEffect(() => {
         if (props.open === open) {
             return;
@@ -116,32 +90,31 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             openCloseAnimation.current.reset();
         }
 
-        openCloseAnimation.current =
-            new Animation<OpenCloseAnimationParameters>(
-                900,
-                20,
-                [
-                    {
-                        t: 0,
-                        state: { marginBottom: 0 },
-                    },
-                    {
-                        t: 2 / 3,
-                        state: { marginBottom: -closedHeight },
-                    },
-                    {
-                        t: 1,
-                        state: { marginBottom: 0 },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    if (t === 2 / 3) {
-                        setOpen(!open);
-                    }
-                    setMarginBottom(values.marginBottom);
+        openCloseAnimation.current = new Animation<OpenCloseAnimationParameters>(
+            900,
+            20,
+            [
+                {
+                    t: 0,
+                    state: { marginBottom: 0 },
+                },
+                {
+                    t: 2 / 3,
+                    state: { marginBottom: -closedHeight },
+                },
+                {
+                    t: 1,
+                    state: { marginBottom: 0 },
+                },
+            ],
+            Animation.Bezier,
+            (values, t) => {
+                if (t === 2 / 3) {
+                    setOpen(!open);
                 }
-            );
+                setMarginBottom(values.marginBottom);
+            }
+        );
 
         openCloseAnimation.current.start();
     }, [props.open]);
@@ -250,8 +223,29 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     }, [store.state.activePluginWrapperRef]);
 
     const handleDeprecationWarningsClicked = React.useCallback(() => {
-        enqueueDeprecationWarnings();
-    }, [enqueueDeprecationWarnings]);
+        if (!deprecationWarnings) {
+            return;
+        }
+        for (const warning of deprecationWarnings) {
+            enqueueSnackbar(warning.message, {
+                variant: "warning",
+                action: (
+                    <a
+                        className="webviz-config-plugin-deprecation-link"
+                        href={warning.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        More info
+                    </a>
+                ),
+                anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "right",
+                },
+            });
+        }
+    }, [deprecationWarnings]);
 
     const handleDownloadClicked = () => {
         store.dispatch({
