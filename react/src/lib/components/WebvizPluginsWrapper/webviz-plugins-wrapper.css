@@ -9,7 +9,8 @@ body {
 }
 
 .WebvizPluginsWrapper__Notification {
-    background-color: white;
+    background-color: rgb(20, 20, 20);
+    color: white;
     padding: 12px;
     border-radius: 4px;
     -webkit-box-shadow: 0px 10px 21px -5px rgba(0, 0, 0, 0.33);

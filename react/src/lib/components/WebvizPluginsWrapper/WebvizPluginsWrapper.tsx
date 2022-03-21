@@ -14,17 +14,14 @@ export const WebvizPluginsWrapper: React.FC<WebvizPluginsWrapperProps> = (
     props
 ) => {
     const store = useStore();
-    const [
-        notificationVisible,
-        setNotificationVisible,
-    ] = React.useState<boolean>(false);
+    const [notificationVisible, setNotificationVisible] =
+        React.useState<boolean>(false);
     const [activePluginId, setActivePluginId] = React.useState<string>(
         store.state.activePluginId
     );
 
-    const notificationTimer = React.useRef<ReturnType<
-        typeof setTimeout
-    > | null>(null);
+    const notificationTimer =
+        React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     React.useEffect(() => {
         return () => {
@@ -51,7 +48,7 @@ export const WebvizPluginsWrapper: React.FC<WebvizPluginsWrapperProps> = (
         <div id={props.id} className="WebvizPluginsWrapper">
             <Snackbar
                 open={notificationVisible}
-                anchorOrigin={{ horizontal: "center", vertical: "top" }}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 TransitionComponent={Slide}
             >
                 <div className="WebvizPluginsWrapper__Notification">{`Now active: ${

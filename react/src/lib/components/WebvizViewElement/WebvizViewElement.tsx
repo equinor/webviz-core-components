@@ -51,6 +51,7 @@ type FlashAnimationParameters = {
 export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const { download } = props;
     const [isHovered, setIsHovered] = React.useState<boolean>(false);
+    const [isFullScreen, setIsFullScreen] = React.useState<boolean>(false);
     const [downloadRequests, setDownloadRequested] = React.useState<number>(0);
     const [fullScreenContainerStyle, setFullScreenContainerStyle] =
         React.useState<React.CSSProperties>({});
@@ -119,21 +120,17 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 boxShadow: "1px 2px 6px -1px rgba(0, 0, 0, 0.33)",
             };
 
+            setIsFullScreen(true);
             setFullScreenContainerStyle(style);
             setBackdropStyle({ display: "block" });
             setContentStyle({
                 zIndex: "auto",
+                flexGrow: 0,
             });
 
             setSpacerStyle({
-                width: parseInt(
-                    getComputedStyle(fullScreenContainerRef.current)?.width ||
-                        "0"
-                ),
-                height: parseInt(
-                    getComputedStyle(fullScreenContainerRef.current)?.height ||
-                        "0"
-                ),
+                width: contentWidthWithoutPadding,
+                height: contentHeightWithoutPadding,
             });
 
             fullScreenAnimation.current =
@@ -244,6 +241,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                             setBackdropStyle({});
                             setContentStyle({});
                             setSpacerStyle({});
+                            setIsFullScreen(false);
                             return;
                         }
                         const newStyle: React.CSSProperties = {
@@ -293,13 +291,21 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 (values, t) => {
                     if (fullScreenContainerRef.current) {
                         if (t === 0.5) {
-                            const actions =
-                                fullScreenContainerRef.current.getElementsByClassName(
-                                    "WebvizViewElement__FullScreenActions"
+                            const actions: Element[] = [];
+                            if (isFullScreen) {
+                                actions.push(
+                                    ...Array.from(
+                                        fullScreenContainerRef.current.getElementsByClassName(
+                                            "WebvizViewElement__FullScreenActions"
+                                        )
+                                    )
                                 );
-                            for (const action of actions) {
-                                (action as HTMLDivElement).style.display =
-                                    "none";
+                                actions.forEach(
+                                    (action) =>
+                                        ((
+                                            action as HTMLDivElement
+                                        ).style.display = "none")
+                                );
                             }
                             flash.style.opacity = "0";
                             html2canvas(fullScreenContainerRef.current, {
@@ -318,9 +324,13 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                                     }
                                 })
                             );
-                            for (const action of actions) {
-                                (action as HTMLDivElement).style.display =
-                                    "block";
+                            if (isFullScreen) {
+                                actions.forEach(
+                                    (action) =>
+                                        ((
+                                            action as HTMLDivElement
+                                        ).style.display = "block")
+                                );
                             }
                             flash.style.opacity = "1";
                         }
@@ -347,7 +357,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     return (
         <div
             className="WebvizViewElement"
-            style={{ flexGrow: props.flexGrow || 1 }}
+            style={{ flexGrow: isFullScreen ? 0 : props.flexGrow || 1 }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
