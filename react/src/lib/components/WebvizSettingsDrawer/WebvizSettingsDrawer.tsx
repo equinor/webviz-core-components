@@ -11,7 +11,7 @@ import { DrawerPosition } from "../../shared-types/webviz-content/drawer-positio
 import { useStore } from "../WebvizContentManager";
 import { ViewSelector } from "./components/ViewSelector/view-selector";
 
-import { Settings } from "./components/Settings/settings";
+import { WebvizSettings } from "../WebvizSettings";
 import { PluginActions } from "./components/PluginActions/plugin-actions";
 
 import { SnackbarProvider } from "notistack";
@@ -131,9 +131,9 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                 </Button>
             </div>
             <ViewSelector open={open} width={expandedWidth} />
-            <Settings visible={open} width={expandedWidth}>
+            <WebvizSettings visible={open} width={expandedWidth}>
                 {props.children}
-            </Settings>
+            </WebvizSettings>
             <SnackbarProvider maxSnack={3}>
                 <PluginActions open={open} />
             </SnackbarProvider>

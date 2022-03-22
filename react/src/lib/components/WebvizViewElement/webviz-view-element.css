@@ -32,7 +32,6 @@
 .WebvizViewElement__Content__flat {
     background-color: white;
     padding: 16px;
-    flex-grow: 4;
     z-index: 1;
 }
 

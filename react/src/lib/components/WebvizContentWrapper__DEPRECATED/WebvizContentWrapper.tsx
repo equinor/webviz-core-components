@@ -11,6 +11,7 @@ import "./webviz-content-wrapper.css";
 import PropTypes from "prop-types";
 import { WebvizViewElement } from "../WebvizViewElement";
 import { WebvizPluginLayoutRow } from "../WebvizPluginLayoutRow";
+import { WebvizSettingsGroup } from "../WebvizSettingsGroup";
 
 type DashProps = {
     url: string;
@@ -75,6 +76,14 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                             showDownload={false}
                         >
                             <h1>Test plugin view element 1</h1>
+                            <WebvizSettingsGroup
+                                id="view-element1-settings"
+                                title="Test"
+                                viewId=""
+                                pluginId=""
+                            >
+                                Blabla
+                            </WebvizSettingsGroup>
                         </WebvizViewElement>
                         <WebvizViewElement
                             id="view-element2"

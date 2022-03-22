@@ -10,8 +10,7 @@ import {
 import React from "react";
 
 import { Animation } from "../../utils/Animation";
-
-import "./webviz-view-element.css";
+import { Dialog } from "../Dialog";
 import PropTypes from "prop-types";
 import {
     DownloadData,
@@ -19,6 +18,9 @@ import {
 } from "../../shared-types/webviz-content/download-data";
 import html2canvas from "html2canvas";
 import downloadFile from "../../utils/downloadFile";
+
+import "./webviz-view-element.css";
+import { WebvizSettings } from "../WebvizSettings";
 
 Icon.add({ settings, download, camera, fullscreen, fullscreen_exit });
 
@@ -31,9 +33,9 @@ export type WebvizViewElementProps = {
     flexGrow?: number;
     showDownload?: boolean;
     screenshotFilename?: string;
-    children?: React.ReactNode;
     download?: DownloadData;
     setProps?: (props: ParentProps) => void;
+    children?: React.ReactNode;
 };
 
 type FullScreenAnimationParameters = {
@@ -51,6 +53,8 @@ type FlashAnimationParameters = {
 export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const { download } = props;
     const [isHovered, setIsHovered] = React.useState<boolean>(false);
+    const [settingsVisible, setSettingsVisible] =
+        React.useState<boolean>(false);
     const [isFullScreen, setIsFullScreen] = React.useState<boolean>(false);
     const [downloadRequests, setDownloadRequested] = React.useState<number>(0);
     const [fullScreenContainerStyle, setFullScreenContainerStyle] =
@@ -346,6 +350,21 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         }
     };
 
+    const settings: React.ReactElement[] = [];
+    const content: React.ReactNode[] = [];
+
+    React.Children.forEach(props.children, (child) => {
+        if (
+            React.isValidElement(child) &&
+            typeof child.type === "function" &&
+            child.type.name === "WebvizSettingsGroup"
+        ) {
+            settings.push(child);
+            return;
+        }
+        content.push(child);
+    });
+
     const handleDownloadClick = React.useCallback(() => {
         const requests = downloadRequests + 1;
         setDownloadRequested(requests);
@@ -353,7 +372,6 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
             props.setProps({ data_requested: requests });
         }
     }, [setDownloadRequested, props.setProps]);
-
     return (
         <div
             className="WebvizViewElement"
@@ -379,7 +397,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     style={fullScreenContainerStyle}
                     className="WebvizViewElement__FullScreenContainer"
                 >
-                    {props.children}
+                    {content}
                     <div
                         className="WebvizViewElement__FullScreenActions"
                         style={backdropStyle}
@@ -400,9 +418,9 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                         : "WebvizViewElement__Actions"
                 }
             >
-                {false && (
+                {settings.length > 0 && (
                     <div>
-                        <IconButton>
+                        <IconButton onClick={() => setSettingsVisible(true)}>
                             <Icon name="settings" size={16} />
                         </IconButton>
                     </div>
@@ -426,6 +444,28 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     </IconButton>
                 </div>
             </div>
+            <Dialog
+                id={`${props.id}-settings`}
+                title="View Element Settings"
+                open={settingsVisible}
+                setProps={(dialogProps: {
+                    action: string;
+                    open: boolean;
+                    action_called: number;
+                }) => {
+                    if (dialogProps.open === false) {
+                        setSettingsVisible(false);
+                    }
+                }}
+            >
+                <WebvizSettings visible={true} width={600}>
+                    {settings.map((setting) => {
+                        return React.cloneElement(setting, {
+                            ...setting.props,
+                        });
+                    })}
+                </WebvizSettings>
+            </Dialog>
         </div>
     );
 };
@@ -435,7 +475,7 @@ WebvizViewElement.propTypes = {
     flexGrow: PropTypes.number,
     showDownload: PropTypes.bool,
     screenshotFilename: PropTypes.string,
-    children: PropTypes.node,
     download: PropTypes.shape(DownloadDataPropTypes),
     setProps: PropTypes.func,
+    children: PropTypes.node,
 };

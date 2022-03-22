@@ -1,15 +1,17 @@
-import { ScrollArea } from "../../../ScrollArea";
+import { ScrollArea } from "../ScrollArea";
 import React from "react";
 
-import "./settings.css";
+import "./webviz-settings.css";
 
-export type SettingsProps = {
+export type WebvizSettingsProps = {
     visible: boolean;
     width: number;
     children?: React.ReactNode;
 };
 
-export const Settings: React.FC<SettingsProps> = (props: SettingsProps) => {
+export const WebvizSettings: React.FC<WebvizSettingsProps> = (
+    props: WebvizSettingsProps
+) => {
     const [activeGroup, setActiveGroup] = React.useState<string>("");
 
     const handleGroupToggle = React.useCallback(
