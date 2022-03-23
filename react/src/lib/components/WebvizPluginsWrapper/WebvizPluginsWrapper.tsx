@@ -1,9 +1,12 @@
 import React from "react";
 import { useStore } from "../WebvizContentManager/WebvizContentManager";
-import { Snackbar, Slide } from "@material-ui/core";
+import { Snackbar, Slide, IconButton } from "@material-ui/core";
+import { Icon } from "@equinor/eds-core-react";
 
 import "./webviz-plugins-wrapper.css";
 import PropTypes from "prop-types";
+import { Backdrop } from "../Backdrop";
+import { FullScreenMenu } from "./components/FullScreenMenu/full-screen-menu";
 
 export type WebvizPluginsWrapperProps = {
     id: string;
@@ -46,6 +49,8 @@ export const WebvizPluginsWrapper: React.FC<WebvizPluginsWrapperProps> = (
 
     return (
         <div id={props.id} className="WebvizPluginsWrapper">
+            <Backdrop opacity={store.state.backdropOpacity} />
+            <FullScreenMenu opacity={store.state.backdropOpacity} />
             <Snackbar
                 open={notificationVisible}
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}

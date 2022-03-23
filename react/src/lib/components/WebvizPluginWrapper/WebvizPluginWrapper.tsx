@@ -40,6 +40,7 @@ export type WebvizPluginWrapperProps = {
     contactPerson?: ContactPerson;
     deprecationWarnings?: DeprecationWarning[];
     feedbackUrl?: string;
+    stretch?: boolean;
     setProps?: (props: ParentProps) => void;
 };
 
@@ -54,7 +55,6 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
     const wrapperRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
-        // Mount
         store.dispatch({
             type: StoreActions.RegisterPlugin,
             payload: {
@@ -69,7 +69,6 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
             },
         });
 
-        // Unmount
         return () => {
             store.dispatch({
                 type: StoreActions.UnregisterPlugin,
@@ -138,17 +137,9 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
                 active ? " WebvizPluginWrapper__Active" : ""
             }`}
             onClick={() => handlePluginClick()}
+            style={{ flexGrow: props.stretch ? 4 : 0 }}
         >
-            <div className="WebvizPluginWrapper__Backdrop" />
             <div className="WebvizPluginWrapper__FullScreenContainer">
-                <div className="WebvizPluginWrapper__FullScreenActions">
-                    <IconButton className="WebvizPluginWrapper__FullScreen_ExitButton">
-                        <Icon name="fullscreen_exit" />
-                    </IconButton>
-                    <IconButton className="WebvizPluginWrapper__FullScreen_ScreenshotButton">
-                        <Icon name="camera" />
-                    </IconButton>
-                </div>
                 {props.children}
             </div>
         </div>

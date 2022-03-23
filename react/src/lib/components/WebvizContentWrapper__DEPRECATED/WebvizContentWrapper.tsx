@@ -55,6 +55,7 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                         email: "superman@equinor.com",
                         phone: "+47 12345678",
                     }}
+                    stretch={true}
                     deprecationWarnings={[
                         {
                             message: "This is a test warning",

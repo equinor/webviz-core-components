@@ -69,7 +69,7 @@ export class Animation<T extends { [key: string]: number }> {
     private findPreviousState(t: number): number {
         let closestT = 0;
         this.states.forEach((state) => {
-            if (state.t <= t && t - state.t < t - closestT) {
+            if (state.t <= t && t < 1 && t - state.t < t - closestT) {
                 closestT = state.t;
             }
         });

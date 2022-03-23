@@ -1,0 +1,11 @@
+.WebvizFullScreenMenu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #f8f8f8;
+    padding: 12px;
+    border-bottom-left-radius: 16px;
+    cursor: pointer;
+    display: none;
+    z-index: 1200;
+}

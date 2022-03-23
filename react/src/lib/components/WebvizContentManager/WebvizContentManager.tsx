@@ -12,6 +12,7 @@ import { Margins } from "../../shared-types/margins";
 import { PluginData, View } from "../../shared-types/webviz-content/webviz";
 import { ContactPerson } from "../../shared-types/webviz-content/contact-person";
 import { DeprecationWarning } from "../../shared-types/webviz-content/deprecation-warning";
+import { FullScreenAction } from "../../shared-types/webviz-content/full-screen-menu";
 
 type ActionMap<
     M extends {
@@ -25,7 +26,9 @@ type ActionMap<
                 | null
                 | boolean
                 | React.RefObject<HTMLDivElement>
-                | View[];
+                | View[]
+                | ((action: string) => void)
+                | FullScreenAction[];
         };
     }
 > = {
@@ -47,6 +50,9 @@ export enum StoreActions {
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
     SetPluginDownloadRequested = "set_plugin_download_requested",
+    SetBackdropOpacity = "set_backdrop_opacity",
+    SetFullScreenActions = "set_full_screen_actions",
+    SetFullScreenActionsCallback = "set_full_screen_actions_callback",
 }
 
 export type StoreState = {
@@ -56,6 +62,9 @@ export type StoreState = {
     pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
     pluginDownloadRequested: boolean;
+    backdropOpacity: number;
+    fullScreenActionsCallback: (action: string) => void;
+    fullScreenActions: FullScreenAction[];
 };
 
 type Payload = {
@@ -90,6 +99,15 @@ type Payload = {
     [StoreActions.SetPluginDownloadRequested]: {
         request: boolean;
     };
+    [StoreActions.SetBackdropOpacity]: {
+        opacity: number;
+    };
+    [StoreActions.SetFullScreenActions]: {
+        actions: FullScreenAction[];
+    };
+    [StoreActions.SetFullScreenActionsCallback]: {
+        callback: (action: string) => void;
+    };
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
@@ -102,6 +120,11 @@ const setInitialState = (): StoreState => {
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
         pluginDownloadRequested: false,
+        backdropOpacity: 0,
+        fullScreenActions: [],
+        fullScreenActionsCallback: () => {
+            return;
+        },
     };
 };
 
@@ -161,18 +184,18 @@ export const StoreReducer = (
     } else if (action.type === StoreActions.SetMenuPosition) {
         let position = DrawerPosition.Left;
         if (action.payload.pinned) {
-            position = (action.payload
-                .menuDrawerPosition as string) as DrawerPosition;
+            position = action.payload
+                .menuDrawerPosition as string as DrawerPosition;
         } else {
             if (
                 action.payload.menuBarPosition === MenuBarPosition.Top ||
                 action.payload.menuBarPosition === MenuBarPosition.Bottom
             ) {
-                position = (action.payload
-                    .menuDrawerPosition as string) as DrawerPosition;
+                position = action.payload
+                    .menuDrawerPosition as string as DrawerPosition;
             } else {
-                position = (action.payload
-                    .menuBarPosition as string) as DrawerPosition;
+                position = action.payload
+                    .menuBarPosition as string as DrawerPosition;
             }
         }
         return {
@@ -187,6 +210,12 @@ export const StoreReducer = (
         };
     } else if (action.type === StoreActions.SetPluginDownloadRequested) {
         return { ...state, pluginDownloadRequested: action.payload.request };
+    } else if (action.type === StoreActions.SetBackdropOpacity) {
+        return { ...state, backdropOpacity: action.payload.opacity };
+    } else if (action.type === StoreActions.SetFullScreenActions) {
+        return { ...state, fullScreenActions: action.payload.actions };
+    } else if (action.type === StoreActions.SetFullScreenActionsCallback) {
+        return { ...state, fullScreenActionsCallback: action.payload.callback };
     }
     return state;
 };
