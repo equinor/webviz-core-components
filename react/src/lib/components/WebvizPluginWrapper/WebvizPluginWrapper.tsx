@@ -1,6 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { IconButton } from "@material-ui/core";
+import { camera, fullscreen_exit } from "@equinor/eds-icons";
+import { Icon } from "@equinor/eds-core-react";
+Icon.add({ camera, fullscreen_exit });
+
 import { useStore } from "../WebvizContentManager/WebvizContentManager";
 import { StoreActions } from "../WebvizContentManager/WebvizContentManager";
 import downloadFile from "../../utils/downloadFile";
@@ -45,6 +50,7 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
     const store = useStore();
     const [active, setActive] = React.useState<boolean>(false);
     const [downloadRequests, setDownloadRequested] = React.useState<number>(0);
+
     const wrapperRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
@@ -133,7 +139,18 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
             }`}
             onClick={() => handlePluginClick()}
         >
-            {props.children}
+            <div className="WebvizPluginWrapper__Backdrop" />
+            <div className="WebvizPluginWrapper__FullScreenContainer">
+                <div className="WebvizPluginWrapper__FullScreenActions">
+                    <IconButton className="WebvizPluginWrapper__FullScreen_ExitButton">
+                        <Icon name="fullscreen_exit" />
+                    </IconButton>
+                    <IconButton className="WebvizPluginWrapper__FullScreen_ScreenshotButton">
+                        <Icon name="camera" />
+                    </IconButton>
+                </div>
+                {props.children}
+            </div>
         </div>
     );
 };

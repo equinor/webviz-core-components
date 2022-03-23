@@ -1,9 +1,4 @@
 .WebvizPluginWrapper {
-    padding-top: 16px;
-    padding-bottom: 16px;
-}
-
-.WebvizPluginWrapper {
     border-bottom: 1px rgb(202, 202, 202) solid;
     opacity: 0.8;
 }
@@ -18,4 +13,32 @@
 }
 
 .WebvizPluginWrapper__Layout__Column {
+}
+
+.WebvizPluginWrapper__Backdrop {
+    position: fixed;
+    background-color: white;
+    z-index: 1299;
+    opacity: 0;
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+}
+
+.WebvizPluginWrapper__FullScreenContainer {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.WebvizPluginWrapper__FullScreenActions {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #f8f8f8;
+    padding: 12px;
+    border-bottom-left-radius: 16px;
+    cursor: pointer;
+    display: none;
 }
