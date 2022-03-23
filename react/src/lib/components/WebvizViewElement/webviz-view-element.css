@@ -1,6 +1,10 @@
 .WebvizViewElement {
     margin: 16px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
 }
 
 .WebvizViewElement__Backdrop {
@@ -22,6 +26,7 @@
     padding: 16px;
     transition: width 5s ease-in-out;
     z-index: 1;
+    flex-grow: 1;
 }
 
 .WebvizViewElement__Content__Spacer {
@@ -33,6 +38,13 @@
     background-color: white;
     padding: 16px;
     z-index: 1;
+}
+
+.WebvizViewElement__SettingsContainer {
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .WebvizViewElement__FullScreenActions {
@@ -55,9 +67,10 @@
     position: absolute;
     right: 8px;
     top: -12px;
-    background-color: #f8f8f8;
-    -webkit-box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.33);
-    box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.33);
+    background-color: #fcfcfc;
+    -webkit-box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px #ccc solid;
     overflow: hidden;
     display: flex;
     align-items: center;

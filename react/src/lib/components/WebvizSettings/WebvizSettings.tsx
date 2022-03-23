@@ -1,5 +1,7 @@
-import { ScrollArea } from "../ScrollArea";
 import React from "react";
+import PropTypes from "prop-types";
+
+import { ScrollArea } from "../ScrollArea";
 
 import "./webviz-settings.css";
 
@@ -54,4 +56,10 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
             </ScrollArea>
         </div>
     );
+};
+
+WebvizSettings.propTypes = {
+    visible: PropTypes.bool.isRequired,
+    width: PropTypes.number.isRequired,
+    children: PropTypes.node,
 };

@@ -34,7 +34,8 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
     let visible = true;
 
     if (
-        props.pluginId !== store.state.activePluginId ||
+        (props.pluginId !== store.state.activePluginId &&
+            props.pluginId !== "") ||
         activePlugin === undefined ||
         (activePlugin.activeViewId !== props.viewId && props.viewId !== "")
     ) {

@@ -1,18 +1,16 @@
 .WebvizPluginWrapper {
-    border-bottom: 1px rgb(202, 202, 202) solid;
+    padding-top: 16px;
+    padding-bottom: 16px;
     opacity: 0.8;
+    border: 4px transparent solid;
+    border-bottom: 1px rgb(202, 202, 202) solid;
+    border-left: 4px transparent solid;
 }
 
 .WebvizPluginWrapper__Active {
     background-color: rgba(255, 255, 255, 1);
     opacity: 1;
-}
-
-.WebvizPluginWrapper__Layout__Row {
-    display: flex;
-}
-
-.WebvizPluginWrapper__Layout__Column {
+    border-left-color: #007085;
 }
 
 .WebvizPluginWrapper__Backdrop {
