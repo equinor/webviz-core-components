@@ -1,6 +1,6 @@
 import { IconButton, Tooltip } from "@material-ui/core";
 import * as edsIcons from "@equinor/eds-icons";
-import { IconData, opacity } from "@equinor/eds-icons";
+import { IconData } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 import React from "react";
 import { useStore } from "../../../WebvizContentManager/WebvizContentManager";

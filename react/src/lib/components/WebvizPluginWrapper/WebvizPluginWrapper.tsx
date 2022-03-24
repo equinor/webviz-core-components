@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { IconButton } from "@material-ui/core";
 import { camera, fullscreen_exit } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({ camera, fullscreen_exit });

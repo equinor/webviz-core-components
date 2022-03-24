@@ -1,7 +1,6 @@
 import React from "react";
 import { useStore } from "../WebvizContentManager/WebvizContentManager";
-import { Snackbar, Slide, IconButton } from "@material-ui/core";
-import { Icon } from "@equinor/eds-core-react";
+import { Snackbar, Slide } from "@material-ui/core";
 
 import "./webviz-plugins-wrapper.css";
 import PropTypes from "prop-types";
@@ -17,14 +16,17 @@ export const WebvizPluginsWrapper: React.FC<WebvizPluginsWrapperProps> = (
     props
 ) => {
     const store = useStore();
-    const [notificationVisible, setNotificationVisible] =
-        React.useState<boolean>(false);
+    const [
+        notificationVisible,
+        setNotificationVisible,
+    ] = React.useState<boolean>(false);
     const [activePluginId, setActivePluginId] = React.useState<string>(
         store.state.activePluginId
     );
 
-    const notificationTimer =
-        React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const notificationTimer = React.useRef<ReturnType<
+        typeof setTimeout
+    > | null>(null);
 
     React.useEffect(() => {
         return () => {
