@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import "./backdrop.css";
 
@@ -16,4 +17,8 @@ export const Backdrop: React.FC<BackdropProps> = (props: BackdropProps) => {
             }}
         ></div>
     );
+};
+
+Backdrop.propTypes = {
+    opacity: PropTypes.number.isRequired,
 };
