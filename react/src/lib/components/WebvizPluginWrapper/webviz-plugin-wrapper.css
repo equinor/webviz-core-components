@@ -20,3 +20,8 @@
     flex-grow: 1;
     display: flex;
 }
+
+.WebvizPluginWrapper__DashContent {
+    display: flex;
+    flex-grow: 4;
+}
