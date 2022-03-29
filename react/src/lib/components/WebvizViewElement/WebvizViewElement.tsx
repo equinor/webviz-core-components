@@ -435,6 +435,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     }, [setDownloadRequested, props.setProps]);
     return (
         <div
+            id={props.id}
             className="WebvizViewElement"
             style={{ flexGrow: isFullScreen ? 0 : props.flexGrow || 1 }}
             onMouseEnter={() => setIsHovered(true)}

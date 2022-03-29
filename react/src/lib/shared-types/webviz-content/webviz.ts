@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 
 import { ContactPerson } from "./contact-person";
 import { DeprecationWarning } from "./deprecation-warning";
+import { TourStep } from "./tour-step";
 
 export type ViewElement = {
     id: string;
@@ -47,4 +48,5 @@ export type PluginData = {
     contactPerson?: ContactPerson;
     deprecationWarnings?: DeprecationWarning[];
     feedbackUrl?: string;
+    tourSteps?: TourStep[];
 };

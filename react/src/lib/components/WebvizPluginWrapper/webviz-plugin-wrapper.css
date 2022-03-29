@@ -17,7 +17,7 @@
     padding-bottom: 16px;
     border: 4px transparent solid;
     border-bottom-width: 1px;
-    flex-grow: 1;
+    flex-grow: 4;
     display: flex;
 }
 

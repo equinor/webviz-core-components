@@ -33,6 +33,7 @@ import html2canvas from "html2canvas";
 import downloadFile from "../../../../utils/downloadFile";
 
 import "./plugin-actions.css";
+import Tour from "reactour";
 
 type PluginActionsProps = {
     open: boolean;
@@ -60,21 +61,18 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 ) => {
     const [marginBottom, setMarginBottom] = React.useState<number>(0);
     const [open, setOpen] = React.useState<boolean>(props.open);
-    const [openAuthorDialog, setOpenAuthorDialog] = React.useState<boolean>(
-        false
-    );
+    const [openAuthorDialog, setOpenAuthorDialog] =
+        React.useState<boolean>(false);
+    const [tourIsOpen, setTourIsOpen] = React.useState<boolean>(false);
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const openCloseAnimation = React.useRef<Animation<OpenCloseAnimationParameters> | null>(
-        null
-    );
-    const fullScreenAnimation = React.useRef<Animation<FullScreenAnimationParameters> | null>(
-        null
-    );
-    const flashAnimation = React.useRef<Animation<FlashAnimationParameters> | null>(
-        null
-    );
+    const openCloseAnimation =
+        React.useRef<Animation<OpenCloseAnimationParameters> | null>(null);
+    const fullScreenAnimation =
+        React.useRef<Animation<FullScreenAnimationParameters> | null>(null);
+    const flashAnimation =
+        React.useRef<Animation<FlashAnimationParameters> | null>(null);
 
     const store = useStore();
 
@@ -95,31 +93,32 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             openCloseAnimation.current.reset();
         }
 
-        openCloseAnimation.current = new Animation<OpenCloseAnimationParameters>(
-            900,
-            20,
-            [
-                {
-                    t: 0,
-                    state: { marginBottom: 0 },
-                },
-                {
-                    t: 2 / 3,
-                    state: { marginBottom: -closedHeight },
-                },
-                {
-                    t: 1,
-                    state: { marginBottom: 0 },
-                },
-            ],
-            Animation.Bezier,
-            (values, t) => {
-                if (t === 2 / 3) {
-                    setOpen(!open);
+        openCloseAnimation.current =
+            new Animation<OpenCloseAnimationParameters>(
+                900,
+                20,
+                [
+                    {
+                        t: 0,
+                        state: { marginBottom: 0 },
+                    },
+                    {
+                        t: 2 / 3,
+                        state: { marginBottom: -closedHeight },
+                    },
+                    {
+                        t: 1,
+                        state: { marginBottom: 0 },
+                    },
+                ],
+                Animation.Bezier,
+                (values, t) => {
+                    if (t === 2 / 3) {
+                        setOpen(!open);
+                    }
+                    setMarginBottom(values.marginBottom);
                 }
-                setMarginBottom(values.marginBottom);
-            }
-        );
+            );
 
         openCloseAnimation.current.start();
     }, [props.open]);
@@ -135,9 +134,10 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             );
             flash.className = "WebvizCameraFlash";
 
-            const fullScreenContainer = store.state.activePluginWrapperRef?.current.getElementsByClassName(
-                "WebvizPluginWrapper__FullScreenContainer"
-            )[0] as HTMLDivElement;
+            const fullScreenContainer =
+                store.state.activePluginWrapperRef?.current.getElementsByClassName(
+                    "WebvizPluginWrapper__FullScreenContainer"
+                )[0] as HTMLDivElement;
 
             flashAnimation.current = new Animation<FlashAnimationParameters>(
                 200,
@@ -182,9 +182,10 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                     "WebvizViewElement__Actions__hidden"
                                 )
                             );
-                            const actions = fullScreenContainer.getElementsByClassName(
-                                "WebvizFullScreenMenu"
-                            );
+                            const actions =
+                                fullScreenContainer.getElementsByClassName(
+                                    "WebvizFullScreenMenu"
+                                );
                             for (const action of actions) {
                                 (action as HTMLDivElement).style.display =
                                     "none";
@@ -241,21 +242,21 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             fullScreenAnimation.current.reset();
         }
         if (store.state.activePluginWrapperRef?.current) {
-            const rect = store.state.activePluginWrapperRef.current.getBoundingClientRect();
+            const rect =
+                store.state.activePluginWrapperRef.current.getBoundingClientRect();
 
-            const contentWidthWithoutPadding = parseInt(
+            const contentWidthWithPadding = parseInt(
                 getComputedStyle(store.state.activePluginWrapperRef.current)
                     ?.width || "0"
             );
-            const contentHeightWithoutPadding =
-                parseInt(
-                    getComputedStyle(store.state.activePluginWrapperRef.current)
-                        ?.height || "0"
-                ) - 32;
+            const contentHeightWithPadding = parseInt(
+                getComputedStyle(store.state.activePluginWrapperRef.current)
+                    ?.height || "0"
+            );
 
             Object.assign(store.state.activePluginWrapperRef.current.style, {
-                width: `${contentWidthWithoutPadding}px`,
-                height: `${contentHeightWithoutPadding}px`,
+                width: `${contentWidthWithPadding}px`,
+                height: `${contentHeightWithPadding}px`,
             });
 
             const fullScreenContainer = Array.from(
@@ -269,8 +270,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     position: "fixed",
                     left: `${rect.left}px`,
                     top: `${rect.top}px`,
-                    width: `${contentWidthWithoutPadding}px`,
-                    height: `${contentHeightWithoutPadding}px`,
+                    width: `${contentWidthWithPadding - 32}px`,
+                    height: `${contentHeightWithPadding - 32}px`,
                     "z-index": "1199",
                     "background-color": "#fff",
                 });
@@ -311,68 +312,70 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                 },
             });
 
-            fullScreenAnimation.current = new Animation<FullScreenAnimationParameters>(
-                1000,
-                10,
-                [
-                    {
-                        t: 0,
-                        state: {
-                            left: rect.left,
-                            top: rect.top,
-                            height: contentHeightWithoutPadding,
-                            width: contentWidthWithoutPadding,
-                            backdropOpacity: 0,
-                            paddingTop: parseInt(
-                                initialFullScreenContainerPadding
-                            ),
+            fullScreenAnimation.current =
+                new Animation<FullScreenAnimationParameters>(
+                    600,
+                    10,
+                    [
+                        {
+                            t: 0,
+                            state: {
+                                left: rect.left,
+                                top: rect.top,
+                                height: contentHeightWithPadding - 32,
+                                width: contentWidthWithPadding - 32,
+                                backdropOpacity: 0,
+                                paddingTop: parseInt(
+                                    initialFullScreenContainerPadding
+                                ),
+                            },
                         },
-                    },
-                    {
-                        t: 1,
-                        state: {
-                            left: 0,
-                            top: 0,
-                            height: window.innerHeight,
-                            width: window.innerWidth,
-                            backdropOpacity: 1,
-                            paddingTop:
-                                parseInt(initialFullScreenContainerPadding) +
-                                56,
-                        },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    store.dispatch({
-                        type: StoreActions.SetBackdropOpacity,
-                        payload: { opacity: values.backdropOpacity },
-                    });
-                    if (fullScreenContainer) {
-                        if (t === 1) {
-                            Object.assign(fullScreenContainer.style, {
-                                left: "0px",
-                                top: "0px",
-                                width: "100vw",
-                                height: "100vh",
-                                "padding-top": `${
+                        {
+                            t: 1,
+                            state: {
+                                left: 0,
+                                top: 0,
+                                height: window.innerHeight,
+                                width: window.innerWidth,
+                                backdropOpacity: 1,
+                                paddingTop:
                                     parseInt(
                                         initialFullScreenContainerPadding
-                                    ) + 56
-                                }px`,
-                            });
-                            return;
-                        }
-                        Object.assign(fullScreenContainer.style, {
-                            left: `${values.left}px`,
-                            top: `${values.top}px`,
-                            width: `${values.width}px`,
-                            height: `${values.height}px`,
-                            "padding-top": `${values.paddingTop}px`,
+                                    ) + 56,
+                            },
+                        },
+                    ],
+                    Animation.Bezier,
+                    (values, t) => {
+                        store.dispatch({
+                            type: StoreActions.SetBackdropOpacity,
+                            payload: { opacity: values.backdropOpacity },
                         });
+                        if (fullScreenContainer) {
+                            if (t === 1) {
+                                Object.assign(fullScreenContainer.style, {
+                                    left: "0px",
+                                    top: "0px",
+                                    width: "100vw",
+                                    height: "100vh",
+                                    "padding-top": `${
+                                        parseInt(
+                                            initialFullScreenContainerPadding
+                                        ) + 56
+                                    }px`,
+                                });
+                                return;
+                            }
+                            Object.assign(fullScreenContainer.style, {
+                                left: `${values.left}px`,
+                                top: `${values.top}px`,
+                                width: `${values.width}px`,
+                                height: `${values.height}px`,
+                                "padding-top": `${values.paddingTop}px`,
+                            });
+                        }
                     }
-                }
-            );
+                );
             fullScreenAnimation.current.start();
         }
     }, [store.state.activePluginWrapperRef, fullScreenAnimation.current]);
@@ -382,7 +385,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             fullScreenAnimation.current.reset();
         }
         if (store.state.activePluginWrapperRef?.current) {
-            const rect = store.state.activePluginWrapperRef.current.getBoundingClientRect();
+            const rect =
+                store.state.activePluginWrapperRef.current.getBoundingClientRect();
 
             const contentWidthWithoutPadding = parseInt(
                 getComputedStyle(store.state.activePluginWrapperRef.current)
@@ -406,75 +410,79 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     getComputedStyle(fullScreenContainer)?.paddingTop) ||
                 "0";
 
-            fullScreenAnimation.current = new Animation<FullScreenAnimationParameters>(
-                1000,
-                10,
-                [
-                    {
-                        t: 0,
-                        state: {
-                            left: 0,
-                            top: 0,
-                            height: window.innerHeight,
-                            width: window.innerWidth,
-                            backdropOpacity: 1,
-                            paddingTop: parseInt(
-                                initialFullScreenContainerPadding
-                            ),
+            fullScreenAnimation.current =
+                new Animation<FullScreenAnimationParameters>(
+                    600,
+                    10,
+                    [
+                        {
+                            t: 0,
+                            state: {
+                                left: 0,
+                                top: 0,
+                                height: window.innerHeight,
+                                width: window.innerWidth,
+                                backdropOpacity: 1,
+                                paddingTop: parseInt(
+                                    initialFullScreenContainerPadding
+                                ),
+                            },
                         },
-                    },
-                    {
-                        t: 1,
-                        state: {
-                            left: rect.left,
-                            top: rect.top,
-                            height: contentHeightWithoutPadding,
-                            width: contentWidthWithoutPadding,
-                            backdropOpacity: 0,
-                            paddingTop:
-                                parseInt(initialFullScreenContainerPadding) -
-                                56,
+                        {
+                            t: 1,
+                            state: {
+                                left: rect.left,
+                                top: rect.top,
+                                height: contentHeightWithoutPadding,
+                                width: contentWidthWithoutPadding,
+                                backdropOpacity: 0,
+                                paddingTop:
+                                    parseInt(
+                                        initialFullScreenContainerPadding
+                                    ) - 56,
+                            },
                         },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    store.dispatch({
-                        type: StoreActions.SetBackdropOpacity,
-                        payload: { opacity: values.backdropOpacity },
-                    });
-                    if (fullScreenContainer) {
-                        if (t === 1) {
-                            Object.assign(fullScreenContainer.style, {
-                                left: "",
-                                top: "",
-                                width: "",
-                                height: "",
-                                position: "",
-                                "padding-top": "",
-                            });
-                            if (store.state.activePluginWrapperRef?.current) {
-                                Object.assign(
-                                    store.state.activePluginWrapperRef.current
-                                        .style,
-                                    {
-                                        width: "",
-                                        height: "",
-                                    }
-                                );
-                            }
-                            return;
-                        }
-                        Object.assign(fullScreenContainer.style, {
-                            left: `${values.left}px`,
-                            top: `${values.top}px`,
-                            width: `${values.width}px`,
-                            height: `${values.height}px`,
-                            "padding-top": `${values.paddingTop}px`,
+                    ],
+                    Animation.Bezier,
+                    (values, t) => {
+                        store.dispatch({
+                            type: StoreActions.SetBackdropOpacity,
+                            payload: { opacity: values.backdropOpacity },
                         });
+                        if (fullScreenContainer) {
+                            if (t === 1) {
+                                Object.assign(fullScreenContainer.style, {
+                                    left: "",
+                                    top: "",
+                                    width: "",
+                                    height: "",
+                                    position: "",
+                                    "padding-top": "",
+                                });
+                                if (
+                                    store.state.activePluginWrapperRef?.current
+                                ) {
+                                    Object.assign(
+                                        store.state.activePluginWrapperRef
+                                            .current.style,
+                                        {
+                                            width: "",
+                                            height: "",
+                                        }
+                                    );
+                                }
+                                return;
+                            }
+                            Object.assign(fullScreenContainer.style, {
+                                left: `${values.left}px`,
+                                top: `${values.top}px`,
+                                width: `${values.width}px`,
+                                height: `${values.height}px`,
+                                "padding-top": `${values.paddingTop}px`,
+                            });
+                        }
                     }
-                }
-            );
+                );
             fullScreenAnimation.current.start();
         }
     }, [store.state.activePluginWrapperRef, fullScreenAnimation.current]);
@@ -514,6 +522,22 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     const openInNewTab = (url: string) => {
         const newWindow = window.open(url, "_blank", "noopener,noreferrer");
         if (newWindow) newWindow.opener = null;
+    };
+
+    const handleTourClick = () => {
+        setTourIsOpen(true);
+    };
+
+    const handleTourStepChanged = (currentStep: number) => {
+        const viewId = pluginData?.tourSteps?.find(
+            (_, index) => index === currentStep
+        )?.viewId;
+        if (viewId) {
+            store.dispatch({
+                type: StoreActions.SetActiveView,
+                payload: { viewId: viewId },
+            });
+        }
     };
 
     return (
@@ -569,7 +593,10 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     <Icon name="person" />
                 </div>
             )}
-            <div className="WebvizPluginActions__Button">
+            <div
+                className="WebvizPluginActions__Button"
+                onClick={handleTourClick}
+            >
                 <Icon name="help" />
             </div>
             {feedbackUrl && (
@@ -585,6 +612,22 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     open={openAuthorDialog}
                     onClose={() => setOpenAuthorDialog(false)}
                     author={pluginData.contactPerson}
+                />
+            )}
+            {pluginData?.tourSteps && (
+                <Tour
+                    steps={
+                        pluginData?.tourSteps?.map((el) => ({
+                            selector: "#" + el.elementId,
+                            content: el.content,
+                        })) || []
+                    }
+                    isOpen={tourIsOpen}
+                    onRequestClose={() => setTourIsOpen(false)}
+                    showNumber={false}
+                    rounded={5}
+                    accentColor="red"
+                    getCurrentStep={handleTourStepChanged}
                 />
             )}
         </div>

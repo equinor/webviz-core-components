@@ -13,6 +13,7 @@ import { PluginData, View } from "../../shared-types/webviz-content/webviz";
 import { ContactPerson } from "../../shared-types/webviz-content/contact-person";
 import { DeprecationWarning } from "../../shared-types/webviz-content/deprecation-warning";
 import { FullScreenAction } from "../../shared-types/webviz-content/full-screen-menu";
+import { TourStep } from "../../shared-types/webviz-content/tour-step";
 
 type ActionMap<
     M extends {
@@ -28,7 +29,8 @@ type ActionMap<
                 | React.RefObject<HTMLDivElement>
                 | View[]
                 | ((action: string) => void)
-                | FullScreenAction[];
+                | FullScreenAction[]
+                | TourStep[];
         };
     }
 > = {
@@ -77,6 +79,7 @@ type Payload = {
         contactPerson?: ContactPerson;
         screenshotFilename?: string;
         feedbackUrl?: string;
+        tourSteps?: TourStep[];
     };
     [StoreActions.UnregisterPlugin]: {
         id: string;
@@ -153,6 +156,7 @@ export const StoreReducer = (
                     deprecationWarnings: action.payload.deprecationWarnings,
                     screenshotFilename: action.payload.screenshotFilename,
                     feedbackUrl: action.payload.feedbackUrl,
+                    tourSteps: action.payload.tourSteps,
                 },
             ],
         };

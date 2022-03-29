@@ -23,6 +23,10 @@ import {
 } from "../../shared-types/webviz-content/deprecation-warning";
 
 import "./webviz-plugin-wrapper.css";
+import {
+    TourStep,
+    TourStepPropTypes,
+} from "../../shared-types/webviz-content/tour-step";
 
 export interface ParentProps {
     data_requested: number | null;
@@ -40,6 +44,7 @@ export type WebvizPluginWrapperProps = {
     deprecationWarnings?: DeprecationWarning[];
     feedbackUrl?: string;
     stretch?: boolean;
+    tourSteps?: TourStep[];
     setProps?: (props: ParentProps) => void;
 };
 
@@ -65,6 +70,7 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
                 deprecationWarnings: props.deprecationWarnings,
                 screenshotFilename: props.screenshotFilename,
                 feedbackUrl: props.feedbackUrl,
+                tourSteps: props.tourSteps,
             },
         });
 
@@ -159,5 +165,6 @@ WebvizPluginWrapper.propTypes = {
         PropTypes.shape(DeprecationWarningPropTypes).isRequired
     ),
     feedbackUrl: PropTypes.string,
+    tourSteps: PropTypes.arrayOf(PropTypes.shape(TourStepPropTypes).isRequired),
     setProps: PropTypes.func,
 };

@@ -15,6 +15,8 @@ export type WebvizSettingsGroupProps = {
     title: string;
     open?: boolean;
     viewId: string;
+    visibleInViews?: string[];
+    notVisibleInViews?: string[];
     pluginId: string;
     children?: React.ReactNode;
     onToggle?: (id: string) => void;
@@ -33,11 +35,29 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
 
     let visible = true;
 
+    // Is this settings group part of the current plugin?
     if (
-        (props.pluginId !== store.state.activePluginId &&
-            props.pluginId !== "") ||
-        activePlugin === undefined ||
-        (activePlugin.activeViewId !== props.viewId && props.viewId !== "")
+        props.pluginId !== store.state.activePluginId &&
+        props.pluginId !== ""
+    ) {
+        visible = false;
+    }
+
+    // Is the currently active plugin defined?
+
+    if (visible && activePlugin === undefined) {
+        visible = false;
+    }
+
+    // Is this settings group part of the current view or is it a shared setting?
+    if (
+        visible &&
+        activePlugin &&
+        ((activePlugin.activeViewId !== props.viewId && props.viewId !== "") ||
+            (props.visibleInViews &&
+                !props.visibleInViews.includes(activePlugin.activeViewId)) ||
+            (props.notVisibleInViews &&
+                props.notVisibleInViews.includes(activePlugin.activeViewId)))
     ) {
         visible = false;
     }
@@ -82,6 +102,8 @@ WebvizSettingsGroup.propTypes = {
     open: PropTypes.bool,
     viewId: PropTypes.string.isRequired,
     pluginId: PropTypes.string.isRequired,
+    visibleInViews: PropTypes.arrayOf(PropTypes.string.isRequired),
+    notVisibleInViews: PropTypes.arrayOf(PropTypes.string.isRequired),
     children: PropTypes.node,
     onToggle: PropTypes.func,
 };
