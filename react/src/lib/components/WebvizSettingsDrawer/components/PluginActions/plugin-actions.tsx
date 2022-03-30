@@ -64,6 +64,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     const [openAuthorDialog, setOpenAuthorDialog] =
         React.useState<boolean>(false);
     const [tourIsOpen, setTourIsOpen] = React.useState<boolean>(false);
+    const [lastTourStep, setLastTourStep] = React.useState<number>(0);
+    const [isTourActive, setIsTourActive] = React.useState<boolean>(false);
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -335,7 +337,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                             state: {
                                 left: 0,
                                 top: 0,
-                                height: window.innerHeight,
+                                height:
+                                    window.innerHeight -
+                                    parseInt(
+                                        initialFullScreenContainerPadding
+                                    ) +
+                                    56,
                                 width: window.innerWidth,
                                 backdropOpacity: 1,
                                 paddingTop:
@@ -526,18 +533,45 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 
     const handleTourClick = () => {
         setTourIsOpen(true);
+        setIsTourActive(true);
     };
 
-    const handleTourStepChanged = (currentStep: number) => {
+    React.useLayoutEffect(() => {
+        if (isTourActive) {
+            setTourIsOpen(true);
+        }
+    }, [pluginData?.activeViewId, isTourActive]);
+
+    const handleTourStepChange = (currentStep: number) => {
+        setLastTourStep(currentStep);
         const viewId = pluginData?.tourSteps?.find(
             (_, index) => index === currentStep
         )?.viewId;
-        if (viewId) {
+        if (viewId && viewId !== pluginData?.activeViewId) {
+            setTourIsOpen(false);
             store.dispatch({
                 type: StoreActions.SetActiveView,
                 payload: { viewId: viewId },
             });
         }
+    };
+
+    const handleTourOpen = () => {
+        const viewId = pluginData?.tourSteps?.find(
+            (_, index) => index === lastTourStep
+        )?.viewId;
+        if (viewId && viewId !== pluginData?.activeViewId) {
+            setTourIsOpen(false);
+            store.dispatch({
+                type: StoreActions.SetActiveView,
+                payload: { viewId: viewId },
+            });
+        }
+    };
+
+    const handleCloseTourRequest = () => {
+        setTourIsOpen(false);
+        setIsTourActive(false);
     };
 
     return (
@@ -623,11 +657,13 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                         })) || []
                     }
                     isOpen={tourIsOpen}
-                    onRequestClose={() => setTourIsOpen(false)}
+                    onRequestClose={handleCloseTourRequest}
                     showNumber={false}
                     rounded={5}
                     accentColor="red"
-                    getCurrentStep={handleTourStepChanged}
+                    getCurrentStep={handleTourStepChange}
+                    onAfterOpen={() => handleTourOpen()}
+                    startAt={lastTourStep}
                 />
             )}
         </div>
