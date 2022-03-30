@@ -20,7 +20,7 @@ import html2canvas from "html2canvas";
 import downloadFile from "../../utils/downloadFile";
 
 import "./webviz-view-element.css";
-import { WebvizSettings } from "../WebvizSettings";
+import { ScrollArea } from "../ScrollArea/ScrollArea";
 import {
     useStore,
     StoreActions,
@@ -507,13 +507,15 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 }}
             >
                 <div className="WebvizViewElement__SettingsContainer">
-                    <WebvizSettings visible={true} width={600}>
-                        {settings.map((setting) => {
-                            return React.cloneElement(setting, {
-                                ...setting.props,
-                            });
-                        })}
-                    </WebvizSettings>
+                    <ScrollArea>
+                        <div className="WebvizViewElement__SettingsContainer__Content">
+                            {settings.map((setting) => {
+                                return React.cloneElement(setting, {
+                                    ...setting.props,
+                                });
+                            })}
+                        </div>
+                    </ScrollArea>
                 </div>
             </Dialog>
         </div>

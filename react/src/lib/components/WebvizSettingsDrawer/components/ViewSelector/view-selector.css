@@ -23,4 +23,6 @@
     flex-grow: 4;
     text-align: center;
     font-weight: bold;
+    font-size: 1rem;
+    line-height: 1rem;
 }

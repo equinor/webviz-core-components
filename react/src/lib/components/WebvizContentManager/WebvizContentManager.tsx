@@ -233,6 +233,7 @@ const storeContext = React.createContext<StoreContext | undefined>(undefined);
 
 type WebvizContentManagerParentProps = {
     activeViewId: string;
+    activePluginId: string;
 };
 
 type WebvizContentManagerProps = {
@@ -257,6 +258,7 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
                     state.pluginsData.find(
                         (plugin) => plugin.id === state.activePluginId
                     )?.activeViewId || "",
+                activePluginId: state.activePluginId,
             });
         }
     }, [state.pluginsData, state.activePluginId]);

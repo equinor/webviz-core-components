@@ -41,10 +41,20 @@
 }
 
 .WebvizViewElement__SettingsContainer {
-    height: 50vh;
+    height: 20vh;
+    min-height: 300px;
+    width: 600px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+}
+
+.WebvizViewElement__SettingsContainer__Content {
+    padding-right: 24px;
+}
+
+.WebvizViewElement__SettingsContainer .ScrollArea {
+    height: 100%;
 }
 
 .WebvizViewElement__FullScreenActions {

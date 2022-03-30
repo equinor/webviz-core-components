@@ -11,6 +11,7 @@ import {
     help,
     person,
     warning_outlined,
+    view_carousel,
 } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({
@@ -22,6 +23,7 @@ Icon.add({
     help,
     person,
     warning_outlined,
+    view_carousel,
 });
 
 import { Animation } from "../../../../utils/Animation";
@@ -84,6 +86,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     const deprecationWarnings = pluginData?.deprecationWarnings;
     const numDeprecationWarnings = deprecationWarnings?.length || 0;
     const feedbackUrl = pluginData?.feedbackUrl;
+    const tourSteps = pluginData?.tourSteps;
 
     const closedHeight = 7 * (12 * 2 + 24);
 
@@ -339,10 +342,10 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                 top: 0,
                                 height:
                                     window.innerHeight -
-                                    parseInt(
+                                    (parseInt(
                                         initialFullScreenContainerPadding
                                     ) +
-                                    56,
+                                        56),
                                 width: window.innerWidth,
                                 backdropOpacity: 1,
                                 paddingTop:
@@ -364,7 +367,11 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                     left: "0px",
                                     top: "0px",
                                     width: "100vw",
-                                    height: "100vh",
+                                    height: `calc(100vh - ${
+                                        parseInt(
+                                            initialFullScreenContainerPadding
+                                        ) + 56
+                                    }px)`,
                                     "padding-top": `${
                                         parseInt(
                                             initialFullScreenContainerPadding
@@ -427,7 +434,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                             state: {
                                 left: 0,
                                 top: 0,
-                                height: window.innerHeight,
+                                height:
+                                    window.innerHeight -
+                                    (parseInt(
+                                        initialFullScreenContainerPadding
+                                    ) +
+                                        56),
                                 width: window.innerWidth,
                                 backdropOpacity: 1,
                                 paddingTop: parseInt(
@@ -627,12 +639,14 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     <Icon name="person" />
                 </div>
             )}
-            <div
-                className="WebvizPluginActions__Button"
-                onClick={handleTourClick}
-            >
-                <Icon name="help" />
-            </div>
+            {tourSteps && (
+                <div
+                    className="WebvizPluginActions__Button"
+                    onClick={handleTourClick}
+                >
+                    <Icon name="help" />
+                </div>
+            )}
             {feedbackUrl && (
                 <div
                     className="WebvizPluginActions__Button"
@@ -648,14 +662,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     author={pluginData.contactPerson}
                 />
             )}
-            {pluginData?.tourSteps && (
+            {tourSteps && (
                 <Tour
-                    steps={
-                        pluginData?.tourSteps?.map((el) => ({
-                            selector: "#" + el.elementId,
-                            content: el.content,
-                        })) || []
-                    }
+                    steps={tourSteps.map((el) => ({
+                        selector: "#" + el.elementId,
+                        content: el.content,
+                    }))}
                     isOpen={tourIsOpen}
                     onRequestClose={handleCloseTourRequest}
                     showNumber={false}
@@ -664,7 +676,16 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     getCurrentStep={handleTourStepChange}
                     onAfterOpen={() => handleTourOpen()}
                     startAt={lastTourStep}
-                />
+                >
+                    <div className="WebvizPluginActions__TourViewTitle">
+                        <Icon name="view_carousel" />
+                        <span>
+                            {pluginData?.views.find(
+                                (view) => view.id === pluginData?.activeViewId
+                            )?.name || "Unknown"}
+                        </span>
+                    </div>
+                </Tour>
             )}
         </div>
     );

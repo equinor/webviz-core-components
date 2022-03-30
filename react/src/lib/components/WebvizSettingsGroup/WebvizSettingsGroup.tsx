@@ -18,6 +18,7 @@ export type WebvizSettingsGroupProps = {
     visibleInViews?: string[];
     notVisibleInViews?: string[];
     pluginId: string;
+    alwaysOpen?: boolean;
     children?: React.ReactNode;
     onToggle?: (id: string) => void;
 };
@@ -28,6 +29,13 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
     const store = useStore();
     const contentRef = React.useRef<HTMLDivElement>(null);
     const contentSize = useSize(contentRef);
+    const [isCompletelyVisible, setIsCompletelyVisible] =
+        React.useState<boolean>(
+            (props.open !== undefined && props.open) ||
+                (props.alwaysOpen !== undefined && props.alwaysOpen)
+        );
+    const completelyVisibleTimeoutRef =
+        React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const activePlugin = store.state.pluginsData.find(
         (plugin) => plugin.id === store.state.activePluginId
@@ -62,33 +70,71 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
         visible = false;
     }
 
+    React.useEffect(() => {
+        return () => {
+            if (completelyVisibleTimeoutRef.current) {
+                clearTimeout(completelyVisibleTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (props.alwaysOpen) {
+            return;
+        }
+        if (completelyVisibleTimeoutRef.current) {
+            clearTimeout(completelyVisibleTimeoutRef.current);
+        }
+        if (props.open) {
+            completelyVisibleTimeoutRef.current = setTimeout(
+                () => setIsCompletelyVisible(true),
+                500
+            );
+        } else {
+            setIsCompletelyVisible(false);
+        }
+    }, [props.open, props.alwaysOpen]);
+
     return (
         <div
             className="WebvizSettingsGroup"
             style={{ display: visible ? "block" : "none" }}
         >
             <div
-                className="WebvizSettingsGroup__Title"
+                className={
+                    props.alwaysOpen
+                        ? "WebvizSettingsGroup__Label"
+                        : "WebvizSettingsGroup__Title"
+                }
                 onClick={() => props.onToggle && props.onToggle(props.id)}
             >
                 <div className="WebvizSettingsGroup__TitleText">
                     {props.title}
                 </div>
-                <div>
-                    <IconButton>
-                        <Icon
-                            name={
-                                props.open === true
-                                    ? "chevron_up"
-                                    : "chevron_down"
-                            }
-                        />
-                    </IconButton>
-                </div>
+                {!props.alwaysOpen && (
+                    <div>
+                        <IconButton>
+                            <Icon
+                                name={
+                                    props.open === true
+                                        ? "chevron_up"
+                                        : "chevron_down"
+                                }
+                            />
+                        </IconButton>
+                    </div>
+                )}
             </div>
             <div
-                className="WebvizSettingsGroup__Content"
-                style={{ height: props.open === true ? contentSize[1] : 0 }}
+                className={
+                    props.alwaysOpen
+                        ? "WebvizSettingsGroup__FlatContent"
+                        : "WebvizSettingsGroup__Content"
+                }
+                style={{
+                    height: props.open || props.alwaysOpen ? contentSize[1] : 0,
+                    overflow: isCompletelyVisible ? "" : "hidden",
+                }}
             >
                 <div ref={contentRef}>{props.children}</div>
             </div>
@@ -104,6 +150,7 @@ WebvizSettingsGroup.propTypes = {
     pluginId: PropTypes.string.isRequired,
     visibleInViews: PropTypes.arrayOf(PropTypes.string.isRequired),
     notVisibleInViews: PropTypes.arrayOf(PropTypes.string.isRequired),
+    alwaysOpen: PropTypes.bool,
     children: PropTypes.node,
     onToggle: PropTypes.func,
 };
