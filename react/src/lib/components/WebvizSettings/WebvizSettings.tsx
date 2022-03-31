@@ -3,6 +3,11 @@ import PropTypes from "prop-types";
 
 import { ScrollArea } from "../ScrollArea";
 
+import {
+    useStore,
+    StoreActions,
+} from "../WebvizContentManager/WebvizContentManager";
+
 import "./webviz-settings.css";
 
 export type WebvizSettingsProps = {
@@ -14,17 +19,27 @@ export type WebvizSettingsProps = {
 export const WebvizSettings: React.FC<WebvizSettingsProps> = (
     props: WebvizSettingsProps
 ) => {
-    const [activeGroup, setActiveGroup] = React.useState<string>("");
+    const [activeGroupId, setActiveGroupId] = React.useState<string>("");
+    const store = useStore();
+
+    React.useEffect(() => {
+        if (store.state.openSettingsGroupId !== activeGroupId) {
+            setActiveGroupId(store.state.openSettingsGroupId);
+        }
+    }, [store.state.openSettingsGroupId]);
 
     const handleGroupToggle = React.useCallback(
         (id: string) => {
-            if (activeGroup === id) {
-                setActiveGroup("");
-                return;
-            }
-            setActiveGroup(id);
+            const groupId = id === activeGroupId ? "" : id;
+            store.dispatch({
+                type: StoreActions.SetOpenSettingsGroupId,
+                payload: {
+                    settingsGroupId: groupId,
+                },
+            });
+            setActiveGroupId(groupId);
         },
-        [activeGroup]
+        [activeGroupId]
     );
 
     return (
@@ -43,7 +58,7 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
                                         ...child.props._dashprivate_layout
                                             .props,
                                         open:
-                                            activeGroup ===
+                                            activeGroupId ===
                                             child.props._dashprivate_layout
                                                 .props.id,
                                         onToggle: handleGroupToggle,

@@ -1,7 +1,8 @@
 .WebvizPluginActions {
     background-color: rgba(196, 196, 196, 0.22);
     display: flex;
-    align-items: stretch;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .WebvizPluginActions__Spacer {

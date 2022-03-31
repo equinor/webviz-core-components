@@ -552,31 +552,62 @@ export const PluginActions: React.FC<PluginActionsProps> = (
         if (isTourActive) {
             setTourIsOpen(true);
         }
-    }, [pluginData?.activeViewId, isTourActive]);
+    }, [
+        pluginData?.activeViewId,
+        isTourActive,
+        store.state.settingsDrawerOpen,
+        store.state.openSettingsGroupId,
+    ]);
 
     const handleTourStepChange = (currentStep: number) => {
         setLastTourStep(currentStep);
-        const viewId = pluginData?.tourSteps?.find(
-            (_, index) => index === currentStep
-        )?.viewId;
-        if (viewId && viewId !== pluginData?.activeViewId) {
+        const tourStep = tourSteps?.find((_, index) => index === currentStep);
+        if (tourStep?.viewId && tourStep?.viewId !== pluginData?.activeViewId) {
             setTourIsOpen(false);
             store.dispatch({
                 type: StoreActions.SetActiveView,
-                payload: { viewId: viewId },
+                payload: { viewId: tourStep?.viewId },
+            });
+        }
+        if (tourStep?.isSettingsGroup) {
+            setTourIsOpen(false);
+            store.dispatch({
+                type: StoreActions.SetOpenSettingsGroupId,
+                payload: {
+                    settingsGroupId: tourStep?.elementId,
+                },
+            });
+            store.dispatch({
+                type: StoreActions.SetSettingsDrawerOpen,
+                payload: {
+                    settingsDrawerOpen: true,
+                },
             });
         }
     };
 
     const handleTourOpen = () => {
-        const viewId = pluginData?.tourSteps?.find(
-            (_, index) => index === lastTourStep
-        )?.viewId;
-        if (viewId && viewId !== pluginData?.activeViewId) {
+        const tourStep = tourSteps?.find((_, index) => index === lastTourStep);
+        if (tourStep?.viewId && tourStep?.viewId !== pluginData?.activeViewId) {
             setTourIsOpen(false);
             store.dispatch({
                 type: StoreActions.SetActiveView,
-                payload: { viewId: viewId },
+                payload: { viewId: tourStep?.viewId },
+            });
+        }
+        if (tourStep?.isSettingsGroup) {
+            setTourIsOpen(false);
+            store.dispatch({
+                type: StoreActions.SetOpenSettingsGroupId,
+                payload: {
+                    settingsGroupId: tourStep?.elementId,
+                },
+            });
+            store.dispatch({
+                type: StoreActions.SetSettingsDrawerOpen,
+                payload: {
+                    settingsDrawerOpen: true,
+                },
             });
         }
     };
@@ -584,6 +615,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     const handleCloseTourRequest = () => {
         setTourIsOpen(false);
         setIsTourActive(false);
+        store.dispatch({
+            type: StoreActions.SetSettingsDrawerOpen,
+            payload: {
+                settingsDrawerOpen: false,
+            },
+        });
     };
 
     return (
@@ -665,7 +702,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             {tourSteps && (
                 <Tour
                     steps={tourSteps.map((el) => ({
-                        selector: "#" + el.elementId,
+                        selector: el.elementId,
                         content: el.content,
                     }))}
                     isOpen={tourIsOpen}

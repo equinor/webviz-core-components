@@ -55,6 +55,8 @@ export enum StoreActions {
     SetBackdropOpacity = "set_backdrop_opacity",
     SetFullScreenActions = "set_full_screen_actions",
     SetFullScreenActionsCallback = "set_full_screen_actions_callback",
+    SetOpenSettingsGroupId = "set_open_settings_group_id",
+    SetSettingsDrawerOpen = "set_settings_drawer_open",
 }
 
 export type StoreState = {
@@ -63,6 +65,8 @@ export type StoreState = {
     position: DrawerPosition;
     pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
+    openSettingsGroupId: string;
+    settingsDrawerOpen: boolean;
     pluginDownloadRequested: boolean;
     backdropOpacity: number;
     fullScreenActionsCallback: (action: string) => void;
@@ -111,6 +115,12 @@ type Payload = {
     [StoreActions.SetFullScreenActionsCallback]: {
         callback: (action: string) => void;
     };
+    [StoreActions.SetOpenSettingsGroupId]: {
+        settingsGroupId: string;
+    };
+    [StoreActions.SetSettingsDrawerOpen]: {
+        settingsDrawerOpen: boolean;
+    };
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
@@ -122,6 +132,8 @@ const setInitialState = (): StoreState => {
         bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
+        openSettingsGroupId: "",
+        settingsDrawerOpen: false,
         pluginDownloadRequested: false,
         backdropOpacity: 0,
         fullScreenActions: [],
@@ -160,7 +172,8 @@ export const StoreReducer = (
                 },
             ],
         };
-    } else if (action.type === StoreActions.UnregisterPlugin) {
+    }
+    if (action.type === StoreActions.UnregisterPlugin) {
         return {
             ...state,
             activePluginId:
@@ -172,7 +185,8 @@ export const StoreReducer = (
                 (plugin) => plugin.id !== action.payload.id
             ),
         };
-    } else if (action.type === StoreActions.SetActiveView) {
+    }
+    if (action.type === StoreActions.SetActiveView) {
         return {
             ...state,
             pluginsData: [
@@ -183,9 +197,11 @@ export const StoreReducer = (
                 ),
             ],
         };
-    } else if (action.type === StoreActions.SetActivePlugin) {
+    }
+    if (action.type === StoreActions.SetActivePlugin) {
         return { ...state, activePluginId: action.payload.pluginId };
-    } else if (action.type === StoreActions.SetMenuPosition) {
+    }
+    if (action.type === StoreActions.SetMenuPosition) {
         let position = DrawerPosition.Left;
         if (action.payload.pinned) {
             position = action.payload
@@ -207,19 +223,36 @@ export const StoreReducer = (
             position: position,
             bodyMargins: action.payload.bodyMargins,
         };
-    } else if (action.type === StoreActions.SetActivePluginWrapperRef) {
+    }
+    if (action.type === StoreActions.SetActivePluginWrapperRef) {
         return {
             ...state,
             activePluginWrapperRef: action.payload.ref,
         };
-    } else if (action.type === StoreActions.SetPluginDownloadRequested) {
+    }
+    if (action.type === StoreActions.SetPluginDownloadRequested) {
         return { ...state, pluginDownloadRequested: action.payload.request };
-    } else if (action.type === StoreActions.SetBackdropOpacity) {
+    }
+    if (action.type === StoreActions.SetBackdropOpacity) {
         return { ...state, backdropOpacity: action.payload.opacity };
-    } else if (action.type === StoreActions.SetFullScreenActions) {
+    }
+    if (action.type === StoreActions.SetFullScreenActions) {
         return { ...state, fullScreenActions: action.payload.actions };
-    } else if (action.type === StoreActions.SetFullScreenActionsCallback) {
+    }
+    if (action.type === StoreActions.SetFullScreenActionsCallback) {
         return { ...state, fullScreenActionsCallback: action.payload.callback };
+    }
+    if (action.type === StoreActions.SetOpenSettingsGroupId) {
+        return {
+            ...state,
+            openSettingsGroupId: action.payload.settingsGroupId,
+        };
+    }
+    if (action.type === StoreActions.SetSettingsDrawerOpen) {
+        return {
+            ...state,
+            settingsDrawerOpen: action.payload.settingsDrawerOpen,
+        };
     }
     return state;
 };

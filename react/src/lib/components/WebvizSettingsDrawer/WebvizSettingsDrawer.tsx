@@ -50,6 +50,10 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
     const collapsedWidth = 64;
 
     React.useLayoutEffect(() => {
+        setOpen(store.state.settingsDrawerOpen);
+    }, [store.state.settingsDrawerOpen]);
+
+    React.useLayoutEffect(() => {
         let top: "auto" | number = 0;
         let bottom: "auto" | number = "auto";
         let left: "auto" | number = "auto";
