@@ -76,7 +76,9 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                             id="view-element1"
                             showDownload={false}
                         >
-                            <h1>Test plugin view element 1</h1>
+                            <h1 data-dash-is-loading="true">
+                                Test plugin view element 1
+                            </h1>
                             <WebvizSettingsGroup
                                 id="view-element1-settings"
                                 title="Test"

@@ -25,12 +25,23 @@ import {
     useStore,
     StoreActions,
 } from "../WebvizContentManager/WebvizContentManager";
+import { Skeleton } from "@material-ui/lab";
 
 Icon.add({ settings, download, camera, fullscreen, fullscreen_exit });
 
-export interface ParentProps {
+export type ParentProps = {
     data_requested: number | null;
+};
+
+export enum LoadingMask {
+    Text = "text",
+    Graph = "graph",
+    Table = "table",
 }
+
+const LoadingMaskPropType = PropTypes.oneOf(
+    Object.values(LoadingMask) as LoadingMask[]
+);
 
 export type WebvizViewElementProps = {
     id: string;
@@ -38,6 +49,7 @@ export type WebvizViewElementProps = {
     showDownload?: boolean;
     screenshotFilename?: string;
     download?: DownloadData;
+    loadingMask?: LoadingMask;
     setProps?: (props: ParentProps) => void;
     children?: React.ReactNode;
 };
@@ -57,6 +69,7 @@ type FlashAnimationParameters = {
 
 export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const store = useStore();
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isHovered, setIsHovered] = React.useState<boolean>(false);
     const [settingsVisible, setSettingsVisible] =
         React.useState<boolean>(false);
@@ -76,14 +89,45 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         React.useRef<Animation<FullScreenAnimationParameters> | null>(null);
     const flashAnimation =
         React.useRef<Animation<FlashAnimationParameters> | null>(null);
+    const mutationObserver = React.useRef<MutationObserver | null>(null);
 
     React.useEffect(() => {
+        mutationObserver.current = new MutationObserver(
+            (mutationsList: MutationRecord[], _: MutationObserver) => {
+                mutationsList.forEach((mutation) => {
+                    if (
+                        mutation.type === "attributes" &&
+                        mutation.attributeName === "data-dash-is-loading" &&
+                        (mutation.target as HTMLElement).dataset[
+                            "dashIsLoading"
+                        ] === "true"
+                    ) {
+                        setIsLoading(true);
+                    } else {
+                        setIsLoading(false);
+                    }
+                });
+            }
+        );
         return () => {
             if (fullScreenAnimation.current) {
                 fullScreenAnimation.current.reset();
             }
+            if (mutationObserver.current) {
+                mutationObserver.current.disconnect();
+            }
         };
     }, []);
+
+    React.useEffect(() => {
+        if (mutationObserver.current && fullScreenContainerRef.current) {
+            mutationObserver.current.disconnect();
+            mutationObserver.current.observe(fullScreenContainerRef.current, {
+                attributes: true,
+                subtree: true,
+            });
+        }
+    }, [fullScreenContainerRef.current, mutationObserver.current]);
 
     React.useEffect(() => {
         if (props.download !== null && props.download !== undefined) {
@@ -170,6 +214,14 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 },
             });
 
+            Array.from(
+                fullScreenContainerRef.current.getElementsByClassName(
+                    "dash-graph"
+                )
+            ).forEach(
+                (el) => ((el as HTMLDivElement).style.visibility = "hidden")
+            );
+
             fullScreenAnimation.current =
                 new Animation<FullScreenAnimationParameters>(
                     600,
@@ -217,6 +269,18 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                                 paddingTop: 70,
                             });
                             setIsHovered(false);
+                            if (fullScreenContainerRef.current) {
+                                Array.from(
+                                    fullScreenContainerRef.current.getElementsByClassName(
+                                        "dash-graph"
+                                    )
+                                ).forEach(
+                                    (el) =>
+                                        ((
+                                            el as HTMLDivElement
+                                        ).style.visibility = "visible")
+                                );
+                            }
                             return;
                         }
                         setFullScreenContainerStyle({
@@ -263,6 +327,14 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 ),
             };
 
+            Array.from(
+                fullScreenContainerRef.current.getElementsByClassName(
+                    "dash-graph"
+                )
+            ).forEach(
+                (el) => ((el as HTMLDivElement).style.visibility = "hidden")
+            );
+
             fullScreenAnimation.current =
                 new Animation<FullScreenAnimationParameters>(
                     600,
@@ -305,6 +377,18 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                             setContentStyle({});
                             setSpacerStyle({});
                             setIsFullScreen(false);
+                            if (fullScreenContainerRef.current) {
+                                Array.from(
+                                    fullScreenContainerRef.current.getElementsByClassName(
+                                        "dash-graph"
+                                    )
+                                ).forEach(
+                                    (el) =>
+                                        ((
+                                            el as HTMLDivElement
+                                        ).style.visibility = "visible")
+                                );
+                            }
                             return;
                         }
                         setFullScreenContainerStyle({
@@ -433,11 +517,65 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
             props.setProps({ data_requested: requests });
         }
     }, [setDownloadRequested, props.setProps]);
+
+    const makeLoadingSkeleton = React.useCallback(() => {
+        const width = fullScreenContainerRef.current
+            ? parseInt(
+                  getComputedStyle(fullScreenContainerRef.current).width || "0"
+              )
+            : 200;
+        const height = fullScreenContainerRef.current
+            ? parseInt(
+                  getComputedStyle(fullScreenContainerRef.current).height || "0"
+              )
+            : 100;
+        if (props.loadingMask === LoadingMask.Graph) {
+            return (
+                <>
+                    <Skeleton key="LoadingLabel" width={width} height={32} />
+                    <Skeleton
+                        key="LoadingGraph"
+                        width={width}
+                        height={height - 40}
+                    />
+                </>
+            );
+        }
+        if (props.loadingMask === LoadingMask.Table) {
+            return (
+                <>
+                    <Skeleton key="LoadingLabel" width={width} height={32} />
+                    <Skeleton
+                        key="LoadingTable"
+                        width={width}
+                        height={height - 40}
+                    />
+                </>
+            );
+        }
+        const bars = Array(Math.floor(height / 40))
+            .fill(0)
+            .map((_, i) => i);
+        return (
+            <>
+                {bars.map((el) => (
+                    <Skeleton
+                        key={`LoadingBar${el}`}
+                        width={width}
+                        height={32}
+                    />
+                ))}
+            </>
+        );
+    }, [props.loadingMask, fullScreenContainerRef.current]);
+
     return (
         <div
             id={props.id}
             className="WebvizViewElement"
-            style={{ flexGrow: isFullScreen ? 0 : props.flexGrow || 1 }}
+            style={{
+                flexGrow: isFullScreen || isLoading ? 0 : props.flexGrow || 1,
+            }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -453,9 +591,14 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 <div
                     ref={fullScreenContainerRef}
                     style={fullScreenContainerStyle}
-                    className="WebvizViewElement__FullScreenContainer"
+                    className={`WebvizViewElement__FullScreenContainer`}
                 >
-                    {content}
+                    {isLoading && makeLoadingSkeleton()}
+                    <div
+                        style={{ visibility: isLoading ? "hidden" : "visible" }}
+                    >
+                        {content}
+                    </div>
                 </div>
             </div>
             <div
@@ -527,6 +670,7 @@ WebvizViewElement.propTypes = {
     flexGrow: PropTypes.number,
     showDownload: PropTypes.bool,
     screenshotFilename: PropTypes.string,
+    loadingMask: LoadingMaskPropType,
     download: PropTypes.shape(DownloadDataPropTypes),
     setProps: PropTypes.func,
     children: PropTypes.node,
