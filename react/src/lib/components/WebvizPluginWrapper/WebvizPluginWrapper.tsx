@@ -167,6 +167,7 @@ WebvizPluginWrapper.propTypes = {
     deprecationWarnings: PropTypes.arrayOf(
         PropTypes.shape(DeprecationWarningPropTypes).isRequired
     ),
+    stretch: PropTypes.bool,
     feedbackUrl: PropTypes.string,
     tourSteps: PropTypes.arrayOf(PropTypes.shape(TourStepPropTypes).isRequired),
     setProps: PropTypes.func,
