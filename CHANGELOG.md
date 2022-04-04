@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.5] - 2022-02-09
 
 ### Changed
-
+- [#212](https://github.com/equinor/webviz-core-components/pull/212) - Changed `tab` behaviour in `SmartNodeSelector`. When pressing `tab` on the last tag or `shift+tab` on the first one, the default behaviour is no longer prevented.
 - [#197](https://github.com/equinor/webviz-core-components/pull/197) - Updated `@equinor/eds-icons` (and associated `@equinor/eds-core-react` dependencies) in order to use new icons upstream in the application menu.
 
 ## [0.5.4] - 2021-12-09
