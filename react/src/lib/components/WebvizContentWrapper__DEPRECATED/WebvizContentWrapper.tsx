@@ -70,6 +70,15 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                         "https://github.com/equinor/webviz-core-components/issues/" +
                         "new?title=New+feedback&body=Feedback+text&labels=userfeedback"
                     }
+                    tourSteps={[
+                        {
+                            elementId: "view-element1",
+                            viewId: "view1",
+                            isSettingsGroup: false,
+                            isViewElementSetting: false,
+                            content: "This is a test",
+                        },
+                    ]}
                 >
                     <WebvizPluginLayoutRow>
                         <WebvizViewElement

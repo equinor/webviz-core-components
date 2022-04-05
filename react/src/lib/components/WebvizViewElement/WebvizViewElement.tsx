@@ -93,18 +93,20 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
 
     React.useEffect(() => {
         mutationObserver.current = new MutationObserver(
-            (mutationsList: MutationRecord[], _: MutationObserver) => {
+            (mutationsList: MutationRecord[]) => {
                 mutationsList.forEach((mutation) => {
                     if (
                         mutation.type === "attributes" &&
                         mutation.attributeName === "data-dash-is-loading" &&
-                        (mutation.target as HTMLElement).dataset[
-                            "dashIsLoading"
-                        ] === "true"
+                        !(mutation.target as HTMLElement).classList.contains(
+                            "WebvizViewElement__LoadingSkeleton"
+                        )
                     ) {
-                        setIsLoading(true);
-                    } else {
-                        setIsLoading(false);
+                        setIsLoading(
+                            (mutation.target as HTMLElement).dataset[
+                                "dashIsLoading"
+                            ] === "true"
+                        );
                     }
                 });
             }
@@ -531,41 +533,63 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
             : 100;
         if (props.loadingMask === LoadingMask.Graph) {
             return (
-                <>
-                    <Skeleton key="LoadingLabel" width={width} height={32} />
+                <div
+                    className="WebvizViewElement__LoadingSkeleton"
+                    style={{ height: height }}
+                >
+                    <Skeleton
+                        key="LoadingLabel"
+                        width={width}
+                        height={32}
+                        animation="wave"
+                    />
                     <Skeleton
                         key="LoadingGraph"
                         width={width}
                         height={height - 40}
+                        animation="wave"
                     />
-                </>
+                </div>
             );
         }
         if (props.loadingMask === LoadingMask.Table) {
             return (
-                <>
-                    <Skeleton key="LoadingLabel" width={width} height={32} />
+                <div
+                    className="WebvizViewElement__LoadingSkeleton"
+                    style={{ height: height }}
+                >
+                    <Skeleton
+                        key="LoadingLabel"
+                        width={width}
+                        height={32}
+                        animation="wave"
+                    />
                     <Skeleton
                         key="LoadingTable"
                         width={width}
                         height={height - 40}
+                        animation="wave"
                     />
-                </>
+                </div>
             );
         }
         const bars = Array(Math.floor(height / 40))
             .fill(0)
             .map((_, i) => i);
         return (
-            <>
+            <div
+                className="WebvizViewElement__LoadingSkeleton"
+                style={{ height: height }}
+            >
                 {bars.map((el) => (
                     <Skeleton
                         key={`LoadingBar${el}`}
                         width={width}
                         height={32}
+                        animation="wave"
                     />
                 ))}
-            </>
+            </div>
         );
     }, [props.loadingMask, fullScreenContainerRef.current]);
 
@@ -594,9 +618,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     className={`WebvizViewElement__FullScreenContainer`}
                 >
                     {isLoading && makeLoadingSkeleton()}
-                    <div
-                        style={{ visibility: isLoading ? "hidden" : "visible" }}
-                    >
+                    <div style={{ display: isLoading ? "none" : "block" }}>
                         {content}
                     </div>
                 </div>

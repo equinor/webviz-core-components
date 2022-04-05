@@ -49,7 +49,7 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
         >
             <ScrollArea>
                 {props.children &&
-                    React.Children.map(props.children, (child) => {
+                    React.Children.map(props.children, (child, index) => {
                         if (React.isValidElement(child)) {
                             return React.cloneElement(child, {
                                 _dashprivate_layout: {
@@ -59,8 +59,10 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
                                             .props,
                                         open:
                                             activeGroupId ===
-                                            child.props._dashprivate_layout
-                                                .props.id,
+                                                child.props._dashprivate_layout
+                                                    .props.id ||
+                                            (activeGroupId === "" &&
+                                                index === 0),
                                         onToggle: handleGroupToggle,
                                     },
                                 },

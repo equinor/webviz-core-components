@@ -1,0 +1,19 @@
+.WebvizPluginTour {
+    position: fixed;
+    opacity: 0.7;
+    z-index: 999999;
+    pointer-events: none;
+    left: 0px;
+    top: 0px;
+    width: 100vw;
+    height: 100vh;
+}
+
+.WebvizPluginTour__Mask {
+    fill: currentColor;
+}
+
+.WebvizPluginTour__ClipPath {
+    pointer-events: auto;
+    clip-path: url(#WebvizPluginTour__ClipPath);
+}

@@ -35,7 +35,7 @@ import html2canvas from "html2canvas";
 import downloadFile from "../../../../utils/downloadFile";
 
 import "./plugin-actions.css";
-import Tour from "reactour";
+import { WebvizPluginTour } from "../../../../components/WebvizPluginTour/WebvizPluginTour";
 
 type PluginActionsProps = {
     open: boolean;
@@ -66,8 +66,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     const [openAuthorDialog, setOpenAuthorDialog] =
         React.useState<boolean>(false);
     const [tourIsOpen, setTourIsOpen] = React.useState<boolean>(false);
-    const [lastTourStep, setLastTourStep] = React.useState<number>(0);
-    const [isTourActive, setIsTourActive] = React.useState<boolean>(false);
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -543,86 +541,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
         if (newWindow) newWindow.opener = null;
     };
 
-    const handleTourClick = () => {
-        setTourIsOpen(true);
-        setIsTourActive(true);
-    };
-
-    React.useLayoutEffect(() => {
-        if (isTourActive) {
-            setTourIsOpen(true);
-        }
-    }, [
-        pluginData?.activeViewId,
-        isTourActive,
-        store.state.settingsDrawerOpen,
-        store.state.openSettingsGroupId,
-    ]);
-
-    const handleTourStepChange = (currentStep: number) => {
-        setLastTourStep(currentStep);
-        const tourStep = tourSteps?.find((_, index) => index === currentStep);
-        if (tourStep?.viewId && tourStep?.viewId !== pluginData?.activeViewId) {
-            setTourIsOpen(false);
-            store.dispatch({
-                type: StoreActions.SetActiveView,
-                payload: { viewId: tourStep?.viewId },
-            });
-        }
-        if (tourStep?.isSettingsGroup) {
-            setTourIsOpen(false);
-            store.dispatch({
-                type: StoreActions.SetOpenSettingsGroupId,
-                payload: {
-                    settingsGroupId: tourStep?.elementId,
-                },
-            });
-            store.dispatch({
-                type: StoreActions.SetSettingsDrawerOpen,
-                payload: {
-                    settingsDrawerOpen: true,
-                },
-            });
-        }
-    };
-
-    const handleTourOpen = () => {
-        const tourStep = tourSteps?.find((_, index) => index === lastTourStep);
-        if (tourStep?.viewId && tourStep?.viewId !== pluginData?.activeViewId) {
-            setTourIsOpen(false);
-            store.dispatch({
-                type: StoreActions.SetActiveView,
-                payload: { viewId: tourStep?.viewId },
-            });
-        }
-        if (tourStep?.isSettingsGroup) {
-            setTourIsOpen(false);
-            store.dispatch({
-                type: StoreActions.SetOpenSettingsGroupId,
-                payload: {
-                    settingsGroupId: tourStep?.elementId,
-                },
-            });
-            store.dispatch({
-                type: StoreActions.SetSettingsDrawerOpen,
-                payload: {
-                    settingsDrawerOpen: true,
-                },
-            });
-        }
-    };
-
-    const handleCloseTourRequest = () => {
-        setTourIsOpen(false);
-        setIsTourActive(false);
-        store.dispatch({
-            type: StoreActions.SetSettingsDrawerOpen,
-            payload: {
-                settingsDrawerOpen: false,
-            },
-        });
-    };
-
     return (
         <div
             className="WebvizPluginActions"
@@ -679,7 +597,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             {tourSteps && (
                 <div
                     className="WebvizPluginActions__Button"
-                    onClick={handleTourClick}
+                    onClick={() => setTourIsOpen(true)}
                 >
                     <Icon name="help" />
                 </div>
@@ -699,31 +617,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     author={pluginData.contactPerson}
                 />
             )}
-            {tourSteps && (
-                <Tour
-                    steps={tourSteps.map((el) => ({
-                        selector: el.elementId,
-                        content: el.content,
-                    }))}
-                    isOpen={tourIsOpen}
-                    onRequestClose={handleCloseTourRequest}
-                    showNumber={false}
-                    rounded={5}
-                    accentColor="red"
-                    getCurrentStep={handleTourStepChange}
-                    onAfterOpen={() => handleTourOpen()}
-                    startAt={lastTourStep}
-                >
-                    <div className="WebvizPluginActions__TourViewTitle">
-                        <Icon name="view_carousel" />
-                        <span>
-                            {pluginData?.views.find(
-                                (view) => view.id === pluginData?.activeViewId
-                            )?.name || "Unknown"}
-                        </span>
-                    </div>
-                </Tour>
-            )}
+            {tourSteps && <WebvizPluginTour open={tourIsOpen} />}
         </div>
     );
 };
