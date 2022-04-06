@@ -1,12 +1,17 @@
+import { Button, MobileStepper } from "@material-ui/core";
 import useSize from "@react-hook/size";
 import React from "react";
 import * as ReactDOM from "react-dom";
-import { useStore } from "../WebvizContentManager";
+import { StoreActions, useStore } from "../WebvizContentManager";
+import { Icon } from "@equinor/eds-core-react";
+import { arrow_back, arrow_forward } from "@equinor/eds-icons";
+Icon.add({ arrow_back, arrow_forward });
 
 import "./webviz-plugin-tour.css";
 
 export type WebvizPluginTourProps = {
     open: boolean;
+    onClose: () => void;
 };
 
 export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
@@ -15,7 +20,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
     const [elementBoundingClientRect, setElementBoundingClientRect] =
         React.useState<DOMRect | null>();
     const [currentTourStep, setCurrentTourStep] = React.useState<number>(0);
-    const [elementId, setElementId] = React.useState<string>("");
+    const [nextTourStep, setNextTourStep] = React.useState<number>(0);
 
     const resizeObserverRef = React.useRef<ResizeObserver | null>(null);
 
@@ -30,30 +35,59 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
     const tourSteps = pluginData?.tourSteps;
 
     React.useEffect(() => {
-        resizeObserverRef.current = new ResizeObserver(() => {
-            setElementBoundingClientRect(
-                document.querySelector(elementId)?.getBoundingClientRect()
-            );
-        });
-    }, [elementId]);
+        if (tourSteps)
+            resizeObserverRef.current = new ResizeObserver(() => {
+                setElementBoundingClientRect(
+                    document
+                        .getElementById(tourSteps[currentTourStep].elementId)
+                        ?.getBoundingClientRect()
+                );
+            });
+    }, [tourSteps, currentTourStep]);
 
     React.useEffect(() => {
         if (props.open && tourSteps) {
             setCurrentTourStep(0);
-            setElementId(tourSteps[0].elementId);
             const elementId = tourSteps[0].elementId;
             setElementBoundingClientRect(
-                document.querySelector(elementId)?.getBoundingClientRect()
+                document.getElementById(elementId)?.getBoundingClientRect()
             );
         }
     }, [props.open, tourSteps]);
 
     React.useEffect(() => {
-        const element = document.getElementById(elementId);
-        if (resizeObserverRef.current && element) {
-            resizeObserverRef.current.observe(element);
+        if (tourSteps) {
+            const element = document.getElementById(
+                tourSteps[currentTourStep].elementId
+            );
+            if (resizeObserverRef.current && element) {
+                resizeObserverRef.current.observe(element);
+            }
         }
-    }, [elementId, resizeObserverRef.current]);
+    }, [tourSteps, currentTourStep, resizeObserverRef.current]);
+
+    React.useEffect(() => {
+        setCurrentTourStep(nextTourStep);
+    }, [pluginData?.activeViewId, nextTourStep]);
+
+    const handleChangeTourStep = React.useCallback(
+        (decrement = false) => {
+            if (!tourSteps) {
+                return;
+            }
+            const newTourStep = currentTourStep + (decrement ? -1 : 1);
+            if (tourSteps[newTourStep].viewId !== pluginData?.activeViewId) {
+                store.dispatch({
+                    type: StoreActions.SetActiveView,
+                    payload: { viewId: tourSteps[newTourStep].viewId },
+                });
+                setNextTourStep(newTourStep);
+            } else {
+                setCurrentTourStep(newTourStep);
+            }
+        },
+        [tourSteps, currentTourStep]
+    );
 
     if (!props.open || !elementBoundingClientRect) {
         return null;
@@ -84,17 +118,110 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
         { x: windowSize[0], y: 0 },
     ];
 
+    const contentPosition: {
+        left: "auto" | number;
+        top: "auto" | number;
+        right: "auto" | number;
+        bottom: "auto" | number;
+    } = {
+        left: "auto",
+        top: "auto",
+        right: "auto",
+        bottom: "auto",
+    };
+    const spacing = {
+        left: elementBoundingClientRect.left,
+        top: elementBoundingClientRect.top,
+        right: windowSize[0] - elementBoundingClientRect.right,
+        bottom: windowSize[1] - elementBoundingClientRect.bottom,
+    };
+    const maxSpacing = Math.max(...Object.values(spacing));
+    const margin = 16;
+    if (spacing.left === maxSpacing) {
+        contentPosition.right =
+            windowSize[0] - elementBoundingClientRect.left + margin;
+        contentPosition.top = elementBoundingClientRect.top;
+    } else if (spacing.top === maxSpacing) {
+        contentPosition.left = elementBoundingClientRect.left;
+        contentPosition.bottom =
+            windowSize[1] - elementBoundingClientRect.top + margin;
+    } else if (spacing.right === maxSpacing) {
+        contentPosition.left = elementBoundingClientRect.right + margin;
+        contentPosition.top = elementBoundingClientRect.top;
+    } else if (spacing.bottom === maxSpacing) {
+        contentPosition.left = elementBoundingClientRect.left;
+        contentPosition.top = elementBoundingClientRect.bottom + margin;
+    }
+
     return ReactDOM.createPortal(
         <>
             {elementBoundingClientRect && (
                 <div className="WebvizPluginTour" ref={webvizPluginTourRef}>
-                    <div className="WebvizPluginTour__Content">
-                        {currentTourStep}
+                    <div
+                        className="WebvizPluginTour__Content"
+                        style={{
+                            left: contentPosition.left,
+                            top: contentPosition.top,
+                            right: contentPosition.right,
+                            bottom: contentPosition.bottom,
+                        }}
+                    >
+                        {pluginData && (
+                            <div className="WebvizPluginTour__View">
+                                <Icon name="view_carousel" />
+                                <span>
+                                    {pluginData.views.find(
+                                        (view) =>
+                                            view.id === pluginData.activeViewId
+                                    )?.name || "Unknown"}
+                                </span>
+                            </div>
+                        )}
+                        {tourSteps && tourSteps[currentTourStep].content}
+                        {tourSteps && tourSteps.length > 1 && (
+                            <MobileStepper
+                                variant="text"
+                                steps={tourSteps.length}
+                                position="static"
+                                activeStep={currentTourStep}
+                                nextButton={
+                                    <Button
+                                        size="small"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            handleChangeTourStep();
+                                        }}
+                                        disabled={
+                                            currentTourStep ===
+                                            tourSteps.length - 1
+                                        }
+                                    >
+                                        Next
+                                        <Icon name="arrow_forward" />
+                                    </Button>
+                                }
+                                backButton={
+                                    <Button
+                                        size="small"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            handleChangeTourStep(true);
+                                        }}
+                                        disabled={currentTourStep === 0}
+                                    >
+                                        <Icon name="arrow_back" />
+                                        Back
+                                    </Button>
+                                }
+                            />
+                        )}
                     </div>
                     <svg
                         width={windowSize[0]}
                         height={windowSize[1]}
                         xmlns="http://www.w3.org/2000/svg"
+                        onClick={() => props.onClose()}
+                        className="WebvizPluginTour__SVG"
                     >
                         <defs>
                             <mask id="WebvizPluginTour__Mask">

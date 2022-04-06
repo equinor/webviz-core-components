@@ -617,7 +617,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     author={pluginData.contactPerson}
                 />
             )}
-            {tourSteps && <WebvizPluginTour open={tourIsOpen} />}
+            {tourSteps && (
+                <WebvizPluginTour
+                    open={tourIsOpen}
+                    onClose={() => setTourIsOpen(false)}
+                />
+            )}
         </div>
     );
 };

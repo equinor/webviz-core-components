@@ -26,14 +26,86 @@ export type WebvizContentWrapperProps = {
 export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
     props
 ) => {
+    const [view, setView] = React.useState<React.ReactNode>(
+        <WebvizPluginLayoutRow>
+            <WebvizViewElement id="view-element1" showDownload={false}>
+                <h1 data-dash-is-loading="true">Test plugin view element 1</h1>
+                <WebvizSettingsGroup
+                    id="view-element1-settings"
+                    title="Test"
+                    viewId=""
+                    pluginId=""
+                >
+                    Blabla
+                </WebvizSettingsGroup>
+            </WebvizViewElement>
+            <WebvizViewElement id="view-element2" showDownload={false}>
+                <h1>Test plugin view element 2</h1>
+            </WebvizViewElement>
+        </WebvizPluginLayoutRow>
+    );
     const handleUrlChanged = (url: string) => {
         props.setProps({ url: url });
     };
     return (
         <WebvizContentManager
             id="manager"
-            setProps={(props: { activeViewId: string }) => {
-                console.log(props);
+            setProps={(props) => {
+                if (props.activeViewId === "view1") {
+                    setView(
+                        <WebvizPluginLayoutRow>
+                            <WebvizViewElement
+                                id="view-element1"
+                                showDownload={false}
+                            >
+                                <h1 data-dash-is-loading="true">
+                                    Test plugin view element 1
+                                </h1>
+                                <WebvizSettingsGroup
+                                    id="view-element1-settings"
+                                    title="Test"
+                                    viewId=""
+                                    pluginId=""
+                                >
+                                    Blabla
+                                </WebvizSettingsGroup>
+                            </WebvizViewElement>
+                            <WebvizViewElement
+                                id="view-element2"
+                                showDownload={false}
+                            >
+                                <h1>Test plugin view element 2</h1>
+                            </WebvizViewElement>
+                        </WebvizPluginLayoutRow>
+                    );
+                } else {
+                    setView(
+                        <WebvizPluginLayoutRow>
+                            <WebvizViewElement
+                                id="view-element3"
+                                showDownload={false}
+                            >
+                                <h1 data-dash-is-loading="true">
+                                    Test plugin view element 3
+                                </h1>
+                                <WebvizSettingsGroup
+                                    id="view-element3-settings"
+                                    title="Test"
+                                    viewId=""
+                                    pluginId=""
+                                >
+                                    Blabla
+                                </WebvizSettingsGroup>
+                            </WebvizViewElement>
+                            <WebvizViewElement
+                                id="view-element4"
+                                showDownload={false}
+                            >
+                                <h1>Test plugin view element 4</h1>
+                            </WebvizViewElement>
+                        </WebvizPluginLayoutRow>
+                    );
+                }
             }}
         >
             <Menu
@@ -47,7 +119,10 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                 <WebvizPluginWrapper
                     name="MyPlugin"
                     id="plugin-wrapper"
-                    views={[]}
+                    views={[
+                        { id: "view1", name: "View 1" },
+                        { id: "view2", name: "View 2" },
+                    ]}
                     showDownload={false}
                     screenshotFilename="MyScreenshot"
                     contactPerson={{
@@ -78,32 +153,16 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                             isViewElementSetting: false,
                             content: "This is a test",
                         },
+                        {
+                            elementId: "view-element4",
+                            viewId: "view2",
+                            isSettingsGroup: false,
+                            isViewElementSetting: false,
+                            content: "This is another test",
+                        },
                     ]}
                 >
-                    <WebvizPluginLayoutRow>
-                        <WebvizViewElement
-                            id="view-element1"
-                            showDownload={false}
-                        >
-                            <h1 data-dash-is-loading="true">
-                                Test plugin view element 1
-                            </h1>
-                            <WebvizSettingsGroup
-                                id="view-element1-settings"
-                                title="Test"
-                                viewId=""
-                                pluginId=""
-                            >
-                                Blabla
-                            </WebvizSettingsGroup>
-                        </WebvizViewElement>
-                        <WebvizViewElement
-                            id="view-element2"
-                            showDownload={false}
-                        >
-                            <h1>Test plugin view element 2</h1>
-                        </WebvizViewElement>
-                    </WebvizPluginLayoutRow>
+                    {view}
                 </WebvizPluginWrapper>
                 <WebvizPluginWrapper
                     name="MyPlugin2"

@@ -1,6 +1,5 @@
 .WebvizPluginTour {
     position: fixed;
-    opacity: 0.7;
     z-index: 999999;
     pointer-events: none;
     left: 0px;
@@ -9,11 +8,38 @@
     height: 100vh;
 }
 
+.WebvizPluginTour__SVG {
+    z-index: 1;
+}
+
 .WebvizPluginTour__Mask {
     fill: currentColor;
+    opacity: 0.5;
 }
 
 .WebvizPluginTour__ClipPath {
     pointer-events: auto;
     clip-path: url(#WebvizPluginTour__ClipPath);
+    opacity: 0.5;
+}
+
+.WebvizPluginTour__View {
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
+    margin-bottom: 8px;
+}
+
+.WebvizPluginTour__View > span {
+    display: block;
+    margin-left: 16px;
+}
+
+.WebvizPluginTour__Content {
+    position: fixed;
+    background-color: white;
+    padding: 16px;
+    border-radius: 4px;
+    z-index: 2;
+    pointer-events: all;
 }
