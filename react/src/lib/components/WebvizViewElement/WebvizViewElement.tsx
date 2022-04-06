@@ -1,12 +1,5 @@
-import { Icon } from "@equinor/eds-core-react";
-import {
-    IconButton,
-    TableContainer,
-    Table,
-    TableRow,
-    TableCell,
-    TableBody,
-} from "@material-ui/core";
+import { CircularProgress, Icon } from "@equinor/eds-core-react";
+import { IconButton } from "@material-ui/core";
 import {
     settings,
     download,
@@ -32,7 +25,6 @@ import {
     useStore,
     StoreActions,
 } from "../WebvizContentManager/WebvizContentManager";
-import { Skeleton } from "@material-ui/lab";
 
 Icon.add({ settings, download, camera, fullscreen, fullscreen_exit });
 
@@ -40,23 +32,12 @@ export type ParentProps = {
     data_requested: number | null;
 };
 
-export enum LoadingMask {
-    Text = "text",
-    Graph = "graph",
-    Table = "table",
-}
-
-const LoadingMaskPropType = PropTypes.oneOf(
-    Object.values(LoadingMask) as LoadingMask[]
-);
-
 export type WebvizViewElementProps = {
     id: string;
     flexGrow?: number;
     showDownload?: boolean;
     screenshotFilename?: string;
     download?: DownloadData;
-    loadingMask?: LoadingMask;
     setProps?: (props: ParentProps) => void;
     children?: React.ReactNode;
 };
@@ -97,6 +78,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const flashAnimation =
         React.useRef<Animation<FlashAnimationParameters> | null>(null);
     const mutationObserver = React.useRef<MutationObserver | null>(null);
+    const loadingDelayTimer =
+        React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     React.useEffect(() => {
         mutationObserver.current = new MutationObserver(
@@ -109,11 +92,21 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                         ) &&
                         mutation.attributeName === "data-dash-is-loading"
                     ) {
-                        setIsLoading(
+                        if (loadingDelayTimer.current) {
+                            clearTimeout(loadingDelayTimer.current);
+                        }
+                        if (
                             (mutation.target as HTMLElement).dataset[
                                 "dashIsLoading"
                             ] === "true"
-                        );
+                        ) {
+                            loadingDelayTimer.current = setTimeout(
+                                () => setIsLoading(true),
+                                1000
+                            );
+                        } else {
+                            setIsLoading(false);
+                        }
                     } else if (
                         mutation.type === "attributes" &&
                         !(mutation.target as HTMLElement).classList.contains(
@@ -127,6 +120,9 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                                 mutation.target as HTMLElement
                             ).classList.contains("dash-loading")
                         ) {
+                            if (loadingDelayTimer.current) {
+                                clearTimeout(loadingDelayTimer.current);
+                            }
                             setIsLoading(false);
                         } else if (
                             !mutation.oldValue?.includes("dash-loading") &&
@@ -134,7 +130,13 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                                 "dash-loading"
                             )
                         ) {
-                            setIsLoading(true);
+                            if (loadingDelayTimer.current) {
+                                clearTimeout(loadingDelayTimer.current);
+                            }
+                            loadingDelayTimer.current = setTimeout(
+                                () => setIsLoading(true),
+                                1000
+                            );
                         }
                     }
                 });
@@ -146,6 +148,9 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
             }
             if (mutationObserver.current) {
                 mutationObserver.current.disconnect();
+            }
+            if (loadingDelayTimer.current) {
+                clearTimeout(loadingDelayTimer.current);
             }
         };
     }, []);
@@ -550,99 +555,12 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         }
     }, [setDownloadRequested, props.setProps]);
 
-    const makeLoadingSkeleton = React.useCallback(() => {
-        const width = contentRef.current
-            ? parseInt(getComputedStyle(contentRef.current).width || "0")
-            : 200;
-        const height = contentRef.current
-            ? parseInt(getComputedStyle(contentRef.current).height || "0")
-            : 100;
-        if (props.loadingMask === LoadingMask.Graph) {
-            return (
-                <div
-                    className="WebvizViewElement__LoadingSkeleton"
-                    style={{ height: height }}
-                >
-                    <Skeleton
-                        key="LoadingLabel"
-                        width={width / 3}
-                        height={32}
-                        animation="wave"
-                        style={{ marginLeft: width / 3, marginBottom: 24 }}
-                    />
-                    <Skeleton
-                        key="LoadingGraph"
-                        variant="rect"
-                        width={width}
-                        height={height - 56}
-                        animation="wave"
-                    />
-                </div>
-            );
-        }
-        if (props.loadingMask === LoadingMask.Table) {
-            const numTableRows = Array(Math.floor(height / 65))
-                .fill(0)
-                .map((_, i) => i);
-            return (
-                <TableContainer style={{ width: width }}>
-                    <Table>
-                        <TableBody>
-                            {numTableRows.map((el) => (
-                                <TableRow
-                                    key={`WebvizViewElement__LoadingSkeleton__${el}`}
-                                >
-                                    <TableCell>
-                                        <Skeleton
-                                            height={32}
-                                            animation="wave"
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton
-                                            height={32}
-                                            animation="wave"
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton
-                                            height={32}
-                                            animation="wave"
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            );
-        }
-        const numLines = Array(Math.floor(height / 32))
-            .fill(0)
-            .map((_, i) => i);
-        return (
-            <div
-                className="WebvizViewElement__LoadingSkeleton"
-                style={{ height: height }}
-            >
-                {numLines.map((el) => (
-                    <Skeleton
-                        key={`LoadingBar${el}`}
-                        width={width}
-                        height={32}
-                        animation="wave"
-                    />
-                ))}
-            </div>
-        );
-    }, [props.loadingMask, contentRef.current]);
-
     return (
         <div
             id={props.id}
             className="WebvizViewElement"
             style={{
-                flexGrow: isFullScreen || isLoading ? 0 : props.flexGrow || 1,
+                flexGrow: isFullScreen ? 0 : props.flexGrow || 1,
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -661,10 +579,12 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     style={fullScreenContainerStyle}
                     className={`WebvizViewElement__FullScreenContainer`}
                 >
-                    {isLoading && makeLoadingSkeleton()}
-                    <div style={{ display: isLoading ? "none" : "block" }}>
-                        {content}
-                    </div>
+                    {isLoading && (
+                        <div className="WebvizViewElement__Loading">
+                            <CircularProgress />
+                        </div>
+                    )}
+                    {content}
                 </div>
             </div>
             <div
@@ -736,7 +656,6 @@ WebvizViewElement.propTypes = {
     flexGrow: PropTypes.number,
     showDownload: PropTypes.bool,
     screenshotFilename: PropTypes.string,
-    loadingMask: LoadingMaskPropType,
     download: PropTypes.shape(DownloadDataPropTypes),
     setProps: PropTypes.func,
     children: PropTypes.node,

@@ -10,6 +10,10 @@
     transition: height 1s ease-in-out, opacity 0.5s ease-in-out;
 }
 
+.WebvizViewSelector * {
+    display: block;
+}
+
 .WebvizViewSelector:hover {
     background-color: rgba(196, 196, 196, 0.22);
 }
