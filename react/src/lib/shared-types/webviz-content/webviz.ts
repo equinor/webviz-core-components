@@ -31,11 +31,13 @@ export const SettingsGroupPropTypes = {
 export type View = {
     id: string;
     name: string;
+    showDownload: boolean;
 };
 
 export const ViewPropTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
+    showDownload: PropTypes.bool.isRequired,
 };
 
 export type PluginData = {

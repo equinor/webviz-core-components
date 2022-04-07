@@ -5,14 +5,11 @@ import { camera, fullscreen_exit } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({ camera, fullscreen_exit });
 
-import { useStore } from "../WebvizContentManager/WebvizContentManager";
-import { StoreActions } from "../WebvizContentManager/WebvizContentManager";
-import downloadFile from "../../utils/downloadFile";
-import { View, ViewPropTypes } from "../../shared-types/webviz-content/webviz";
 import {
-    DownloadData,
-    DownloadDataPropTypes,
-} from "../../shared-types/webviz-content/download-data";
+    useStore,
+    StoreActions,
+} from "../WebvizContentManager/WebvizContentManager";
+import { View, ViewPropTypes } from "../../shared-types/webviz-content/webviz";
 import {
     ContactPerson,
     ContactPersonPropTypes,
@@ -27,25 +24,19 @@ import {
     TourStep,
     TourStepPropTypes,
 } from "../../shared-types/webviz-content/tour-step";
-
-export interface ParentProps {
-    data_requested: number | null;
-}
+import { WebvizView } from "../WebvizView";
 
 export type WebvizPluginWrapperProps = {
     id: string;
     name: string;
     views: View[];
-    showDownload: boolean;
     children?: React.ReactNode;
-    download?: DownloadData;
     screenshotFilename?: string;
     contactPerson?: ContactPerson;
     deprecationWarnings?: DeprecationWarning[];
     feedbackUrl?: string;
     stretch?: boolean;
     tourSteps?: TourStep[];
-    setProps?: (props: ParentProps) => void;
     persistence?: boolean | string | number;
     persisted_props?: string[];
     persistence_type?: "local" | "session" | "memory";
@@ -54,10 +45,8 @@ export type WebvizPluginWrapperProps = {
 export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
     props: WebvizPluginWrapperProps
 ) => {
-    const { download } = props;
     const store = useStore();
     const [active, setActive] = React.useState<boolean>(false);
-    const [downloadRequests, setDownloadRequested] = React.useState<number>(0);
 
     const wrapperRef = React.useRef<HTMLDivElement>(null);
 
@@ -68,7 +57,6 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
                 id: props.id,
                 name: props.name,
                 views: props.views,
-                showDownload: props.showDownload,
                 contactPerson: props.contactPerson,
                 deprecationWarnings: props.deprecationWarnings,
                 screenshotFilename: props.screenshotFilename,
@@ -84,40 +72,6 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
             });
         };
     }, []);
-
-    React.useEffect(() => {
-        if (!active) {
-            return;
-        }
-        if (download !== null && download !== undefined) {
-            downloadFile({
-                filename: download.filename,
-                data: download.content,
-                mimeType: download.mime_type,
-            });
-            if (props.setProps) {
-                props.setProps({ data_requested: null });
-            }
-        }
-    }, [download]);
-
-    React.useEffect(() => {
-        if (!active || !store.state.pluginDownloadRequested) {
-            return;
-        }
-        if (store.state.pluginDownloadRequested) {
-            const requests = downloadRequests + 1;
-            setDownloadRequested(requests);
-            if (props.setProps) {
-                props.setProps({ data_requested: requests });
-            }
-
-            store.dispatch({
-                type: StoreActions.SetPluginDownloadRequested,
-                payload: { request: false },
-            });
-        }
-    }, [store.state.pluginDownloadRequested]);
 
     React.useLayoutEffect(() => {
         const isActive = store.state.activePluginId === props.id;
@@ -137,6 +91,8 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
         });
     }, [props.id]);
 
+    const pluginData = store.state.pluginsData.find((el) => el.id === props.id);
+
     return (
         <div
             id={props.id}
@@ -147,9 +103,18 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
             onClick={() => handlePluginClick()}
             style={{ flexGrow: props.stretch ? 4 : 0 }}
         >
-            <div className="WebvizPluginWrapper__FullScreenContainer">
-                {props.children}
-            </div>
+            <WebvizView
+                id={pluginData?.activeViewId || ""}
+                showDownload={
+                    pluginData?.views.find(
+                        (view) => view.id === pluginData.activeViewId
+                    )?.showDownload || false
+                }
+            >
+                <div className="WebvizPluginWrapper__FullScreenContainer">
+                    {props.children}
+                </div>
+            </WebvizView>
         </div>
     );
 };
@@ -159,9 +124,7 @@ WebvizPluginWrapper.propTypes = {
     name: PropTypes.string.isRequired,
     views: PropTypes.arrayOf(PropTypes.shape(ViewPropTypes).isRequired)
         .isRequired,
-    showDownload: PropTypes.bool.isRequired,
     children: PropTypes.node,
-    download: PropTypes.shape(DownloadDataPropTypes),
     screenshotFilename: PropTypes.string,
     contactPerson: PropTypes.shape(ContactPersonPropTypes),
     deprecationWarnings: PropTypes.arrayOf(
@@ -170,7 +133,6 @@ WebvizPluginWrapper.propTypes = {
     stretch: PropTypes.bool,
     feedbackUrl: PropTypes.string,
     tourSteps: PropTypes.arrayOf(PropTypes.shape(TourStepPropTypes).isRequired),
-    setProps: PropTypes.func,
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and

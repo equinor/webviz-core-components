@@ -78,7 +78,6 @@ type Payload = {
         id: string;
         name: string;
         views: View[];
-        showDownload: boolean;
         deprecationWarnings?: DeprecationWarning[];
         contactPerson?: ContactPerson;
         screenshotFilename?: string;
