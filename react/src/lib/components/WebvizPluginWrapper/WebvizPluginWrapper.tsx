@@ -24,7 +24,6 @@ import {
     TourStep,
     TourStepPropTypes,
 } from "../../shared-types/webviz-content/tour-step";
-import { WebvizView } from "../WebvizView";
 
 export type WebvizPluginWrapperProps = {
     id: string;
@@ -91,8 +90,6 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
         });
     }, [props.id]);
 
-    const pluginData = store.state.pluginsData.find((el) => el.id === props.id);
-
     return (
         <div
             id={props.id}
@@ -103,18 +100,9 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
             onClick={() => handlePluginClick()}
             style={{ flexGrow: props.stretch ? 4 : 0 }}
         >
-            <WebvizView
-                id={pluginData?.activeViewId || ""}
-                showDownload={
-                    pluginData?.views.find(
-                        (view) => view.id === pluginData.activeViewId
-                    )?.showDownload || false
-                }
-            >
-                <div className="WebvizPluginWrapper__FullScreenContainer">
-                    {props.children}
-                </div>
-            </WebvizView>
+            <div className="WebvizPluginWrapper__FullScreenContainer">
+                {props.children}
+            </div>
         </div>
     );
 };
