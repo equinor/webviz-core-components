@@ -51,7 +51,7 @@ export enum StoreActions {
     SetActivePlugin = "set_active_plugin",
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
-    SetActiveViewDownloadRequested = "set_plugin_download_requested",
+    SetActiveViewDownloadRequested = "set_active_view_download_requested",
     SetBackdropOpacity = "set_backdrop_opacity",
     SetFullScreenActions = "set_full_screen_actions",
     SetFullScreenActionsCallback = "set_full_screen_actions_callback",
@@ -202,18 +202,18 @@ export const StoreReducer = (
     if (action.type === StoreActions.SetMenuPosition) {
         let position = DrawerPosition.Left;
         if (action.payload.pinned) {
-            position = action.payload
-                .menuDrawerPosition as string as DrawerPosition;
+            position = (action.payload
+                .menuDrawerPosition as string) as DrawerPosition;
         } else {
             if (
                 action.payload.menuBarPosition === MenuBarPosition.Top ||
                 action.payload.menuBarPosition === MenuBarPosition.Bottom
             ) {
-                position = action.payload
-                    .menuDrawerPosition as string as DrawerPosition;
+                position = (action.payload
+                    .menuDrawerPosition as string) as DrawerPosition;
             } else {
-                position = action.payload
-                    .menuBarPosition as string as DrawerPosition;
+                position = (action.payload
+                    .menuBarPosition as string) as DrawerPosition;
             }
         }
         return {
