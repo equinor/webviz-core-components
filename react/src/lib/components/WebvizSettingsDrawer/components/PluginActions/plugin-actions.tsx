@@ -85,6 +85,9 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     const numDeprecationWarnings = deprecationWarnings?.length || 0;
     const feedbackUrl = pluginData?.feedbackUrl;
     const tourSteps = pluginData?.tourSteps;
+    const showDownload = pluginData?.views.find(
+        (view) => view.id === pluginData?.activeViewId
+    )?.showDownload;
 
     const closedHeight = 7 * (12 * 2 + 24);
 
@@ -531,7 +534,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 
     const handleDownloadClick = () => {
         store.dispatch({
-            type: StoreActions.SetPluginDownloadRequested,
+            type: StoreActions.SetActiveViewDownloadRequested,
             payload: { request: true },
         });
     };
@@ -563,7 +566,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             >
                 <Icon name="camera" />
             </div>
-            {pluginData?.showDownload && (
+            {showDownload && (
                 <div
                     className="WebvizPluginActions__Button"
                     onClick={handleDownloadClick}

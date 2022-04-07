@@ -51,7 +51,7 @@ export enum StoreActions {
     SetActivePlugin = "set_active_plugin",
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
-    SetPluginDownloadRequested = "set_plugin_download_requested",
+    SetActiveViewDownloadRequested = "set_plugin_download_requested",
     SetBackdropOpacity = "set_backdrop_opacity",
     SetFullScreenActions = "set_full_screen_actions",
     SetFullScreenActionsCallback = "set_full_screen_actions_callback",
@@ -67,7 +67,7 @@ export type StoreState = {
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
     openSettingsGroupId: string;
     settingsDrawerOpen: boolean;
-    pluginDownloadRequested: boolean;
+    activeViewDownloadRequested: boolean;
     backdropOpacity: number;
     fullScreenActionsCallback: (action: string) => void;
     fullScreenActions: FullScreenAction[];
@@ -102,7 +102,7 @@ type Payload = {
     [StoreActions.SetActivePluginWrapperRef]: {
         ref: React.RefObject<HTMLDivElement>;
     };
-    [StoreActions.SetPluginDownloadRequested]: {
+    [StoreActions.SetActiveViewDownloadRequested]: {
         request: boolean;
     };
     [StoreActions.SetBackdropOpacity]: {
@@ -133,7 +133,7 @@ const setInitialState = (): StoreState => {
         activePluginWrapperRef: null,
         openSettingsGroupId: "",
         settingsDrawerOpen: false,
-        pluginDownloadRequested: false,
+        activeViewDownloadRequested: false,
         backdropOpacity: 0,
         fullScreenActions: [],
         fullScreenActionsCallback: () => {
@@ -159,7 +159,6 @@ export const StoreReducer = (
                     id: action.payload.id,
                     name: action.payload.name,
                     views: action.payload.views,
-                    showDownload: action.payload.showDownload,
                     activeViewId:
                         action.payload.views.find((_, index) => index === 0)
                             ?.id || "",
@@ -229,8 +228,11 @@ export const StoreReducer = (
             activePluginWrapperRef: action.payload.ref,
         };
     }
-    if (action.type === StoreActions.SetPluginDownloadRequested) {
-        return { ...state, pluginDownloadRequested: action.payload.request };
+    if (action.type === StoreActions.SetActiveViewDownloadRequested) {
+        return {
+            ...state,
+            activeViewDownloadRequested: action.payload.request,
+        };
     }
     if (action.type === StoreActions.SetBackdropOpacity) {
         return { ...state, backdropOpacity: action.payload.opacity };

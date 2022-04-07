@@ -13,6 +13,8 @@ import {
     DownloadDataPropTypes,
 } from "../../shared-types/webviz-content/download-data";
 
+import "./webviz-view.css";
+
 export type ParentProps = {
     data_requested: number | null;
 };
@@ -44,7 +46,7 @@ export const WebvizView: React.FC<WebvizViewProps> = (props) => {
     }, [props.download]);
 
     React.useEffect(() => {
-        if (!store.state.pluginDownloadRequested) {
+        if (!store.state.activeViewDownloadRequested) {
             return;
         }
         const requests = downloadRequests + 1;
@@ -54,12 +56,16 @@ export const WebvizView: React.FC<WebvizViewProps> = (props) => {
         }
 
         store.dispatch({
-            type: StoreActions.SetPluginDownloadRequested,
+            type: StoreActions.SetActiveViewDownloadRequested,
             payload: { request: false },
         });
-    }, [store.state.pluginDownloadRequested]);
+    }, [store.state.activeViewDownloadRequested]);
 
-    return <div id={props.id}>{props.children}</div>;
+    return (
+        <div id={props.id} className="WebvizView">
+            {props.children}
+        </div>
+    );
 };
 
 WebvizView.propTypes = {

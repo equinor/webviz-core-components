@@ -45,7 +45,6 @@ export type PluginData = {
     name: string;
     activeViewId: string;
     views: View[];
-    showDownload: boolean;
     screenshotFilename?: string;
     contactPerson?: ContactPerson;
     deprecationWarnings?: DeprecationWarning[];
