@@ -6,10 +6,13 @@
     top: 0;
     left: 0;
     z-index: 99;
-    transition: width 1s ease-in-out;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+}
+
+.WebvizSettingsDrawer__Transition {
+    transition: width 1s ease-in-out;
 }
 
 .WebvizSettingsDrawer__Left {

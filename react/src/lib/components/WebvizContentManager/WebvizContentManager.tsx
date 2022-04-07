@@ -31,7 +31,7 @@ type ActionMap<
                 | ((action: string) => void)
                 | FullScreenAction[]
                 | TourStep[];
-        };
+        } | null;
     }
 > = {
     [Key in keyof M]: M[Key] extends undefined
@@ -57,6 +57,7 @@ export enum StoreActions {
     SetFullScreenActionsCallback = "set_full_screen_actions_callback",
     SetOpenSettingsGroupId = "set_open_settings_group_id",
     SetSettingsDrawerOpen = "set_settings_drawer_open",
+    IncrementViewUpdates = "increment_view_updated",
 }
 
 export type StoreState = {
@@ -67,10 +68,12 @@ export type StoreState = {
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
     openSettingsGroupId: string;
     settingsDrawerOpen: boolean;
+    externalTrigger: boolean;
     activeViewDownloadRequested: boolean;
     backdropOpacity: number;
     fullScreenActionsCallback: (action: string) => void;
     fullScreenActions: FullScreenAction[];
+    viewUpdates: number;
 };
 
 type Payload = {
@@ -119,7 +122,9 @@ type Payload = {
     };
     [StoreActions.SetSettingsDrawerOpen]: {
         settingsDrawerOpen: boolean;
+        externalTrigger: boolean;
     };
+    [StoreActions.IncrementViewUpdates]: null;
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
@@ -139,6 +144,8 @@ const setInitialState = (): StoreState => {
         fullScreenActionsCallback: () => {
             return;
         },
+        viewUpdates: 0,
+        externalTrigger: false,
     };
 };
 
@@ -253,6 +260,13 @@ export const StoreReducer = (
         return {
             ...state,
             settingsDrawerOpen: action.payload.settingsDrawerOpen,
+            externalTrigger: action.payload.externalTrigger,
+        };
+    }
+    if (action.type === StoreActions.IncrementViewUpdates) {
+        return {
+            ...state,
+            viewUpdates: state.viewUpdates + 1,
         };
     }
     return state;

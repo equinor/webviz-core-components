@@ -3,15 +3,15 @@ import PropTypes from "prop-types";
 export type TourStep = {
     elementId: string;
     viewId: string;
-    isSettingsGroup: boolean;
-    isViewElementSetting: boolean;
+    settingsGroupId?: string | null;
+    viewElementId?: string | null;
     content: string;
 };
 
 export const TourStepPropTypes = {
     elementId: PropTypes.string.isRequired,
     viewId: PropTypes.string.isRequired,
-    isSettingsGroup: PropTypes.bool.isRequired,
-    isViewElementSetting: PropTypes.bool.isRequired,
+    settingsGroupId: PropTypes.string,
+    viewElementId: PropTypes.string,
     content: PropTypes.string.isRequired,
 };

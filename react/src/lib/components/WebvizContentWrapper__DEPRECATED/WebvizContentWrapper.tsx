@@ -148,15 +148,11 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                         {
                             elementId: "view-element1",
                             viewId: "view1",
-                            isSettingsGroup: false,
-                            isViewElementSetting: false,
                             content: "This is a test",
                         },
                         {
                             elementId: "view-element4",
                             viewId: "view2",
-                            isSettingsGroup: false,
-                            isViewElementSetting: false,
                             content: "This is another test",
                         },
                     ]}

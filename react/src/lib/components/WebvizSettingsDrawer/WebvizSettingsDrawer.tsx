@@ -19,6 +19,7 @@ import { SnackbarProvider } from "notistack";
 import PropTypes from "prop-types";
 
 import "./webviz-settings-drawer.css";
+import { StoreActions } from "../WebvizContentManager/WebvizContentManager";
 
 type Position = {
     left: number | "auto";
@@ -35,7 +36,6 @@ export type WebvizSettingsDrawerProps = {
 export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
     props
 ) => {
-    const [open, setOpen] = React.useState<boolean>(false);
     const [position, setPosition] = React.useState<Position>({
         left: "auto",
         top: "auto",
@@ -50,8 +50,19 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
     const collapsedWidth = 64;
 
     React.useLayoutEffect(() => {
-        setOpen(store.state.settingsDrawerOpen);
-    }, [store.state.settingsDrawerOpen]);
+        if (drawerRef.current && store.state.externalTrigger) {
+            drawerRef.current.classList.remove(
+                "WebvizSettingsDrawer__Transition"
+            );
+            window.setTimeout(() => {
+                if (drawerRef.current) {
+                    drawerRef.current.classList.add(
+                        "WebvizSettingsDrawer__Transition"
+                    );
+                }
+            }, 1000);
+        }
+    }, [store.state.settingsDrawerOpen, store.state.externalTrigger]);
 
     React.useLayoutEffect(() => {
         let top: "auto" | number = 0;
@@ -98,16 +109,29 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
         store.state.bodyMargins,
         oldDrawerSize,
     ]);
+
+    const handleToggleOpenClick = React.useCallback(() => {
+        store.dispatch({
+            type: StoreActions.SetSettingsDrawerOpen,
+            payload: {
+                settingsDrawerOpen: !store.state.settingsDrawerOpen,
+                externalTrigger: false,
+            },
+        });
+    }, [store]);
+
     return (
         <div
             id={props.id}
             ref={drawerRef}
-            className={`WebvizSettingsDrawer WebvizSettingsDrawer__${
+            className={`WebvizSettingsDrawer WebvizSettingsDrawer__Transition WebvizSettingsDrawer__${
                 store.state.position.charAt(0).toUpperCase() +
                 store.state.position.slice(1)
             }`}
             style={{
-                width: open ? expandedWidth : collapsedWidth,
+                width: store.state.settingsDrawerOpen
+                    ? expandedWidth
+                    : collapsedWidth,
                 left: position.left,
                 top: position.top,
                 right: position.right,
@@ -124,22 +148,28 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
             <div className="WebvizSettingsDrawer__TopButtons">
                 <Button
                     className={`WebvizSettingsDrawer__Toggle ${
-                        !open
+                        !store.state.settingsDrawerOpen
                             ? "WebvizSettingsDrawer__ToggleOpen"
                             : "WebvizSettingsDrawer__ToggleClose"
                     }`}
-                    onClick={() => setOpen(!open)}
+                    onClick={() => handleToggleOpenClick()}
                 >
                     <Icon name="chevron_left" />
                     <Icon name="settings" />
                 </Button>
             </div>
-            <ViewSelector open={open} width={expandedWidth} />
-            <WebvizSettings visible={open} width={expandedWidth}>
+            <ViewSelector
+                open={store.state.settingsDrawerOpen}
+                width={expandedWidth}
+            />
+            <WebvizSettings
+                visible={store.state.settingsDrawerOpen}
+                width={expandedWidth}
+            >
                 {props.children}
             </WebvizSettings>
             <SnackbarProvider maxSnack={3}>
-                <PluginActions open={open} />
+                <PluginActions open={store.state.settingsDrawerOpen} />
             </SnackbarProvider>
         </div>
     );
