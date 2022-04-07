@@ -65,6 +65,12 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     .getElementById(tourSteps[currentTourStep].elementId)
                     ?.getBoundingClientRect()
             );
+            const element = document.getElementById(
+                tourSteps[currentTourStep].elementId
+            );
+            if (resizeObserverRef.current && element) {
+                resizeObserverRef.current.observe(element);
+            }
         }
     }, [tourSteps, currentTourStep, store.state.viewUpdates]);
 
@@ -73,20 +79,6 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
             handleChangeTourStep(0);
         }
     }, [props.open, tourSteps]);
-
-    React.useEffect(() => {
-        if (resizeObserverRef.current) {
-            resizeObserverRef.current.disconnect();
-        }
-        if (tourSteps) {
-            const element = document.getElementById(
-                tourSteps[currentTourStep].elementId
-            );
-            if (resizeObserverRef.current && element) {
-                resizeObserverRef.current.observe(element);
-            }
-        }
-    }, [tourSteps, currentTourStep, resizeObserverRef.current]);
 
     React.useEffect(() => {
         if (elementBoundingClientRect) {
