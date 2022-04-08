@@ -1,5 +1,5 @@
-import { CircularProgress, Icon } from "@equinor/eds-core-react";
-import { IconButton } from "@material-ui/core";
+import { Icon } from "@equinor/eds-core-react";
+import { IconButton, Tooltip } from "@material-ui/core";
 import {
     settings,
     download,
@@ -20,7 +20,6 @@ import html2canvas from "html2canvas";
 import downloadFile from "../../utils/downloadFile";
 
 import "./webviz-view-element.css";
-import { ScrollArea } from "../ScrollArea/ScrollArea";
 import {
     useStore,
     StoreActions,
@@ -57,7 +56,7 @@ type FlashAnimationParameters = {
 
 export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const store = useStore();
-    const [isLoading, setIsLoading] = React.useState<boolean>(false);
+    //const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isHovered, setIsHovered] = React.useState<boolean>(false);
     const [settingsVisible, setSettingsVisible] =
         React.useState<boolean>(false);
@@ -77,94 +76,6 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         React.useRef<Animation<FullScreenAnimationParameters> | null>(null);
     const flashAnimation =
         React.useRef<Animation<FlashAnimationParameters> | null>(null);
-    const mutationObserver = React.useRef<MutationObserver | null>(null);
-    const loadingDelayTimer =
-        React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    React.useEffect(() => {
-        mutationObserver.current = new MutationObserver(
-            (mutationsList: MutationRecord[]) => {
-                mutationsList.forEach((mutation) => {
-                    if (
-                        mutation.type === "attributes" &&
-                        !(mutation.target as HTMLElement).classList.contains(
-                            "WebvizViewElement__LoadingSkeleton"
-                        ) &&
-                        mutation.attributeName === "data-dash-is-loading"
-                    ) {
-                        if (loadingDelayTimer.current) {
-                            clearTimeout(loadingDelayTimer.current);
-                        }
-                        if (
-                            (mutation.target as HTMLElement).dataset[
-                                "dashIsLoading"
-                            ] === "true"
-                        ) {
-                            loadingDelayTimer.current = setTimeout(
-                                () => setIsLoading(true),
-                                1000
-                            );
-                        } else {
-                            setIsLoading(false);
-                        }
-                    } else if (
-                        mutation.type === "attributes" &&
-                        !(mutation.target as HTMLElement).classList.contains(
-                            "WebvizViewElement__LoadingSkeleton"
-                        ) &&
-                        mutation.attributeName === "class"
-                    ) {
-                        if (
-                            mutation.oldValue?.includes("dash-loading") &&
-                            !(
-                                mutation.target as HTMLElement
-                            ).classList.contains("dash-loading")
-                        ) {
-                            if (loadingDelayTimer.current) {
-                                clearTimeout(loadingDelayTimer.current);
-                            }
-                            setIsLoading(false);
-                        } else if (
-                            !mutation.oldValue?.includes("dash-loading") &&
-                            (mutation.target as HTMLElement).classList.contains(
-                                "dash-loading"
-                            )
-                        ) {
-                            if (loadingDelayTimer.current) {
-                                clearTimeout(loadingDelayTimer.current);
-                            }
-                            loadingDelayTimer.current = setTimeout(
-                                () => setIsLoading(true),
-                                1000
-                            );
-                        }
-                    }
-                });
-            }
-        );
-        return () => {
-            if (fullScreenAnimation.current) {
-                fullScreenAnimation.current.reset();
-            }
-            if (mutationObserver.current) {
-                mutationObserver.current.disconnect();
-            }
-            if (loadingDelayTimer.current) {
-                clearTimeout(loadingDelayTimer.current);
-            }
-        };
-    }, []);
-
-    React.useEffect(() => {
-        if (mutationObserver.current && fullScreenContainerRef.current) {
-            mutationObserver.current.disconnect();
-            mutationObserver.current.observe(fullScreenContainerRef.current, {
-                attributes: true,
-                subtree: true,
-                attributeOldValue: true,
-            });
-        }
-    }, [fullScreenContainerRef.current, mutationObserver.current]);
 
     React.useEffect(() => {
         if (props.download !== null && props.download !== undefined) {
@@ -579,11 +490,6 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     style={fullScreenContainerStyle}
                     className={`WebvizViewElement__FullScreenContainer`}
                 >
-                    {isLoading && (
-                        <div className="WebvizViewElement__Loading">
-                            <CircularProgress />
-                        </div>
-                    )}
                     {content}
                 </div>
             </div>
@@ -596,28 +502,38 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
             >
                 {settings.length > 0 && (
                     <div>
-                        <IconButton onClick={() => setSettingsVisible(true)}>
-                            <Icon name="settings" size={16} />
-                        </IconButton>
+                        <Tooltip title="Open settings for view element">
+                            <IconButton
+                                onClick={() => setSettingsVisible(true)}
+                            >
+                                <Icon name="settings" size={16} />
+                            </IconButton>
+                        </Tooltip>
                     </div>
                 )}
                 <div className="WebvizViewElement__Actions__Spacer" />
                 {props.showDownload && (
                     <div>
-                        <IconButton onClick={() => handleDownloadClick()}>
-                            <Icon name="download" size={16} />
-                        </IconButton>
+                        <Tooltip title="Download data from view element">
+                            <IconButton onClick={() => handleDownloadClick()}>
+                                <Icon name="download" size={16} />
+                            </IconButton>
+                        </Tooltip>
                     </div>
                 )}
                 <div>
-                    <IconButton onClick={handleScreenShotClick}>
-                        <Icon name="camera" size={16} />
-                    </IconButton>
+                    <Tooltip title="Take screenshot">
+                        <IconButton onClick={handleScreenShotClick}>
+                            <Icon name="camera" size={16} />
+                        </IconButton>
+                    </Tooltip>
                 </div>
                 <div>
-                    <IconButton onClick={handleFullScreenClick}>
-                        <Icon name="fullscreen" size={16} />
-                    </IconButton>
+                    <Tooltip title="View in fullscreen">
+                        <IconButton onClick={handleFullScreenClick}>
+                            <Icon name="fullscreen" size={16} />
+                        </IconButton>
+                    </Tooltip>
                 </div>
             </div>
             <Dialog
@@ -636,15 +552,11 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 }}
             >
                 <div className="WebvizViewElement__SettingsContainer">
-                    <ScrollArea>
-                        <div className="WebvizViewElement__SettingsContainer__Content">
-                            {settings.map((setting) => {
-                                return React.cloneElement(setting, {
-                                    ...setting.props,
-                                });
-                            })}
-                        </div>
-                    </ScrollArea>
+                    {settings.map((setting) => {
+                        return React.cloneElement(setting, {
+                            ...setting.props,
+                        });
+                    })}
                 </div>
             </Dialog>
         </div>

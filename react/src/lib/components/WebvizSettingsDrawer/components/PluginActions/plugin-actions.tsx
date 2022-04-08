@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Badge } from "@material-ui/core";
+import { Badge, Tooltip } from "@material-ui/core";
 
 import {
     camera,
@@ -63,22 +63,18 @@ export const PluginActions: React.FC<PluginActionsProps> = (
 ) => {
     const [marginBottom, setMarginBottom] = React.useState<number>(0);
     const [open, setOpen] = React.useState<boolean>(props.open);
-    const [openAuthorDialog, setOpenAuthorDialog] = React.useState<boolean>(
-        false
-    );
+    const [openAuthorDialog, setOpenAuthorDialog] =
+        React.useState<boolean>(false);
     const [tourIsOpen, setTourIsOpen] = React.useState<boolean>(false);
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const openCloseAnimation = React.useRef<Animation<OpenCloseAnimationParameters> | null>(
-        null
-    );
-    const fullScreenAnimation = React.useRef<Animation<FullScreenAnimationParameters> | null>(
-        null
-    );
-    const flashAnimation = React.useRef<Animation<FlashAnimationParameters> | null>(
-        null
-    );
+    const openCloseAnimation =
+        React.useRef<Animation<OpenCloseAnimationParameters> | null>(null);
+    const fullScreenAnimation =
+        React.useRef<Animation<FullScreenAnimationParameters> | null>(null);
+    const flashAnimation =
+        React.useRef<Animation<FlashAnimationParameters> | null>(null);
 
     const store = useStore();
 
@@ -103,31 +99,32 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             openCloseAnimation.current.reset();
         }
 
-        openCloseAnimation.current = new Animation<OpenCloseAnimationParameters>(
-            900,
-            20,
-            [
-                {
-                    t: 0,
-                    state: { marginBottom: 0 },
-                },
-                {
-                    t: 2 / 3,
-                    state: { marginBottom: -closedHeight },
-                },
-                {
-                    t: 1,
-                    state: { marginBottom: 0 },
-                },
-            ],
-            Animation.Bezier,
-            (values, t) => {
-                if (t === 2 / 3) {
-                    setOpen(!open);
+        openCloseAnimation.current =
+            new Animation<OpenCloseAnimationParameters>(
+                900,
+                20,
+                [
+                    {
+                        t: 0,
+                        state: { marginBottom: 0 },
+                    },
+                    {
+                        t: 2 / 3,
+                        state: { marginBottom: -closedHeight },
+                    },
+                    {
+                        t: 1,
+                        state: { marginBottom: 0 },
+                    },
+                ],
+                Animation.Bezier,
+                (values, t) => {
+                    if (t === 2 / 3) {
+                        setOpen(!open);
+                    }
+                    setMarginBottom(values.marginBottom);
                 }
-                setMarginBottom(values.marginBottom);
-            }
-        );
+            );
 
         openCloseAnimation.current.start();
     }, [props.open]);
@@ -143,9 +140,10 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             );
             flash.className = "WebvizCameraFlash";
 
-            const fullScreenContainer = store.state.activePluginWrapperRef?.current.getElementsByClassName(
-                "WebvizPluginWrapper__FullScreenContainer"
-            )[0] as HTMLDivElement;
+            const fullScreenContainer =
+                store.state.activePluginWrapperRef?.current.getElementsByClassName(
+                    "WebvizPluginWrapper__FullScreenContainer"
+                )[0] as HTMLDivElement;
 
             flashAnimation.current = new Animation<FlashAnimationParameters>(
                 200,
@@ -190,9 +188,10 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                     "WebvizViewElement__Actions__hidden"
                                 )
                             );
-                            const actions = fullScreenContainer.getElementsByClassName(
-                                "WebvizFullScreenMenu"
-                            );
+                            const actions =
+                                fullScreenContainer.getElementsByClassName(
+                                    "WebvizFullScreenMenu"
+                                );
                             for (const action of actions) {
                                 (action as HTMLDivElement).style.display =
                                     "none";
@@ -249,7 +248,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             fullScreenAnimation.current.reset();
         }
         if (store.state.activePluginWrapperRef?.current) {
-            const rect = store.state.activePluginWrapperRef.current.getBoundingClientRect();
+            const rect =
+                store.state.activePluginWrapperRef.current.getBoundingClientRect();
 
             const contentWidthWithPadding = parseInt(
                 getComputedStyle(store.state.activePluginWrapperRef.current)
@@ -318,75 +318,79 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                 },
             });
 
-            fullScreenAnimation.current = new Animation<FullScreenAnimationParameters>(
-                600,
-                10,
-                [
-                    {
-                        t: 0,
-                        state: {
-                            left: rect.left,
-                            top: rect.top,
-                            height: contentHeightWithPadding - 32,
-                            width: contentWidthWithPadding - 32,
-                            backdropOpacity: 0,
-                            paddingTop: parseInt(
-                                initialFullScreenContainerPadding
-                            ),
+            fullScreenAnimation.current =
+                new Animation<FullScreenAnimationParameters>(
+                    600,
+                    10,
+                    [
+                        {
+                            t: 0,
+                            state: {
+                                left: rect.left,
+                                top: rect.top,
+                                height: contentHeightWithPadding - 32,
+                                width: contentWidthWithPadding - 32,
+                                backdropOpacity: 0,
+                                paddingTop: parseInt(
+                                    initialFullScreenContainerPadding
+                                ),
+                            },
                         },
-                    },
-                    {
-                        t: 1,
-                        state: {
-                            left: 0,
-                            top: 0,
-                            height:
-                                window.innerHeight -
-                                (parseInt(initialFullScreenContainerPadding) +
-                                    56),
-                            width: window.innerWidth,
-                            backdropOpacity: 1,
-                            paddingTop:
-                                parseInt(initialFullScreenContainerPadding) +
-                                56,
-                        },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    store.dispatch({
-                        type: StoreActions.SetBackdropOpacity,
-                        payload: { opacity: values.backdropOpacity },
-                    });
-                    if (fullScreenContainer) {
-                        if (t === 1) {
-                            Object.assign(fullScreenContainer.style, {
-                                left: "0px",
-                                top: "0px",
-                                width: "100vw",
-                                height: `calc(100vh - ${
+                        {
+                            t: 1,
+                            state: {
+                                left: 0,
+                                top: 0,
+                                height:
+                                    window.innerHeight -
+                                    (parseInt(
+                                        initialFullScreenContainerPadding
+                                    ) +
+                                        56),
+                                width: window.innerWidth,
+                                backdropOpacity: 1,
+                                paddingTop:
                                     parseInt(
                                         initialFullScreenContainerPadding
-                                    ) + 56
-                                }px)`,
-                                "padding-top": `${
-                                    parseInt(
-                                        initialFullScreenContainerPadding
-                                    ) + 56
-                                }px`,
-                            });
-                            return;
-                        }
-                        Object.assign(fullScreenContainer.style, {
-                            left: `${values.left}px`,
-                            top: `${values.top}px`,
-                            width: `${values.width}px`,
-                            height: `${values.height}px`,
-                            "padding-top": `${values.paddingTop}px`,
+                                    ) + 56,
+                            },
+                        },
+                    ],
+                    Animation.Bezier,
+                    (values, t) => {
+                        store.dispatch({
+                            type: StoreActions.SetBackdropOpacity,
+                            payload: { opacity: values.backdropOpacity },
                         });
+                        if (fullScreenContainer) {
+                            if (t === 1) {
+                                Object.assign(fullScreenContainer.style, {
+                                    left: "0px",
+                                    top: "0px",
+                                    width: "100vw",
+                                    height: `calc(100vh - ${
+                                        parseInt(
+                                            initialFullScreenContainerPadding
+                                        ) + 56
+                                    }px)`,
+                                    "padding-top": `${
+                                        parseInt(
+                                            initialFullScreenContainerPadding
+                                        ) + 56
+                                    }px`,
+                                });
+                                return;
+                            }
+                            Object.assign(fullScreenContainer.style, {
+                                left: `${values.left}px`,
+                                top: `${values.top}px`,
+                                width: `${values.width}px`,
+                                height: `${values.height}px`,
+                                "padding-top": `${values.paddingTop}px`,
+                            });
+                        }
                     }
-                }
-            );
+                );
             fullScreenAnimation.current.start();
         }
     }, [store.state.activePluginWrapperRef, fullScreenAnimation.current]);
@@ -396,7 +400,8 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             fullScreenAnimation.current.reset();
         }
         if (store.state.activePluginWrapperRef?.current) {
-            const rect = store.state.activePluginWrapperRef.current.getBoundingClientRect();
+            const rect =
+                store.state.activePluginWrapperRef.current.getBoundingClientRect();
 
             const contentWidthWithoutPadding = parseInt(
                 getComputedStyle(store.state.activePluginWrapperRef.current)
@@ -420,78 +425,86 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     getComputedStyle(fullScreenContainer)?.paddingTop) ||
                 "0";
 
-            fullScreenAnimation.current = new Animation<FullScreenAnimationParameters>(
-                600,
-                10,
-                [
-                    {
-                        t: 0,
-                        state: {
-                            left: 0,
-                            top: 0,
-                            height:
-                                window.innerHeight -
-                                (parseInt(initialFullScreenContainerPadding) +
-                                    56),
-                            width: window.innerWidth,
-                            backdropOpacity: 1,
-                            paddingTop: parseInt(
-                                initialFullScreenContainerPadding
-                            ),
+            fullScreenAnimation.current =
+                new Animation<FullScreenAnimationParameters>(
+                    600,
+                    10,
+                    [
+                        {
+                            t: 0,
+                            state: {
+                                left: 0,
+                                top: 0,
+                                height:
+                                    window.innerHeight -
+                                    (parseInt(
+                                        initialFullScreenContainerPadding
+                                    ) +
+                                        56),
+                                width: window.innerWidth,
+                                backdropOpacity: 1,
+                                paddingTop: parseInt(
+                                    initialFullScreenContainerPadding
+                                ),
+                            },
                         },
-                    },
-                    {
-                        t: 1,
-                        state: {
-                            left: rect.left,
-                            top: rect.top,
-                            height: contentHeightWithoutPadding,
-                            width: contentWidthWithoutPadding,
-                            backdropOpacity: 0,
-                            paddingTop:
-                                parseInt(initialFullScreenContainerPadding) -
-                                56,
+                        {
+                            t: 1,
+                            state: {
+                                left: rect.left,
+                                top: rect.top,
+                                height: contentHeightWithoutPadding,
+                                width: contentWidthWithoutPadding,
+                                backdropOpacity: 0,
+                                paddingTop:
+                                    parseInt(
+                                        initialFullScreenContainerPadding
+                                    ) - 56,
+                            },
                         },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    store.dispatch({
-                        type: StoreActions.SetBackdropOpacity,
-                        payload: { opacity: values.backdropOpacity },
-                    });
-                    if (fullScreenContainer) {
-                        if (t === 1) {
-                            Object.assign(fullScreenContainer.style, {
-                                left: "",
-                                top: "",
-                                width: "",
-                                height: "",
-                                position: "",
-                                "padding-top": "",
-                            });
-                            if (store.state.activePluginWrapperRef?.current) {
-                                Object.assign(
-                                    store.state.activePluginWrapperRef.current
-                                        .style,
-                                    {
-                                        width: "",
-                                        height: "",
-                                    }
-                                );
-                            }
-                            return;
-                        }
-                        Object.assign(fullScreenContainer.style, {
-                            left: `${values.left}px`,
-                            top: `${values.top}px`,
-                            width: `${values.width}px`,
-                            height: `${values.height}px`,
-                            "padding-top": `${values.paddingTop}px`,
+                    ],
+                    Animation.Bezier,
+                    (values, t) => {
+                        store.dispatch({
+                            type: StoreActions.SetBackdropOpacity,
+                            payload: { opacity: values.backdropOpacity },
                         });
+                        if (fullScreenContainer) {
+                            if (t === 1) {
+                                Object.assign(fullScreenContainer.style, {
+                                    left: "",
+                                    top: "",
+                                    width: "",
+                                    height: "",
+                                    position: "",
+                                    "padding-top": "",
+                                    "z-index": "",
+                                    "background-color": "",
+                                });
+                                if (
+                                    store.state.activePluginWrapperRef?.current
+                                ) {
+                                    Object.assign(
+                                        store.state.activePluginWrapperRef
+                                            .current.style,
+                                        {
+                                            width: "",
+                                            height: "",
+                                        }
+                                    );
+                                }
+                                return;
+                            }
+                            Object.assign(fullScreenContainer.style, {
+                                left: `${values.left}px`,
+                                top: `${values.top}px`,
+                                width: `${values.width}px`,
+                                height: `${values.height}px`,
+                                "padding-top": `${values.paddingTop}px`,
+                            });
+                        }
                     }
-                }
-            );
+                );
             fullScreenAnimation.current.start();
         }
     }, [store.state.activePluginWrapperRef, fullScreenAnimation.current]);
@@ -522,10 +535,7 @@ export const PluginActions: React.FC<PluginActionsProps> = (
     }, [deprecationWarnings]);
 
     const handleDownloadClick = () => {
-        store.dispatch({
-            type: StoreActions.SetActiveViewDownloadRequested,
-            payload: { request: true },
-        });
+        store.state.activeViewDownloadCallback();
     };
 
     const openInNewTab = (url: string) => {
@@ -547,20 +557,26 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                 className="WebvizPluginActions__Button"
                 onClick={() => handleFullScreenClick()}
             >
-                <Icon name="fullscreen" />
+                <Tooltip title="Open active plugin in fullscreen mode">
+                    <Icon name="fullscreen" />
+                </Tooltip>
             </div>
             <div
                 className="WebvizPluginActions__Button"
                 onClick={() => handleScreenShotClick()}
             >
-                <Icon name="camera" />
+                <Tooltip title="Take a screenshot from active plugin">
+                    <Icon name="camera" />
+                </Tooltip>
             </div>
             {showDownload && (
                 <div
                     className="WebvizPluginActions__Button"
                     onClick={handleDownloadClick}
                 >
-                    <Icon name="download" />
+                    <Tooltip title="Download data from active plugin">
+                        <Icon name="download" />
+                    </Tooltip>
                 </div>
             )}
             <div className="WebvizPluginActions__Spacer"></div>
@@ -569,13 +585,15 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     className="WebvizPluginActions__Button"
                     onClick={handleDeprecationWarningsClick}
                 >
-                    <Badge
-                        className="WebvizPluginActions__Button_Badge"
-                        badgeContent={numDeprecationWarnings}
-                        color="primary"
-                    >
-                        <Icon name="warning_outlined" />
-                    </Badge>
+                    <Tooltip title="Show deprecation warnings for active plugin">
+                        <Badge
+                            className="WebvizPluginActions__Button_Badge"
+                            badgeContent={numDeprecationWarnings}
+                            color="primary"
+                        >
+                            <Icon name="warning_outlined" />
+                        </Badge>
+                    </Tooltip>
                 </div>
             )}
             {pluginData?.contactPerson && (
@@ -583,7 +601,9 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     className="WebvizPluginActions__Button"
                     onClick={() => setOpenAuthorDialog(true)}
                 >
-                    <Icon name="person" />
+                    <Tooltip title="View active plugin's author">
+                        <Icon name="person" />
+                    </Tooltip>
                 </div>
             )}
             {tourSteps && (
@@ -591,7 +611,9 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     className="WebvizPluginActions__Button"
                     onClick={() => setTourIsOpen(true)}
                 >
-                    <Icon name="help" />
+                    <Tooltip title="Start a tour through the active plugin">
+                        <Icon name="help" />
+                    </Tooltip>
                 </div>
             )}
             {feedbackUrl && (
@@ -599,7 +621,9 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     className="WebvizPluginActions__Button"
                     onClick={() => openInNewTab(feedbackUrl)}
                 >
-                    <Icon name="comment_solid" />
+                    <Tooltip title="Report issue/give feedback on the active plugin">
+                        <Icon name="comment_solid" />
+                    </Tooltip>
                 </div>
             )}
             {pluginData?.contactPerson && (

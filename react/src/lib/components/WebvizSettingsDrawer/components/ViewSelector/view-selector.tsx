@@ -10,6 +10,7 @@ import "./view-selector.css";
 import { ViewList } from "../ViewList/view-list";
 import { Overlay } from "../../../Overlay";
 import ReactDOM from "react-dom";
+import { Tooltip } from "@material-ui/core";
 
 type ViewSelectorProps = {
     open: boolean;
@@ -129,36 +130,38 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
         "No active view";
 
     return (
-        <div
-            className="WebvizViewSelector"
-            style={{
-                width: isCollapsed ? "auto" : props.width - 36,
-                height: plugin?.views && plugin.views.length > 1 ? 56 : 0,
-                opacity: plugin?.views && plugin.views.length > 1 ? 1 : 0,
-            }}
-            onClick={() => setMenuOpen(true)}
-        >
-            <div ref={viewCarouselRef}>
-                <Icon name="view_carousel" />
-            </div>
+        <Tooltip title="Change view">
             <div
-                ref={viewNameRef}
-                className="WebvizViewSelector__ViewName"
+                className="WebvizViewSelector"
                 style={{
-                    opacity: props.open ? 1 : 0,
-                    width: isCollapsed ? 0 : "auto",
+                    width: isCollapsed ? "auto" : props.width - 36,
+                    height: plugin?.views && plugin.views.length > 1 ? 56 : 0,
+                    opacity: plugin?.views && plugin.views.length > 1 ? 1 : 0,
                 }}
+                onClick={() => setMenuOpen(true)}
             >
-                {plugin?.views && plugin.views.length > 1 && activeViewName}
+                <div ref={viewCarouselRef}>
+                    <Icon name="view_carousel" />
+                </div>
+                <div
+                    ref={viewNameRef}
+                    className="WebvizViewSelector__ViewName"
+                    style={{
+                        opacity: props.open ? 1 : 0,
+                        width: isCollapsed ? 0 : "auto",
+                    }}
+                >
+                    {plugin?.views && plugin.views.length > 1 && activeViewName}
+                </div>
+                <div
+                    style={{
+                        opacity: props.open ? 1 : 0,
+                        width: isCollapsed ? 0 : "auto",
+                    }}
+                >
+                    <Icon name="chevron_down" />
+                </div>
             </div>
-            <div
-                style={{
-                    opacity: props.open ? 1 : 0,
-                    width: isCollapsed ? 0 : "auto",
-                }}
-            >
-                <Icon name="chevron_down" />
-            </div>
-        </div>
+        </Tooltip>
     );
 };

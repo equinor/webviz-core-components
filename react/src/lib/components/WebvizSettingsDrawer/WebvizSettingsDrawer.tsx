@@ -4,7 +4,7 @@ import { settings, chevron_right, chevron_left } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({ settings, chevron_right, chevron_left });
 
-import { Button } from "@material-ui/core";
+import { Button, Tooltip } from "@material-ui/core";
 
 import { DrawerPosition } from "../../shared-types/webviz-content/drawer-position";
 
@@ -146,17 +146,25 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
             }}
         >
             <div className="WebvizSettingsDrawer__TopButtons">
-                <Button
-                    className={`WebvizSettingsDrawer__Toggle ${
-                        !store.state.settingsDrawerOpen
-                            ? "WebvizSettingsDrawer__ToggleOpen"
-                            : "WebvizSettingsDrawer__ToggleClose"
-                    }`}
-                    onClick={() => handleToggleOpenClick()}
+                <Tooltip
+                    title={
+                        store.state.settingsDrawerOpen
+                            ? "Close settings drawer"
+                            : "Open settings drawer"
+                    }
                 >
-                    <Icon name="chevron_left" />
-                    <Icon name="settings" />
-                </Button>
+                    <Button
+                        className={`WebvizSettingsDrawer__Toggle ${
+                            !store.state.settingsDrawerOpen
+                                ? "WebvizSettingsDrawer__ToggleOpen"
+                                : "WebvizSettingsDrawer__ToggleClose"
+                        }`}
+                        onClick={() => handleToggleOpenClick()}
+                    >
+                        <Icon name="chevron_left" />
+                        <Icon name="settings" />
+                    </Button>
+                </Tooltip>
             </div>
             <ViewSelector
                 open={store.state.settingsDrawerOpen}

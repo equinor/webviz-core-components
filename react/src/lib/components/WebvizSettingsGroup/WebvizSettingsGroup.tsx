@@ -1,6 +1,6 @@
 import { Icon } from "@equinor/eds-core-react";
 import { chevron_down, chevron_up } from "@equinor/eds-icons";
-import { IconButton } from "@material-ui/core";
+import { IconButton, Tooltip } from "@material-ui/core";
 import useSize from "@react-hook/size";
 import React from "react";
 
@@ -95,36 +95,56 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
         }
     }, [props.open, props.alwaysOpen]);
 
+    const makeTitle = React.useCallback(
+        (children: React.ReactElement): React.ReactElement => {
+            if (props.alwaysOpen) {
+                return children;
+            }
+            return (
+                <Tooltip
+                    title={`${props.open ? "Close" : "Open"} settings group '${
+                        props.title
+                    }`}
+                >
+                    {children}
+                </Tooltip>
+            );
+        },
+        [props.open, props.title, props.alwaysOpen]
+    );
+
     return (
         <div
             className="WebvizSettingsGroup"
             style={{ display: visible ? "block" : "none" }}
         >
-            <div
-                className={
-                    props.alwaysOpen
-                        ? "WebvizSettingsGroup__Label"
-                        : "WebvizSettingsGroup__Title"
-                }
-                onClick={() => props.onToggle && props.onToggle(props.id)}
-            >
-                <div className="WebvizSettingsGroup__TitleText">
-                    {props.title}
-                </div>
-                {!props.alwaysOpen && (
-                    <div>
-                        <IconButton>
-                            <Icon
-                                name={
-                                    props.open === true
-                                        ? "chevron_up"
-                                        : "chevron_down"
-                                }
-                            />
-                        </IconButton>
+            {makeTitle(
+                <div
+                    className={
+                        props.alwaysOpen
+                            ? "WebvizSettingsGroup__Label"
+                            : "WebvizSettingsGroup__Title"
+                    }
+                    onClick={() => props.onToggle && props.onToggle(props.id)}
+                >
+                    <div className="WebvizSettingsGroup__TitleText">
+                        {props.title}
                     </div>
-                )}
-            </div>
+                    {!props.alwaysOpen && (
+                        <div>
+                            <IconButton>
+                                <Icon
+                                    name={
+                                        props.open === true
+                                            ? "chevron_up"
+                                            : "chevron_down"
+                                    }
+                                />
+                            </IconButton>
+                        </div>
+                    )}
+                </div>
+            )}
             <div
                 className={
                     props.alwaysOpen
@@ -133,7 +153,8 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                 }
                 style={{
                     height: props.open || props.alwaysOpen ? contentSize[1] : 0,
-                    overflow: isCompletelyVisible ? "" : "hidden",
+                    overflow:
+                        isCompletelyVisible || props.alwaysOpen ? "" : "hidden",
                 }}
             >
                 <div ref={contentRef}>{props.children}</div>

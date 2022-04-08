@@ -43,23 +43,22 @@ export const WebvizView: React.FC<WebvizViewProps> = (props) => {
                 props.setProps({ data_requested: null });
             }
         }
-    }, [props.download]);
+    }, [props.download, props.setProps]);
 
     React.useEffect(() => {
-        if (!store.state.activeViewDownloadRequested) {
-            return;
-        }
-        const requests = downloadRequests + 1;
-        setDownloadRequested(requests);
-        if (props.setProps) {
-            props.setProps({ data_requested: requests });
-        }
-
         store.dispatch({
-            type: StoreActions.SetActiveViewDownloadRequested,
-            payload: { request: false },
+            type: StoreActions.SetActiveViewDownloadCallback,
+            payload: {
+                callback: () => {
+                    const requests = downloadRequests + 1;
+                    setDownloadRequested(requests);
+                    if (props.setProps) {
+                        props.setProps({ data_requested: requests });
+                    }
+                },
+            },
         });
-    }, [store.state.activeViewDownloadRequested]);
+    }, [props.setProps, downloadRequests]);
 
     return (
         <div id={props.id} className="WebvizView">

@@ -36,10 +36,10 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
         bottom: "auto",
     });
 
-    const resizeObserverRef = React.useRef<ResizeObserver | null>(null);
-
     const store = useStore();
     const webvizPluginTourRef = React.useRef<HTMLDivElement>(null);
+    const intervalRef =
+        React.useRef<ReturnType<typeof setInterval> | null>(null);
 
     const windowSize = useSize(webvizPluginTourRef.current);
 
@@ -49,34 +49,49 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
     const tourSteps = pluginData?.tourSteps;
 
     React.useEffect(() => {
-        if (resizeObserverRef.current) {
-            resizeObserverRef.current.disconnect();
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
         }
         if (tourSteps) {
-            resizeObserverRef.current = new ResizeObserver(() => {
-                setElementBoundingClientRect(
-                    document
-                        .getElementById(tourSteps[currentTourStep].elementId)
-                        ?.getBoundingClientRect()
-                );
-            });
+            if (document.getElementById(tourSteps[currentTourStep].elementId)) {
+                intervalRef.current = setInterval(() => {
+                    const element = document.getElementById(
+                        tourSteps[currentTourStep].elementId
+                    );
+                    if (!element) {
+                        if (intervalRef.current) {
+                            clearInterval(intervalRef.current);
+                        }
+                        return;
+                    }
+                    setElementBoundingClientRect(
+                        element.getBoundingClientRect()
+                    );
+                }, 100);
+            }
             setElementBoundingClientRect(
                 document
                     .getElementById(tourSteps[currentTourStep].elementId)
                     ?.getBoundingClientRect()
             );
-            const element = document.getElementById(
-                tourSteps[currentTourStep].elementId
-            );
-            if (resizeObserverRef.current && element) {
-                resizeObserverRef.current.observe(element);
-            }
         }
     }, [tourSteps, currentTourStep, store.state.viewUpdates]);
 
     React.useEffect(() => {
         if (props.open && tourSteps) {
             handleChangeTourStep(0);
+            return;
+        }
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
         }
     }, [props.open, tourSteps]);
 

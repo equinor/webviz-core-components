@@ -51,10 +51,10 @@ export enum StoreActions {
     SetActivePlugin = "set_active_plugin",
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
-    SetActiveViewDownloadRequested = "set_active_view_download_requested",
     SetBackdropOpacity = "set_backdrop_opacity",
     SetFullScreenActions = "set_full_screen_actions",
     SetFullScreenActionsCallback = "set_full_screen_actions_callback",
+    SetActiveViewDownloadCallback = "set_download_callback",
     SetOpenSettingsGroupId = "set_open_settings_group_id",
     SetSettingsDrawerOpen = "set_settings_drawer_open",
     IncrementViewUpdates = "increment_view_updated",
@@ -69,9 +69,9 @@ export type StoreState = {
     openSettingsGroupId: string;
     settingsDrawerOpen: boolean;
     externalTrigger: boolean;
-    activeViewDownloadRequested: boolean;
     backdropOpacity: number;
     fullScreenActionsCallback: (action: string) => void;
+    activeViewDownloadCallback: () => void;
     fullScreenActions: FullScreenAction[];
     viewUpdates: number;
 };
@@ -105,9 +105,6 @@ type Payload = {
     [StoreActions.SetActivePluginWrapperRef]: {
         ref: React.RefObject<HTMLDivElement>;
     };
-    [StoreActions.SetActiveViewDownloadRequested]: {
-        request: boolean;
-    };
     [StoreActions.SetBackdropOpacity]: {
         opacity: number;
     };
@@ -116,6 +113,9 @@ type Payload = {
     };
     [StoreActions.SetFullScreenActionsCallback]: {
         callback: (action: string) => void;
+    };
+    [StoreActions.SetActiveViewDownloadCallback]: {
+        callback: () => void;
     };
     [StoreActions.SetOpenSettingsGroupId]: {
         settingsGroupId: string;
@@ -138,10 +138,12 @@ const setInitialState = (): StoreState => {
         activePluginWrapperRef: null,
         openSettingsGroupId: "",
         settingsDrawerOpen: false,
-        activeViewDownloadRequested: false,
         backdropOpacity: 0,
         fullScreenActions: [],
         fullScreenActionsCallback: () => {
+            return;
+        },
+        activeViewDownloadCallback: () => {
             return;
         },
         viewUpdates: 0,
@@ -209,18 +211,18 @@ export const StoreReducer = (
     if (action.type === StoreActions.SetMenuPosition) {
         let position = DrawerPosition.Left;
         if (action.payload.pinned) {
-            position = (action.payload
-                .menuDrawerPosition as string) as DrawerPosition;
+            position = action.payload
+                .menuDrawerPosition as string as DrawerPosition;
         } else {
             if (
                 action.payload.menuBarPosition === MenuBarPosition.Top ||
                 action.payload.menuBarPosition === MenuBarPosition.Bottom
             ) {
-                position = (action.payload
-                    .menuDrawerPosition as string) as DrawerPosition;
+                position = action.payload
+                    .menuDrawerPosition as string as DrawerPosition;
             } else {
-                position = (action.payload
-                    .menuBarPosition as string) as DrawerPosition;
+                position = action.payload
+                    .menuBarPosition as string as DrawerPosition;
             }
         }
         return {
@@ -235,12 +237,6 @@ export const StoreReducer = (
             activePluginWrapperRef: action.payload.ref,
         };
     }
-    if (action.type === StoreActions.SetActiveViewDownloadRequested) {
-        return {
-            ...state,
-            activeViewDownloadRequested: action.payload.request,
-        };
-    }
     if (action.type === StoreActions.SetBackdropOpacity) {
         return { ...state, backdropOpacity: action.payload.opacity };
     }
@@ -249,6 +245,12 @@ export const StoreReducer = (
     }
     if (action.type === StoreActions.SetFullScreenActionsCallback) {
         return { ...state, fullScreenActionsCallback: action.payload.callback };
+    }
+    if (action.type === StoreActions.SetActiveViewDownloadCallback) {
+        return {
+            ...state,
+            activeViewDownloadCallback: action.payload.callback,
+        };
     }
     if (action.type === StoreActions.SetOpenSettingsGroupId) {
         return {
