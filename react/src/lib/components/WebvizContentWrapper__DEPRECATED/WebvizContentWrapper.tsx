@@ -120,8 +120,18 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                     name="MyPlugin"
                     id="plugin-wrapper"
                     views={[
-                        { id: "view1", name: "View 1", showDownload: true },
-                        { id: "view2", name: "View 2", showDownload: false },
+                        {
+                            id: "view1",
+                            group: "",
+                            name: "View 1",
+                            showDownload: true,
+                        },
+                        {
+                            id: "view2",
+                            group: "",
+                            name: "View 2",
+                            showDownload: false,
+                        },
                     ]}
                     screenshotFilename="MyScreenshot"
                     contactPerson={{

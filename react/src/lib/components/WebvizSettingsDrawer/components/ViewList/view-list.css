@@ -49,6 +49,18 @@
     top: 8px;
 }
 
+.WebvizViewList__Group {
+    padding-left: 40px;
+}
+
+.WebvizViewList__GroupTitle {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    height: 24px;
+    padding: 8px;
+}
+
 .WebvizViewList__Item {
     padding: 8px;
     cursor: pointer;
