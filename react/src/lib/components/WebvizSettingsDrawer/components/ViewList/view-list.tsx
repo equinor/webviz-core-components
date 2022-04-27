@@ -12,7 +12,7 @@ import { Tooltip } from "@material-ui/core";
 
 export type ViewListProps = {
     open: boolean;
-    location: "bottom" | "right";
+    location: "below" | "aside";
     views: View[];
     activeViewId: string;
     anchorElement: HTMLElement | null;
@@ -34,7 +34,7 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
     React.useLayoutEffect(() => {
         if (props.anchorElement) {
             const rect = props.anchorElement.getBoundingClientRect();
-            if (props.location === "bottom") {
+            if (props.location === "below") {
                 setMainPosition({
                     x: rect.left + rect.width / 2,
                     y: rect.bottom + 20,

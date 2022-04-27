@@ -16,13 +16,14 @@
     background-color: white;
     position: relative;
     box-sizing: border-box;
+    padding-top: 8px;
 }
 
-.WebvizViewList__Bottom {
+.WebvizViewList__Below {
     margin-left: -151px;
 }
 
-.WebvizViewList__Right {
+.WebvizViewList__Aside {
     margin-top: -20px;
 }
 
@@ -30,20 +31,19 @@
     position: absolute;
     background-color: white;
     transform: rotateZ(45deg);
-    border-top: 1px #ccc solid;
-    border-left: 1px #ccc solid;
     width: 20px;
     height: 20px;
     clip: rect();
+    border: 1px #ccc solid;
 }
 
-.WebvizViewList__ArrowBottom {
+.WebvizViewList__ArrowBelow {
     left: 50%;
     margin: -11px;
     top: 0px;
 }
 
-.WebvizViewList__ArrowRight {
+.WebvizViewList__ArrowAside {
     left: -10px;
     margin: 0px;
     top: 8px;
@@ -51,6 +51,15 @@
 
 .WebvizViewList__Group {
     padding-left: 40px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px #ccc solid;
+    border-top: 1px #ccc solid;
+    background-color: rgb(253, 253, 253);
+}
+
+.WebvizViewList__Group:first-child {
+    margin-top: 0px;
 }
 
 .WebvizViewList__GroupTitle {

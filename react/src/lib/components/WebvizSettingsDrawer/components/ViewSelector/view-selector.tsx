@@ -69,7 +69,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                                     ? viewNameRef.current
                                     : viewCarouselRef.current
                             }
-                            location={props.open ? "bottom" : "right"}
+                            location={props.open ? "below" : "aside"}
                             onActiveViewChange={handleSelectViewClick}
                         />
                     </>
