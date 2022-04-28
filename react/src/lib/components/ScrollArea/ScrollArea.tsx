@@ -24,12 +24,10 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         x: 0,
         y: 0,
     });
-    const [scrollbarSelected, setScrollbarSelected] = React.useState<boolean>(
-        false
-    );
-    const [scrollAreaHovered, setScrollAreaHovered] = React.useState<boolean>(
-        false
-    );
+    const [scrollbarSelected, setScrollbarSelected] =
+        React.useState<boolean>(false);
+    const [scrollAreaHovered, setScrollAreaHovered] =
+        React.useState<boolean>(false);
     const contentRef = React.useRef<HTMLDivElement>(null);
     const contentHeight = useSize(contentRef, {
         initialHeight: 0,
@@ -134,7 +132,8 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
     React.useEffect(() => {
         const checkIfHovered = (e: MouseEvent) => {
             if (scrollAreaRef.current) {
-                const boundingRect = scrollAreaRef.current.getBoundingClientRect();
+                const boundingRect =
+                    scrollAreaRef.current.getBoundingClientRect();
                 const mousePosition = { x: e.pageX, y: e.pageY };
                 if (
                     pointIsContained(
@@ -196,7 +195,6 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 
     React.useEffect(() => {
         const scroll = (e: WheelEvent) => {
-            e.preventDefault();
             e.stopPropagation();
             setScrollPosition({
                 y: Math.max(

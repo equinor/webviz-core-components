@@ -34,6 +34,7 @@ export type ParentProps = {
 export type WebvizViewElementProps = {
     id: string;
     flexGrow?: number;
+    hidden?: boolean;
     showDownload?: boolean;
     screenshotFilename?: string;
     download?: DownloadData;
@@ -466,6 +467,10 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         }
     }, [setDownloadRequested, props.setProps]);
 
+    if (props.hidden) {
+        return null;
+    }
+
     return (
         <div
             id={props.id}
@@ -566,6 +571,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
 WebvizViewElement.propTypes = {
     id: PropTypes.string.isRequired,
     flexGrow: PropTypes.number,
+    hidden: PropTypes.bool,
     showDownload: PropTypes.bool,
     screenshotFilename: PropTypes.string,
     download: PropTypes.shape(DownloadDataPropTypes),
