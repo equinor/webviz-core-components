@@ -1,6 +1,6 @@
 .WebvizViewList {
     position: absolute;
-    width: 300px;
+    max-width: 40vw;
     background-color: white;
     border: 1px #ccc solid;
     border-radius: 4px;

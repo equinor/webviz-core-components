@@ -29,4 +29,8 @@
     font-weight: bold;
     font-size: 1rem;
     line-height: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-left: 12px;
 }

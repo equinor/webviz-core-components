@@ -46,7 +46,7 @@ export const Overlay: React.FC<OverlayProps> = (props) => {
 
     return (
         <div
-            className="Overlay"
+            className="WebvizOverlay"
             style={{
                 display: opacity > 0 ? "block" : "none",
                 opacity: opacity,
