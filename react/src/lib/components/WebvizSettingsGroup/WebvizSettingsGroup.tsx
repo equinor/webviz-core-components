@@ -1,5 +1,5 @@
 import { Icon } from "@equinor/eds-core-react";
-import { chevron_down, chevron_up } from "@equinor/eds-icons";
+import { chevron_down, chevron_up, world } from "@equinor/eds-icons";
 import { IconButton, Tooltip } from "@material-ui/core";
 import useSize from "@react-hook/size";
 import React from "react";
@@ -8,7 +8,7 @@ import "./webviz-settings-group.css";
 import PropTypes from "prop-types";
 import { useStore } from "../WebvizContentManager/WebvizContentManager";
 
-Icon.add({ chevron_down, chevron_up });
+Icon.add({ chevron_down, chevron_up, world });
 
 export type WebvizSettingsGroupProps = {
     id: string;
@@ -127,6 +127,15 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                     }
                     onClick={() => props.onToggle && props.onToggle(props.id)}
                 >
+                    {props.viewId === "" && (
+                        <div className="WebvizSettingsGroup__GlobalIcon">
+                            <Icon
+                                name="world"
+                                title="Global settings group"
+                                size={16}
+                            />
+                        </div>
+                    )}
                     <div className="WebvizSettingsGroup__TitleText">
                         {props.title}
                     </div>

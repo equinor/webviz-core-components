@@ -28,9 +28,23 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
         }
     }, [store.state.openSettingsGroupId]);
 
+    React.useEffect(() => {
+        if (activeGroupId !== "") {
+            return;
+        }
+        React.Children.forEach(props.children, (child, index) => {
+            if (React.isValidElement(child)) {
+                if (index === 0) {
+                    setActiveGroupId(child.props._dashprivate_layout.props.id);
+                    return;
+                }
+            }
+        });
+    }, [props.children, activeGroupId]);
+
     const handleGroupToggle = React.useCallback(
         (id: string) => {
-            const groupId = id === activeGroupId ? "" : id;
+            const groupId = id === activeGroupId ? "-" : id;
             store.dispatch({
                 type: StoreActions.SetOpenSettingsGroupId,
                 payload: {
@@ -49,7 +63,7 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
         >
             <ScrollArea>
                 {props.children &&
-                    React.Children.map(props.children, (child, index) => {
+                    React.Children.map(props.children, (child) => {
                         if (React.isValidElement(child)) {
                             return React.cloneElement(child, {
                                 _dashprivate_layout: {
@@ -59,10 +73,8 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
                                             .props,
                                         open:
                                             activeGroupId ===
-                                                child.props._dashprivate_layout
-                                                    .props.id ||
-                                            (activeGroupId === "" &&
-                                                index === 0),
+                                            child.props._dashprivate_layout
+                                                .props.id,
                                         onToggle: handleGroupToggle,
                                     },
                                 },

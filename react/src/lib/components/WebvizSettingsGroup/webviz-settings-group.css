@@ -6,6 +6,12 @@
     cursor: pointer;
 }
 
+.WebvizSettingsGroup__GlobalIcon {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+}
+
 .WebvizSettingsGroup__Label {
     display: flex;
     align-items: center;
@@ -17,6 +23,7 @@
     flex-grow: 4;
     text-align: left;
     font-weight: bold;
+    line-height: 1em;
 }
 
 .WebvizSettingsGroup__FlatContent {
