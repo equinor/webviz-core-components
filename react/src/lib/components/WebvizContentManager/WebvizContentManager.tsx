@@ -288,6 +288,7 @@ type WebvizContentManagerParentProps = {
 
 type WebvizContentManagerProps = {
     id: string;
+    activePluginId?: string;
     children?: React.ReactNode;
     setProps?: (props: WebvizContentManagerParentProps) => void;
 };
@@ -300,6 +301,15 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         null,
         setInitialState
     );
+
+    React.useEffect(() => {
+        if (props.activePluginId) {
+            dispatch({
+                type: StoreActions.SetActivePlugin,
+                payload: { pluginId: props.activePluginId },
+            });
+        }
+    }, [props.activePluginId]);
 
     React.useEffect(() => {
         if (props.setProps) {
@@ -325,6 +335,7 @@ export const useStore = (): StoreContext =>
 
 WebvizContentManager.propTypes = {
     id: PropTypes.string.isRequired,
+    activePluginId: PropTypes.string,
     children: PropTypes.node,
     setProps: PropTypes.func,
 };
