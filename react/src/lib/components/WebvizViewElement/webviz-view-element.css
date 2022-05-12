@@ -52,6 +52,10 @@
     padding-right: 24px;
 }
 
+.WebvizViewElement__FullScreenContainer {
+    box-sizing: border-box;
+}
+
 .WebvizViewElement__FullScreenActions {
     position: fixed;
     top: 0;

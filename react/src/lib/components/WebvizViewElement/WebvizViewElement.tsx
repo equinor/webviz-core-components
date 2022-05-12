@@ -98,10 +98,12 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         if (contentRef.current && fullScreenContainerRef.current) {
             const rect = contentRef.current.getBoundingClientRect();
 
+            const contentWidth = contentRef.current.offsetWidth;
             const contentWidthWithoutPadding = parseInt(
                 getComputedStyle(contentRef.current)?.width || "0"
             );
 
+            const contentHeight = contentRef.current.offsetHeight;
             const contentHeightWithoutPadding = parseInt(
                 getComputedStyle(contentRef.current)?.height || "0"
             );
@@ -110,8 +112,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 position: "fixed",
                 left: rect.left,
                 top: rect.top,
-                width: contentWidthWithoutPadding,
-                height: contentHeightWithoutPadding,
+                width: contentWidth,
+                height: contentHeight,
                 zIndex: 1199,
                 padding: parseInt(
                     getComputedStyle(contentRef.current)?.padding || "0"
@@ -181,8 +183,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                             state: {
                                 left: rect.left,
                                 top: rect.top,
-                                height: contentHeightWithoutPadding,
-                                width: contentWidthWithoutPadding,
+                                height: contentHeight,
+                                width: contentWidth,
                                 backdropOpacity: 0,
                                 paddingTop: parseInt(
                                     getComputedStyle(contentRef.current)
@@ -258,13 +260,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         if (contentRef.current && fullScreenContainerRef.current) {
             const rect = contentRef.current.getBoundingClientRect();
 
-            const contentWidthWithoutPadding = parseInt(
-                getComputedStyle(contentRef.current)?.width || "0"
-            );
-
-            const contentHeightWithoutPadding = parseInt(
-                getComputedStyle(contentRef.current)?.height || "0"
-            );
+            const contentWidth = contentRef.current.offsetWidth;
+            const contentHeight = contentRef.current.offsetHeight;
 
             const style: React.CSSProperties = {
                 position: "fixed",
@@ -305,8 +302,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                             state: {
                                 left: rect.left,
                                 top: rect.top,
-                                height: contentHeightWithoutPadding,
-                                width: contentWidthWithoutPadding,
+                                height: contentHeight,
+                                width: contentWidth,
                                 backdropOpacity: 0,
                                 paddingTop: parseInt(
                                     getComputedStyle(contentRef.current)
