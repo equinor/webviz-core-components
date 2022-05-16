@@ -289,6 +289,7 @@ type WebvizContentManagerParentProps = {
 type WebvizContentManagerProps = {
     id: string;
     activePluginId?: string;
+    activeViewId?: string;
     children?: React.ReactNode;
     setProps?: (props: WebvizContentManagerParentProps) => void;
 };
@@ -336,6 +337,7 @@ export const useStore = (): StoreContext =>
 WebvizContentManager.propTypes = {
     id: PropTypes.string.isRequired,
     activePluginId: PropTypes.string,
+    activeViewId: PropTypes.string,
     children: PropTypes.node,
     setProps: PropTypes.func,
 };

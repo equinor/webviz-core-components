@@ -27,7 +27,7 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
     props
 ) => {
     const [view, setView] = React.useState<React.ReactNode>(
-        <WebvizPluginLayoutRow>
+        <WebvizPluginLayoutRow id="row-1">
             <WebvizViewElement id="view-element1" showDownload={false}>
                 <h1 data-dash-is-loading="true">Test plugin view element 1</h1>
                 <WebvizSettingsGroup
@@ -53,7 +53,7 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
             setProps={(props) => {
                 if (props.activeViewId === "view1") {
                     setView(
-                        <WebvizPluginLayoutRow>
+                        <WebvizPluginLayoutRow id="row-2">
                             <WebvizViewElement
                                 id="view-element1"
                                 showDownload={false}
@@ -80,7 +80,7 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                     );
                 } else {
                     setView(
-                        <WebvizPluginLayoutRow>
+                        <WebvizPluginLayoutRow id="row-3">
                             <WebvizViewElement
                                 id="view-element3"
                                 showDownload={false}
