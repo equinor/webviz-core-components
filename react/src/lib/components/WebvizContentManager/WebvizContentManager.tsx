@@ -302,6 +302,35 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         null,
         setInitialState
     );
+    const [lastHref, setLastHref] = React.useState<string>("");
+
+    React.useEffect(() => {
+        const href = window.location.href;
+        if (href !== lastHref) {
+            const activeViewId = sessionStorage.getItem(href);
+            if (activeViewId) {
+                dispatch({
+                    type: StoreActions.SetActiveView,
+                    payload: { viewId: activeViewId },
+                });
+                if (props.setProps) {
+                    props.setProps({
+                        activeViewId: activeViewId,
+                        activePluginId: state.activePluginId,
+                    });
+                }
+            }
+        } else {
+            const activeViewId = state.pluginsData.find(
+                (plugin) => plugin.id === state.activePluginId
+            )?.activeViewId;
+
+            if (activeViewId) {
+                sessionStorage.setItem(href, activeViewId);
+            }
+        }
+        setLastHref(href);
+    }, [state.pluginsData]);
 
     React.useEffect(() => {
         if (props.activePluginId) {
@@ -311,6 +340,21 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
             });
         }
     }, [props.activePluginId]);
+
+    React.useEffect(() => {
+        if (props.activeViewId) {
+            const activeViewId =
+                state.pluginsData.find(
+                    (plugin) => plugin.id === state.activePluginId
+                )?.activeViewId || "";
+            if (activeViewId === "") {
+                dispatch({
+                    type: StoreActions.SetActiveView,
+                    payload: { viewId: props.activeViewId },
+                });
+            }
+        }
+    }, [props.activeViewId]);
 
     React.useEffect(() => {
         if (props.setProps) {

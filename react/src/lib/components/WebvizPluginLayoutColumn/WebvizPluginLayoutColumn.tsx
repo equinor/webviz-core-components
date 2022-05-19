@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { v4 as uuidv4 } from "uuid";
 
 import "./webviz-plugin-layout-column.css";
 
 export type WebvizPluginLayoutColumnProps = {
-    id: string;
+    id?: string;
     hidden?: boolean;
     flexGrow?: number;
     children?: React.ReactNode;
@@ -14,6 +15,7 @@ export const WebvizPluginLayoutColumn: React.FC<WebvizPluginLayoutColumnProps> =
     (props) => {
         return (
             <div
+                id={props.id || uuidv4()}
                 className="Webviz_PluginLayout__Column"
                 style={{
                     flexGrow: props.flexGrow || 1,
@@ -26,7 +28,7 @@ export const WebvizPluginLayoutColumn: React.FC<WebvizPluginLayoutColumnProps> =
     };
 
 WebvizPluginLayoutColumn.propTypes = {
-    id: PropTypes.string.isRequired,
+    id: PropTypes.string,
     hidden: PropTypes.bool,
     flexGrow: PropTypes.number,
     children: PropTypes.node,
