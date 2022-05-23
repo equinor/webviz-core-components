@@ -119,6 +119,7 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                 <WebvizPluginWrapper
                     name="MyPlugin"
                     id="plugin-wrapper"
+                    initiallyActiveViewId="view1"
                     views={[
                         {
                             id: "view1",
@@ -174,6 +175,7 @@ export const WebvizContentWrapper: React.FC<WebvizContentWrapperProps> = (
                     id="plugin-wrapper2"
                     views={[]}
                     screenshotFilename="MyScreenshot"
+                    initiallyActiveViewId="view-1"
                 >
                     <WebvizViewElement id="view-element" showDownload={false}>
                         <h1>Test plugin 2 view element</h1>

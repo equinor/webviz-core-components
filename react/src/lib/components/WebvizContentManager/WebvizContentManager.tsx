@@ -49,6 +49,7 @@ export enum StoreActions {
     UnregisterPlugin = "unregister_plugin",
     SetActiveView = "set_active_view",
     SetActivePlugin = "set_active_plugin",
+    SetActivePluginAndView = "set_active_plugin_and_view",
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
     SetBackdropOpacity = "set_backdrop_opacity",
@@ -81,6 +82,7 @@ type Payload = {
         id: string;
         name: string;
         views: View[];
+        initiallyActiveViewId: string;
         deprecationWarnings?: DeprecationWarning[];
         contactPerson?: ContactPerson;
         screenshotFilename?: string;
@@ -95,6 +97,10 @@ type Payload = {
     };
     [StoreActions.SetActivePlugin]: {
         pluginId: string;
+    };
+    [StoreActions.SetActivePluginAndView]: {
+        pluginId: string;
+        viewId: string;
     };
     [StoreActions.SetMenuPosition]: {
         pinned: boolean;
@@ -158,19 +164,18 @@ export const StoreReducer = (
     if (action.type === StoreActions.RegisterPlugin) {
         return {
             ...state,
-            activePluginId:
-                state.activePluginId === ""
-                    ? action.payload.id
-                    : state.activePluginId,
+            activePluginId: !state.pluginsData.find(
+                (plugin) => plugin.id === state.activePluginId
+            )
+                ? action.payload.id
+                : state.activePluginId,
             pluginsData: [
                 ...state.pluginsData,
                 {
                     id: action.payload.id,
                     name: action.payload.name,
                     views: action.payload.views,
-                    activeViewId:
-                        action.payload.views.find((_, index) => index === 0)
-                            ?.id || "",
+                    activeViewId: action.payload.initiallyActiveViewId,
                     contactPerson: action.payload.contactPerson,
                     deprecationWarnings: action.payload.deprecationWarnings,
                     screenshotFilename: action.payload.screenshotFilename,
@@ -199,6 +204,19 @@ export const StoreReducer = (
             pluginsData: [
                 ...state.pluginsData.map((plugin) =>
                     plugin.id === state.activePluginId
+                        ? { ...plugin, activeViewId: action.payload.viewId }
+                        : plugin
+                ),
+            ],
+        };
+    }
+    if (action.type === StoreActions.SetActivePluginAndView) {
+        return {
+            ...state,
+            activePluginId: action.payload.pluginId,
+            pluginsData: [
+                ...state.pluginsData.map((plugin) =>
+                    plugin.id === action.payload.pluginId
                         ? { ...plugin, activeViewId: action.payload.viewId }
                         : plugin
                 ),
@@ -290,6 +308,8 @@ type WebvizContentManagerProps = {
     id: string;
     activePluginId?: string;
     activeViewId?: string;
+    initiallyActivePluginId?: string;
+    initiallyActiveViewId?: string;
     children?: React.ReactNode;
     setProps?: (props: WebvizContentManagerParentProps) => void;
 };
@@ -306,32 +326,42 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
 
     React.useEffect(() => {
         const href = window.location.href;
-        if (href !== lastHref) {
-            const activeViewId = sessionStorage.getItem(href);
-            if (activeViewId) {
-                dispatch({
-                    type: StoreActions.SetActiveView,
-                    payload: { viewId: activeViewId },
+        const data = JSON.parse(sessionStorage.getItem(href) || "{}");
+        if (href !== lastHref && Object.keys(data).length === 2) {
+            dispatch({
+                type: StoreActions.SetActivePluginAndView,
+                payload: {
+                    pluginId: data.activePluginId,
+                    viewId: data.activeViewId,
+                },
+            });
+
+            if (props.setProps) {
+                props.setProps({
+                    activeViewId: data.activeViewId,
+                    activePluginId: data.activePluginId,
                 });
-                if (props.setProps) {
-                    props.setProps({
-                        activeViewId: activeViewId,
-                        activePluginId: state.activePluginId,
-                    });
-                }
             }
         } else {
+            const activePluginId = state.activePluginId;
             const activeViewId = state.pluginsData.find(
                 (plugin) => plugin.id === state.activePluginId
             )?.activeViewId;
 
-            if (activeViewId) {
-                sessionStorage.setItem(href, activeViewId);
+            if (activePluginId && activeViewId) {
+                sessionStorage.setItem(
+                    href,
+                    JSON.stringify({
+                        activePluginId: activePluginId,
+                        activeViewId: activeViewId,
+                    })
+                );
             }
         }
         setLastHref(href);
     }, [state.pluginsData]);
 
+    /*
     React.useEffect(() => {
         if (props.activePluginId) {
             dispatch({
@@ -355,6 +385,7 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
             }
         }
     }, [props.activeViewId]);
+    */
 
     React.useEffect(() => {
         if (props.setProps) {

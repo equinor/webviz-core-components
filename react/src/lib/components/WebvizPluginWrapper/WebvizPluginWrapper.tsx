@@ -29,6 +29,7 @@ export type WebvizPluginWrapperProps = {
     id: string;
     name: string;
     views: View[];
+    initiallyActiveViewId: string;
     children?: React.ReactNode;
     screenshotFilename?: string;
     contactPerson?: ContactPerson;
@@ -63,6 +64,7 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
                 id: props.id,
                 name: props.name,
                 views: props.views,
+                initiallyActiveViewId: props.initiallyActiveViewId,
                 contactPerson: props.contactPerson,
                 deprecationWarnings: props.deprecationWarnings,
                 screenshotFilename: props.screenshotFilename,
@@ -119,6 +121,7 @@ WebvizPluginWrapper.propTypes = {
     name: PropTypes.string.isRequired,
     views: PropTypes.arrayOf(PropTypes.shape(ViewPropTypes).isRequired)
         .isRequired,
+    initiallyActiveViewId: PropTypes.string.isRequired,
     children: PropTypes.node,
     screenshotFilename: PropTypes.string,
     contactPerson: PropTypes.shape(ContactPersonPropTypes),
