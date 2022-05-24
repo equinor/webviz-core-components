@@ -145,27 +145,29 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                 }px)`,
             }}
         >
-            <div className="WebvizSettingsDrawer__TopButtons">
-                <Tooltip
-                    title={
-                        store.state.settingsDrawerOpen
-                            ? "Close settings drawer"
-                            : "Open settings drawer"
-                    }
-                >
-                    <Button
-                        className={`WebvizSettingsDrawer__Toggle ${
-                            !store.state.settingsDrawerOpen
-                                ? "WebvizSettingsDrawer__ToggleOpen"
-                                : "WebvizSettingsDrawer__ToggleClose"
-                        }`}
-                        onClick={() => handleToggleOpenClick()}
+            {React.Children.count(props.children) > 0 && (
+                <div className="WebvizSettingsDrawer__TopButtons">
+                    <Tooltip
+                        title={
+                            store.state.settingsDrawerOpen
+                                ? "Close settings drawer"
+                                : "Open settings drawer"
+                        }
                     >
-                        <Icon name="chevron_left" />
-                        <Icon name="settings" />
-                    </Button>
-                </Tooltip>
-            </div>
+                        <Button
+                            className={`WebvizSettingsDrawer__Toggle ${
+                                !store.state.settingsDrawerOpen
+                                    ? "WebvizSettingsDrawer__ToggleOpen"
+                                    : "WebvizSettingsDrawer__ToggleClose"
+                            }`}
+                            onClick={() => handleToggleOpenClick()}
+                        >
+                            <Icon name="chevron_left" />
+                            <Icon name="settings" />
+                        </Button>
+                    </Tooltip>
+                </div>
+            )}
             <ViewSelector
                 open={store.state.settingsDrawerOpen}
                 width={expandedWidth}
