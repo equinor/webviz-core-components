@@ -9,12 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 - [#207](https://github.com/equinor/webviz-core-components/pull/207) - Added `storybook` and stories for each component. Added publishment of `storybook` to GitHub workflow. Added `storybook` link to README.
+
+## [0.5.7] - 2022-05-05
+
+### Changed
+
+- [#212](https://github.com/equinor/webviz-core-components/pull/212) - Changed `tab` behaviour in `SmartNodeSelector`. When pressing `tab` on the last tag or `shift+tab` on the first one, the default behaviour is no longer prevented.
+
+## [0.5.6] - 2022-03-14
+
+### Added
+- [#202](https://github.com/equinor/webviz-core-components/pull/202) - Adjusted `z-index` of suggestions of `SmartNodeSelector` to a hard-coded value of `1500`.
 - [#201](https://github.com/equinor/webviz-core-components/pull/201) - Implemented wrapper around `MaterialUI's` draggable dialog. Makes a new `Dialog` component available in `Dash`.
+- [#210](https://github.com/equinor/webviz-core-components/pull/210) - Added `backdrop` property to `Dialog`. This allows to disable the backdrop behind a dialog and makes all other elements remain clickable.
 
 ## [0.5.5] - 2022-02-09
 
 ### Changed
-
 - [#197](https://github.com/equinor/webviz-core-components/pull/197) - Updated `@equinor/eds-icons` (and associated `@equinor/eds-core-react` dependencies) in order to use new icons upstream in the application menu.
 
 ## [0.5.4] - 2021-12-09

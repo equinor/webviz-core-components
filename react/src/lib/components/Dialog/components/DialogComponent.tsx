@@ -1,6 +1,8 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import {
+    withStyles,
     Button,
     Dialog as MuiDialog,
     DialogActions,
@@ -16,6 +18,12 @@ import { close } from "@equinor/eds-icons";
 Icon.add({ close });
 
 import { DraggablePaperComponent } from "./DraggablePaperComponent";
+
+const StyledMuiDialog = withStyles({
+    root: {
+        pointerEvents: "none",
+    },
+})(MuiDialog);
 
 export type DialogParentProps = {
     /**
@@ -40,11 +48,11 @@ export type DialogProps = {
     /**
      * States if the dialog is open or not.
      */
-    open: boolean;
+    open?: boolean;
     /**
      * Width of the dialog. Can be one of 'xs' | 'sm' | 'md' | 'lg' | 'xl'.
      */
-    max_width: "xs" | "sm" | "md" | "lg" | "xl";
+    max_width?: "xs" | "sm" | "md" | "lg" | "xl";
     /**
      * Set to true to show the dialog fullscreen.
      */
@@ -60,7 +68,11 @@ export type DialogProps = {
     /**
      * The child elements showed in the dialog
      */
-    children: React.ReactNode;
+    children?: React.ReactNode;
+    /**
+     * Set to false if you do not want to have a backdrop behind the dialog.
+     */
+    backdrop?: boolean;
     /**
      * A list of actions to be displayed as buttons in the lower right corner of the dialog.
      */
@@ -75,7 +87,7 @@ export type DialogProps = {
 /**
  * A modal dialog component with optional buttons. Can be set to be draggable.
  */
-export const DialogComponent: React.FC<DialogProps> = (props) => {
+export const Dialog: React.FC<DialogProps> = (props) => {
     const [open, setOpen] = React.useState<boolean>(props.open || false);
 
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
@@ -84,7 +96,10 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
         setOpen(props.open || false);
     }, [props.open]);
 
-    const handleClose = () => {
+    const handleClose = (reason: string) => {
+        if (reason === "backdropClick" && !props.backdrop) {
+            return;
+        }
         setOpen(false);
         props.setProps({ open: false });
     };
@@ -98,20 +113,8 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
         setActionsCalled(actionsCalled + 1);
     };
 
-    return (
-        <MuiDialog
-            id={props.id}
-            open={open}
-            onClose={() => handleClose()}
-            PaperComponent={props.draggable ? DraggablePaperComponent : Paper}
-            aria-labelledby="dialog-title"
-            maxWidth={
-                (props.max_width as "xs" | "sm" | "md" | "lg" | "xl" | null) ||
-                false
-            }
-            fullScreen={props.full_screen}
-            scroll="body"
-        >
+    const content = (
+        <>
             <DialogTitle
                 style={{
                     cursor: props.draggable ? "move" : "default",
@@ -122,7 +125,7 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
                 {props.title}
                 <IconButton
                     aria-label="close"
-                    onClick={() => handleClose()}
+                    onClick={() => handleClose("buttonClick")}
                     style={{
                         position: "absolute",
                         right: 8,
@@ -136,7 +139,6 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
             <DialogContent>{props.children}</DialogContent>
             <DialogActions>
                 {props.actions &&
-                    Array.isArray(props.actions) &&
                     props.actions.map((action) => (
                         <Button
                             key={action}
@@ -147,11 +149,111 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
                         </Button>
                     ))}
             </DialogActions>
-        </MuiDialog>
+        </>
     );
+
+    if (props.backdrop) {
+        return (
+            <MuiDialog
+                id={props.id}
+                open={open}
+                onClose={(_, reason) => handleClose(reason)}
+                PaperComponent={
+                    props.draggable ? DraggablePaperComponent : Paper
+                }
+                aria-labelledby="dialog-title"
+                maxWidth={
+                    (props.max_width as
+                        | "xs"
+                        | "sm"
+                        | "md"
+                        | "lg"
+                        | "xl"
+                        | null) || false
+                }
+                fullScreen={props.full_screen}
+                scroll="body"
+            >
+                {content}
+            </MuiDialog>
+        );
+    } else {
+        return (
+            <StyledMuiDialog
+                id={props.id}
+                open={open}
+                onClose={(_, reason) => handleClose(reason)}
+                hideBackdrop={true}
+                PaperComponent={
+                    props.draggable ? DraggablePaperComponent : Paper
+                }
+                aria-labelledby="dialog-title"
+                maxWidth={
+                    (props.max_width as
+                        | "xs"
+                        | "sm"
+                        | "md"
+                        | "lg"
+                        | "xl"
+                        | null) || false
+                }
+                fullScreen={props.full_screen}
+                scroll="paper"
+            >
+                {content}
+            </StyledMuiDialog>
+        );
+    }
 };
 
-DialogComponent.defaultProps = {
+Dialog.propTypes = {
+    /**
+     * The ID used to identify this component in Dash callbacks.
+     */
+    id: PropTypes.string.isRequired,
+    /**
+     * States if the dialog is open or not.
+     */
+    open: PropTypes.bool,
+    /**
+     * Width of the dialog. Can be one of 'xs' | 'sm' | 'md' | 'lg' | 'xl'.
+     */
+    max_width: PropTypes.oneOf(["xs", "sm", "md", "lg", "xl"]),
+    /**
+     * Set to true to show the dialog fullscreen.
+     */
+    full_screen: PropTypes.bool,
+    /**
+     * Set to true if the dialog shall be draggable.
+     */
+    draggable: PropTypes.bool,
+    /**
+     * The title of the dialog.
+     */
+    title: PropTypes.string.isRequired,
+    /**
+     * The child elements showed in the dialog
+     */
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node,
+    ]),
+    /**
+     * Set to false if you do not want to have a backdrop behind the dialog.
+     */
+    backdrop: PropTypes.bool,
+    /**
+     * A list of actions to be displayed as buttons in the lower right corner of the dialog.
+     */
+    actions: PropTypes.arrayOf(PropTypes.string.isRequired),
+    /**
+     * Dash-assigned callback that should be called whenever any of the
+     * properties change.
+     */
+    setProps: PropTypes.func.isRequired,
+};
+
+Dialog.defaultProps = {
     open: false,
     max_width: "md",
     draggable: false,

@@ -36,6 +36,10 @@ const propTypes = {
         PropTypes.node,
     ]),
     /**
+     * Set to false if you do not want to have a backdrop behind the dialog.
+     */
+    backdrop: PropTypes.bool,
+    /**
      * A list of actions to be displayed as buttons in the lower right corner of the dialog.
      */
     actions: PropTypes.arrayOf(PropTypes.string.isRequired),

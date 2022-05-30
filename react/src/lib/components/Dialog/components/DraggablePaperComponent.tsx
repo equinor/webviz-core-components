@@ -5,11 +5,13 @@ import Draggable from "react-draggable";
 
 export const DraggablePaperComponent: React.FC<PaperProps> = (props) => {
     return (
-        <Draggable
-            handle="#draggable-dialog-title"
-            cancel={'[class*="MuiDialogContent-root"]'}
-        >
-            <Paper {...props} />
-        </Draggable>
+        <div style={{ pointerEvents: "all" }}>
+            <Draggable
+                handle="#draggable-dialog-title"
+                cancel={'[class*="MuiDialogContent-root"]'}
+            >
+                <Paper {...props} />
+            </Draggable>
+        </div>
     );
 };

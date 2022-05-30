@@ -2,28 +2,26 @@ import React from "react";
 
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { DialogComponent, DialogProps } from "./components/DialogComponent";
+import { Dialog, DialogProps } from "./components/DialogComponent";
 import { Button } from "@material-ui/core";
 
 export default {
     title: "Components/Dialog",
-    component: DialogComponent,
+    component: Dialog,
     argTypes: {
         actions: { control: "array" },
     },
-} as ComponentMeta<typeof DialogComponent>;
+} as ComponentMeta<typeof Dialog>;
 
-const Template: ComponentStory<typeof DialogComponent> = (
-    args: DialogProps
-) => {
+const Template: ComponentStory<typeof Dialog> = (args: DialogProps) => {
     const { open, setProps, ...other } = args;
-    const [dialogOpen, setDialogOpen] = React.useState<boolean>(open);
+    const [dialogOpen, setDialogOpen] = React.useState<boolean>(open || false);
     return (
         <>
             <Button variant="outlined" onClick={() => setDialogOpen(true)}>
                 Open dialog
             </Button>
-            <DialogComponent
+            <Dialog
                 open={dialogOpen}
                 setProps={(newProps) => setDialogOpen(newProps.open)}
                 {...other}
@@ -36,10 +34,10 @@ export const Basic = Template.bind({});
 Basic.args = {
     id: "Dialog",
     title: "My Dialog",
-    open: DialogComponent.defaultProps?.open || false,
-    max_width: DialogComponent.defaultProps?.max_width || "md",
-    full_screen: DialogComponent.defaultProps?.full_screen || false,
-    draggable: DialogComponent.defaultProps?.draggable || false,
+    open: Dialog.defaultProps?.open || false,
+    max_width: Dialog.defaultProps?.max_width || "md",
+    full_screen: Dialog.defaultProps?.full_screen || false,
+    draggable: Dialog.defaultProps?.draggable || false,
     children: [],
-    actions: DialogComponent.defaultProps?.actions || [],
+    actions: Dialog.defaultProps?.actions || [],
 };
