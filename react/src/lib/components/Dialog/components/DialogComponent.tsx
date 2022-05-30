@@ -87,7 +87,7 @@ export type DialogProps = {
 /**
  * A modal dialog component with optional buttons. Can be set to be draggable.
  */
-export const Dialog: React.FC<DialogProps> = (props) => {
+export const DialogComponent: React.FC<DialogProps> = (props) => {
     const [open, setOpen] = React.useState<boolean>(props.open || false);
 
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
@@ -206,7 +206,7 @@ export const Dialog: React.FC<DialogProps> = (props) => {
     }
 };
 
-Dialog.propTypes = {
+DialogComponent.propTypes = {
     /**
      * The ID used to identify this component in Dash callbacks.
      */
@@ -253,7 +253,7 @@ Dialog.propTypes = {
     setProps: PropTypes.func.isRequired,
 };
 
-Dialog.defaultProps = {
+DialogComponent.defaultProps = {
     open: false,
     max_width: "md",
     draggable: false,

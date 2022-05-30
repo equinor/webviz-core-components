@@ -2,7 +2,10 @@ import React from "react";
 
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
-import { Dialog, DialogProps } from "./components/DialogComponent";
+import {
+    DialogComponent as Dialog,
+    DialogProps,
+} from "./components/DialogComponent";
 import { Button } from "@material-ui/core";
 
 export default {
