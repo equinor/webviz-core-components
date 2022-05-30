@@ -28,7 +28,7 @@ export type ParentProps = {
     url: string;
 };
 
-type MenuProps = {
+export type MenuProps = {
     id?: string;
     navigationItems: PropertyNavigationType;
     initiallyPinned?: boolean;
@@ -155,12 +155,10 @@ export const Menu: React.FC<MenuProps> = (props) => {
         getNavigationMaxWidth(props.navigationItems) + 40
     );
 
-    const [
-        navigationItemsWithAssignedIds,
-        setNavigationsItemsWithAssignedIds,
-    ] = React.useState<NavigationType>(
-        makeNavigationItemsWithAssignedIds(props.navigationItems)
-    );
+    const [navigationItemsWithAssignedIds, setNavigationsItemsWithAssignedIds] =
+        React.useState<NavigationType>(
+            makeNavigationItemsWithAssignedIds(props.navigationItems)
+        );
 
     React.useEffect(() => {
         localStorage.setItem("pinned", pinned ? "true" : "false");

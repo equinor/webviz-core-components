@@ -2,11 +2,15 @@ import React from "react";
 import PropTypes from "prop-types";
 import "./Overlay.css";
 
-type OverlayProps = {
+export type OverlayProps = {
     visible: boolean;
     onClick: () => void;
 };
 
+/**
+ * An overlay that can be used to remove focus from the background and set focus on a certain component
+ * (e.g. dialog, notification).
+ */
 export const Overlay: React.FC<OverlayProps> = (props) => {
     const [opacity, setOpacity] = React.useState<number>(0);
 
@@ -57,6 +61,12 @@ export const Overlay: React.FC<OverlayProps> = (props) => {
 };
 
 Overlay.propTypes = {
+    /**
+     * Set if the overlay shall be shown or not.
+     */
     visible: PropTypes.bool.isRequired,
+    /**
+     * Callback function called when the overlay is clicked on.
+     */
     onClick: PropTypes.func.isRequired,
 };

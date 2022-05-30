@@ -6,3 +6,4 @@
  */
 
 export { ColorScales } from "./ColorScales";
+export { ColorScalesProps } from "./ColorScales";

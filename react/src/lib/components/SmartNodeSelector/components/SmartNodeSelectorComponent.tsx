@@ -50,7 +50,7 @@ export type SmartNodeSelectorPropsType = {
     caseInsensitiveMatching?: boolean;
     useBetaFeatures?: boolean;
     persistence: boolean | string | number;
-    persisted_props: "selectedTags"[];
+    persisted_props: string[];
     persistence_type: "local" | "session" | "memory";
 };
 
