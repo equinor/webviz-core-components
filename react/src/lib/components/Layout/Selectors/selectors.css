@@ -1,9 +1,0 @@
-.webviz-selectors {
-    color: #555;
-    margin-top: 0.5vh;
-    margin-bottom: 0.5vh;
-}
-
-.webviz-selectors:hover {
-    box-shadow: 0px 0px 1px 0.5px lightgrey;
-}
