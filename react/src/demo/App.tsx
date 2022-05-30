@@ -34,14 +34,12 @@ type MenuProps = {
 };
 
 const App: React.FC = () => {
-    const [
-        nodeSelectorState,
-        setNodeSelectorState,
-    ] = React.useState<SmartNodeSelectorProps>({
-        selectedNodes: [],
-        selectedIds: [],
-        selectedTags: [],
-    });
+    const [nodeSelectorState, setNodeSelectorState] =
+        React.useState<SmartNodeSelectorProps>({
+            selectedNodes: [],
+            selectedIds: [],
+            selectedTags: [],
+        });
 
     const [currentPage, setCurrentPage] = React.useState<MenuProps>({
         url: "",
@@ -118,6 +116,7 @@ const App: React.FC = () => {
                         id="dialog"
                         max_width="xl"
                         open={dialogOpen}
+                        backdrop={false}
                         draggable={true}
                         setProps={(newProps) => {
                             console.log(newProps);
@@ -147,13 +146,11 @@ const App: React.FC = () => {
                         deprecation_warnings={[
                             {
                                 message: "Deprecated 1",
-                                url:
-                                    "https://github.com/equinor/webviz-core-components",
+                                url: "https://github.com/equinor/webviz-core-components",
                             },
                             {
                                 message: "Deprecated 2",
-                                url:
-                                    "https://github.com/equinor/webviz-core-components",
+                                url: "https://github.com/equinor/webviz-core-components",
                             },
                         ]}
                     />

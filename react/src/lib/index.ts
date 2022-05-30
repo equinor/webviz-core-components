@@ -5,10 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import WebvizPluginPlaceholder from "./components/WebvizPluginPlaceholder";
+import { WebvizPluginPlaceholder } from "./components/WebvizPluginPlaceholder";
 import { ColorScales } from "./components/ColorScales";
-import Select from "./components/Select";
-import SmartNodeSelector, {
+import { Select } from "./components/Select";
+import {
+    SmartNodeSelector,
     TreeData,
     TreeDataNode,
     TreeDataNodeMetaData,
@@ -19,7 +20,7 @@ import SmartNodeSelector, {
 import { Menu } from "./components/Menu";
 import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
-import { Dialog } from "./components/Dialog/Dialog";
+import { Dialog } from "./components/Dialog";
 import { WebvizContentWrapper } from "./components/WebvizContentWrapper__DEPRECATED";
 import { WebvizContentManager } from "./components/WebvizContentManager";
 import { WebvizPluginsWrapper } from "./components/WebvizPluginsWrapper";

@@ -14,7 +14,7 @@ import { Point } from "../../shared-types/point";
 
 import "./ScrollArea.css";
 
-type ScrollAreaProps = {
+export type ScrollAreaProps = {
     children?: React.ReactNode;
 };
 

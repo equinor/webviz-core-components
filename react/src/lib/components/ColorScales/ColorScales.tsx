@@ -5,7 +5,7 @@ import PropTypes, { InferProps } from "prop-types";
 import ColorscalePicker, { Colorscale } from "react-colorscales";
 
 // Use "Viridis" as the default scale
-const DEFAULT_SCALE = [
+export const DEFAULT_SCALE = [
     "#fafa6e",
     "#9cdf7c",
     "#4abd8c",
@@ -23,7 +23,7 @@ const propTypes = {
     /**
      * Optional: Initial colorscale to display. Default is Viridis.
      */
-    colorscale: PropTypes.array,
+    colorscale: PropTypes.arrayOf(PropTypes.string.isRequired),
 
     /**
      * Optional: Initial number of colors in scale to display.
@@ -42,6 +42,8 @@ const propTypes = {
     setProps: PropTypes.func,
 };
 
+export type ColorScalesProps = InferProps<typeof propTypes>;
+
 /**
  * ColorScales is a Dash wrapper for `react-colorscales`.
  * It takes an array of colors, `colorscale`, and
@@ -52,21 +54,13 @@ export const ColorScales: React.FC<InferProps<typeof propTypes>> = (
 ): JSX.Element => {
     const { id, setProps, colorscale, nSwatches, fixSwatches } = props;
 
-
     const [showColorScalePicker, setShowColorScalePicker] = useState(false);
     const [colorScale, setColorScale] = useState(colorscale || DEFAULT_SCALE);
 
     return (
         <div id={id}>
-            <div
-                onClick={() =>
-                    setShowColorScalePicker(!showColorScalePicker)
-                }
-            >
-                <Colorscale
-                    colorscale={colorScale}
-                    width={150}
-                />
+            <div onClick={() => setShowColorScalePicker(!showColorScalePicker)}>
+                <Colorscale colorscale={colorScale} width={150} />
             </div>
             {showColorScalePicker && (
                 <ColorscalePicker

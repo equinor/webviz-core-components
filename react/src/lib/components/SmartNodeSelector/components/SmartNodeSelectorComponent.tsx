@@ -50,7 +50,7 @@ export type SmartNodeSelectorPropsType = {
     caseInsensitiveMatching?: boolean;
     useBetaFeatures?: boolean;
     persistence: boolean | string | number;
-    persisted_props: "selectedTags"[];
+    persisted_props: string[];
     persistence_type: "local" | "session" | "memory";
 };
 
@@ -111,6 +111,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     protected selectedNodes: string[] | null;
     protected blurEnabled: boolean;
     protected updateFromWithin: boolean;
+    protected tabbedInFromOutside: boolean;
 
     public state: SmartNodeSelectorStateType;
     public static propTypes: Record<string, unknown>;
@@ -154,6 +155,7 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         this.selectedNodes = null;
         this.blurEnabled = true;
         this.updateFromWithin = false;
+        this.tabbedInFromOutside = false;
 
         let error: string | undefined = undefined;
 
@@ -378,9 +380,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     ): void {
         if (index >= 0 && index < this.countTags()) {
             if (this.state.nodeSelections.length > index && index >= 0) {
-                const inputField = (this.state.nodeSelections[
-                    index
-                ]?.getRef() as React.RefObject<HTMLInputElement>).current;
+                const inputField = (
+                    this.state.nodeSelections[
+                        index
+                    ]?.getRef() as React.RefObject<HTMLInputElement>
+                ).current;
                 if (inputField) {
                     inputField.focus();
                     if (setSelection !== undefined) {
@@ -404,9 +408,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     }
 
     hasLastEmptyTag(): boolean {
-        const lastTag = this.state.nodeSelections[
-            this.state.nodeSelections.length - 1
-        ];
+        const lastTag =
+            this.state.nodeSelections[this.state.nodeSelections.length - 1];
         return !(lastTag.displayAsTag() || lastTag.isValid());
     }
 
@@ -588,8 +591,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             return;
         }
         if (
-            (this.currentNodeSelection().getRef() as React.RefObject<HTMLInputElement>)
-                .current === document.activeElement
+            (
+                this.currentNodeSelection().getRef() as React.RefObject<HTMLInputElement>
+            ).current === document.activeElement
         ) {
             this.updateState({
                 suggestionsVisible: true,
@@ -656,9 +660,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
     letMaxNumValuesBlink(): void {
         if (this.props.maxNumSelectedNodes !== 1) {
             let numBlinks = 0;
-            const numberOfTagsDiv = (this
-                .refNumberOfTags as React.RefObject<HTMLDivElement>)
-                .current as HTMLDivElement;
+            const numberOfTagsDiv = (
+                this.refNumberOfTags as React.RefObject<HTMLDivElement>
+            ).current as HTMLDivElement;
             const blinkTimer = setInterval(() => {
                 numBlinks++;
                 if (numBlinks % 2 === 0) {
@@ -673,6 +677,19 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 }
             }, 200);
         }
+    }
+
+    containsActiveElement(): boolean {
+        if (
+            document.activeElement &&
+            document.activeElement instanceof HTMLElement &&
+            this.ref.current
+        ) {
+            return this.ref.current.contains(
+                document.activeElement as HTMLElement
+            );
+        }
+        return false;
     }
 
     checkIfSelectionIsDuplicate(
@@ -701,9 +718,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         }
         const domNode = (this.tagFieldRef as React.RefObject<HTMLUListElement>)
             .current as HTMLUListElement;
-        const suggestions = (this
-            .suggestionsRef as React.RefObject<HTMLDivElement>)
-            .current as HTMLDivElement;
+        const suggestions = (
+            this.suggestionsRef as React.RefObject<HTMLDivElement>
+        ).current as HTMLDivElement;
         const eventTarget = event.target as Element;
         if (
             (!domNode || !domNode.contains(eventTarget)) &&
@@ -738,6 +755,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             e.stopPropagation();
         } else if (e.key === "c" && e.ctrlKey) {
             this.copyAllSelectedTags();
+        } else if (e.key === "Tab" && !this.containsActiveElement()) {
+            this.tabbedInFromOutside = true;
         }
     }
 
@@ -982,8 +1001,11 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
             suggestionsVisible: false,
             showAllSuggestions: false,
             callback: () => {
-                ((this.state.nodeSelections[0].getRef() as React.RefObject<HTMLInputElement>)
-                    .current as HTMLInputElement).focus();
+                (
+                    (
+                        this.state.nodeSelections[0].getRef() as React.RefObject<HTMLInputElement>
+                    ).current as HTMLInputElement
+                ).focus();
             },
         });
         e.stopPropagation();
@@ -1119,7 +1141,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                 nodeSelection.isValid() &&
                 !this.checkIfSelectionIsDuplicate(nodeSelection, i)
             ) {
-                const matchedNodePaths = nodeSelection.exactlyMatchedNodePaths();
+                const matchedNodePaths =
+                    nodeSelection.exactlyMatchedNodePaths();
                 for (let j = 0; j < matchedNodePaths.length; j++) {
                     if (
                         selectedNodes.length >= maxNumSelectedNodes &&
@@ -1332,8 +1355,9 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                         showAllSuggestions: true,
                         forceUpdate: true,
                         callback: () => {
-                            const input = (this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>)
-                                ?.current;
+                            const input = (
+                                this.currentNodeSelection()?.getRef() as React.RefObject<HTMLInputElement>
+                            )?.current;
                             if (input) {
                                 input.setSelectionRange(0, 0);
                             }
@@ -1564,11 +1588,56 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
         eventType: KeyEventType
     ): void {
         if (eventType === KeyEventType.KeyDown) {
-            if (e.shiftKey) {
-                this.decrementCurrentTagIndex(() => this.focusCurrentTag());
-            } else {
-                this.incrementCurrentTagIndex(() => this.focusCurrentTag());
+            if (this.containsActiveElement()) {
+                if (e.shiftKey && this.currentTagIndex() === 0) {
+                    this.hideSuggestions({
+                        callback: () => {
+                            if (!this.selectionHasStarted) {
+                                this.unselectAllTags({});
+
+                                this.updateState({ currentTagIndex: -1 });
+                            }
+                            this.selectionHasStarted = false;
+                        },
+                    });
+                    return;
+                }
+                if (
+                    !e.shiftKey &&
+                    this.currentTagIndex() === this.countTags() - 1
+                ) {
+                    this.hideSuggestions({
+                        callback: () => {
+                            if (!this.selectionHasStarted) {
+                                this.unselectAllTags({});
+
+                                this.updateState({ currentTagIndex: -1 });
+                            }
+                            this.selectionHasStarted = false;
+                        },
+                    });
+                    return;
+                }
+
+                if (e.shiftKey) {
+                    this.decrementCurrentTagIndex(() => this.focusCurrentTag());
+                } else {
+                    this.incrementCurrentTagIndex(() => this.focusCurrentTag());
+                }
             }
+        } else if (this.tabbedInFromOutside) {
+            if (e.shiftKey) {
+                this.updateState({
+                    currentTagIndex: this.countTags() - 1,
+                    callback: () => this.focusCurrentTag(Direction.Right),
+                });
+            } else {
+                this.updateState({
+                    currentTagIndex: 0,
+                    callback: () => this.focusCurrentTag(Direction.Right),
+                });
+            }
+            this.tabbedInFromOutside = false;
         }
         e.preventDefault();
     }
@@ -1873,7 +1942,8 @@ export default class SmartNodeSelectorComponent extends Component<SmartNodeSelec
                     className={classNames({
                         SmartNodeSelector: true,
                         "SmartNodeSelector--frameless": frameless,
-                        "SmartNodeSelector--SuggestionsActive": suggestionsVisible,
+                        "SmartNodeSelector--SuggestionsActive":
+                            suggestionsVisible,
                         "SmartNodeSelector--Invalid":
                             maxNumSelectedNodes > 0 &&
                             this.countValidSelections() > maxNumSelectedNodes,
