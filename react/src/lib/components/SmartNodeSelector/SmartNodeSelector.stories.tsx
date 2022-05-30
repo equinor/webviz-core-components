@@ -34,6 +34,7 @@ Basic.args = {
     lineBreakAfterTag:
         SmartNodeSelector.defaultProps?.lineBreakAfterTag || false,
     useBetaFeatures: SmartNodeSelector.defaultProps?.useBetaFeatures || false,
+    selectedTags: [],
     persistence: SmartNodeSelector.defaultProps?.persistence || false,
     persisted_props: SmartNodeSelector.defaultProps?.persisted_props || [
         "selectedTags",
