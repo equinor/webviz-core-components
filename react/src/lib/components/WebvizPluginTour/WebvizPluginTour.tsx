@@ -60,7 +60,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
         }
-        if (tourSteps) {
+        if (tourSteps && props.open) {
             if (document.getElementById(tourSteps[currentTourStep].elementId)) {
                 intervalRef.current = setInterval(() => {
                     const element = document.getElementById(
@@ -75,6 +75,10 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     setElementBoundingClientRect(
                         element.getBoundingClientRect()
                     );
+                    element.scrollIntoView({
+                        block: "nearest",
+                        inline: "start",
+                    });
                 }, 100);
             }
             setElementBoundingClientRect(
@@ -83,7 +87,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     ?.getBoundingClientRect()
             );
         }
-    }, [tourSteps, currentTourStep, store.state.viewUpdates]);
+    }, [tourSteps, currentTourStep, store.state.viewUpdates, props.open]);
 
     React.useEffect(() => {
         if (props.open && tourSteps) {
