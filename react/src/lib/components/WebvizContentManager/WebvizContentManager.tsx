@@ -361,32 +361,6 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         setLastHref(href);
     }, [state.pluginsData]);
 
-    /*
-    React.useEffect(() => {
-        if (props.activePluginId) {
-            dispatch({
-                type: StoreActions.SetActivePlugin,
-                payload: { pluginId: props.activePluginId },
-            });
-        }
-    }, [props.activePluginId]);
-
-    React.useEffect(() => {
-        if (props.activeViewId) {
-            const activeViewId =
-                state.pluginsData.find(
-                    (plugin) => plugin.id === state.activePluginId
-                )?.activeViewId || "";
-            if (activeViewId === "") {
-                dispatch({
-                    type: StoreActions.SetActiveView,
-                    payload: { viewId: props.activeViewId },
-                });
-            }
-        }
-    }, [props.activeViewId]);
-    */
-
     React.useEffect(() => {
         if (props.setProps) {
             props.setProps({
