@@ -140,7 +140,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
 /**
  * Select is a dash wrapper for the html select tag.
  */
-const Select: React.FC<InferProps<typeof propTypes>> = (
+export const Select: React.FC<InferProps<typeof propTypes>> = (
     props: InferProps<typeof propTypes>
 ): JSX.Element => {
     const {
@@ -211,8 +211,6 @@ const Select: React.FC<InferProps<typeof propTypes>> = (
         </div>
     );
 };
-
-export default Select;
 
 Select.defaultProps = defaultProps;
 

@@ -1,11 +1,11 @@
 import React, { MouseEvent } from "react";
 import PropTypes from "prop-types";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import classNames from 'classnames';
+import { IconData } from "@equinor/eds-icons";
+import classNames from "classnames";
+import { Icon } from "@equinor/eds-core-react";
 
 type WebvizToolbarButtonProps = {
-    icon: IconProp;
+    icon: IconData;
     selected?: boolean;
     onClick?: (event: MouseEvent) => void;
     important?: boolean;
@@ -21,31 +21,33 @@ const WebvizToolbarButton: React.FC<WebvizToolbarButtonProps> = ({
     important,
     tooltip,
     href,
-    target
+    target,
 }) => {
-    const createIcon = (useOnClick: boolean) => (<FontAwesomeIcon
-        icon={icon}
-        className={classNames({
-            "webviz-config-plugin-button": true,
-            "webviz-config-plugin-button-selected": selected,
-            "webviz-config-plugin-button-important": important,
-        })}
-        onClick={useOnClick ? onClick : undefined}
-    />);
+    const createIcon = (useOnClick: boolean) => (
+        <Icon
+            data={icon}
+            className={classNames({
+                "webviz-config-plugin-button": true,
+                "webviz-config-plugin-button-selected": selected,
+                "webviz-config-plugin-button-important": important,
+            })}
+            onClick={useOnClick ? onClick : undefined}
+        />
+    );
 
     return (
         <div className="webviz-config-tooltip-wrapper">
             {href ? (
-                <a href={href} target={target}>{createIcon(false)}</a>
+                <a href={href} target={target}>
+                    {createIcon(false)}
+                </a>
             ) : (
                 createIcon(true)
             )}
-            <div className="webviz-config-tooltip">
-                {tooltip}
-            </div>
+            <div className="webviz-config-tooltip">{tooltip}</div>
         </div>
     );
-}
+};
 
 export default WebvizToolbarButton;
 
@@ -61,7 +63,7 @@ WebvizToolbarButton.propTypes = {
     tooltip: PropTypes.string,
 
     /**
-     * 
+     *
      */
     important: PropTypes.bool,
 

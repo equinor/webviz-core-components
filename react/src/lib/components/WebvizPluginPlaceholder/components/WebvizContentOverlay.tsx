@@ -1,7 +1,11 @@
 import React from "react";
 import PropTypes, { InferProps } from "prop-types";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEnvelope, faPhone } from "@fortawesome/free-solid-svg-icons";
+
+import { person, email, call } from "@equinor/eds-icons";
+
+import { Icon } from "@equinor/eds-core-react";
+
+Icon.add({ person, email, call });
 
 const propTypes = {
     /**
@@ -39,19 +43,13 @@ const WebvizContentOverlay: React.FC<InferProps<typeof propTypes>> = ({
             <div className="webviz-plugin-data-owner">
                 {contactPerson && "name" in contactPerson && (
                     <p>
-                        <FontAwesomeIcon
-                            icon={faUser}
-                            style={{ marginRight: "5px" }}
-                        />
+                        <Icon name="person" style={{ marginRight: "5px" }} />
                         {contactPerson.name}
                     </p>
                 )}
                 {contactPerson && "email" in contactPerson && (
                     <p>
-                        <FontAwesomeIcon
-                            icon={faEnvelope}
-                            style={{ marginRight: "5px" }}
-                        />
+                        <Icon name="email" style={{ marginRight: "5px" }} />
                         <a href="mailto:{this.props.contactPerson.email}">
                             {contactPerson.email}
                         </a>
@@ -59,10 +57,7 @@ const WebvizContentOverlay: React.FC<InferProps<typeof propTypes>> = ({
                 )}
                 {contactPerson && "phone" in contactPerson && (
                     <p>
-                        <FontAwesomeIcon
-                            icon={faPhone}
-                            style={{ marginRight: "5px" }}
-                        />
+                        <Icon name="call" style={{ marginRight: "5px" }} />
                         {contactPerson.phone}
                     </p>
                 )}

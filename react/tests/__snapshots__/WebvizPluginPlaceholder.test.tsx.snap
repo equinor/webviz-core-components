@@ -27,17 +27,20 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
       >
         <svg
           aria-hidden="true"
-          class="svg-inline--fa fa-camera-retro fa-w-16 webviz-config-plugin-button"
-          data-icon="camera-retro"
-          data-prefix="fas"
-          focusable="false"
-          role="img"
-          viewBox="0 0 512 512"
+          class="Icon__StyledSvg-sc-6evbi1-0 webviz-config-plugin-button"
+          fill="currentColor"
+          height="24px"
+          viewBox="0 0 24 24"
+          width="24px"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M48 32C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h416c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48H48zm0 32h106c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H38c-3.3 0-6-2.7-6-6V80c0-8.8 7.2-16 16-16zm426 96H38c-3.3 0-6-2.7-6-6v-36c0-3.3 2.7-6 6-6h138l30.2-45.3c1.1-1.7 3-2.7 5-2.7H464c8.8 0 16 7.2 16 16v74c0 3.3-2.7 6-6 6zM256 424c-66.2 0-120-53.8-120-120s53.8-120 120-120 120 53.8 120 120-53.8 120-120 120zm0-208c-48.5 0-88 39.5-88 88s39.5 88 88 88 88-39.5 88-88-39.5-88-88-88zm-48 104c-8.8 0-16-7.2-16-16 0-35.3 28.7-64 64-64 8.8 0 16 7.2 16 16s-7.2 16-16 16c-17.6 0-32 14.4-32 32 0 8.8-7.2 16-16 16z"
-            fill="currentColor"
+            class="Icon__StyledPath-sc-6evbi1-1"
+            clip-rule="evenodd"
+            d="M16.83 5H20c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h3.17L9 3h6l1.83 2zM4 19h16V7h-4.05l-.59-.65L14.12 5H9.88L8.64 6.35 8.05 7H4v12zm8-11c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm-3.2 5c0 1.77 1.43 3.2 3.2 3.2 1.77 0 3.2-1.43 3.2-3.2 0-1.77-1.43-3.2-3.2-3.2-1.77 0-3.2 1.43-3.2 3.2z"
+            data-testid="eds-icon-path"
+            fill-rule="evenodd"
+            height="24"
           />
         </svg>
         <div
@@ -51,17 +54,20 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
       >
         <svg
           aria-hidden="true"
-          class="svg-inline--fa fa-expand fa-w-14 webviz-config-plugin-button"
-          data-icon="expand"
-          data-prefix="fas"
-          focusable="false"
-          role="img"
-          viewBox="0 0 448 512"
+          class="Icon__StyledSvg-sc-6evbi1-0 webviz-config-plugin-button"
+          fill="currentColor"
+          height="24px"
+          viewBox="0 0 24 24"
+          width="24px"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M0 180V56c0-13.3 10.7-24 24-24h124c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H64v84c0 6.6-5.4 12-12 12H12c-6.6 0-12-5.4-12-12zM288 44v40c0 6.6 5.4 12 12 12h84v84c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12V56c0-13.3-10.7-24-24-24H300c-6.6 0-12 5.4-12 12zm148 276h-40c-6.6 0-12 5.4-12 12v84h-84c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h124c13.3 0 24-10.7 24-24V332c0-6.6-5.4-12-12-12zM160 468v-40c0-6.6-5.4-12-12-12H64v-84c0-6.6-5.4-12-12-12H12c-6.6 0-12 5.4-12 12v124c0 13.3 10.7 24 24 24h124c6.6 0 12-5.4 12-12z"
-            fill="currentColor"
+            class="Icon__StyledPath-sc-6evbi1-1"
+            clip-rule="evenodd"
+            d="M7 10H5V5h5v2H7v3zm-2 4h2v3h3v2H5v-5zm12 3h-3v2h5v-5h-2v3zM14 7V5h5v5h-2V7h-3z"
+            data-testid="eds-icon-path"
+            fill-rule="evenodd"
+            height="24"
           />
         </svg>
         <div
@@ -75,17 +81,20 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
       >
         <svg
           aria-hidden="true"
-          class="svg-inline--fa fa-download fa-w-16 webviz-config-plugin-button"
-          data-icon="download"
-          data-prefix="fas"
-          focusable="false"
-          role="img"
-          viewBox="0 0 512 512"
+          class="Icon__StyledSvg-sc-6evbi1-0 webviz-config-plugin-button"
+          fill="currentColor"
+          height="24px"
+          viewBox="0 0 24 24"
+          width="24px"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"
-            fill="currentColor"
+            class="Icon__StyledPath-sc-6evbi1-1"
+            clip-rule="evenodd"
+            d="M19 9.5h-4v-6H9v6H5l7 7 7-7zm-8 2v-6h2v6h1.17L12 13.67 9.83 11.5H11zm8 9v-2H5v2h14z"
+            data-testid="eds-icon-path"
+            fill-rule="evenodd"
+            height="24"
           />
         </svg>
         <div
@@ -99,17 +108,20 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
       >
         <svg
           aria-hidden="true"
-          class="svg-inline--fa fa-question-circle fa-w-16 webviz-config-plugin-button"
-          data-icon="question-circle"
-          data-prefix="fas"
-          focusable="false"
-          role="img"
-          viewBox="0 0 512 512"
+          class="Icon__StyledSvg-sc-6evbi1-0 webviz-config-plugin-button"
+          fill="currentColor"
+          height="24px"
+          viewBox="0 0 24 24"
+          width="24px"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zM262.655 90c-54.497 0-89.255 22.957-116.549 63.758-3.536 5.286-2.353 12.415 2.715 16.258l34.699 26.31c5.205 3.947 12.621 3.008 16.665-2.122 17.864-22.658 30.113-35.797 57.303-35.797 20.429 0 45.698 13.148 45.698 32.958 0 14.976-12.363 22.667-32.534 33.976C247.128 238.528 216 254.941 216 296v4c0 6.627 5.373 12 12 12h56c6.627 0 12-5.373 12-12v-1.333c0-28.462 83.186-29.647 83.186-106.667 0-58.002-60.165-102-116.531-102zM256 338c-25.365 0-46 20.635-46 46 0 25.364 20.635 46 46 46s46-20.636 46-46c0-25.365-20.635-46-46-46z"
-            fill="currentColor"
+            class="Icon__StyledPath-sc-6evbi1-1"
+            clip-rule="evenodd"
+            d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm11 4v2h-2v-2h2zm-1 4c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM8 10c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.283-.79 1.973-1.56 2.646C13.712 13.283 13 13.905 13 15h-2c0-1.821.942-2.543 1.77-3.178.65-.498 1.23-.943 1.23-1.822 0-1.1-.9-2-2-2s-2 .9-2 2H8z"
+            data-testid="eds-icon-path"
+            fill-rule="evenodd"
+            height="24"
           />
         </svg>
         <div
@@ -124,17 +136,20 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
       >
         <svg
           aria-hidden="true"
-          class="svg-inline--fa fa-exclamation-triangle fa-w-18 webviz-config-plugin-button webviz-config-plugin-button-important"
-          data-icon="exclamation-triangle"
-          data-prefix="fas"
-          focusable="false"
-          role="img"
-          viewBox="0 0 576 512"
+          class="Icon__StyledSvg-sc-6evbi1-0 webviz-config-plugin-button webviz-config-plugin-button-important"
+          fill="currentColor"
+          height="24px"
+          viewBox="0 0 24 24"
+          width="24px"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M569.517 440.013C587.975 472.007 564.806 512 527.94 512H48.054c-36.937 0-59.999-40.055-41.577-71.987L246.423 23.985c18.467-32.009 64.72-31.951 83.154 0l239.94 416.028zM288 354c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"
-            fill="currentColor"
+            class="Icon__StyledPath-sc-6evbi1-1"
+            clip-rule="evenodd"
+            d="m23 21.5-11-19-11 19h22zm-12-3v-2h2v2h-2zm0-4h2v-4h-2v4z"
+            data-testid="eds-icon-path"
+            fill-rule="evenodd"
+            height="24"
           />
         </svg>
         <div
@@ -146,29 +161,29 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
     </div>
   </div>
   <div
-    class="makeStyles-root-1 makeStyles-bottom-5 makeStyles-right-9 makeStyles-bottom-5 makeStyles-right-9 makeStyles-reverseColumns-2"
+    class="makeStyles-bottom-4 makeStyles-right-6 makeStyles-root-1"
   >
     <div
-      class="MuiCollapse-container SnackbarItem-collapseContainer-28 MuiCollapse-entered"
+      class="MuiCollapse-root MuiCollapse-entered"
       style="min-height: 0px;"
     >
       <div
-        class="MuiCollapse-wrapper SnackbarItem-collapseWrapper-29"
+        class="MuiCollapse-wrapper"
       >
         <div
-          class="MuiCollapse-wrapperInner SnackbarItem-collapseWrapperInner-31"
+          class="MuiCollapse-wrapperInner"
         >
           <div
-            class="SnackbarItem-root-12 SnackbarItem-wrappedRoot-27 SnackbarItem-anchorOriginBottomRight-16"
+            class="SnackbarItem-root-8 SnackbarItem-wrappedRoot-23 SnackbarItem-anchorOriginBottomRight-12"
           >
             <div
               aria-describedby="notistack-snackbar"
-              class="ForwardRef-root-32 SnackbarItem-contentRoot-24 SnackbarItem-variantWarning-23 SnackbarItem-lessPadding-19"
+              class="ForwardRef-root-24 SnackbarItem-contentRoot-15 SnackbarItem-variantWarning-20 SnackbarItem-lessPadding-16"
               role="alert"
               style="webkit-transform: none; transform: none; webkit-transition: -webkit-transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"
             >
               <div
-                class="SnackbarItem-message-25"
+                class="SnackbarItem-message-21"
                 id="notistack-snackbar"
               >
                 <svg
@@ -185,7 +200,7 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
                 Deprecated 1
               </div>
               <div
-                class="SnackbarItem-action-26"
+                class="SnackbarItem-action-22"
               >
                 <a
                   class="webviz-config-plugin-deprecation-link"
@@ -202,26 +217,26 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
       </div>
     </div>
     <div
-      class="MuiCollapse-container SnackbarItem-collapseContainer-28 MuiCollapse-entered"
+      class="MuiCollapse-root MuiCollapse-entered"
       style="min-height: 0px;"
     >
       <div
-        class="MuiCollapse-wrapper SnackbarItem-collapseWrapper-29"
+        class="MuiCollapse-wrapper"
       >
         <div
-          class="MuiCollapse-wrapperInner SnackbarItem-collapseWrapperInner-31"
+          class="MuiCollapse-wrapperInner"
         >
           <div
-            class="SnackbarItem-root-12 SnackbarItem-wrappedRoot-27 SnackbarItem-anchorOriginBottomRight-16"
+            class="SnackbarItem-root-8 SnackbarItem-wrappedRoot-23 SnackbarItem-anchorOriginBottomRight-12"
           >
             <div
               aria-describedby="notistack-snackbar"
-              class="ForwardRef-root-32 SnackbarItem-contentRoot-24 SnackbarItem-variantWarning-23 SnackbarItem-lessPadding-19"
+              class="ForwardRef-root-24 SnackbarItem-contentRoot-15 SnackbarItem-variantWarning-20 SnackbarItem-lessPadding-16"
               role="alert"
               style="webkit-transform: none; transform: none; webkit-transition: -webkit-transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"
             >
               <div
-                class="SnackbarItem-message-25"
+                class="SnackbarItem-message-21"
                 id="notistack-snackbar"
               >
                 <svg
@@ -238,7 +253,7 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
                 Deprecated 2
               </div>
               <div
-                class="SnackbarItem-action-26"
+                class="SnackbarItem-action-22"
               >
                 <a
                   class="webviz-config-plugin-deprecation-link"
