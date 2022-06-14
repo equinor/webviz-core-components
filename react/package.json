@@ -53,7 +53,6 @@
         "notistack": "^1.0.5",
         "react-colorscales": "^0.7.3",
         "react-draggable": "^4.4.4",
-        "reactour": "^1.18.3",
         "styled-components": "^5.2.1",
         "uuid": "^8.3.2"
     },
@@ -75,7 +74,6 @@
         "@types/lodash": "^4.14.176",
         "@types/react": "^17.0.3",
         "@types/react-dom": "^17.0.3",
-        "@types/reactour": "^1.18.1",
         "@types/uuid": "^8.3.4",
         "@typescript-eslint/eslint-plugin": "^4.19.0",
         "@typescript-eslint/parser": "^4.19.0",
