@@ -30,7 +30,7 @@ jobs:
               with:
                   python-version: ${{ matrix.python-version }}
 
-            - name: Node and npm versions
+            - name: ℹ️ Node and npm versions
               run: |
                   node -v
                   npm -v
@@ -41,6 +41,9 @@ jobs:
                   npm run copy-package-json --prefix ./react
                   pip install .[dependencies]
                   pip install dash[dev]
+
+            - name: ℹ️ Installed npm packages (depth = 0)
+              run: npm list --depth=0
 
             - name: 🏗️ Build JavaScript part
               run: |
