@@ -40,7 +40,7 @@ jobs:
                   npm ci --ignore-scripts --prefix ./react
                   npm run copy-package-json --prefix ./react
                   pip install .[dependencies]
-                  pip install dash[dev]
+                  pip install dash==2.0.0[dev]
 
             - name: ℹ️ Installed npm packages (depth = 0)
               run: npm list --depth=0 --prefix react/
