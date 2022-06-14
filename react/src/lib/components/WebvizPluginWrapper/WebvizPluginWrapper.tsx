@@ -9,21 +9,12 @@ import {
     useStore,
     StoreActions,
 } from "../WebvizContentManager/WebvizContentManager";
-import { View, ViewPropTypes } from "../../shared-types/webviz-content/webviz";
-import {
-    ContactPerson,
-    ContactPersonPropTypes,
-} from "../../shared-types/webviz-content/contact-person";
-import {
-    DeprecationWarning,
-    DeprecationWarningPropTypes,
-} from "../../shared-types/webviz-content/deprecation-warning";
+import { View } from "../../shared-types/webviz-content/webviz";
+import { ContactPerson } from "../../shared-types/webviz-content/contact-person";
+import { DeprecationWarning } from "../../shared-types/webviz-content/deprecation-warning";
 
 import "./webviz-plugin-wrapper.css";
-import {
-    TourStep,
-    TourStepPropTypes,
-} from "../../shared-types/webviz-content/tour-step";
+import { TourStep } from "../../shared-types/webviz-content/tour-step";
 
 export type WebvizPluginWrapperProps = {
     id: string;
