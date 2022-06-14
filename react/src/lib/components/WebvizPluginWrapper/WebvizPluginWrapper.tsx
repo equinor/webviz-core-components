@@ -119,18 +119,39 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
 WebvizPluginWrapper.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    views: PropTypes.arrayOf(PropTypes.shape(ViewPropTypes).isRequired)
-        .isRequired,
+    views: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            group: PropTypes.string.isRequired,
+            showDownload: PropTypes.bool.isRequired,
+        }).isRequired
+    ).isRequired,
     initiallyActiveViewId: PropTypes.string.isRequired,
     children: PropTypes.node,
     screenshotFilename: PropTypes.string,
-    contactPerson: PropTypes.shape(ContactPersonPropTypes),
+    contactPerson: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        email: PropTypes.string.isRequired,
+        phone: PropTypes.string.isRequired,
+    }),
     deprecationWarnings: PropTypes.arrayOf(
-        PropTypes.shape(DeprecationWarningPropTypes).isRequired
+        PropTypes.shape({
+            message: PropTypes.string.isRequired,
+            url: PropTypes.string.isRequired,
+        }).isRequired
     ),
     stretch: PropTypes.bool,
     feedbackUrl: PropTypes.string,
-    tourSteps: PropTypes.arrayOf(PropTypes.shape(TourStepPropTypes).isRequired),
+    tourSteps: PropTypes.arrayOf(
+        PropTypes.shape({
+            elementId: PropTypes.string.isRequired,
+            viewId: PropTypes.string.isRequired,
+            settingsGroupId: PropTypes.string,
+            viewElementId: PropTypes.string,
+            content: PropTypes.string.isRequired,
+        }).isRequired
+    ),
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and
