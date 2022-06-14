@@ -43,7 +43,7 @@ jobs:
                   pip install dash[dev]
 
             - name: ℹ️ Installed npm packages (depth = 0)
-              run: npm list --depth=0
+              run: npm list --depth=0 --prefix react/
 
             - name: 🏗️ Build JavaScript part
               run: |
