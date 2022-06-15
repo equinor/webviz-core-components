@@ -39,8 +39,9 @@ jobs:
               run: |
                   npm ci --ignore-scripts --prefix ./react
                   npm run copy-package-json --prefix ./react
+                  pip install "dash<2.5"  # Build issue upstream in dash==2.5
                   pip install .[dependencies]
-                  pip install dash[dev]==2.0.0
+                  pip install dash[dev]
 
             - name: ℹ️ Installed npm packages (depth = 0)
               run: npm list --depth=0 --prefix react/

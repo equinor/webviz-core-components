@@ -16,7 +16,7 @@ package_name = (
     .replace("@", "")
 )
 
-INSTALL_REQUIRES = ["dash==2.0"]
+INSTALL_REQUIRES = ["dash>=2.0"]
 
 TESTS_REQUIRE = ["selenium", "pylint", "black>=20.8b1", "bandit"]
 
