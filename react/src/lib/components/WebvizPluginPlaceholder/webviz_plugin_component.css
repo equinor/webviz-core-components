@@ -1,0 +1,145 @@
+/**
+ * Copyright (c) 2021- Equinor ASA
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.webviz-config-plugin-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 16px;
+}
+
+.webviz-config-plugin-expand {
+    position: fixed;
+    padding: 10px;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto;
+    background: white;
+    z-index: 1001;
+}
+
+.webviz-config-plugin-wrapper:hover {
+    box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.06);
+}
+
+.webviz-plugin-content {
+    position: relative;
+    padding-right: 15px;
+    transition: 1s;
+}
+
+.webviz-plugin-content-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.1) 60%,
+        rgba(0, 0, 0, 0)
+    );
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.webviz-plugin-data-owner {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 5px;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    text-align: center;
+}
+
+.webviz-config-plugin-buttonbar {
+    text-align: center;
+    user-select: none;
+    padding: 5px;
+}
+
+.webviz-config-plugin-button {
+    color: grey;
+    margin-bottom: 5px;
+    opacity: 0.2;
+    transition: 1s;
+    cursor: pointer;
+}
+
+.webviz-config-plugin-wrapper:hover .webviz-config-plugin-button {
+    opacity: 0.9;
+}
+
+.webviz-config-tooltip-wrapper {
+    position: relative;
+    z-index: 1000;
+}
+
+.webviz-config-tooltip-wrapper .webviz-config-tooltip {
+    position: absolute;
+    top: -5px;
+    right: 180%;
+    padding: 5px 5px;
+    white-space: nowrap;
+    visibility: hidden;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+}
+
+.webviz-config-tooltip-wrapper .webviz-config-tooltip::after {
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    content: "";
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(0, 0, 0, 0.5);
+}
+
+.webviz-config-tooltip-wrapper:hover .webviz-config-tooltip {
+    visibility: visible;
+}
+
+.webviz-config-plugin-button:hover,
+.webviz-config-tooltip-wrapper:hover,
+.webviz-config-plugin-button-selected {
+    opacity: 1;
+    color: black;
+}
+
+.webviz-config-plugin-button-important {
+    opacity: 0.9;
+    color: #ff9200;
+}
+
+.webviz-config-plugin-button-important:hover {
+    opacity: 1;
+    color: #ad6200;
+}
+
+.webviz-config-plugin-deprecation-link {
+    padding-left: 8px;
+}
+
+a.webviz-config-plugin-deprecation-link,
+a.webviz-config-plugin-deprecation-link:hover {
+    color: black;
+    text-transform: uppercase;
+    display: block;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+a.webviz-config-plugin-deprecation-link:hover {
+    background-color: rgba(173, 98, 0, 0.3);
+}
