@@ -195,17 +195,22 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 
     React.useEffect(() => {
         const scroll = (e: WheelEvent) => {
+            const target = e.target as HTMLElement | undefined;
+
+            const parentElement = target?.parentElement as
+                | HTMLElement
+                | undefined;
+
+            const targetScrollHeightLargerThanItsVisibleHeight =
+                target && target.scrollHeight > target.clientHeight;
+
+            const parentScrollHeightLargerThanItsVisibleHeight =
+                parentElement &&
+                parentElement.scrollHeight > parentElement.clientHeight;
+
             if (
-                e.target &&
-                ((e.target as HTMLElement).scrollHeight >
-                    (e.target as HTMLElement).clientHeight ||
-                    ((e.target as HTMLElement).parentElement &&
-                        ((e.target as HTMLElement).parentElement as HTMLElement)
-                            .scrollHeight >
-                            (
-                                (e.target as HTMLElement)
-                                    .parentElement as HTMLElement
-                            ).clientHeight))
+                targetScrollHeightLargerThanItsVisibleHeight ||
+                parentScrollHeightLargerThanItsVisibleHeight
             ) {
                 return;
             }
