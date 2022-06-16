@@ -1,0 +1,77 @@
+.WebvizPluginActions {
+    background-color: rgba(196, 196, 196, 0.22);
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+}
+
+.WebvizPluginActions__Spacer {
+    flex-grow: 4;
+}
+
+.WebvizPluginActions__Button_Badge > .MuiBadge-colorPrimary {
+    color: #ffff;
+    background-color: orange;
+}
+
+.WebvizPluginActions__Button {
+    cursor: pointer;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.WebvizPluginActions__Button::after {
+    content: "";
+    border-radius: 0;
+    background-color: rgba(196, 196, 196, 0.22);
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: 0px;
+    margin-top: 0px;
+    transition-duration: 0.1s;
+    display: block;
+}
+
+.WebvizPluginActions__Button:hover {
+    background-color: rgba(196, 196, 196, 0.22);
+}
+
+.WebvizPluginActions__Button:active::after {
+    border-radius: 50px;
+    width: 100px;
+    height: 100px;
+    margin-left: -50px;
+    margin-top: -50px;
+    transition: all 0.05s ease-in-out;
+}
+
+.WebvizCameraFlash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #fff;
+    z-index: 5000;
+}
+
+.WebvizPluginActions__TourViewTitle {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.WebvizPluginActions__TourViewTitle > span {
+    display: block;
+    margin-left: 8px;
+    font-size: 1rem;
+    line-height: 1rem;
+}

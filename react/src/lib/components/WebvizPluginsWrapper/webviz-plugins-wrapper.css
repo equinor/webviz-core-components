@@ -1,0 +1,91 @@
+.WebvizPluginsWrapper {
+    height: 100vh;
+    overflow: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.WebvizPluginsWrapper__Notification {
+    background-color: rgb(20, 20, 20);
+    color: white;
+    padding: 12px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0px 10px 21px -5px rgba(0, 0, 0, 0.33);
+    -moz-box-shadow: 0px 10px 21px -5px rgba(0, 0, 0, 0.33);
+    box-shadow: 0px 10px 21px -5px rgba(0, 0, 0, 0.33);
+}
+
+.dash-graph {
+    width: 100%;
+    height: 100%;
+}
+
+*[data-dash-is-loading="true"],
+.dash-loading {
+    pointer-events: none;
+    position: relative;
+    cursor: progress;
+}
+
+*[data-dash-is-loading="true"]:before,
+.dash-loading:before {
+    animation: fadeinTransparent 4s;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-color: white;
+    z-index: 999;
+    opacity: 0.7;
+}
+
+*[data-dash-is-loading="true"]:after,
+.dash-loading:after {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin-top: -12px;
+    margin-left: -12px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    border-top-color: #007079;
+    animation: fadeinFull 4s, spinner 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeinTransparent {
+    0% {
+        opacity: 0;
+    }
+    40% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes fadeinFull {
+    0% {
+        opacity: 0;
+    }
+    40% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

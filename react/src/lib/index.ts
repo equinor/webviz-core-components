@@ -21,12 +21,32 @@ import { Menu } from "./components/Menu";
 import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
 import { Dialog } from "./components/Dialog";
+import { WebvizContentManager } from "./components/WebvizContentManager";
+import { WebvizPluginsWrapper } from "./components/WebvizPluginsWrapper";
+import { WebvizPluginWrapper } from "./components/WebvizPluginWrapper";
+import { WebvizSettingsDrawer } from "./components/WebvizSettingsDrawer";
+import { WebvizView } from "./components/WebvizView";
+import { WebvizViewElement } from "./components/WebvizViewElement";
+import { WebvizSettingsGroup } from "./components/WebvizSettingsGroup";
+import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn/WebvizPluginLayoutColumn";
+import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow/WebvizPluginLayoutRow";
+import { WebvizPluginLoadingIndicator } from "./components/WebvizPluginLoadingIndicator";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
 
 export {
+    WebvizContentManager,
+    WebvizPluginWrapper,
+    WebvizPluginsWrapper,
+    WebvizSettingsDrawer,
+    WebvizView,
+    WebvizViewElement,
     WebvizPluginPlaceholder,
+    WebvizSettingsGroup,
+    WebvizPluginLayoutColumn,
+    WebvizPluginLayoutRow,
+    WebvizPluginLoadingIndicator,
     ColorScales,
     Select,
     SmartNodeSelector,

@@ -1,0 +1,122 @@
+.WebvizViewElement {
+    margin: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.WebvizViewElement__Backdrop {
+    position: fixed;
+    background-color: white;
+    z-index: 1299;
+    opacity: 0;
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+}
+
+.WebvizViewElement__Content {
+    -webkit-box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.33);
+    box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.33);
+    background-color: white;
+    padding: 16px;
+    transition: width 5s ease-in-out;
+    z-index: 1;
+    flex-grow: 1;
+}
+
+.WebvizViewElement__Content__Spacer {
+    display: block;
+    padding: 0px;
+}
+
+.WebvizViewElement__Content__flat {
+    background-color: white;
+    padding: 16px;
+    z-index: 1;
+}
+
+.WebvizViewElement__SettingsContainer {
+    max-height: 40vh;
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.WebvizViewElement__SettingsContainer__Content {
+    padding-right: 24px;
+}
+
+.WebvizViewElement__FullScreenContainer {
+    box-sizing: border-box;
+}
+
+.WebvizViewElement__FullScreenActions {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #f8f8f8;
+    padding: 12px;
+    border-bottom-left-radius: 16px;
+    cursor: pointer;
+    display: none;
+}
+
+.WebvizViewElement__FullScreenActions:hover {
+    background-color: rgba(196, 196, 196, 0.22);
+}
+
+.WebvizViewElement__Actions,
+.WebvizViewElement__Actions__hover {
+    position: absolute;
+    right: 8px;
+    top: -12px;
+    background-color: #fcfcfc;
+    -webkit-box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 2px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px #ccc solid;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+    height: 24px;
+    border-radius: 8px;
+}
+
+.WebvizViewElement__Actions {
+    opacity: 0;
+}
+
+.WebvizViewElement__Actions__hover {
+    opacity: 1;
+}
+
+.WebvizViewElement__Actions__hidden {
+    display: none;
+}
+
+.WebvizViewElement__Actions > div {
+    opacity: 0.5;
+}
+
+.WebvizViewElement__Actions__hover > div {
+    opacity: 1;
+}
+
+.WebvizViewElement__ActionsContent > div {
+    text-align: center;
+}
+
+.WebvizViewElement__ActionsContent .VerticalScrollBar {
+    width: 4px;
+    border-radius: 2px;
+}
+
+.WebvizViewElement__Actions__Spacer {
+    flex-grow: 4;
+}

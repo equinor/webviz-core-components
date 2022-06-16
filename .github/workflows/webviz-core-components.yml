@@ -30,12 +30,21 @@ jobs:
               with:
                   python-version: ${{ matrix.python-version }}
 
+            - name: ℹ️ Node and npm versions
+              run: |
+                  node -v
+                  npm -v
+
             - name: 📦 Install build dependencies
               run: |
                   npm ci --ignore-scripts --prefix ./react
                   npm run copy-package-json --prefix ./react
+                  pip install "dash<2.5"  # Build issue upstream in dash==2.5
                   pip install .[dependencies]
                   pip install dash[dev]
+
+            - name: ℹ️ Installed npm packages (depth = 0)
+              run: npm list --depth=0 --prefix react/
 
             - name: 🏗️ Build JavaScript part
               run: |

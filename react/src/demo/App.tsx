@@ -9,12 +9,7 @@
 import { Button } from "@material-ui/core";
 import React from "react";
 
-import {
-    WebvizPluginPlaceholder,
-    SmartNodeSelector,
-    Menu,
-    Dialog,
-} from "../lib";
+import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog } from "../lib";
 
 const steps = [
     {
@@ -53,48 +48,6 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <Menu
-                menuBarPosition="left"
-                menuDrawerPosition="left"
-                showLogo={true}
-                navigationItems={[
-                    {
-                        type: "section",
-                        title: "Components",
-                        icon: "layers",
-                        content: [
-                            {
-                                type: "group",
-                                title: "Demos",
-                                content: [
-                                    {
-                                        type: "page",
-                                        title: "WebvizPluginPlaceholder",
-                                        href: "#webviz-plugin-placeholder",
-                                    },
-                                    {
-                                        type: "page",
-                                        title: "SmartNodeSelector",
-                                        href: "#smart-node-selector",
-                                    },
-                                    {
-                                        type: "page",
-                                        title: "Dialog",
-                                        href: "#dialog",
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ]}
-                setProps={setCurrentPage}
-            />
-            {currentPage.url.split("#").length === 1 && (
-                <div>
-                    <h1>webviz-core-components - Demo page</h1>Please select a
-                    component from the menu to view its demo application.
-                </div>
-            )}
             {currentPage.url.split("#")[1] === "dialog" && (
                 <>
                     <h1>Dialog</h1>

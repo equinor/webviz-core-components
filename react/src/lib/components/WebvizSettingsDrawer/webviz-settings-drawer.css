@@ -1,0 +1,44 @@
+.WebvizSettingsDrawer {
+    position: fixed;
+    background-color: #f8f8f8;
+    height: 100vh;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.WebvizSettingsDrawer__Transition {
+    transition: width 1s ease-in-out;
+}
+
+.WebvizSettingsDrawer__Left {
+    -webkit-box-shadow: inset -14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    box-shadow: inset -14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+}
+
+.WebvizSettingsDrawer__Right {
+    -webkit-box-shadow: inset 14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+    box-shadow: inset 14px 1px 18px -18px rgba(0, 0, 0, 0.32);
+}
+
+.WebvizSettingsDrawer__TopButtons {
+    text-align: right;
+    margin-top: 22px;
+    margin-bottom: 10px;
+}
+
+.WebvizSettingsDrawer__ToggleOpen,
+.WebvizSettingsDrawer__ToggleOpen:hover {
+    transform: rotateY(180deg);
+    transition: transform 0.5s ease-in-out;
+}
+
+.WebvizSettingsDrawer__ToggleClose,
+.WebvizSettingsDrawer__ToggleClose:hover {
+    transform: rotateY(0deg);
+    transition: transform 0.5s ease-in-out;
+}

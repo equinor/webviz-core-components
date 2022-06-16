@@ -1,0 +1,27 @@
+.WebvizPluginWrapper {
+    opacity: 0.8;
+    border: 4px transparent solid;
+    border-bottom: 1px rgb(202, 202, 202) solid;
+    border-left: 4px transparent solid;
+    display: flex;
+}
+
+.WebvizPluginWrapper__Active {
+    background-color: rgba(255, 255, 255, 1);
+    opacity: 1;
+    border-left-color: #007085;
+}
+
+.WebvizPluginWrapper__FullScreenContainer {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    border: 4px transparent solid;
+    border-bottom-width: 1px;
+    flex-grow: 4;
+    display: flex;
+}
+
+.WebvizPluginWrapper__DashContent {
+    display: flex;
+    flex-grow: 4;
+}

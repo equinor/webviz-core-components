@@ -1,0 +1,36 @@
+.WebvizViewSelector {
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    cursor: pointer;
+    justify-content: space-evenly;
+    padding-left: 20px;
+    padding-right: 16px;
+    overflow: hidden;
+    transition: height 1s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.WebvizViewSelector * {
+    display: block;
+}
+
+.WebvizViewSelector:hover {
+    background-color: rgba(196, 196, 196, 0.22);
+}
+
+.WebvizViewSelector > div {
+    transition: opacity 1s ease-in-out;
+}
+
+.WebvizViewSelector__ViewName {
+    color: #007079;
+    flex-grow: 4;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-left: 12px;
+}

@@ -29,7 +29,7 @@ import {
 
 import WebvizToolbarButton from "./components/WebvizToolbarButton";
 import WebvizContentOverlay from "./components/WebvizContentOverlay";
-import downloadFile from "./utils/downloadFile";
+import downloadFile from "../../utils/downloadFile";
 
 import "./webviz_plugin_component.css";
 

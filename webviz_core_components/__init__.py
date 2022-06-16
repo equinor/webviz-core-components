@@ -14,6 +14,10 @@ from ._imports_ import __all__
 from .wrapped_components import *
 from .wrapped_components import __all__ as wrapped_components
 
+from .WebvizPluginPlaceholderWrapper import (
+    WebvizPluginPlaceholderWrapper as WebvizPluginPlaceholder,
+)
+
 __all__ += wrapped_components
 
 try:

@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import useSize from "@react-hook/size";
 
+import { useStore } from "../WebvizContentManager";
+
 import { TopMenu } from "./components/TopMenu/TopMenu";
 import { MenuBar } from "./components/MenuBar/MenuBar";
 import { MenuDrawer } from "./components/MenuDrawer/MenuDrawer";
@@ -23,6 +25,8 @@ import {
 } from "./types/navigation";
 
 import "./Menu.css";
+import { StoreActions } from "../WebvizContentManager/WebvizContentManager";
+import { Margins } from "lib/shared-types/margins";
 
 export type ParentProps = {
     url: string;
@@ -141,6 +145,8 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const menuDrawerPosition = props.menuDrawerPosition || "left";
     const showLogo = props.showLogo || false;
 
+    const webvizContentStore = useStore();
+
     const [open, setOpen] = React.useState<boolean>(false);
     const [pinned, setPinned] = React.useState<boolean>(
         localStorage.getItem("pinned") === "true" ||
@@ -190,7 +196,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
     }, [props.navigationItems, windowSize.width]);
 
     React.useEffect(() => {
-        const bodyMargins = { left: 16, top: 16, right: 16, bottom: 16 };
+        const bodyMargins: Margins = {
+            left: 16,
+            top: 16,
+            right: 16,
+            bottom: 16,
+        };
 
         if (!pinned) {
             if (props.menuBarPosition === "left") {
@@ -204,9 +215,9 @@ export const Menu: React.FC<MenuProps> = (props) => {
             }
         } else {
             if (props.menuDrawerPosition === "left") {
-                bodyMargins.left += menuDrawerWidth;
-            } else if (props.menuBarPosition === "right") {
-                bodyMargins.right += menuDrawerWidth;
+                bodyMargins.left = menuDrawerWidth + menuContentSpacing;
+            } else if (props.menuDrawerPosition === "right") {
+                bodyMargins.right = menuDrawerWidth + menuContentSpacing;
             }
         }
 
@@ -214,6 +225,19 @@ export const Menu: React.FC<MenuProps> = (props) => {
         document.body.style.marginTop = bodyMargins.top + "px";
         document.body.style.marginRight = bodyMargins.right + "px";
         document.body.style.marginBottom = bodyMargins.bottom + "px";
+
+        if (webvizContentStore) {
+            webvizContentStore.dispatch({
+                type: StoreActions.SetMenuPosition,
+                payload: {
+                    pinned: pinned,
+                    menuBarPosition: menuBarPosition as MenuBarPosition,
+                    menuDrawerPosition:
+                        menuDrawerPosition as MenuDrawerPosition,
+                    bodyMargins: bodyMargins,
+                },
+            });
+        }
     }, [
         menuBarWidth,
         menuDrawerWidth,

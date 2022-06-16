@@ -1,0 +1,5 @@
+.Webviz_PluginLayout__Row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
