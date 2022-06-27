@@ -4,6 +4,7 @@ import "./Overlay.css";
 
 export type OverlayProps = {
     visible: boolean;
+    zIndex?: number;
     onClick: () => void;
 };
 
@@ -54,6 +55,7 @@ export const Overlay: React.FC<OverlayProps> = (props) => {
             style={{
                 display: opacity > 0 ? "block" : "none",
                 opacity: opacity,
+                zIndex: props.zIndex || 1001,
             }}
             onClick={props.onClick}
         ></div>
@@ -65,6 +67,10 @@ Overlay.propTypes = {
      * Set if the overlay shall be shown or not.
      */
     visible: PropTypes.bool.isRequired,
+    /**
+     * Optionally defined a preferred z-index for the overlay.
+     */
+    zIndex: PropTypes.number,
     /**
      * Callback function called when the overlay is clicked on.
      */

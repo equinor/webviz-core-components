@@ -49,6 +49,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                         <Overlay
                             visible={menuOpen}
                             onClick={() => setMenuOpen(false)}
+                            zIndex={1003}
                         />
                         <ViewList
                             open={menuOpen}
