@@ -1,1 +1,2 @@
-export { CollapseExpandButton } from "./collapse-expand-button";
+export { CollapseExpandButton } from "./CollapseExpandButton";
+export { ValuesList } from "./ValuesList";
