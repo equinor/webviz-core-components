@@ -16,3 +16,18 @@
 .WebvizAttributesSelector__ValuesList__Position {
     visibility: hidden;
 }
+
+.WebvizAttributesSelector__ValuesList__Value {
+    padding: 8px;
+    cursor: pointer;
+    box-sizing: border-box;
+    height: 34px;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.WebvizAttributesSelector__ValuesList__Value--Selected {
+    background-color: #d5eaf4;
+}

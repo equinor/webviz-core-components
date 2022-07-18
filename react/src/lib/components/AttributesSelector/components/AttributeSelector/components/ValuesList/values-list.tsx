@@ -96,7 +96,7 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                 true
             );
         };
-    }, [valuesListPositionRef.current, popup.current]);
+    }, [valuesListPositionRef.current, popup.current, props.open]);
     return (
         <div
             ref={valuesListPositionRef}
