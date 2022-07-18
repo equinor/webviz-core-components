@@ -1,17 +1,47 @@
+import { ScrollArea } from "../../../../../ScrollArea";
 import React from "react";
 import ReactDOM from "react-dom";
 
 import "./values-list.css";
 
+export type ValueProps = {
+    checked: boolean;
+    selected: boolean;
+    children: React.ReactChild;
+};
+
+const Value: React.FC<ValueProps> = (props) => {
+    return (
+        <div
+            className={`WebvizAttributesSelector__ValuesList__Value${
+                props.selected
+                    ? " WebvizAttributesSelector__ValuesList__Value--selected"
+                    : ""
+            }`}
+        >
+            <div
+                className={`WebvizAttributesSelector__ValuesList__Value__Checkbox${
+                    props.checked
+                        ? " WebvizAttributesSelector__ValuesList__Value__Checkbox--checked"
+                        : ""
+                }`}
+            ></div>
+            {props.children}
+        </div>
+    );
+};
+
 export type ValuesListProps = {
     open: boolean;
+    alwaysOpen: boolean;
     values: string[];
-    contentRef: React.RefObject<HTMLDivElement>;
+    contentRef: React.RefObject<HTMLUListElement>;
 };
 
 export const ValuesList: React.FC<ValuesListProps> = (props) => {
     const popup = React.useRef<HTMLDivElement | null>(null);
     const valuesListPositionRef = React.useRef<HTMLDivElement | null>(null);
+    const [selection, setSelection] = React.useState<string[]>([]);
 
     React.useEffect(() => {
         popup.current = document.createElement("div");
@@ -24,6 +54,58 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             }
         };
     }, []);
+
+    const valuesList = React.useCallback(
+        (
+            maxHeight?: number,
+            top?: number,
+            left?: number,
+            width?: number,
+            open = true,
+            popup = false
+        ) => {
+            maxHeight = maxHeight || 300;
+            const height = Math.min(maxHeight, (props.values.length + 1) * 34);
+            return (
+                <div
+                    className={`WebvizAttributesSelector__ValuesList${
+                        popup
+                            ? " WebvizAttributesSelector__ValuesList--popup"
+                            : ""
+                    }`}
+                    style={{
+                        height: height,
+                        display: open ? "block" : "none",
+                        top: top,
+                        left: left,
+                        width: width,
+                    }}
+                >
+                    <ScrollArea>
+                        <div className="WebvizAttributesSelector__ValuesList__Value">
+                            <div
+                                className={
+                                    "WebvizAttributesSelector__ValuesList__Value__Checkbox" +
+                                    " WebvizAttributesSelector__ValuesList__Value__Checkbox--indeterminate"
+                                }
+                            ></div>
+                            Select / unselect all
+                        </div>
+                        {props.values.map((value) => (
+                            <Value
+                                key={value}
+                                checked={false}
+                                selected={selection.includes(value)}
+                            >
+                                {value}
+                            </Value>
+                        ))}
+                    </ScrollArea>
+                </div>
+            );
+        },
+        []
+    );
 
     React.useEffect(() => {
         const renderValuesList = () => {
@@ -63,22 +145,14 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                           height: 0,
                       };
                 ReactDOM.render(
-                    <div
-                        className="WebvizAttributesSelector__ValuesList"
-                        style={{
-                            maxHeight: maxHeight,
-                            display: props.open ? "block" : "none",
-                            top: boundingRect.top,
-                            left: boundingRect.left,
-                            width: boundingRect.width,
-                        }}
-                    >
-                        {props.values.map((value) => (
-                            <div className="WebvizAttributesSelector__ValuesList__Value">
-                                {value}
-                            </div>
-                        ))}
-                    </div>,
+                    valuesList(
+                        maxHeight,
+                        boundingRect.top,
+                        boundingRect.left,
+                        boundingRect.width,
+                        props.open && !props.alwaysOpen,
+                        true
+                    ),
                     popup.current
                 );
             }
@@ -98,9 +172,12 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
         };
     }, [valuesListPositionRef.current, popup.current, props.open]);
     return (
-        <div
-            ref={valuesListPositionRef}
-            className="WebvizAttributesSelector__ValuesList WebvizAttributesSelector__ValuesList__Position"
-        ></div>
+        <>
+            <div
+                ref={valuesListPositionRef}
+                className="WebvizAttributesSelector__ValuesList WebvizAttributesSelector__ValuesList__Position"
+            ></div>
+            {props.alwaysOpen && valuesList()}
+        </>
     );
 };

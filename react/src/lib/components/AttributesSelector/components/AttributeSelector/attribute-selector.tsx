@@ -13,7 +13,8 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>([]);
     const [active, setActive] = React.useState<boolean>(false);
     const [alwaysOpen, setAlwaysOpen] = React.useState<boolean>(false);
-    const contentRef = React.useRef<HTMLDivElement | null>(null);
+
+    const contentRef = React.useRef<HTMLUListElement | null>(null);
 
     React.useEffect(() => {
         const handleMouseDown = (e: MouseEvent) => {
@@ -53,15 +54,25 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                     onToggle={(expanded: boolean) => setAlwaysOpen(expanded)}
                 />
             </div>
-            <div className="WebvizAttributeSelector__Content" ref={contentRef}>
+            <ul
+                className={`WebvizAttributeSelector__Content${
+                    alwaysOpen
+                        ? " WebvizAttributeSelector__Content--expanded"
+                        : ""
+                }`}
+                ref={contentRef}
+            >
                 <input
                     id={`WebvizAttributeSelector_${props.id}`}
                     placeholder="Add attribute"
+                    onFocus={() => setActive(true)}
+                    onBlur={() => setActive(false)}
                 />
-            </div>
+            </ul>
             <ValuesList
-                open={active || alwaysOpen}
-                values={["test"]}
+                open={active}
+                alwaysOpen={alwaysOpen}
+                values={props.attribute.values}
                 contentRef={contentRef}
             />
         </div>
