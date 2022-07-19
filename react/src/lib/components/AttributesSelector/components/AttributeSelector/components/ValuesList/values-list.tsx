@@ -7,6 +7,7 @@ import "./values-list.css";
 export type ValueProps = {
     checked: boolean;
     selected: boolean;
+    onClick: () => void;
     children: React.ReactChild;
 };
 
@@ -18,6 +19,7 @@ const Value: React.FC<ValueProps> = (props) => {
                     ? " WebvizAttributesSelector__ValuesList__Value--selected"
                     : ""
             }`}
+            onClick={() => props.onClick()}
         >
             <div
                 className={`WebvizAttributesSelector__ValuesList__Value__Checkbox${
@@ -38,10 +40,19 @@ export type ValuesListProps = {
     contentRef: React.RefObject<HTMLUListElement>;
 };
 
+type ValueSelection = {
+    fromIndex: number;
+    toIndex: number;
+};
+
 export const ValuesList: React.FC<ValuesListProps> = (props) => {
     const popup = React.useRef<HTMLDivElement | null>(null);
     const valuesListPositionRef = React.useRef<HTMLDivElement | null>(null);
-    const [selection, setSelection] = React.useState<string[]>([]);
+    const [selections, setSelections] = React.useState<ValueSelection[]>([]);
+    const [lastSelectedIndex, setLastSelectedIndex] =
+        React.useState<number>(-1);
+    const [ctrlPressed, setCtrlPressed] = React.useState<boolean>(false);
+    const [shiftPressed, setShiftPressed] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         popup.current = document.createElement("div");
@@ -54,6 +65,122 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             }
         };
     }, []);
+
+    React.useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Control") {
+                setCtrlPressed(true);
+            }
+            if (e.key === "Shift") {
+                setShiftPressed(true);
+            }
+        };
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Control") {
+                setCtrlPressed(false);
+            }
+            if (e.key === "Shift") {
+                setShiftPressed(false);
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("keyup", handleKeyUp);
+        };
+    }, [setCtrlPressed, setShiftPressed]);
+
+    const handleValueClicked = React.useCallback(
+        (index: number) => {
+            if (ctrlPressed) {
+                if (
+                    selections.some(
+                        (selection) =>
+                            selection.fromIndex <= index &&
+                            selection.toIndex >= index
+                    )
+                ) {
+                    setSelections(
+                        selections.reduce(
+                            (
+                                previousArray: ValueSelection[],
+                                currentValue: ValueSelection
+                            ) => {
+                                if (
+                                    currentValue.fromIndex === index &&
+                                    currentValue.toIndex === index
+                                ) {
+                                    return previousArray;
+                                } else if (currentValue.fromIndex === index) {
+                                    return [
+                                        ...previousArray,
+                                        {
+                                            fromIndex:
+                                                currentValue.fromIndex + 1,
+                                            toIndex: currentValue.toIndex,
+                                        },
+                                    ];
+                                } else if (currentValue.toIndex === index) {
+                                    return [
+                                        ...previousArray,
+                                        {
+                                            fromIndex: currentValue.fromIndex,
+                                            toIndex: currentValue.toIndex - 1,
+                                        },
+                                    ];
+                                } else if (
+                                    currentValue.fromIndex <= index &&
+                                    currentValue.toIndex >= index
+                                ) {
+                                    return [
+                                        ...previousArray,
+                                        {
+                                            fromIndex: currentValue.fromIndex,
+                                            toIndex: index - 1,
+                                        },
+                                        {
+                                            fromIndex: index + 1,
+                                            toIndex: currentValue.toIndex,
+                                        },
+                                    ];
+                                }
+                                return [...previousArray, currentValue];
+                            },
+                            []
+                        )
+                    );
+                } else {
+                    setSelections([
+                        ...selections,
+                        { fromIndex: index, toIndex: index },
+                    ]);
+                }
+            } else if (shiftPressed) {
+                const lastSelection = selections[selections.length - 1];
+                if (index <= lastSelection.toIndex) {
+                    setSelections([
+                        ...selections.slice(0, selections.length - 1),
+                        { fromIndex: index, toIndex: lastSelection.toIndex },
+                    ]);
+                } else {
+                    setSelections([
+                        ...selections.slice(0, selections.length - 1),
+                        { fromIndex: lastSelection.fromIndex, toIndex: index },
+                    ]);
+                }
+            } else {
+                setSelections([{ fromIndex: index, toIndex: index }]);
+            }
+        },
+        [selections, setSelections, ctrlPressed, shiftPressed]
+    );
+
+    React.useEffect(() => {
+        console.log(selections);
+    }, [selections]);
 
     const valuesList = React.useCallback(
         (
@@ -91,11 +218,16 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                             ></div>
                             Select / unselect all
                         </div>
-                        {props.values.map((value) => (
+                        {props.values.map((value, index) => (
                             <Value
                                 key={value}
                                 checked={false}
-                                selected={selection.includes(value)}
+                                selected={selections.some(
+                                    (selection) =>
+                                        selection.fromIndex <= index &&
+                                        selection.toIndex >= index
+                                )}
+                                onClick={() => handleValueClicked(index)}
                             >
                                 {value}
                             </Value>
@@ -104,7 +236,7 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                 </div>
             );
         },
-        []
+        [selections, ctrlPressed, shiftPressed]
     );
 
     React.useEffect(() => {

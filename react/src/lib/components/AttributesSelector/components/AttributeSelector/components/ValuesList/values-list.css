@@ -5,6 +5,12 @@
     background-color: white;
     overflow-y: auto;
     margin-top: -2px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .WebvizAttributesSelector__ValuesList .ScrollArea {
@@ -38,8 +44,16 @@
     align-items: center;
 }
 
+.WebvizAttributesSelector__ValuesList__Value:hover {
+    background-color: #f4fcff;
+}
+
 .WebvizAttributesSelector__ValuesList__Value--Selected {
     background-color: #d5eaf4;
+}
+
+.WebvizAttributesSelector__ValuesList__Value--Selected:hover {
+    background-color: #deeef6;
 }
 
 .WebvizAttributesSelector__ValuesList__Value__Checkbox {
