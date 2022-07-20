@@ -15,7 +15,7 @@
 
 .WebvizAttributeSelector__Content {
     background-color: #f9f9f9;
-    min-height: 30px;
+    min-height: 40px;
     border: 1px #ccc solid;
     border-radius: 4px;
     display: flex;
@@ -35,4 +35,7 @@
     border: none;
     outline: none;
     padding: 8px;
+    position: relative;
+    z-index: 11;
+    display: block;
 }

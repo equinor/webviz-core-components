@@ -1,0 +1,33 @@
+.WebvizAttributeSelector_ValueTag {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 4px;
+    justify-content: left;
+    align-items: center;
+    min-width: 0;
+    color: #565656;
+    position: relative;
+    border-radius: 4px;
+    white-space: nowrap;
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin: 4px;
+    z-index: 11;
+    border: 1px #ccc solid;
+    background-color: #fefefe;
+}
+
+.WebvizAttributeSelector_ValueTag button {
+    border: 1px #fff solid;
+    border-radius: 50%;
+    display: flex;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    padding: 4px;
+    align-items: center;
+    margin-left: 8px;
+    font-size: 12px;
+    line-height: 12px;
+}
