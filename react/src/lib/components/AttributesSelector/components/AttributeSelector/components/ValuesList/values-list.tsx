@@ -9,16 +9,27 @@ import "./values-list.css";
 export type ValueProps = {
     checked: boolean;
     selected: boolean;
+    keyboardHover: boolean;
     onClick: () => void;
+    onToggleCheck: () => void;
     children: React.ReactChild;
 };
 
 const Value: React.FC<ValueProps> = (props) => {
+    const handleCheckboxClick = (e: React.MouseEvent) => {
+        props.onToggleCheck();
+        e.preventDefault();
+        e.stopPropagation();
+    };
     return (
         <div
             className={`WebvizAttributesSelector__ValuesList__Value${
                 props.selected
                     ? " WebvizAttributesSelector__ValuesList__Value--selected"
+                    : ""
+            }${
+                props.keyboardHover
+                    ? " WebvizAttributesSelector__ValuesList__Value--KeyboardHover"
                     : ""
             }`}
             onClick={() => props.onClick()}
@@ -29,6 +40,7 @@ const Value: React.FC<ValueProps> = (props) => {
                         ? " WebvizAttributesSelector__ValuesList__Value__Checkbox--checked"
                         : ""
                 }`}
+                onClick={(e) => handleCheckboxClick(e)}
             ></div>
             {props.children}
         </div>
@@ -46,6 +58,7 @@ export type ValuesListProps = {
     valuesListRef: React.RefObject<HTMLDivElement>;
     onNewSelection: (selection: string[]) => void;
     onClearSelection: () => void;
+    onToggleChecked: (value: string) => void;
 };
 
 type ValueSelection = {
@@ -59,6 +72,10 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
     const [selections, setSelections] = React.useState<ValueSelection[]>([]);
     const [ctrlPressed, setCtrlPressed] = React.useState<boolean>(false);
     const [shiftPressed, setShiftPressed] = React.useState<boolean>(false);
+    const [currentKeyboardHoverIndex, setCurrentKeyboardHoverIndex] =
+        React.useState<number>(-1);
+    const [shiftKeyboardIndex, setShiftKeyboardIndex] =
+        React.useState<number>(-1);
 
     React.useEffect(() => {
         popup.current = document.createElement("div");
@@ -71,6 +88,13 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             }
         };
     }, []);
+
+    React.useEffect(() => {
+        if (!props.open) {
+            setSelections([]);
+            setCurrentKeyboardHoverIndex(-1);
+        }
+    }, [props.open, setSelections, setCurrentKeyboardHoverIndex]);
 
     React.useEffect(() => {
         if (!props.inputActive) {
@@ -109,6 +133,16 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             }
             if (e.key === "Shift") {
                 setShiftPressed(true);
+                setShiftKeyboardIndex(currentKeyboardHoverIndex);
+                if (currentKeyboardHoverIndex > -1) {
+                    setSelections([
+                        ...selections.slice(0, selections.length - 1),
+                        {
+                            fromIndex: currentKeyboardHoverIndex,
+                            toIndex: currentKeyboardHoverIndex,
+                        },
+                    ]);
+                }
             }
             if (e.key === "Enter" && !props.inputActive) {
                 props.onNewSelection(
@@ -125,6 +159,46 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                 );
                 setSelections([]);
             }
+            if (e.key === "ArrowDown") {
+                if (e.shiftKey) {
+                    setSelections([
+                        ...selections.slice(0, selections.length - 1),
+                        {
+                            fromIndex: Math.min(
+                                shiftKeyboardIndex,
+                                currentKeyboardHoverIndex + 1
+                            ),
+                            toIndex: Math.max(
+                                shiftKeyboardIndex,
+                                currentKeyboardHoverIndex + 1
+                            ),
+                        },
+                    ]);
+                }
+                setCurrentKeyboardHoverIndex((prevIndex) =>
+                    Math.min(prevIndex + 1, props.values.length - 1)
+                );
+            }
+            if (e.key === "ArrowUp") {
+                if (e.shiftKey) {
+                    setSelections([
+                        ...selections.slice(0, selections.length - 1),
+                        {
+                            fromIndex: Math.min(
+                                shiftKeyboardIndex,
+                                currentKeyboardHoverIndex - 1
+                            ),
+                            toIndex: Math.max(
+                                shiftKeyboardIndex,
+                                currentKeyboardHoverIndex - 1
+                            ),
+                        },
+                    ]);
+                }
+                setCurrentKeyboardHoverIndex((prevIndex) =>
+                    Math.max(prevIndex - 1, 0)
+                );
+            }
         };
         const handleKeyUp = (e: KeyboardEvent) => {
             if (e.key === "Control") {
@@ -132,6 +206,7 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             }
             if (e.key === "Shift") {
                 setShiftPressed(false);
+                setShiftKeyboardIndex(-1);
             }
         };
 
@@ -148,10 +223,15 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
         selections,
         setSelections,
         props.onNewSelection,
+        currentKeyboardHoverIndex,
+        setCurrentKeyboardHoverIndex,
+        setShiftKeyboardIndex,
+        shiftKeyboardIndex,
     ]);
 
     const handleValueClicked = React.useCallback(
         (index: number) => {
+            setCurrentKeyboardHoverIndex(index);
             if (ctrlPressed) {
                 if (
                     selections.some(
@@ -232,7 +312,13 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                 setSelections([{ fromIndex: index, toIndex: index }]);
             }
         },
-        [selections, setSelections, ctrlPressed, shiftPressed]
+        [
+            selections,
+            setSelections,
+            setCurrentKeyboardHoverIndex,
+            ctrlPressed,
+            shiftPressed,
+        ]
     );
 
     const valuesList = React.useCallback(
@@ -245,7 +331,10 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             popup = false
         ) => {
             maxHeight = maxHeight || 300;
-            const height = Math.min(maxHeight, (props.values.length + 1) * 34);
+            const height = Math.min(
+                maxHeight,
+                (props.values.length + (selections.length > 0 ? 2 : 1)) * 34.5
+            );
             return (
                 <div
                     ref={props.valuesListRef}
@@ -262,22 +351,27 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                         width: width,
                     }}
                 >
-                    <ScrollArea>
+                    <div
+                        className="WebvizAttributesSelector__ValuesList__Value"
+                        onClick={() => props.onClearSelection()}
+                    >
                         <div
-                            className="WebvizAttributesSelector__ValuesList__Value"
-                            onClick={() => props.onClearSelection()}
-                        >
-                            <div
-                                className={
-                                    "WebvizAttributesSelector__ValuesList__Value__Checkbox" +
-                                    " WebvizAttributesSelector__ValuesList__Value__Checkbox--indeterminate"
-                                }
-                            ></div>
-                            Select / unselect all
-                        </div>
+                            className={
+                                "WebvizAttributesSelector__ValuesList__Value__Checkbox" +
+                                " WebvizAttributesSelector__ValuesList__Value__Checkbox--indeterminate"
+                            }
+                        ></div>
+                        Select / unselect all
+                    </div>
+                    <ScrollArea
+                        height={Math.min(maxHeight, props.values.length * 34)}
+                    >
                         {props.values.map((value, index) => (
                             <Value
                                 key={value}
+                                keyboardHover={
+                                    index === currentKeyboardHoverIndex
+                                }
                                 checked={props.selectedValues.some((v) =>
                                     value.match(
                                         `^${replaceAll(
@@ -297,11 +391,19 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                                         selection.toIndex >= index
                                 )}
                                 onClick={() => handleValueClicked(index)}
+                                onToggleCheck={() =>
+                                    props.onToggleChecked(value)
+                                }
                             >
                                 {value}
                             </Value>
                         ))}
                     </ScrollArea>
+                    {selections.length > 0 && (
+                        <div className="WebvizAttributesSelector__ValuesList__Tooltip">
+                            Press Enter to confirm your selection
+                        </div>
+                    )}
                 </div>
             );
         },
@@ -313,6 +415,8 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             props.values,
             props.selectedValues,
             props.onClearSelection,
+            props.onToggleChecked,
+            currentKeyboardHoverIndex,
         ]
     );
 
@@ -389,6 +493,8 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
         ctrlPressed,
         props.selectedValues,
         props.onClearSelection,
+        props.onToggleChecked,
+        currentKeyboardHoverIndex,
     ]);
     return (
         <>

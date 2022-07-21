@@ -15,6 +15,7 @@ import { Point } from "../../shared-types/point";
 import "./ScrollArea.css";
 
 export type ScrollAreaProps = {
+    height?: number | string;
     children?: React.ReactNode;
 };
 
@@ -327,7 +328,11 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
     ]);
 
     return (
-        <div className="ScrollArea" ref={scrollAreaRef}>
+        <div
+            className="ScrollArea"
+            ref={scrollAreaRef}
+            style={props.height ? { height: props.height } : {}}
+        >
             <div
                 ref={scrollbarRef}
                 className="VerticalScrollBar"

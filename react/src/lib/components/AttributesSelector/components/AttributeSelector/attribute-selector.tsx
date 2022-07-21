@@ -1,6 +1,14 @@
 import React from "react";
-import { Attribute } from "../../types";
+import {
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+} from "@material-ui/core";
 
+import { Attribute } from "../../types";
 import { CollapseExpandButton, ValuesList, ValueTag } from "./components";
 import { escapeRegExp, replaceAll } from "../../utils/string-operations";
 
@@ -19,6 +27,10 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
     const [currentText, setCurrentText] = React.useState<string>("");
     const [inputActive, setInputActive] = React.useState<boolean>(false);
     const [inputShaking, setInputShaking] = React.useState<boolean>(false);
+    const [confirmDialogOpen, setConfirmDialogOpen] =
+        React.useState<boolean>(false);
+    const [matchedSelection, setMatchedSelection] = React.useState<string>("");
+    const [currentSelection, setCurrentSelection] = React.useState<string>("");
 
     const contentRef = React.useRef<HTMLUListElement | null>(null);
     const valuesListRef = React.useRef<HTMLDivElement | null>(null);
@@ -47,6 +59,8 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                 (!valuesList || !valuesList.contains(eventTarget))
             ) {
                 setActive(false);
+            } else {
+                setActive(true);
             }
         };
         document.addEventListener("mousedown", handleMouseDown);
@@ -56,27 +70,40 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
         };
     }, [contentRef, valuesListRef, setActive]);
 
+    const getMatchedValues = React.useCallback(
+        (value: string): string[] => {
+            return props.attribute.values.filter((v) =>
+                v.match(
+                    `^${replaceAll(
+                        replaceAll(escapeRegExp(value), "*", ".*"),
+                        "?",
+                        "."
+                    )}$`
+                )
+            );
+        },
+        [props.attribute]
+    );
+
+    const getMatchedSelections = React.useCallback(
+        (value: string): string[] => {
+            return selectedValues.filter((v) =>
+                value.match(
+                    `^${replaceAll(
+                        replaceAll(escapeRegExp(v), "*", ".*"),
+                        "?",
+                        "."
+                    )}$`
+                )
+            );
+        },
+        [selectedValues]
+    );
+
     const handleInputKeyUp = React.useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === "Enter" && inputRef.current) {
-                if (
-                    props.attribute.values.filter((v) =>
-                        v.match(
-                            `^${replaceAll(
-                                replaceAll(
-                                    escapeRegExp(
-                                        (inputRef.current as HTMLInputElement)
-                                            .value
-                                    ),
-                                    "*",
-                                    ".*"
-                                ),
-                                "?",
-                                "."
-                            )}$`
-                        )
-                    ).length > 0
-                ) {
+                if (getMatchedValues(inputRef.current.value).length > 0) {
                     setSelectedValues([
                         ...selectedValues,
                         inputRef.current.value,
@@ -152,12 +179,14 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                 {selectedValues.map((value) => (
                     <ValueTag
                         key={value}
+                        highlighted={matchedSelection === value}
                         value={value}
                         onRemove={(v) => {
                             setSelectedValues(
                                 selectedValues.filter((el) => el !== v)
                             );
                         }}
+                        matchedValues={getMatchedValues(value)}
                     />
                 ))}
                 <input
@@ -189,7 +218,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                     setSelectedValues([
                         ...selectedValues,
                         ...selection.filter(
-                            (el) => !selectedValues.includes(el)
+                            (el) => getMatchedSelections(el).length === 0
                         ),
                     ]);
                 }}
@@ -197,7 +226,77 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                 onClearSelection={() => setSelectedValues([])}
                 currentText={currentText}
                 inputActive={inputActive}
+                onToggleChecked={(v) => {
+                    const matchedSelections = getMatchedSelections(v);
+                    if (matchedSelections.length > 0) {
+                        if (getMatchedValues(matchedSelections[0]).length > 1) {
+                            setConfirmDialogOpen(true);
+                            setMatchedSelection(matchedSelections[0]);
+                            setCurrentSelection(v);
+                        } else {
+                            setSelectedValues(
+                                selectedValues.filter((el) => el !== v)
+                            );
+                        }
+                    } else {
+                        setSelectedValues([...selectedValues, v]);
+                    }
+                }}
             />
+            <Dialog
+                open={confirmDialogOpen}
+                onClose={() => setConfirmDialogOpen(false)}
+            >
+                <DialogTitle>Remove wildcard selector?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Unchecking this value will remove the wildcard selector
+                        <span className="WebvizAttributeSelector__Dialog__Highlight">
+                            {matchedSelection}
+                        </span>
+                        .
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => {
+                            setConfirmDialogOpen(false);
+                            setMatchedSelection("");
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            setSelectedValues(
+                                selectedValues.filter(
+                                    (el) => el !== matchedSelection
+                                )
+                            );
+                            setMatchedSelection("");
+                            setConfirmDialogOpen(false);
+                        }}
+                    >
+                        Remove
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            setSelectedValues([
+                                ...selectedValues.filter(
+                                    (el) => el !== matchedSelection
+                                ),
+                                ...getMatchedValues(matchedSelection).filter(
+                                    (el) => el !== currentSelection
+                                ),
+                            ]);
+                            setMatchedSelection("");
+                            setConfirmDialogOpen(false);
+                        }}
+                    >
+                        Expand
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };

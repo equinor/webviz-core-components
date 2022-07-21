@@ -18,6 +18,11 @@
     background-color: #fefefe;
 }
 
+.WebvizAttributeSelector_ValueTag--highlighted {
+    border-color: rgb(157, 0, 0);
+    z-index: 1500;
+}
+
 .WebvizAttributeSelector_ValueTag button {
     border: 1px #fff solid;
     border-radius: 50%;
@@ -30,4 +35,25 @@
     margin-left: 8px;
     font-size: 12px;
     line-height: 12px;
+}
+
+.WebvizAttributeSelector_ValueTag__NumMatches {
+    align-items: center;
+    background: rgb(245, 245, 245);
+    border: 1px #ccc solid;
+    border-radius: 11px;
+    color: #565656;
+    height: 20px;
+    justify-content: center;
+    margin-right: 8px;
+    padding: 0;
+    padding-left: 3px;
+    padding-right: 3px;
+    min-width: 20px;
+    display: inline-block;
+    outline: none;
+    position: relative;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
 }

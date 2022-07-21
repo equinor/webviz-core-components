@@ -115,7 +115,23 @@ const App: React.FC = () => {
                     attributes={[
                         {
                             name: "Attribute 1",
-                            values: ["Value 1", "Value 2", "Value 3"],
+                            values: [
+                                "Value 1",
+                                "Value 2",
+                                "Value 3",
+                                "Value 4",
+                                "Value 5",
+                            ],
+                        },
+                        {
+                            name: "Attribute 2",
+                            values: [
+                                "Value 1",
+                                "Value 2",
+                                "Value 3",
+                                "Value 4",
+                                "Value 5",
+                            ],
                         },
                     ]}
                 />

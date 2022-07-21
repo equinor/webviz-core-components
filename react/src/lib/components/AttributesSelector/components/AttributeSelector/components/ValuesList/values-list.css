@@ -11,10 +11,7 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-}
-
-.WebvizAttributesSelector__ValuesList .ScrollArea {
-    height: 100%;
+    overflow: hidden;
 }
 
 .WebvizAttributesSelector__ValuesList--popup {
@@ -25,7 +22,7 @@
     right: -1px;
     -webkit-box-shadow: 0px 4px 5px -1px rgba(0, 0, 0, 0.2);
     box-shadow: 0px 4px 5px -1px rgba(0, 0, 0, 0.2);
-    z-index: 1500;
+    z-index: 1299;
 }
 
 .WebvizAttributesSelector__ValuesList__Position {
@@ -43,10 +40,15 @@
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
+    border: 1px transparent solid;
 }
 
 .WebvizAttributesSelector__ValuesList__Value:hover {
     background-color: #f4fcff;
+}
+
+.WebvizAttributesSelector__ValuesList__Value--KeyboardHover {
+    border: 1px rgb(37, 53, 224) solid;
 }
 
 .WebvizAttributesSelector__ValuesList__Value--Selected {
@@ -86,4 +88,18 @@
     width: 6px;
     background-color: #fff;
     margin-top: 3px;
+}
+
+.WebvizAttributesSelector__ValuesList__Tooltip {
+    padding: 8px;
+    font-style: italic;
+    box-sizing: border-box;
+    height: 34px;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background-color: rgb(231, 231, 231);
+    color: rgb(118, 118, 118);
 }

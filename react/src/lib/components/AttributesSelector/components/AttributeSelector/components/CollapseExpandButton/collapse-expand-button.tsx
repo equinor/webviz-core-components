@@ -19,7 +19,7 @@ export const CollapseExpandButton: React.FC<CollapseExpandButtonProps> = (
             }`}
             onClick={() => props.onToggle(!props.expanded)}
         >
-            Keep options open
+            {props.expanded ? "Keep options closed" : "Keep options open"}
         </div>
     );
 };
