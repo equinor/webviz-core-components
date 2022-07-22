@@ -1,0 +1,67 @@
+.WebvizRangeFilter__Thumb {
+    position: absolute;
+    margin-top: -5px;
+    margin-left: -6px;
+    display: flex;
+}
+
+.WebvizRangeFilter__Thumb__Handle {
+    background-color: black;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    cursor: pointer;
+}
+
+.WebvizRangeFilter__Thumb__LeftHandle {
+    background-color: black;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    width: 6px;
+    height: 12px;
+    cursor: pointer;
+}
+
+.WebvizRangeFilter__Thumb__RightHandle {
+    background-color: black;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    width: 6px;
+    height: 12px;
+    cursor: pointer;
+}
+
+.WebvizRangeFilter__Thumb__Bar {
+    background-color: rgb(91, 82, 255);
+    height: 12px;
+}
+
+.WebvizRangeFilter__Thumb__Tooltip {
+    position: absolute;
+    top: 24px;
+    background-color: black;
+    color: white;
+    padding: 4px;
+    width: 40px;
+    text-align: center;
+}
+
+.WebvizRangeFilter__Thumb__Tooltip--left {
+    left: 0px;
+    margin-left: -24px;
+}
+.WebvizRangeFilter__Thumb__Tooltip--right {
+    right: 0px;
+    margin-right: -12px;
+}
+
+.WebvizRangeFilter__Thumb__Tooltip::before {
+    position: absolute;
+    top: -12px;
+    border-bottom: 12px black solid;
+    border-left: 12px transparent solid;
+    border-right: 12px transparent solid;
+    content: "";
+    left: 50%;
+    margin-left: -6px;
+}

@@ -31,6 +31,7 @@ import { WebvizSettingsGroup } from "./components/WebvizSettingsGroup";
 import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn/WebvizPluginLayoutColumn";
 import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow/WebvizPluginLayoutRow";
 import { WebvizPluginLoadingIndicator } from "./components/WebvizPluginLoadingIndicator";
+import { RangeFilter } from "./components/RangeFilter";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
@@ -60,4 +61,5 @@ export {
     Overlay,
     ScrollArea,
     Dialog,
+    RangeFilter,
 };

@@ -9,7 +9,12 @@
 import { Button } from "@material-ui/core";
 import React from "react";
 
-import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog } from "../lib";
+import {
+    WebvizPluginPlaceholder,
+    SmartNodeSelector,
+    Dialog,
+    RangeFilter,
+} from "../lib";
 
 const steps = [
     {
@@ -48,6 +53,8 @@ const App: React.FC = () => {
 
     return (
         <div>
+            <RangeFilter minValue={0} maxValue={99} />
+
             {currentPage.url.split("#")[1] === "dialog" && (
                 <>
                     <h1>Dialog</h1>
