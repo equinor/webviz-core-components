@@ -100,7 +100,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
         [selectedValues]
     );
 
-    const handleInputKeyUp = React.useCallback(
+    const handleInputKeyDown = React.useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === "Enter" && inputRef.current) {
                 if (getMatchedValues(inputRef.current.value).length > 0) {
@@ -128,6 +128,16 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
             shakingTimer.current,
             setInputShaking,
         ]
+    );
+
+    const handleInputKeyUp = React.useCallback(
+        (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "ArrowDown" && inputRef.current) {
+                inputRef.current.blur();
+                setInputActive(false);
+            }
+        },
+        [inputRef.current, setInputActive]
     );
 
     React.useEffect(() => {
@@ -205,7 +215,8 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                     value={currentText}
                     onBlur={() => setInputActive(false)}
                     onChange={(e) => setCurrentText(e.target.value)}
-                    onKeyDown={(e) => handleInputKeyUp(e)}
+                    onKeyDown={(e) => handleInputKeyDown(e)}
+                    onKeyUp={(e) => handleInputKeyUp(e)}
                 />
             </ul>
             <ValuesList

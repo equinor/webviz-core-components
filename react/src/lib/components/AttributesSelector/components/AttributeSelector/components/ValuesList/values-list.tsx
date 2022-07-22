@@ -73,9 +73,11 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
     const [ctrlPressed, setCtrlPressed] = React.useState<boolean>(false);
     const [shiftPressed, setShiftPressed] = React.useState<boolean>(false);
     const [currentKeyboardHoverIndex, setCurrentKeyboardHoverIndex] =
-        React.useState<number>(-1);
+        React.useState<number>(-2);
     const [shiftKeyboardIndex, setShiftKeyboardIndex] =
         React.useState<number>(-1);
+    const [keyboardSelectionStarted, setKeyboardSelectionStarted] =
+        React.useState<boolean>(false);
 
     React.useEffect(() => {
         popup.current = document.createElement("div");
@@ -92,7 +94,7 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
     React.useEffect(() => {
         if (!props.open) {
             setSelections([]);
-            setCurrentKeyboardHoverIndex(-1);
+            setCurrentKeyboardHoverIndex(-2);
         }
     }, [props.open, setSelections, setCurrentKeyboardHoverIndex]);
 
@@ -100,6 +102,7 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
         if (!props.inputActive) {
             return;
         }
+        setCurrentKeyboardHoverIndex(-2);
         if (props.currentText === "") {
             setSelections([]);
         } else {
@@ -124,27 +127,34 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                     }))
             );
         }
-    }, [props.currentText, setSelections, props.values, props.inputActive]);
+    }, [
+        props.currentText,
+        setSelections,
+        props.values,
+        props.inputActive,
+        setCurrentKeyboardHoverIndex,
+    ]);
 
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (
+                !props.open ||
+                (!props.inputActive && currentKeyboardHoverIndex === -2)
+            ) {
+                return;
+            }
             if (e.key === "Control") {
                 setCtrlPressed(true);
             }
             if (e.key === "Shift") {
                 setShiftPressed(true);
-                setShiftKeyboardIndex(currentKeyboardHoverIndex);
-                if (currentKeyboardHoverIndex > -1) {
-                    setSelections([
-                        ...selections.slice(0, selections.length - 1),
-                        {
-                            fromIndex: currentKeyboardHoverIndex,
-                            toIndex: currentKeyboardHoverIndex,
-                        },
-                    ]);
-                }
             }
             if (e.key === "Enter" && !props.inputActive) {
+                if (currentKeyboardHoverIndex === -1) {
+                    setSelections([]);
+                    props.onClearSelection();
+                    return;
+                }
                 props.onNewSelection(
                     selections.reduce(
                         (newSelection, selection) => [
@@ -161,52 +171,140 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             }
             if (e.key === "ArrowDown") {
                 if (e.shiftKey) {
-                    setSelections([
-                        ...selections.slice(0, selections.length - 1),
-                        {
-                            fromIndex: Math.min(
-                                shiftKeyboardIndex,
+                    if (!keyboardSelectionStarted) {
+                        if (currentKeyboardHoverIndex > -1) {
+                            setShiftKeyboardIndex(
                                 currentKeyboardHoverIndex + 1
-                            ),
-                            toIndex: Math.max(
-                                shiftKeyboardIndex,
-                                currentKeyboardHoverIndex + 1
-                            ),
-                        },
-                    ]);
+                            );
+                            const lastSelection =
+                                selections.length > 0
+                                    ? selections[selections.length - 1]
+                                    : { fromIndex: -1, toIndex: -1 };
+                            if (
+                                currentKeyboardHoverIndex ===
+                                    lastSelection.fromIndex &&
+                                currentKeyboardHoverIndex ===
+                                    lastSelection.toIndex
+                            ) {
+                                setSelections([
+                                    ...selections.slice(
+                                        0,
+                                        selections.length - 1
+                                    ),
+                                    {
+                                        fromIndex: currentKeyboardHoverIndex,
+                                        toIndex: currentKeyboardHoverIndex,
+                                    },
+                                ]);
+                            } else {
+                                setSelections([
+                                    ...selections,
+                                    {
+                                        fromIndex:
+                                            currentKeyboardHoverIndex + 1,
+                                        toIndex: currentKeyboardHoverIndex + 1,
+                                    },
+                                ]);
+                            }
+                            setKeyboardSelectionStarted(true);
+                        }
+                    } else {
+                        setSelections([
+                            ...selections.slice(0, selections.length - 1),
+                            {
+                                fromIndex: Math.min(
+                                    shiftKeyboardIndex,
+                                    currentKeyboardHoverIndex + 1
+                                ),
+                                toIndex: Math.max(
+                                    shiftKeyboardIndex,
+                                    currentKeyboardHoverIndex + 1
+                                ),
+                            },
+                        ]);
+                    }
                 }
-                setCurrentKeyboardHoverIndex((prevIndex) =>
-                    Math.min(prevIndex + 1, props.values.length - 1)
+                setCurrentKeyboardHoverIndex(
+                    Math.min(
+                        currentKeyboardHoverIndex + 1,
+                        props.values.length - 1
+                    )
                 );
             }
             if (e.key === "ArrowUp") {
                 if (e.shiftKey) {
-                    setSelections([
-                        ...selections.slice(0, selections.length - 1),
-                        {
-                            fromIndex: Math.min(
-                                shiftKeyboardIndex,
+                    if (!keyboardSelectionStarted) {
+                        if (currentKeyboardHoverIndex > -1) {
+                            setShiftKeyboardIndex(
                                 currentKeyboardHoverIndex - 1
-                            ),
-                            toIndex: Math.max(
-                                shiftKeyboardIndex,
-                                currentKeyboardHoverIndex - 1
-                            ),
-                        },
-                    ]);
+                            );
+                            const lastSelection =
+                                selections.length > 0
+                                    ? selections[selections.length - 1]
+                                    : { fromIndex: -1, toIndex: -1 };
+                            if (
+                                currentKeyboardHoverIndex ===
+                                    lastSelection.fromIndex &&
+                                currentKeyboardHoverIndex ===
+                                    lastSelection.toIndex
+                            ) {
+                                setSelections([
+                                    ...selections.slice(
+                                        0,
+                                        selections.length - 1
+                                    ),
+                                    {
+                                        fromIndex: currentKeyboardHoverIndex,
+                                        toIndex: currentKeyboardHoverIndex,
+                                    },
+                                ]);
+                            } else {
+                                setSelections([
+                                    ...selections,
+                                    {
+                                        fromIndex:
+                                            currentKeyboardHoverIndex - 1,
+                                        toIndex: currentKeyboardHoverIndex - 1,
+                                    },
+                                ]);
+                            }
+                            setKeyboardSelectionStarted(true);
+                        }
+                    } else {
+                        setSelections([
+                            ...selections.slice(0, selections.length - 1),
+                            {
+                                fromIndex: Math.min(
+                                    shiftKeyboardIndex,
+                                    currentKeyboardHoverIndex - 1
+                                ),
+                                toIndex: Math.max(
+                                    shiftKeyboardIndex,
+                                    currentKeyboardHoverIndex - 1
+                                ),
+                            },
+                        ]);
+                    }
                 }
-                setCurrentKeyboardHoverIndex((prevIndex) =>
-                    Math.max(prevIndex - 1, 0)
+                setCurrentKeyboardHoverIndex(
+                    Math.max(currentKeyboardHoverIndex - 1, -1)
                 );
             }
         };
         const handleKeyUp = (e: KeyboardEvent) => {
+            if (
+                !props.open ||
+                (!props.inputActive && currentKeyboardHoverIndex === -2)
+            ) {
+                return;
+            }
             if (e.key === "Control") {
                 setCtrlPressed(false);
             }
             if (e.key === "Shift") {
                 setShiftPressed(false);
                 setShiftKeyboardIndex(-1);
+                setKeyboardSelectionStarted(false);
             }
         };
 
@@ -218,6 +316,7 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
             document.removeEventListener("keyup", handleKeyUp);
         };
     }, [
+        props.open,
         setCtrlPressed,
         setShiftPressed,
         selections,
@@ -227,11 +326,14 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
         setCurrentKeyboardHoverIndex,
         setShiftKeyboardIndex,
         shiftKeyboardIndex,
+        keyboardSelectionStarted,
+        setKeyboardSelectionStarted,
     ]);
 
     const handleValueClicked = React.useCallback(
         (index: number) => {
             setCurrentKeyboardHoverIndex(index);
+            setKeyboardSelectionStarted(true);
             if (ctrlPressed) {
                 if (
                     selections.some(
@@ -321,106 +423,87 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
         ]
     );
 
-    const valuesList = React.useCallback(
-        (
-            maxHeight?: number,
-            top?: number,
-            left?: number,
-            width?: number,
-            open = true,
-            popup = false
-        ) => {
-            maxHeight = maxHeight || 300;
-            const height = Math.min(
-                maxHeight,
-                (props.values.length + (selections.length > 0 ? 2 : 1)) * 34.5
-            );
-            return (
+    const valuesList = (
+        maxHeight?: number,
+        top?: number,
+        left?: number,
+        width?: number,
+        open = true,
+        popup = false
+    ) => {
+        maxHeight = maxHeight || 300;
+        const height = Math.min(
+            maxHeight,
+            (props.values.length + (selections.length > 0 ? 2 : 1)) * 34.5
+        );
+        return (
+            <div
+                ref={props.valuesListRef}
+                className={`WebvizAttributesSelector__ValuesList${
+                    popup ? " WebvizAttributesSelector__ValuesList--popup" : ""
+                }`}
+                style={{
+                    height: height,
+                    display: open ? "block" : "none",
+                    top: top,
+                    left: left,
+                    width: width,
+                }}
+            >
                 <div
-                    ref={props.valuesListRef}
-                    className={`WebvizAttributesSelector__ValuesList${
-                        popup
-                            ? " WebvizAttributesSelector__ValuesList--popup"
+                    className={`WebvizAttributesSelector__ValuesList__Value${
+                        currentKeyboardHoverIndex === -1
+                            ? " WebvizAttributesSelector__ValuesList__Value--KeyboardHover"
                             : ""
                     }`}
-                    style={{
-                        height: height,
-                        display: open ? "block" : "none",
-                        top: top,
-                        left: left,
-                        width: width,
-                    }}
+                    onClick={() => props.onClearSelection()}
                 >
                     <div
-                        className="WebvizAttributesSelector__ValuesList__Value"
-                        onClick={() => props.onClearSelection()}
-                    >
-                        <div
-                            className={
-                                "WebvizAttributesSelector__ValuesList__Value__Checkbox" +
-                                " WebvizAttributesSelector__ValuesList__Value__Checkbox--indeterminate"
-                            }
-                        ></div>
-                        Select / unselect all
-                    </div>
-                    <ScrollArea
-                        height={Math.min(maxHeight, props.values.length * 34)}
-                    >
-                        {props.values.map((value, index) => (
-                            <Value
-                                key={value}
-                                keyboardHover={
-                                    index === currentKeyboardHoverIndex
-                                }
-                                checked={props.selectedValues.some((v) =>
-                                    value.match(
-                                        `^${replaceAll(
-                                            replaceAll(
-                                                escapeRegExp(v),
-                                                "*",
-                                                ".*"
-                                            ),
-                                            "?",
-                                            "."
-                                        )}$`
-                                    )
-                                )}
-                                selected={selections.some(
-                                    (selection) =>
-                                        selection.fromIndex <= index &&
-                                        selection.toIndex >= index
-                                )}
-                                onClick={() => handleValueClicked(index)}
-                                onToggleCheck={() =>
-                                    props.onToggleChecked(value)
-                                }
-                            >
-                                {value}
-                            </Value>
-                        ))}
-                    </ScrollArea>
-                    {selections.length > 0 && (
-                        <div className="WebvizAttributesSelector__ValuesList__Tooltip">
-                            Press Enter to confirm your selection
-                        </div>
-                    )}
+                        className={
+                            "WebvizAttributesSelector__ValuesList__Value__Checkbox" +
+                            " WebvizAttributesSelector__ValuesList__Value__Checkbox--indeterminate"
+                        }
+                    ></div>
+                    Select / unselect all
                 </div>
-            );
-        },
-        [
-            selections,
-            ctrlPressed,
-            shiftPressed,
-            props.valuesListRef,
-            props.values,
-            props.selectedValues,
-            props.onClearSelection,
-            props.onToggleChecked,
-            currentKeyboardHoverIndex,
-        ]
-    );
+                <ScrollArea
+                    height={Math.min(maxHeight, props.values.length * 34)}
+                >
+                    {props.values.map((value, index) => (
+                        <Value
+                            key={value}
+                            keyboardHover={index === currentKeyboardHoverIndex}
+                            checked={props.selectedValues.some((v) =>
+                                value.match(
+                                    `^${replaceAll(
+                                        replaceAll(escapeRegExp(v), "*", ".*"),
+                                        "?",
+                                        "."
+                                    )}$`
+                                )
+                            )}
+                            selected={selections.some(
+                                (selection) =>
+                                    selection.fromIndex <= index &&
+                                    selection.toIndex >= index
+                            )}
+                            onClick={() => handleValueClicked(index)}
+                            onToggleCheck={() => props.onToggleChecked(value)}
+                        >
+                            {value}
+                        </Value>
+                    ))}
+                </ScrollArea>
+                {selections.length > 0 && (
+                    <div className="WebvizAttributesSelector__ValuesList__Tooltip">
+                        Press Enter to confirm your selection
+                    </div>
+                )}
+            </div>
+        );
+    };
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         const renderValuesList = () => {
             if (valuesListPositionRef.current && popup.current) {
                 const maxHeight =
