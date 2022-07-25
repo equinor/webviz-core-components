@@ -1,4 +1,3 @@
-import { Tooltip } from "@material-ui/core";
 import React from "react";
 
 import "./thumb.css";
@@ -19,7 +18,6 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
         React.useState<HTMLDivElement | null>(null);
     const [fromValue, setFromValue] = React.useState<number>(props.fromValue);
     const [toValue, setToValue] = React.useState<number>(props.toValue);
-    const [tooltipVisible, setTooltipVisible] = React.useState<boolean>(false);
 
     const thumbRef = React.useRef<HTMLDivElement | null>(null);
     const handleRef = React.useRef<HTMLDivElement | null>(null);
@@ -171,11 +169,7 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                     <div
                         className="WebvizRangeFilter__Thumb__LeftHandle"
                         ref={leftHandleRef}
-                    >
-                        <Tooltip title={fromValue}>
-                            <span></span>
-                        </Tooltip>
-                    </div>
+                    ></div>
                     <div
                         className="WebvizRangeFilter__Thumb__Bar"
                         style={{
@@ -186,11 +180,7 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                     <div
                         className="WebvizRangeFilter__Thumb__RightHandle"
                         ref={rightHandleRef}
-                    >
-                        <Tooltip title={toValue}>
-                            <span></span>
-                        </Tooltip>
-                    </div>
+                    ></div>
                 </>
             )}
         </div>
