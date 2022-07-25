@@ -18,6 +18,10 @@
     background-color: #fefefe;
 }
 
+.WebvizAttributeSelector_ValueTag--selected {
+    background-color: #aebaff;
+}
+
 .WebvizAttributeSelector_ValueTag--highlighted {
     border-color: rgb(157, 0, 0);
     z-index: 1500;

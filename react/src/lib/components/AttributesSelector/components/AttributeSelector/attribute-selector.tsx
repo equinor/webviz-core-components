@@ -9,7 +9,12 @@ import {
 } from "@material-ui/core";
 
 import { Attribute } from "../../types";
-import { CollapseExpandButton, ValuesList, ValueTag } from "./components";
+import {
+    CollapseExpandButton,
+    MouseSelection,
+    ValuesList,
+    ValueTag,
+} from "./components";
 import { escapeRegExp, replaceAll } from "../../utils/string-operations";
 
 import "animate.css";
@@ -32,6 +37,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
     const [matchedSelection, setMatchedSelection] = React.useState<string>("");
     const [currentSelection, setCurrentSelection] = React.useState<string>("");
 
+    const selectorRef = React.useRef<HTMLDivElement | null>(null);
     const contentRef = React.useRef<HTMLUListElement | null>(null);
     const valuesListRef = React.useRef<HTMLDivElement | null>(null);
     const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -61,6 +67,17 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                 setActive(false);
             } else {
                 setActive(true);
+            }
+            if (contentRef.current) {
+                Array.from(
+                    contentRef.current.getElementsByClassName(
+                        "WebvizAttributeSelector_ValueTag"
+                    )
+                ).forEach((child) =>
+                    child.classList.remove(
+                        "WebvizAttributeSelector_ValueTag--selected"
+                    )
+                );
             }
         };
         document.addEventListener("mousedown", handleMouseDown);
@@ -100,6 +117,121 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
         [selectedValues]
     );
 
+    const countSelectedTags = () => {
+        return Array.from(
+            contentRef.current?.getElementsByClassName(
+                "WebvizAttributeSelector_ValueTag--selected"
+            ) || []
+        ).length;
+    };
+
+    React.useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!active) {
+                return;
+            }
+            if (e.key === "Delete" || e.key === "Backspace") {
+                if (contentRef.current) {
+                    const newValues: string[] = [];
+                    Array.from(
+                        contentRef.current.getElementsByClassName(
+                            "WebvizAttributeSelector_ValueTag"
+                        )
+                    ).forEach((tag, index) => {
+                        if (
+                            !tag.classList.contains(
+                                "WebvizAttributeSelector_ValueTag--selected"
+                            )
+                        ) {
+                            if (index >= 0 && index < selectedValues.length) {
+                                newValues.push(selectedValues.at(index) || "");
+                            }
+                        }
+                    });
+                    setSelectedValues(newValues);
+                    if (inputRef.current) {
+                        inputRef.current.focus();
+                    }
+                }
+            } else if (e.key === "ArrowLeft") {
+                if (e.shiftKey) {
+                    if (
+                        contentRef.current &&
+                        (inputActive || countSelectedTags() > 0)
+                    ) {
+                        if (countSelectedTags() < selectedValues.length) {
+                            const index =
+                                Array.from(
+                                    contentRef.current.getElementsByClassName(
+                                        "WebvizAttributeSelector_ValueTag"
+                                    )
+                                ).filter(
+                                    (child) =>
+                                        !child.classList.contains(
+                                            "WebvizAttributeSelector_ValueTag--selected"
+                                        )
+                                ).length - 1;
+                            (
+                                contentRef.current
+                                    .getElementsByClassName(
+                                        "WebvizAttributeSelector_ValueTag"
+                                    )
+                                    .item(index) as HTMLElement
+                            ).classList.add(
+                                "WebvizAttributeSelector_ValueTag--selected"
+                            );
+                            if (inputRef.current) {
+                                inputRef.current.blur();
+                            }
+                        }
+                    }
+                }
+            } else if (e.key === "ArrowRight") {
+                if (e.shiftKey) {
+                    if (contentRef.current && countSelectedTags() > 0) {
+                        if (countSelectedTags() > 0) {
+                            const index = Array.from(
+                                contentRef.current.getElementsByClassName(
+                                    "WebvizAttributeSelector_ValueTag"
+                                )
+                            ).filter(
+                                (child) =>
+                                    !child.classList.contains(
+                                        "WebvizAttributeSelector_ValueTag--selected"
+                                    )
+                            ).length;
+                            (
+                                contentRef.current
+                                    .getElementsByClassName(
+                                        "WebvizAttributeSelector_ValueTag"
+                                    )
+                                    .item(index) as HTMLElement
+                            ).classList.remove(
+                                "WebvizAttributeSelector_ValueTag--selected"
+                            );
+                        }
+                        if (countSelectedTags() === 0 && inputRef.current) {
+                            inputRef.current.focus();
+                        }
+                    }
+                }
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [
+        active,
+        selectedValues,
+        inputRef.current,
+        setSelectedValues,
+        contentRef.current,
+        inputActive,
+    ]);
+
     const handleInputKeyDown = React.useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === "Enter" && inputRef.current) {
@@ -127,6 +259,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
             setCurrentText,
             shakingTimer.current,
             setInputShaking,
+            setSelectedValues,
         ]
     );
 
@@ -167,8 +300,16 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
         };
     }, [contentRef.current]);
 
+    const handleClearSelection = React.useCallback(() => {
+        if (selectedValues.length > 0) {
+            setSelectedValues([]);
+        } else {
+            setSelectedValues(props.attribute.values);
+        }
+    }, [selectedValues, setSelectedValues]);
+
     return (
-        <div className="WebvizAttributeSelector">
+        <div className="WebvizAttributeSelector" ref={selectorRef}>
             <div className="WebvizAttributeSelector__Header">
                 <label htmlFor={`WebvizAttributeSelector_${props.id}`}>
                     {props.attribute.name}
@@ -178,6 +319,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                     onToggle={(expanded: boolean) => setAlwaysOpen(expanded)}
                 />
             </div>
+            <MouseSelection selectorRef={selectorRef} contentRef={contentRef} />
             <ul
                 className={`WebvizAttributeSelector__Content${
                     alwaysOpen
@@ -234,7 +376,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                     ]);
                 }}
                 selectedValues={selectedValues}
-                onClearSelection={() => setSelectedValues([])}
+                onClearSelection={() => handleClearSelection()}
                 currentText={currentText}
                 inputActive={inputActive}
                 onToggleChecked={(v) => {

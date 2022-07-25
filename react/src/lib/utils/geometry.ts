@@ -91,3 +91,29 @@ export const pointsAreEqual = (point1: Point, point2: Point): boolean =>
 
 export const sizesAreEqual = (size1: Size, size2: Size): boolean =>
     size1.width === size2.width && size1.height === size2.height;
+
+export const centerPointFromBoundingRect = (boundingRect: DOMRect): Point => {
+    return {
+        x: boundingRect.left + boundingRect.width / 2,
+        y: boundingRect.top + boundingRect.height / 2,
+    };
+};
+
+export const dimensionsFromBoundingRect = (boundingRect: DOMRect): Size => {
+    return {
+        width: boundingRect.width,
+        height: boundingRect.height,
+    };
+};
+
+export const boundingRectRelativeToParent = (
+    parentBoundingRect: DOMRect,
+    childBoundingRect: DOMRect
+): DOMRect => {
+    return new DOMRect(
+        childBoundingRect.left - parentBoundingRect.left,
+        childBoundingRect.top - parentBoundingRect.top,
+        childBoundingRect.width,
+        childBoundingRect.height
+    );
+};
