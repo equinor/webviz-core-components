@@ -25,6 +25,11 @@ export type AttributeSelectorProps = {
     attribute: Attribute;
 };
 
+type KeyboardSelection = {
+    startIndex: number;
+    endIndex: number;
+};
+
 export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>([]);
     const [active, setActive] = React.useState<boolean>(false);
@@ -36,6 +41,16 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
         React.useState<boolean>(false);
     const [matchedSelection, setMatchedSelection] = React.useState<string>("");
     const [currentSelection, setCurrentSelection] = React.useState<string>("");
+    const [currentKeyboardTagIndex, setCurrentKeyboardTagIndex] =
+        React.useState<number>(-1);
+    const [keyboardShiftTagIndex, setKeyboardShiftTagIndex] =
+        React.useState<number>(-1);
+
+    const [keyboardSelections, setKeyboardSelections] = React.useState<
+        KeyboardSelection[]
+    >([]);
+    const [keyboardSelectionsIndex, setKeyboardSelectionsIndex] =
+        React.useState<number>(0);
 
     const selectorRef = React.useRef<HTMLDivElement | null>(null);
     const contentRef = React.useRef<HTMLUListElement | null>(null);
@@ -117,13 +132,17 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
         [selectedValues]
     );
 
-    const countSelectedTags = () => {
-        return Array.from(
-            contentRef.current?.getElementsByClassName(
-                "WebvizAttributeSelector_ValueTag--selected"
-            ) || []
-        ).length;
-    };
+    React.useEffect(() => {
+        setCurrentKeyboardTagIndex(selectedValues.length);
+        setKeyboardShiftTagIndex(-1);
+        setKeyboardSelections([]);
+        setKeyboardSelectionsIndex(0);
+    }, [
+        selectedValues,
+        setCurrentKeyboardTagIndex,
+        setKeyboardShiftTagIndex,
+        setKeyboardSelections,
+    ]);
 
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -153,66 +172,107 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                         inputRef.current.focus();
                     }
                 }
+            } else if (e.key === "Shift") {
+                setKeyboardShiftTagIndex(currentKeyboardTagIndex);
+                setKeyboardSelectionsIndex(keyboardSelections.length);
+            } else if (e.key === "Escape") {
+                setCurrentKeyboardTagIndex(selectedValues.length);
+                setKeyboardShiftTagIndex(-1);
+                setKeyboardSelections([]);
+                setKeyboardSelectionsIndex(0);
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
             } else if (e.key === "ArrowLeft") {
+                if (
+                    currentKeyboardTagIndex === selectedValues.length &&
+                    inputRef.current
+                ) {
+                    inputRef.current.blur();
+                }
+                const newKeyboardTagIndex = Math.max(
+                    0,
+                    currentKeyboardTagIndex - 1
+                );
+                setCurrentKeyboardTagIndex(newKeyboardTagIndex);
                 if (e.shiftKey) {
-                    if (
-                        contentRef.current &&
-                        (inputActive || countSelectedTags() > 0)
-                    ) {
-                        if (countSelectedTags() < selectedValues.length) {
-                            const index =
-                                Array.from(
-                                    contentRef.current.getElementsByClassName(
-                                        "WebvizAttributeSelector_ValueTag"
-                                    )
-                                ).filter(
-                                    (child) =>
-                                        !child.classList.contains(
-                                            "WebvizAttributeSelector_ValueTag--selected"
-                                        )
-                                ).length - 1;
-                            (
-                                contentRef.current
-                                    .getElementsByClassName(
-                                        "WebvizAttributeSelector_ValueTag"
-                                    )
-                                    .item(index) as HTMLElement
-                            ).classList.add(
-                                "WebvizAttributeSelector_ValueTag--selected"
-                            );
-                            if (inputRef.current) {
-                                inputRef.current.blur();
-                            }
-                        }
+                    if (keyboardSelectionsIndex < keyboardSelections.length) {
+                        setKeyboardSelections([
+                            ...keyboardSelections.slice(
+                                0,
+                                keyboardSelectionsIndex
+                            ),
+                            {
+                                startIndex: Math.min(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                                endIndex: Math.max(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                            },
+                        ]);
+                    } else {
+                        setKeyboardSelections([
+                            ...keyboardSelections,
+                            {
+                                startIndex: Math.min(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                                endIndex: Math.max(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                            },
+                        ]);
                     }
                 }
             } else if (e.key === "ArrowRight") {
+                if (
+                    currentKeyboardTagIndex === selectedValues.length - 1 &&
+                    inputRef.current
+                ) {
+                    inputRef.current.focus();
+                }
+                const newKeyboardTagIndex = Math.min(
+                    selectedValues.length,
+                    currentKeyboardTagIndex + 1
+                );
+                setCurrentKeyboardTagIndex(newKeyboardTagIndex);
                 if (e.shiftKey) {
-                    if (contentRef.current && countSelectedTags() > 0) {
-                        if (countSelectedTags() > 0) {
-                            const index = Array.from(
-                                contentRef.current.getElementsByClassName(
-                                    "WebvizAttributeSelector_ValueTag"
-                                )
-                            ).filter(
-                                (child) =>
-                                    !child.classList.contains(
-                                        "WebvizAttributeSelector_ValueTag--selected"
-                                    )
-                            ).length;
-                            (
-                                contentRef.current
-                                    .getElementsByClassName(
-                                        "WebvizAttributeSelector_ValueTag"
-                                    )
-                                    .item(index) as HTMLElement
-                            ).classList.remove(
-                                "WebvizAttributeSelector_ValueTag--selected"
-                            );
-                        }
-                        if (countSelectedTags() === 0 && inputRef.current) {
-                            inputRef.current.focus();
-                        }
+                    if (keyboardSelectionsIndex < keyboardSelections.length) {
+                        setKeyboardSelections([
+                            ...keyboardSelections.slice(
+                                0,
+                                keyboardSelectionsIndex
+                            ),
+                            {
+                                startIndex: Math.min(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                                endIndex: Math.max(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                            },
+                        ]);
+                    } else {
+                        setKeyboardSelections([
+                            ...keyboardSelections,
+                            {
+                                startIndex: Math.min(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                                endIndex: Math.max(
+                                    newKeyboardTagIndex,
+                                    keyboardShiftTagIndex
+                                ),
+                            },
+                        ]);
                     }
                 }
             }
@@ -230,6 +290,13 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
         setSelectedValues,
         contentRef.current,
         inputActive,
+        setCurrentKeyboardTagIndex,
+        currentKeyboardTagIndex,
+        setKeyboardShiftTagIndex,
+        keyboardSelections,
+        setKeyboardSelections,
+        keyboardSelectionsIndex,
+        keyboardShiftTagIndex,
     ]);
 
     const handleInputKeyDown = React.useCallback(
@@ -305,8 +372,11 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
             setSelectedValues([]);
         } else {
             setSelectedValues(props.attribute.values);
+            if (inputRef.current) {
+                inputRef.current.focus();
+            }
         }
-    }, [selectedValues, setSelectedValues]);
+    }, [selectedValues, setSelectedValues, inputRef.current]);
 
     return (
         <div className="WebvizAttributeSelector" ref={selectorRef}>
@@ -328,7 +398,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                 }`}
                 ref={contentRef}
             >
-                {selectedValues.map((value) => (
+                {selectedValues.map((value, index) => (
                     <ValueTag
                         key={value}
                         highlighted={matchedSelection === value}
@@ -339,6 +409,14 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                             );
                         }}
                         matchedValues={getMatchedValues(value)}
+                        focused={currentKeyboardTagIndex === index}
+                        selected={
+                            keyboardSelections.some(
+                                (selection) =>
+                                    index >= selection.startIndex &&
+                                    index <= selection.endIndex
+                            ) || currentKeyboardTagIndex === index
+                        }
                     />
                 ))}
                 <input
@@ -353,12 +431,19 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                     onFocus={() => {
                         setActive(true);
                         setInputActive(true);
+                        setCurrentKeyboardTagIndex(selectedValues.length);
                     }}
                     value={currentText}
                     onBlur={() => setInputActive(false)}
                     onChange={(e) => setCurrentText(e.target.value)}
                     onKeyDown={(e) => handleInputKeyDown(e)}
                     onKeyUp={(e) => handleInputKeyUp(e)}
+                    onMouseDown={() => {
+                        setCurrentKeyboardTagIndex(selectedValues.length);
+                        setKeyboardShiftTagIndex(-1);
+                        setKeyboardSelections([]);
+                        setKeyboardSelectionsIndex(0);
+                    }}
                 />
             </ul>
             <ValuesList
@@ -379,6 +464,7 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
                 onClearSelection={() => handleClearSelection()}
                 currentText={currentText}
                 inputActive={inputActive}
+                inputRef={inputRef}
                 onToggleChecked={(v) => {
                     const matchedSelections = getMatchedSelections(v);
                     if (matchedSelections.length > 0) {

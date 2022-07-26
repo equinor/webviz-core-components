@@ -18,6 +18,10 @@
     background-color: #fefefe;
 }
 
+.WebvizAttributeSelector_ValueTag--focused {
+    outline: 1px rgb(51, 99, 255) dashed;
+}
+
 .WebvizAttributeSelector_ValueTag--selected {
     background-color: #aebaff;
 }

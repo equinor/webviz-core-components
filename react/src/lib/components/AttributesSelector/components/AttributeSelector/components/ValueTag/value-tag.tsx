@@ -6,6 +6,8 @@ import "./value-tag.css";
 export type ValueTagProps = {
     value: string;
     highlighted: boolean;
+    focused: boolean;
+    selected: boolean;
     matchedValues: string[];
     onRemove: (value: string) => void;
 };
@@ -16,6 +18,14 @@ export const ValueTag: React.FC<ValueTagProps> = (props) => {
             className={`WebvizAttributeSelector_ValueTag${
                 props.highlighted
                     ? " WebvizAttributeSelector_ValueTag--highlighted"
+                    : ""
+            }${
+                props.focused
+                    ? " WebvizAttributeSelector_ValueTag--focused"
+                    : ""
+            }${
+                props.selected
+                    ? " WebvizAttributeSelector_ValueTag--selected"
                     : ""
             }`}
         >

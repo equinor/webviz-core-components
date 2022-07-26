@@ -56,6 +56,7 @@ export type ValuesListProps = {
     inputActive: boolean;
     contentRef: React.RefObject<HTMLUListElement>;
     valuesListRef: React.RefObject<HTMLDivElement>;
+    inputRef: React.RefObject<HTMLInputElement>;
     onNewSelection: (selection: string[]) => void;
     onClearSelection: () => void;
     onToggleChecked: (value: string) => void;
@@ -287,8 +288,14 @@ export const ValuesList: React.FC<ValuesListProps> = (props) => {
                     }
                 }
                 setCurrentKeyboardHoverIndex(
-                    Math.max(currentKeyboardHoverIndex - 1, -1)
+                    Math.max(currentKeyboardHoverIndex - 1, -2)
                 );
+                if (
+                    currentKeyboardHoverIndex - 1 === -2 &&
+                    props.inputRef.current
+                ) {
+                    props.inputRef.current.focus();
+                }
             }
         };
         const handleKeyUp = (e: KeyboardEvent) => {
