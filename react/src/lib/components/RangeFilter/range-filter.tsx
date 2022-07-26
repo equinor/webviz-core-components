@@ -1,3 +1,5 @@
+import { Point } from "../../shared-types/point";
+import { ORIGIN } from "../../utils/geometry";
 import React from "react";
 import { Thumb } from "./components";
 
@@ -19,6 +21,8 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
     const [trackWidth, setTrackWidth] = React.useState<number>(0);
     const trackRef = React.useRef<HTMLDivElement | null>(null);
     const resizeObserver = React.useRef<ResizeObserver | null>(null);
+    const [cursorPosition, setCursorPosition] = React.useState<Point>(ORIGIN);
+    const [hovered, setHovered] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         resizeObserver.current = new ResizeObserver((entries) => {
@@ -39,6 +43,66 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
     }, [setTrackWidth, setTrackLeft, trackRef.current]);
 
     React.useEffect(() => {
+        const handleMouseOver = () => {
+            setHovered(true);
+        };
+        const handleMouseLeave = () => {
+            setHovered(false);
+        };
+        const handleMouseMove = (e: MouseEvent) => {
+            if (trackRef.current) {
+                const boundingClientRect =
+                    trackRef.current.getBoundingClientRect();
+                setCursorPosition({
+                    x: Math.min(
+                        trackWidth,
+                        Math.max(0, e.clientX - boundingClientRect.left)
+                    ),
+                    y: e.clientY - boundingClientRect.top,
+                });
+            }
+        };
+
+        if (trackRef.current) {
+            trackRef.current.addEventListener(
+                "mouseover",
+                handleMouseOver,
+                false
+            );
+            trackRef.current.addEventListener(
+                "mouseleave",
+                handleMouseLeave,
+                false
+            );
+            trackRef.current.addEventListener(
+                "mousemove",
+                handleMouseMove,
+                false
+            );
+        }
+
+        return () => {
+            if (trackRef.current) {
+                trackRef.current.removeEventListener(
+                    "mouseover",
+                    handleMouseOver,
+                    false
+                );
+                trackRef.current.removeEventListener(
+                    "mouseleave",
+                    handleMouseLeave,
+                    false
+                );
+                trackRef.current.removeEventListener(
+                    "mousemove",
+                    handleMouseMove,
+                    false
+                );
+            }
+        };
+    }, [setHovered, setCursorPosition, trackRef.current, trackWidth]);
+
+    React.useEffect(() => {
         if (trackRef.current && resizeObserver.current) {
             resizeObserver.current.observe(trackRef.current);
         }
@@ -55,24 +119,18 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
     };
 
     const handleMouseClick = (e: React.MouseEvent) => {
-        if (e.target === trackRef.current) {
-            setThumbs([
-                ...thumbs,
-                {
-                    fromValue: pixelToValue(e.clientX),
-                    toValue: pixelToValue(e.clientX),
-                },
-            ]);
-        }
+        setThumbs([
+            ...thumbs,
+            {
+                fromValue: pixelToValue(e.clientX),
+                toValue: pixelToValue(e.clientX),
+            },
+        ]);
     };
 
     return (
         <div className="WebvizRangeFilter">
-            <div
-                className="WebvizRangeFilter__Track"
-                ref={trackRef}
-                onClick={(e) => handleMouseClick(e)}
-            >
+            <div className="WebvizRangeFilter__Track" ref={trackRef}>
                 {thumbs.map((thumb, index) => (
                     <Thumb
                         key={`thumb-${thumb.fromValue}-${thumb.toValue}`}
@@ -94,8 +152,18 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                                 )
                             )
                         }
+                        onMouseLeave={() => setHovered(true)}
+                        onMouseOver={() => setHovered(false)}
                     />
                 ))}
+                <div
+                    className="WebvizRangeFilter__HoverIndicator"
+                    style={{
+                        display: hovered ? "block" : "none",
+                        left: cursorPosition.x,
+                    }}
+                    onClick={(e) => handleMouseClick(e)}
+                />
             </div>
         </div>
     );
