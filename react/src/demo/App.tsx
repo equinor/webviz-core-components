@@ -53,7 +53,7 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <RangeFilter minValue={0} maxValue={99} />
+            <RangeFilter minValue={0} maxValue={99} step={1} showTicks={true} />
 
             {currentPage.url.split("#")[1] === "dialog" && (
                 <>
