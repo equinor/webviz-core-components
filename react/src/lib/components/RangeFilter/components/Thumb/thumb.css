@@ -6,6 +6,7 @@
 }
 
 .WebvizRangeFilter__Thumb__Handle {
+    position: relative;
     background-color: black;
     width: 1px;
     height: 100%;
@@ -21,6 +22,14 @@
     border-radius: 4px;
     outline: 1px #35a0ae9b solid;
     transition: outline 0.1s ease-in-out;
+}
+
+.WebvizRangeFilter__Thumb--Tooltip {
+    position: absolute;
+    top: -24px;
+    width: 100%;
+    color: rgba(0, 0, 0, 0.75);
+    text-align: center;
 }
 
 .WebvizRangeFilter__Thumb__Bar {

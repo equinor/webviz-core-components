@@ -28,6 +28,7 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
     const [animation, setAnimation] = React.useState<string>("");
     const [mouseDownValueDelta, setMouseDownValueDelta] =
         React.useState<number>(0);
+    const [hovered, setHovered] = React.useState<boolean>(false);
 
     const thumbRef = React.useRef<HTMLDivElement | null>(null);
     const handleRef = React.useRef<HTMLDivElement | null>(null);
@@ -234,108 +235,122 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
     );
 
     return (
-        <div
-            className={`WebvizRangeFilter__Thumb${animation}`}
-            ref={thumbRef}
-            style={{
-                left: valueToPixel(props.thumb.fromValue),
-                width: width,
-            }}
-            onMouseOver={() => props.onMouseOver()}
-            onMouseLeave={() => {
-                if (mouseTarget === null) props.onMouseLeave();
-            }}
-        >
-            {mouseTarget &&
-                (mouseTarget === barRef.current ||
-                    mouseTarget === leftHandleRef.current ||
-                    mouseTarget === handleRef.current) && (
-                    <div
-                        className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--left"
-                        style={{
-                            marginLeft: isSingleValue
-                                ? -24
-                                : Math.min(-24, width / 2 - 40),
-                        }}
-                    >
-                        {props.thumb.fromValue}
-                    </div>
-                )}
-            {mouseTarget &&
-                (mouseTarget === barRef.current ||
-                    mouseTarget === rightHandleRef.current) && (
-                    <div
-                        className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--right"
-                        style={{ marginRight: Math.min(-24, width / 2 - 40) }}
-                    >
-                        {props.thumb.toValue}
-                    </div>
-                )}
-            {isSingleValue && (
-                <div
-                    className={`WebvizRangeFilter__Thumb__Handle${
-                        mouseTarget === handleRef.current
-                            ? " WebvizRangeFilter__Thumb__Handle--active"
-                            : ""
-                    }`}
-                    ref={handleRef}
-                    onDoubleClick={() => {
-                        setIsSingleValue(false);
-                        if (
-                            props.thumb.toValue <
-                                props.maxValue - props.step * 10 &&
-                            props.thumb.toValue <=
-                                props.maxRangeValue - props.step * 3
-                        ) {
-                            props.thumb.setToValue(
-                                Math.min(
-                                    props.thumb.toValue + props.step * 10,
-                                    props.maxValue,
-                                    props.maxRangeValue
-                                )
-                            );
-                        } else {
-                            props.thumb.setFromValue(
-                                Math.max(
-                                    props.thumb.fromValue - props.step * 10,
-                                    props.minValue,
-                                    props.minRangeValue
-                                )
-                            );
-                        }
-                        props.updateProps();
-                    }}
-                ></div>
-            )}
-            {!isSingleValue && (
-                <>
+        <>
+            <div
+                className="WebvizRangeFilter__Thumb--Tooltip"
+                style={{ display: isSingleValue && hovered ? "block" : "none" }}
+            >
+                Double-click to expand to range
+            </div>
+            <div
+                className={`WebvizRangeFilter__Thumb${animation}`}
+                ref={thumbRef}
+                style={{
+                    left: valueToPixel(props.thumb.fromValue),
+                    width: width,
+                }}
+                onMouseOver={() => {
+                    props.onMouseOver();
+                    setHovered(true);
+                }}
+                onMouseLeave={() => {
+                    setHovered(false);
+                    if (mouseTarget === null) props.onMouseLeave();
+                }}
+            >
+                {mouseTarget &&
+                    (mouseTarget === barRef.current ||
+                        mouseTarget === leftHandleRef.current ||
+                        mouseTarget === handleRef.current) && (
+                        <div
+                            className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--left"
+                            style={{
+                                marginLeft: isSingleValue
+                                    ? -24
+                                    : Math.min(-24, width / 2 - 40),
+                            }}
+                        >
+                            {props.thumb.fromValue}
+                        </div>
+                    )}
+                {mouseTarget &&
+                    (mouseTarget === barRef.current ||
+                        mouseTarget === rightHandleRef.current) && (
+                        <div
+                            className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--right"
+                            style={{
+                                marginRight: Math.min(-24, width / 2 - 40),
+                            }}
+                        >
+                            {props.thumb.toValue}
+                        </div>
+                    )}
+                {isSingleValue && (
                     <div
                         className={`WebvizRangeFilter__Thumb__Handle${
-                            mouseTarget === leftHandleRef.current
+                            mouseTarget === handleRef.current
                                 ? " WebvizRangeFilter__Thumb__Handle--active"
                                 : ""
                         }`}
-                        ref={leftHandleRef}
-                    ></div>
-                    <div
-                        className="WebvizRangeFilter__Thumb__Bar"
-                        ref={barRef}
-                        style={{
-                            width:
-                                valueToPixel(props.thumb.toValue) -
-                                valueToPixel(props.thumb.fromValue),
+                        ref={handleRef}
+                        onDoubleClick={() => {
+                            setIsSingleValue(false);
+                            if (
+                                props.thumb.toValue <
+                                    props.maxValue - props.step * 10 &&
+                                props.thumb.toValue <=
+                                    props.maxRangeValue - props.step * 3
+                            ) {
+                                props.thumb.setToValue(
+                                    Math.min(
+                                        props.thumb.toValue + props.step * 10,
+                                        props.maxValue,
+                                        props.maxRangeValue
+                                    )
+                                );
+                            } else {
+                                props.thumb.setFromValue(
+                                    Math.max(
+                                        props.thumb.fromValue - props.step * 10,
+                                        props.minValue,
+                                        props.minRangeValue
+                                    )
+                                );
+                            }
+                            props.updateProps();
                         }}
                     ></div>
-                    <div
-                        className={`WebvizRangeFilter__Thumb__Handle${
-                            mouseTarget === rightHandleRef.current
-                                ? " WebvizRangeFilter__Thumb__Handle--active"
-                                : ""
-                        }`}
-                        ref={rightHandleRef}
-                    ></div>
-                </>
-            )}
-        </div>
+                )}
+                {!isSingleValue && (
+                    <>
+                        <div
+                            className={`WebvizRangeFilter__Thumb__Handle${
+                                mouseTarget === leftHandleRef.current
+                                    ? " WebvizRangeFilter__Thumb__Handle--active"
+                                    : ""
+                            }`}
+                            ref={leftHandleRef}
+                        ></div>
+                        <div
+                            className="WebvizRangeFilter__Thumb__Bar"
+                            ref={barRef}
+                            style={{
+                                width:
+                                    valueToPixel(props.thumb.toValue) -
+                                    valueToPixel(props.thumb.fromValue),
+                            }}
+                        ></div>
+                        <div
+                            className={`WebvizRangeFilter__Thumb__Handle${
+                                mouseTarget === rightHandleRef.current
+                                    ? " WebvizRangeFilter__Thumb__Handle--active"
+                                    : ""
+                            }`}
+                            ref={rightHandleRef}
+                        ></div>
+                    </>
+                )}
+            </div>
+        </>
     );
 };
