@@ -3,21 +3,21 @@ import React from "react";
 import "./thumb.css";
 
 import "animate.css";
+import { ThumbInstance } from "../../range-filter";
 
 export type ThumbProps = {
     minValue: number;
     maxValue: number;
     minRangeValue: number;
     maxRangeValue: number;
-    fromValue: number;
-    toValue: number;
     trackBoundingClientRect: DOMRect;
     width: number;
     step: number;
-    onValuesChange: (fromValue: number, toValue: number) => void;
+    thumb: ThumbInstance;
     onMouseOver: () => void;
     onMouseLeave: () => void;
     onRemove: () => void;
+    updateProps: () => void;
 };
 
 export const Thumb: React.FC<ThumbProps> = (props) => {
@@ -25,10 +25,9 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
     const [wasRange, setWasRange] = React.useState<boolean>(false);
     const [mouseTarget, setMouseTarget] =
         React.useState<HTMLDivElement | null>(null);
-    const [fromValue, setFromValue] = React.useState<number>(props.fromValue);
-    const [toValue, setToValue] = React.useState<number>(props.toValue);
     const [animation, setAnimation] = React.useState<string>("");
-    const [mouseDownLeft, setMouseDownLeft] = React.useState<number>(0);
+    const [mouseDownValueDelta, setMouseDownValueDelta] =
+        React.useState<number>(0);
 
     const thumbRef = React.useRef<HTMLDivElement | null>(null);
     const handleRef = React.useRef<HTMLDivElement | null>(null);
@@ -45,11 +44,6 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
             }
         };
     }, []);
-
-    React.useEffect(() => {
-        setFromValue(props.fromValue);
-        setToValue(props.toValue);
-    }, [props.fromValue, props.toValue]);
 
     const pixelToValue = (px: number) => {
         const deltaPixel = px - props.trackBoundingClientRect.x;
@@ -102,30 +96,24 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                 ].includes(e.target as HTMLDivElement)
             ) {
                 setMouseTarget(e.target as HTMLDivElement);
-                setMouseDownLeft(e.clientX);
+                setMouseDownValueDelta(
+                    closestValidValue(pixelToValue(e.clientX)) -
+                        props.thumb.fromValue
+                );
+                props.onMouseOver();
             }
             e.preventDefault();
             e.stopPropagation();
         };
-        const handleMouseUp = (e: MouseEvent) => {
+        const handleMouseUp = () => {
             setMouseTarget(null);
-            if (
-                [
-                    handleRef.current,
-                    leftHandleRef.current,
-                    rightHandleRef.current,
-                    barRef.current,
-                ].includes(e.target as HTMLDivElement)
-            ) {
-                //props.onValuesChange(fromValue, toValue);
-            }
         };
         const handleMouseMove = (e: MouseEvent) => {
             if (mouseTarget === null) {
                 return;
             }
             if (isSingleValue && mouseTarget === handleRef.current) {
-                setFromValue(
+                props.thumb.setFromValue(
                     Math.max(
                         Math.min(
                             closestValidValue(pixelToValue(e.clientX)),
@@ -134,7 +122,7 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                         props.minRangeValue
                     )
                 );
-                setToValue(
+                props.thumb.setToValue(
                     Math.max(
                         Math.min(
                             closestValidValue(pixelToValue(e.clientX)),
@@ -151,8 +139,8 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                     ),
                     props.minRangeValue
                 );
-                setFromValue(newValue);
-                setIsSingleValue(newValue === toValue);
+                props.thumb.setFromValue(newValue);
+                setIsSingleValue(newValue === props.thumb.toValue);
             } else if (mouseTarget === rightHandleRef.current) {
                 const newValue = Math.max(
                     Math.min(
@@ -161,36 +149,37 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                     ),
                     props.minRangeValue
                 );
-                setToValue(newValue);
-                setIsSingleValue(newValue === fromValue);
+                props.thumb.setToValue(newValue);
+                setIsSingleValue(newValue === props.thumb.fromValue);
             } else if (mouseTarget === barRef.current) {
-                const range = toValue - fromValue;
+                const range = props.thumb.toValue - props.thumb.fromValue;
                 const newFromValue = Math.max(
                     Math.min(
                         props.maxRangeValue - range,
-                        fromValue +
-                            closestValidValue(
-                                pixelToValue(e.clientX) -
-                                    pixelToValue(mouseDownLeft)
-                            )
+                        closestValidValue(pixelToValue(e.clientX)) -
+                            mouseDownValueDelta
                     ),
                     props.minRangeValue
                 );
                 const newToValue = Math.min(
                     Math.max(
                         props.minRangeValue + range,
-                        toValue +
-                            closestValidValue(
-                                pixelToValue(e.clientX) -
-                                    pixelToValue(mouseDownLeft)
-                            )
+                        closestValidValue(pixelToValue(e.clientX)) +
+                            (range - mouseDownValueDelta)
                     ),
                     props.maxRangeValue
                 );
-                setFromValue(newFromValue);
-                setToValue(newToValue);
+                props.thumb.setFromValue(newFromValue);
+                props.thumb.setToValue(newToValue);
             }
-            if (mouseTarget) {
+            if (
+                [
+                    handleRef.current,
+                    leftHandleRef.current,
+                    rightHandleRef.current,
+                    barRef.current,
+                ].includes(mouseTarget)
+            ) {
                 if (
                     Math.abs(
                         e.clientY -
@@ -199,6 +188,7 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                     ) > props.trackBoundingClientRect.height
                 ) {
                     props.onRemove();
+                    setMouseTarget(null);
                 }
             }
         };
@@ -225,43 +215,60 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
         rightHandleRef.current,
         mouseTarget,
         setMouseTarget,
-        setFromValue,
-        setToValue,
+        props.thumb.fromValue,
+        props.thumb.toValue,
+        props.thumb,
         props.minValue,
         props.maxValue,
         props.minRangeValue,
         props.maxRangeValue,
-        mouseDownLeft,
-        setMouseDownLeft,
+        mouseDownValueDelta,
+        setMouseDownValueDelta,
+        props.onMouseOver,
+        props.onMouseLeave,
     ]);
+
+    const width = Math.max(
+        valueToPixel(props.thumb.toValue) - valueToPixel(props.thumb.fromValue),
+        1
+    );
 
     return (
         <div
             className={`WebvizRangeFilter__Thumb${animation}`}
             ref={thumbRef}
             style={{
-                left: valueToPixel(fromValue),
-                width: Math.max(
-                    valueToPixel(toValue) - valueToPixel(fromValue),
-                    1
-                ),
+                left: valueToPixel(props.thumb.fromValue),
+                width: width,
             }}
             onMouseOver={() => props.onMouseOver()}
-            onMouseLeave={() => props.onMouseLeave()}
+            onMouseLeave={() => {
+                if (mouseTarget === null) props.onMouseLeave();
+            }}
         >
             {mouseTarget &&
                 (mouseTarget === barRef.current ||
                     mouseTarget === leftHandleRef.current ||
                     mouseTarget === handleRef.current) && (
-                    <div className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--left">
-                        {fromValue}
+                    <div
+                        className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--left"
+                        style={{
+                            marginLeft: isSingleValue
+                                ? -24
+                                : Math.min(-24, width / 2 - 40),
+                        }}
+                    >
+                        {props.thumb.fromValue}
                     </div>
                 )}
             {mouseTarget &&
                 (mouseTarget === barRef.current ||
                     mouseTarget === rightHandleRef.current) && (
-                    <div className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--right">
-                        {toValue}
+                    <div
+                        className="WebvizRangeFilter__Thumb__Tooltip WebvizRangeFilter__Thumb__Tooltip--right"
+                        style={{ marginRight: Math.min(-24, width / 2 - 40) }}
+                    >
+                        {props.thumb.toValue}
                     </div>
                 )}
             {isSingleValue && (
@@ -274,21 +281,29 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                     ref={handleRef}
                     onDoubleClick={() => {
                         setIsSingleValue(false);
-                        if (toValue < props.maxValue - props.step * 10) {
-                            setToValue(
+                        if (
+                            props.thumb.toValue <
+                                props.maxValue - props.step * 10 &&
+                            props.thumb.toValue <=
+                                props.maxRangeValue - props.step * 3
+                        ) {
+                            props.thumb.setToValue(
                                 Math.min(
-                                    toValue + props.step * 10,
-                                    props.maxValue
+                                    props.thumb.toValue + props.step * 10,
+                                    props.maxValue,
+                                    props.maxRangeValue
                                 )
                             );
                         } else {
-                            setFromValue(
+                            props.thumb.setFromValue(
                                 Math.max(
-                                    fromValue - props.step * 10,
-                                    props.minValue
+                                    props.thumb.fromValue - props.step * 10,
+                                    props.minValue,
+                                    props.minRangeValue
                                 )
                             );
                         }
+                        props.updateProps();
                     }}
                 ></div>
             )}
@@ -307,7 +322,8 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
                         ref={barRef}
                         style={{
                             width:
-                                valueToPixel(toValue) - valueToPixel(fromValue),
+                                valueToPixel(props.thumb.toValue) -
+                                valueToPixel(props.thumb.fromValue),
                         }}
                     ></div>
                     <div

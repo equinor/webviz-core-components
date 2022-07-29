@@ -17,7 +17,10 @@
 
 .WebvizRangeFilter__Thumb__Handle:hover,
 .WebvizRangeFilter__Thumb__Handle--active {
-    transform: scaleX(5) scaleY(1.2);
+    transform: scaleX(8) scaleY(1.2);
+    border-radius: 4px;
+    outline: 1px #35a0ae9b solid;
+    transition: outline 0.1s ease-in-out;
 }
 
 .WebvizRangeFilter__Thumb__Bar {
@@ -28,10 +31,13 @@
     box-shadow: inset 0px -2px 5px -3px rgba(0, 0, 0, 0.75);
     border-radius: 4px;
     cursor: ew-resize;
+    transition: outline 0.1s ease-in-out;
 }
 .WebvizRangeFilter__Thumb__Bar:hover {
     background-color: #35a0ae;
     transform: scaleY(1.2);
+    outline: 5px #35a0ae9b solid;
+    transition: outline 0.1s ease-in-out;
 }
 
 .WebvizRangeFilter__Thumb__Tooltip {

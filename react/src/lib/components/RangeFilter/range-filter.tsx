@@ -6,11 +6,20 @@ import { Thumb } from "./components";
 import "./range-filter.css";
 import { uniqueId } from "lodash";
 
+export type ParentProps = {
+    values: number[];
+    selections: {
+        fromValue: number;
+        toValue: number;
+    }[];
+};
+
 export type RangeFilterProps = {
     minValue: number;
     maxValue: number;
     step: number;
     showTicks?: boolean;
+    setProps: (props: ParentProps) => void;
 };
 
 export class ThumbInstance {
@@ -37,11 +46,6 @@ export class ThumbInstance {
     }
 }
 
-type Tick = {
-    value: number;
-    left: number;
-};
-
 export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
     const [thumbs, setThumbs] = React.useState<ThumbInstance[]>([]);
     const [trackBoundingClientRect, setTrackBoundingClientRect] =
@@ -51,37 +55,10 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
     const resizeObserver = React.useRef<ResizeObserver | null>(null);
     const [cursorPosition, setCursorPosition] = React.useState<Point>(ORIGIN);
     const [hovered, setHovered] = React.useState<boolean>(false);
-    const [tickPositions, setTickPositions] = React.useState<Tick[]>([]);
 
     const closestValidValue = (value: number) => {
         return Math.round(value / props.step) * props.step;
     };
-
-    React.useEffect(() => {
-        if (props.showTicks && trackWidth > 0) {
-            const range = props.maxValue - props.minValue;
-            let step = props.step;
-            const maxNumberTicks = Math.floor(trackWidth / 2);
-            while (range / step > maxNumberTicks) {
-                step += props.step;
-            }
-            const dStep = trackWidth / (range / step);
-
-            const ticks = [];
-            for (let i = 0; i < range / step; i++) {
-                ticks.push({ value: i * step, left: i * dStep });
-            }
-
-            setTickPositions(ticks);
-        }
-    }, [
-        trackWidth,
-        props.step,
-        props.showTicks,
-        props.minValue,
-        props.maxValue,
-        setTickPositions,
-    ]);
 
     React.useEffect(() => {
         resizeObserver.current = new ResizeObserver((entries) => {
@@ -101,6 +78,30 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
             });
         });
     }, [setTrackWidth, setTrackBoundingClientRect, trackRef.current]);
+
+    const updateParentProps = React.useCallback(
+        (givenThumbs?: ThumbInstance[]) => {
+            const values = [];
+            const currentThumbs = givenThumbs || thumbs;
+            for (let i = props.minValue; i <= props.maxValue; i += props.step) {
+                if (
+                    currentThumbs.some(
+                        (el) => i >= el.fromValue && i <= el.toValue
+                    )
+                ) {
+                    values.push(i);
+                }
+            }
+            props.setProps({
+                values: values,
+                selections: currentThumbs.map((el) => ({
+                    fromValue: el.fromValue,
+                    toValue: el.toValue,
+                })),
+            });
+        },
+        [thumbs, props.setProps]
+    );
 
     React.useEffect(() => {
         const handleMouseOver = () => {
@@ -123,6 +124,10 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
             }
         };
 
+        const handleMouseUp = () => {
+            updateParentProps();
+        };
+
         if (trackRef.current) {
             trackRef.current.addEventListener(
                 "mouseover",
@@ -139,6 +144,7 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                 handleMouseMove,
                 false
             );
+            document.addEventListener("mouseup", handleMouseUp);
         }
 
         return () => {
@@ -158,9 +164,17 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                     handleMouseMove,
                     false
                 );
+                document.removeEventListener("mouseup", handleMouseUp);
             }
         };
-    }, [setHovered, setCursorPosition, trackRef.current, trackWidth]);
+    }, [
+        thumbs,
+        setHovered,
+        setCursorPosition,
+        trackRef.current,
+        trackWidth,
+        props.setProps,
+    ]);
 
     React.useEffect(() => {
         if (trackRef.current && resizeObserver.current) {
@@ -178,21 +192,16 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
         return (deltaPixel / trackWidth) * (props.maxValue - props.minValue);
     };
 
-    const valueToPixel = (value: number) => {
-        return (
-            (trackWidth * (value - props.minValue)) /
-            (props.maxValue - props.minValue)
-        );
-    };
-
     const handleMouseClick = (e: React.MouseEvent) => {
-        setThumbs([
+        const newThumbs = [
             ...thumbs,
             new ThumbInstance(
                 closestValidValue(pixelToValue(e.clientX)),
                 closestValidValue(pixelToValue(e.clientX))
             ),
-        ]);
+        ];
+        setThumbs(newThumbs);
+        updateParentProps(newThumbs);
     };
 
     return (
@@ -201,6 +210,7 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                 {thumbs.map((thumb, index) => (
                     <Thumb
                         key={`thumb-${thumb.id}`}
+                        thumb={thumb}
                         minValue={props.minValue}
                         maxValue={props.maxValue}
                         minRangeValue={Math.max(
@@ -215,19 +225,15 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                                 .map((el) => el.fromValue - 1),
                             props.maxValue
                         )}
-                        fromValue={thumb.fromValue}
-                        toValue={thumb.toValue}
                         step={props.step}
                         trackBoundingClientRect={trackBoundingClientRect}
                         width={trackWidth}
-                        onValuesChange={(fromValue, toValue) =>
-                            thumbs.at(index)?.setRange(fromValue, toValue)
-                        }
                         onMouseLeave={() => setHovered(true)}
                         onMouseOver={() => setHovered(false)}
                         onRemove={() =>
                             setThumbs(thumbs.filter((_, i) => i !== index))
                         }
+                        updateProps={() => updateParentProps()}
                     />
                 ))}
                 <div
@@ -240,15 +246,6 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                 />
             </div>
             <div className="WebvizRangeFilter__Ticks">
-                {tickPositions.map((tick) => (
-                    <div
-                        key={`tick-${tick.value}`}
-                        className="WebvizRangeFilter__Tick"
-                        style={{
-                            left: valueToPixel(closestValidValue(tick.value)),
-                        }}
-                    ></div>
-                ))}
                 <div className="WebvizRangeFilter__Ticks__Value WebvizRangeFilter__Ticks__Value--left">
                     {props.minValue}
                 </div>

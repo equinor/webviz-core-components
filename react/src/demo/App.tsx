@@ -45,6 +45,8 @@ const App: React.FC = () => {
             selectedTags: [],
         });
 
+    const [selectedValues, setSelectedValues] = React.useState<number[]>([]);
+
     const [currentPage, setCurrentPage] = React.useState<MenuProps>({
         url: "",
     });
@@ -53,8 +55,14 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <RangeFilter minValue={0} maxValue={99} step={1} showTicks={true} />
-
+            <RangeFilter
+                minValue={0}
+                maxValue={99}
+                step={1}
+                showTicks={true}
+                setProps={({ values }) => setSelectedValues(values)}
+            />
+            Selected Values are: {selectedValues.join(", ")}
             {currentPage.url.split("#")[1] === "dialog" && (
                 <>
                     <h1>Dialog</h1>
