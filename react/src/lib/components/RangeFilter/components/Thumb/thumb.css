@@ -42,6 +42,7 @@
     cursor: ew-resize;
     transition: outline 0.1s ease-in-out;
 }
+
 .WebvizRangeFilter__Thumb__Bar:hover {
     background-color: #35a0ae;
     transform: scaleY(1.2);
@@ -64,6 +65,7 @@
     margin-left: -24px;
     display: block;
 }
+
 .WebvizRangeFilter__Thumb__Tooltip--right {
     right: 0px;
     margin-right: -24px;
