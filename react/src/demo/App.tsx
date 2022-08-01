@@ -9,7 +9,12 @@
 import { Button } from "@material-ui/core";
 import React from "react";
 
-import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog } from "../lib";
+import {
+    WebvizPluginPlaceholder,
+    SmartNodeSelector,
+    Dialog,
+    AttributesSelector,
+} from "../lib";
 
 const steps = [
     {
@@ -102,6 +107,35 @@ const App: React.FC = () => {
                     />
                 </>
             )}
+
+            <>
+                <h1>AttributesSelector</h1>
+                <AttributesSelector
+                    id={"attributes-selector"}
+                    attributes={[
+                        {
+                            name: "Attribute 1",
+                            values: [
+                                "Value 1",
+                                "Value 2",
+                                "Value 3",
+                                "Value 4",
+                                "Value 5",
+                            ],
+                        },
+                        {
+                            name: "Attribute 2",
+                            values: [
+                                "Value 1",
+                                "Value 2",
+                                "Value 3",
+                                "Value 4",
+                                "Value 5",
+                            ],
+                        },
+                    ]}
+                />
+            </>
             {currentPage.url.split("#")[1] === "smart-node-selector" && (
                 <>
                     <h1>SmartNodeSelector</h1>

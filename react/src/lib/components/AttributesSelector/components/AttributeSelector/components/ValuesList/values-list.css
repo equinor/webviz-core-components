@@ -1,0 +1,105 @@
+.WebvizAttributesSelector__ValuesList {
+    box-sizing: border-box;
+    border: 1px #ccc solid;
+    border-radius: 0px 0px 4px 4px;
+    background-color: white;
+    overflow-y: auto;
+    margin-top: -2px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    overflow: hidden;
+}
+
+.WebvizAttributesSelector__ValuesList--popup {
+    position: absolute;
+    top: 100%;
+    margin-top: 0px;
+    left: -1px;
+    right: -1px;
+    -webkit-box-shadow: 0px 4px 5px -1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 4px 5px -1px rgba(0, 0, 0, 0.2);
+    z-index: 1299;
+}
+
+.WebvizAttributesSelector__ValuesList__Position {
+    visibility: hidden;
+}
+
+.WebvizAttributesSelector__ValuesList__Value {
+    padding: 8px;
+    cursor: pointer;
+    box-sizing: border-box;
+    height: 34px;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    border: 1px transparent solid;
+}
+
+.WebvizAttributesSelector__ValuesList__Value:hover {
+    background-color: #f4fcff;
+}
+
+.WebvizAttributesSelector__ValuesList__Value--KeyboardHover {
+    border: 1px rgb(37, 53, 224) solid;
+}
+
+.WebvizAttributesSelector__ValuesList__Value--Selected {
+    background-color: #d5eaf4;
+}
+
+.WebvizAttributesSelector__ValuesList__Value--Selected:hover {
+    background-color: #deeef6;
+}
+
+.WebvizAttributesSelector__ValuesList__Value__Checkbox {
+    background-color: #000;
+    border-radius: 4px;
+    width: 8px;
+    height: 8px;
+    padding: 4px;
+    margin-right: 8px;
+}
+
+.WebvizAttributesSelector__ValuesList__Value__Checkbox--checked::before {
+    content: "";
+    display: inline-block;
+    transform: rotate(45deg);
+    height: 8px;
+    width: 4px;
+    margin-top: -2px;
+    margin-left: 1px;
+    border-bottom: 2px solid #fff;
+    border-right: 2px solid #fff;
+}
+
+.WebvizAttributesSelector__ValuesList__Value__Checkbox--indeterminate::before {
+    content: "";
+    display: inline-block;
+    height: 2px;
+    margin-left: 1px;
+    width: 6px;
+    background-color: #fff;
+    margin-top: 3px;
+}
+
+.WebvizAttributesSelector__ValuesList__Tooltip {
+    padding: 8px;
+    font-style: italic;
+    box-sizing: border-box;
+    height: 34px;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background-color: rgb(231, 231, 231);
+    color: rgb(118, 118, 118);
+}

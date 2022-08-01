@@ -1,0 +1,6 @@
+.WebvizAttributeSelector__MouseSelection {
+    position: absolute;
+    border: 1px blue solid;
+    background-color: rgba(124, 144, 211, 0.589);
+    z-index: 1500;
+}

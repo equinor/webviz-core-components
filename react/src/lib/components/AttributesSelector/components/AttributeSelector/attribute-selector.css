@@ -1,0 +1,59 @@
+.WebvizAttributeSelector {
+    position: relative;
+}
+
+.WebvizAttributeSelector__Header {
+    display: flex;
+    flex-direction: row;
+    margin-top: 16px;
+}
+
+.WebvizAttributeSelector__Header > label {
+    flex-grow: 4;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.WebvizAttributeSelector__Content {
+    background-color: #f9f9f9;
+    min-height: 40px;
+    border: 1px #ccc solid;
+    border-radius: 4px;
+    display: flex;
+    cursor: text;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.WebvizAttributeSelector__Content--expanded {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.WebvizAttributeSelector__Content input {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 8px;
+    position: relative;
+    z-index: 11;
+    display: block;
+}
+
+.WebvizAttributeSelector__Dialog__Highlight {
+    border: 1px rgb(157, 0, 0) solid;
+    display: inline-block;
+    flex-wrap: wrap;
+    border-radius: 4px;
+    justify-content: left;
+    align-items: center;
+    color: #565656;
+    border-radius: 4px;
+    white-space: nowrap;
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin: 4px;
+    background-color: #fefefe;
+}

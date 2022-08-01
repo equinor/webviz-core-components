@@ -1,0 +1,67 @@
+.WebvizAttributeSelector_ValueTag {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 4px;
+    justify-content: left;
+    align-items: center;
+    min-width: 0;
+    color: #565656;
+    position: relative;
+    border-radius: 4px;
+    white-space: nowrap;
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin: 4px;
+    z-index: 11;
+    border: 1px #ccc solid;
+    background-color: #fefefe;
+}
+
+.WebvizAttributeSelector_ValueTag--focused {
+    outline: 1px rgb(51, 99, 255) dashed;
+}
+
+.WebvizAttributeSelector_ValueTag--selected {
+    background-color: #aebaff;
+}
+
+.WebvizAttributeSelector_ValueTag--highlighted {
+    border-color: rgb(157, 0, 0);
+    z-index: 1500;
+}
+
+.WebvizAttributeSelector_ValueTag button {
+    border: 1px #fff solid;
+    border-radius: 50%;
+    display: flex;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    padding: 4px;
+    align-items: center;
+    margin-left: 8px;
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.WebvizAttributeSelector_ValueTag__NumMatches {
+    align-items: center;
+    background: rgb(245, 245, 245);
+    border: 1px #ccc solid;
+    border-radius: 11px;
+    color: #565656;
+    height: 20px;
+    justify-content: center;
+    margin-right: 8px;
+    padding: 0;
+    padding-left: 3px;
+    padding-right: 3px;
+    min-width: 20px;
+    display: inline-block;
+    outline: none;
+    position: relative;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+}

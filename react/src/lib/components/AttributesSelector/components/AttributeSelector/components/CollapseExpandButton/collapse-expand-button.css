@@ -1,0 +1,30 @@
+.WebvizAttributesSelector__CollapseExpandButton {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.WebvizAttributesSelector__CollapseExpandButton__collapse::before {
+    content: "";
+    width: 0;
+    height: 0;
+    display: inline-block;
+    vertical-align: center;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #000;
+    margin-right: 8px;
+    margin-top: 4px;
+}
+
+.WebvizAttributesSelector__CollapseExpandButton__expand::before {
+    content: "";
+    width: 0;
+    height: 0;
+    display: inline-block;
+    vertical-align: center;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #000;
+    margin-right: 8px;
+    margin-top: 4px;
+}
