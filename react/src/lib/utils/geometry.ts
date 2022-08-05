@@ -68,6 +68,18 @@ export const pointIsContained = (
     );
 };
 
+export const pointIsContainedInBoundingClientRect = (
+    point: Point,
+    clientRect: DOMRect
+): boolean => {
+    return (
+        point.x >= clientRect.x &&
+        point.x <= clientRect.x + clientRect.width &&
+        point.y >= clientRect.y &&
+        point.y <= clientRect.y + clientRect.height
+    );
+};
+
 export const sizeSum = (size1: Size, size2: Size): Size => {
     return {
         width: size1.width + size2.width,

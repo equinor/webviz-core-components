@@ -1,0 +1,82 @@
+.WebvizRangeFilter__Thumb {
+    position: absolute;
+    display: flex;
+    z-index: 10;
+    height: 100%;
+}
+
+.WebvizRangeFilter__Thumb__Handle {
+    position: relative;
+    background-color: black;
+    width: 1px;
+    height: 100%;
+    cursor: ew-resize;
+    -webkit-box-shadow: 0px 0px 7px -3px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0px 0px 7px -3px rgba(0, 0, 0, 0.75);
+    box-shadow: 0px 0px 7px -3px rgba(0, 0, 0, 0.75);
+}
+
+.WebvizRangeFilter__Thumb__Handle:hover,
+.WebvizRangeFilter__Thumb__Handle--active {
+    transform: scaleX(8) scaleY(1.2);
+    border-radius: 4px;
+    outline: 1px #35a0ae9b solid;
+    transition: outline 0.1s ease-in-out;
+}
+
+.WebvizRangeFilter__Thumb--Tooltip {
+    position: absolute;
+    top: -24px;
+    width: 100%;
+    color: rgba(0, 0, 0, 0.75);
+    text-align: center;
+}
+
+.WebvizRangeFilter__Thumb__Bar {
+    background-color: #246e78;
+    height: 100%;
+    -webkit-box-shadow: inset 0px -2px 5px -3px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: inset 0px -2px 5px -3px rgba(0, 0, 0, 0.75);
+    box-shadow: inset 0px -2px 5px -3px rgba(0, 0, 0, 0.75);
+    border-radius: 4px;
+    cursor: ew-resize;
+    transition: outline 0.1s ease-in-out;
+}
+
+.WebvizRangeFilter__Thumb__Bar:hover {
+    background-color: #35a0ae;
+    transform: scaleY(1.2);
+    outline: 5px #35a0ae9b solid;
+    transition: outline 0.1s ease-in-out;
+}
+
+.WebvizRangeFilter__Thumb__Tooltip {
+    position: absolute;
+    padding: 4px;
+    width: 40px;
+    text-align: center;
+    background-color: white;
+    border-radius: 4px;
+    top: 26px;
+}
+
+.WebvizRangeFilter__Thumb__Tooltip--left {
+    left: 0px;
+    margin-left: -24px;
+    display: block;
+}
+
+.WebvizRangeFilter__Thumb__Tooltip--right {
+    right: 0px;
+    margin-right: -24px;
+    display: block;
+}
+
+@keyframes width {
+    0% {
+        transform: scaleX(0);
+    }
+    100% {
+        transform: scaleX(100%);
+    }
+}

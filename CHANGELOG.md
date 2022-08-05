@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+-   [#225](https://github.com/equinor/webviz-core-components/pull/225) - Added `RangeFilter` component which allows for a quick selection of integer ranges.
 -   [#207](https://github.com/equinor/webviz-core-components/pull/207) - Added `storybook` and stories for each component. Added publishment of `storybook` to GitHub workflow. Added `storybook` link to README.
 -   [#219](https://github.com/equinor/webviz-core-components/pull/219) - Implemented components required by the new Webviz Layout Framework (WLF)
 
