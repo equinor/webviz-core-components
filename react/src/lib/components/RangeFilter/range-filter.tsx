@@ -1,25 +1,30 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { uniqueId } from "lodash";
+import { TextField } from "@material-ui/core";
+
 import { Point } from "../../shared-types/point";
 import { ORIGIN } from "../../utils/geometry";
-import React from "react";
 import { Thumb } from "./components";
 
 import "./range-filter.css";
-import { uniqueId } from "lodash";
+
+type Selection = {
+    fromValue: number;
+    toValue: number;
+};
 
 export type ParentProps = {
     values: number[];
-    selections: {
-        fromValue: number;
-        toValue: number;
-    }[];
+    selections: Selection[];
 };
 
 export type RangeFilterProps = {
     minValue: number;
     maxValue: number;
     step: number;
-    showTicks?: boolean;
-    setProps: (props: ParentProps) => void;
+    selections?: Selection[];
+    setProps?: (props: ParentProps) => void;
 };
 
 export class ThumbInstance {
@@ -32,15 +37,15 @@ export class ThumbInstance {
         this.toValue = to;
     }
 
-    setFromValue(toValue: number) {
+    setFromValue(toValue: number): void {
         this.fromValue = toValue;
     }
 
-    setToValue(toValue: number) {
+    setToValue(toValue: number): void {
         this.toValue = toValue;
     }
 
-    setRange(from: number, to: number) {
+    setRange(from: number, to: number): void {
         this.fromValue = from;
         this.toValue = to;
     }
@@ -55,6 +60,9 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
     const resizeObserver = React.useRef<ResizeObserver | null>(null);
     const [cursorPosition, setCursorPosition] = React.useState<Point>(ORIGIN);
     const [hovered, setHovered] = React.useState<boolean>(false);
+    const [changedByUser, setChangedByUser] = React.useState<boolean>(true);
+    const [inputError, setInputError] = React.useState<string | null>(null);
+    const inputRef = React.useRef<HTMLInputElement | null>(null);
 
     const closestValidValue = (value: number) => {
         return Math.round(value / props.step) * props.step;
@@ -80,7 +88,8 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
     }, [setTrackWidth, setTrackBoundingClientRect, trackRef.current]);
 
     const updateParentProps = React.useCallback(
-        (givenThumbs?: ThumbInstance[]) => {
+        (givenThumbs?: ThumbInstance[], userChange = false) => {
+            setChangedByUser(userChange);
             const values = [];
             const currentThumbs = givenThumbs || thumbs;
             for (let i = props.minValue; i <= props.maxValue; i += props.step) {
@@ -92,15 +101,26 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                     values.push(i);
                 }
             }
-            props.setProps({
-                values: values,
-                selections: currentThumbs.map((el) => ({
-                    fromValue: el.fromValue,
-                    toValue: el.toValue,
-                })),
-            });
+            if (props.setProps) {
+                props.setProps({
+                    values: values,
+                    selections: currentThumbs.map((el) => ({
+                        fromValue: el.fromValue,
+                        toValue: el.toValue,
+                    })),
+                });
+            }
+            if (!userChange && inputRef.current) {
+                inputRef.current.value = currentThumbs
+                    .map((el) =>
+                        el.fromValue === el.toValue
+                            ? el.fromValue.toString()
+                            : `${el.fromValue}-${el.toValue}`
+                    )
+                    .join(";");
+            }
         },
-        [thumbs, props.setProps]
+        [thumbs, props.setProps, inputRef.current, changedByUser]
     );
 
     React.useEffect(() => {
@@ -204,6 +224,40 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
         updateParentProps(newThumbs);
     };
 
+    const handleInputChange = (e: React.ChangeEvent) => {
+        if (!changedByUser) {
+            setChangedByUser(true);
+            return;
+        }
+        const regex =
+            /^(([0-9]{1,}(-[0-9]{1,})?)([;,]{1}[0-9]{1,}(-[0-9]{1,})?){0,})?$/;
+        const value = (e.target as HTMLInputElement | undefined)?.value || "";
+        if (!regex.test(value)) {
+            setInputError("Invalid input");
+            return;
+        }
+        setInputError(null);
+        let newThumbs: ThumbInstance[] = [];
+        if (value.length > 0) {
+            newThumbs = value.split(/,|;/).map((el) => {
+                const split = el.split("-");
+                if (split.length === 1) {
+                    return new ThumbInstance(
+                        parseInt(split[0]),
+                        parseInt(split[0])
+                    );
+                } else {
+                    return new ThumbInstance(
+                        parseInt(split[0]),
+                        parseInt(split[1])
+                    );
+                }
+            });
+        }
+        setThumbs(newThumbs);
+        updateParentProps(newThumbs, true);
+    };
+
     return (
         <div className="WebvizRangeFilter">
             <div className="WebvizRangeFilter__Track" ref={trackRef}>
@@ -266,6 +320,29 @@ export const RangeFilter: React.FC<RangeFilterProps> = (props) => {
                     )}
                 </div>
             </div>
+            <div className="WebvizRangeFilter__Input">
+                <TextField
+                    onChange={(e: React.ChangeEvent) => handleInputChange(e)}
+                    inputRef={inputRef}
+                    error={inputError !== null}
+                    helperText={inputError}
+                    variant="outlined"
+                    style={{ width: "100%" }}
+                />
+            </div>
         </div>
     );
+};
+
+RangeFilter.propTypes = {
+    minValue: PropTypes.number.isRequired,
+    maxValue: PropTypes.number.isRequired,
+    step: PropTypes.number.isRequired,
+    selections: PropTypes.arrayOf(
+        PropTypes.shape({
+            fromValue: PropTypes.number.isRequired,
+            toValue: PropTypes.number.isRequired,
+        }).isRequired
+    ),
+    setProps: PropTypes.func,
 };

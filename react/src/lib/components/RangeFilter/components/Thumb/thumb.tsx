@@ -39,6 +39,10 @@ export const Thumb: React.FC<ThumbProps> = (props) => {
         React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     React.useEffect(() => {
+        setIsSingleValue(props.thumb.fromValue === props.thumb.toValue);
+    }, [props.thumb.fromValue, props.thumb.toValue]);
+
+    React.useEffect(() => {
         return () => {
             if (animationRef.current) {
                 clearTimeout(animationRef.current);

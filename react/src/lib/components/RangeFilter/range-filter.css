@@ -56,13 +56,6 @@
     right: 0px;
 }
 
-.WebvizRangeFilter__Tick {
-    width: 1px;
-    background-color: transparent;
-    height: 10px;
-    position: absolute;
-}
-
 .WebvizRangeFilter__ValueIndicator {
     position: absolute;
     z-index: 100;
@@ -78,4 +71,8 @@
 
 .WebvizRangeFilter__ValueIndicatorTrack {
     position: relative;
+}
+
+.WebvizRangeFilter__Input {
+    margin-top: 16px;
 }
