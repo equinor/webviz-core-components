@@ -27,6 +27,7 @@ import { WebvizPluginWrapper } from "./components/WebvizPluginWrapper";
 import { WebvizSettingsDrawer } from "./components/WebvizSettingsDrawer";
 import { WebvizView } from "./components/WebvizView";
 import { WebvizViewElement } from "./components/WebvizViewElement";
+import { WebvizViewToggleContainer } from "./components/WebvizViewToggleContainer";
 import { WebvizSettingsGroup } from "./components/WebvizSettingsGroup";
 import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn/WebvizPluginLayoutColumn";
 import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow/WebvizPluginLayoutRow";
@@ -42,6 +43,7 @@ export {
     WebvizSettingsDrawer,
     WebvizView,
     WebvizViewElement,
+    WebvizViewToggleContainer,
     WebvizPluginPlaceholder,
     WebvizSettingsGroup,
     WebvizPluginLayoutColumn,
