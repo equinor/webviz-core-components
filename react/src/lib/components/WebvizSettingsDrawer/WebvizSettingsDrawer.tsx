@@ -129,9 +129,11 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                 store.state.position.slice(1)
             }`}
             style={{
-                width: store.state.settingsDrawerOpen
-                    ? expandedWidth
-                    : collapsedWidth,
+                width:
+                    store.state.settingsDrawerOpen &&
+                    React.Children.count(props.children) > 0
+                        ? expandedWidth
+                        : collapsedWidth,
                 left: position.left,
                 top: position.top,
                 right: position.right,
