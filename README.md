@@ -59,6 +59,9 @@ then:
      pip install -e .
      ```
   3. Create a new example in `examples/` which uses your new component.
+    ```
+    npm run copy-package-json
+    ```
 
 - Write tests for your component.
 
