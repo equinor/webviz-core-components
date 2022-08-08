@@ -24,7 +24,7 @@ export const EdsIcon: React.FC<IconProps> = (props) => {
                     `An icon with name "${props.icon}" does not exist.` +
                     ` Please check the icon name for typos. ` +
                     `An overview of all available icons can be found at ` +
-                    `https://eds.equinor.com/assets/system-icons/library/.`
+                    `https://eds-storybook-react.azurewebsites.net/?path=/story/icons--preview.`
                 }
             >
                 <Icon
