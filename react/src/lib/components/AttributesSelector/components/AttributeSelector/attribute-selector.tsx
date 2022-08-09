@@ -23,6 +23,7 @@ import "./attribute-selector.css";
 export type AttributeSelectorProps = {
     id: string;
     attribute: Attribute;
+    onValuesChange: (values: string[]) => void;
 };
 
 type KeyboardSelection = {
@@ -66,6 +67,10 @@ export const AttributeSelector: React.FC<AttributeSelectorProps> = (props) => {
             }
         };
     }, []);
+
+    React.useEffect(() => {
+        props.onValuesChange(selectedValues);
+    }, [selectedValues]);
 
     React.useEffect(() => {
         const handleMouseDown = (e: MouseEvent) => {

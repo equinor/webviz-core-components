@@ -112,26 +112,19 @@ const App: React.FC = () => {
                 <h1>AttributesSelector</h1>
                 <AttributesSelector
                     id={"attributes-selector"}
-                    attributes={[
+                    selectionData={[
                         {
-                            name: "Attribute 1",
-                            values: [
-                                "Value 1",
-                                "Value 2",
-                                "Value 3",
-                                "Value 4",
-                                "Value 5",
-                            ],
+                            name: "Well 1",
+                            attributes: {
+                                Zone: ["A", "B", "C"],
+                            },
                         },
                         {
-                            name: "Attribute 2",
-                            values: [
-                                "Value 1",
-                                "Value 2",
-                                "Value 3",
-                                "Value 4",
-                                "Value 5",
-                            ],
+                            name: "Well 2",
+                            attributes: {
+                                Region: ["1", "2", "3"],
+                                Zone: ["A", "B", "C"],
+                            },
                         },
                     ]}
                 />
