@@ -5,13 +5,14 @@ import { IconData } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 import { Tooltip } from "@material-ui/core";
 
-type IconProps = {
+export type EdsIconProps = {
+    id?: string;
     icon: string;
     size?: 16 | 24 | 32 | 40 | 48;
     color?: string;
 };
 
-export const EdsIcon: React.FC<IconProps> = (props) => {
+export const EdsIcon: React.FC<EdsIconProps> = (props) => {
     let icon: IconData | undefined = undefined;
     if (props.icon) {
         icon = Object.values(edsIcons).find((el) => el.name === props.icon);
@@ -28,6 +29,7 @@ export const EdsIcon: React.FC<IconProps> = (props) => {
                 }
             >
                 <Icon
+                    id={props.id}
                     data={edsIcons.report}
                     color="hsla(0, 100%, 50%, 1)"
                     className={"IconNotFound"}
@@ -37,10 +39,13 @@ export const EdsIcon: React.FC<IconProps> = (props) => {
         );
     }
 
-    return <Icon data={icon} size={props.size} color={props.color} />;
+    return (
+        <Icon id={props.id} data={icon} size={props.size} color={props.color} />
+    );
 };
 
 EdsIcon.propTypes = {
+    id: PropTypes.string,
     icon: PropTypes.string.isRequired,
     size: PropTypes.oneOf([16, 24, 32, 40, 48]),
     color: PropTypes.string,
