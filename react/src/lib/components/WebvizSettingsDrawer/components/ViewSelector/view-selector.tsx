@@ -86,6 +86,8 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
         props.open,
         store.state.activePluginId,
         store.state.pluginsData,
+        viewNameRef.current,
+        viewCarouselRef.current,
     ]);
 
     React.useEffect(() => {
@@ -141,7 +143,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                 }}
                 onClick={() => setMenuOpen(true)}
             >
-                <div ref={viewCarouselRef}>
+                <div ref={viewCarouselRef} className="WebvizViewSelector__Icon">
                     <Icon name="view_carousel" />
                 </div>
                 <div

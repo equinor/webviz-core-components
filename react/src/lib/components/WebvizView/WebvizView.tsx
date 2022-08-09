@@ -21,7 +21,6 @@ export type ParentProps = {
 
 export type WebvizViewProps = {
     id: string;
-    showDownload: boolean;
     download?: DownloadData;
     setProps?: (props: ParentProps) => void;
     children?: React.ReactNode;
@@ -69,7 +68,6 @@ export const WebvizView: React.FC<WebvizViewProps> = (props) => {
 
 WebvizView.propTypes = {
     id: PropTypes.string.isRequired,
-    showDownload: PropTypes.bool.isRequired,
     children: PropTypes.node,
     download: PropTypes.shape(DownloadDataPropTypes),
     setProps: PropTypes.func,

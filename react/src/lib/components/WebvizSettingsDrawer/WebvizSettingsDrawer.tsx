@@ -129,9 +129,11 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                 store.state.position.slice(1)
             }`}
             style={{
-                width: store.state.settingsDrawerOpen
-                    ? expandedWidth
-                    : collapsedWidth,
+                width:
+                    store.state.settingsDrawerOpen &&
+                    React.Children.count(props.children) > 0
+                        ? expandedWidth
+                        : collapsedWidth,
                 left: position.left,
                 top: position.top,
                 right: position.right,
@@ -169,17 +171,28 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                 </div>
             )}
             <ViewSelector
-                open={store.state.settingsDrawerOpen}
+                open={
+                    store.state.settingsDrawerOpen &&
+                    React.Children.count(props.children) > 0
+                }
                 width={expandedWidth}
             />
             <WebvizSettings
-                visible={store.state.settingsDrawerOpen}
+                visible={
+                    store.state.settingsDrawerOpen &&
+                    React.Children.count(props.children) > 0
+                }
                 width={expandedWidth}
             >
                 {props.children}
             </WebvizSettings>
             <SnackbarProvider maxSnack={3}>
-                <PluginActions open={store.state.settingsDrawerOpen} />
+                <PluginActions
+                    open={
+                        store.state.settingsDrawerOpen &&
+                        React.Children.count(props.children) > 0
+                    }
+                />
             </SnackbarProvider>
         </div>
     );
