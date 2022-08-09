@@ -1,9 +1,9 @@
 .WebvizViewSelector {
     display: flex;
     align-items: center;
+    justify-items: center;
     border-radius: 4px;
     cursor: pointer;
-    justify-content: space-evenly;
     padding-left: 20px;
     padding-right: 16px;
     overflow: hidden;
@@ -33,4 +33,9 @@
     white-space: nowrap;
     overflow: hidden;
     padding-left: 12px;
+}
+
+.WebvizViewSelector__Icon {
+    display: flex;
+    justify-content: center;
 }

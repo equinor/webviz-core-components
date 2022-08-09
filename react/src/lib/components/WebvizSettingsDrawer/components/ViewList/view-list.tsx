@@ -30,13 +30,17 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
             views: View[];
         }[]
     >([]);
+    const ref = React.useRef<HTMLDivElement>(null);
 
     React.useLayoutEffect(() => {
         if (props.anchorElement) {
             const rect = props.anchorElement.getBoundingClientRect();
             if (props.location === "below") {
                 setMainPosition({
-                    x: rect.left + rect.width / 2,
+                    x:
+                        rect.left +
+                        rect.width / 2 -
+                        (ref.current?.getBoundingClientRect().width || 0) / 2,
                     y: rect.bottom + 20,
                 });
             } else {
@@ -46,7 +50,7 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                 });
             }
         }
-    }, [props.anchorElement]);
+    }, [props.anchorElement, props.location, ref.current]);
 
     React.useEffect(() => {
         const viewList: {
@@ -84,6 +88,7 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                 top: mainPosition.y,
                 display: props.open ? "block" : "none",
             }}
+            ref={ref}
         >
             <div
                 className={`WebvizViewList__Arrow WebvizViewList__Arrow${

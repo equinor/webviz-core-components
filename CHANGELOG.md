@@ -10,11 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 -   [#220](https://github.com/equinor/webviz-core-components/pull/220) - `Overlay` was hiding menu due to conflicting z-index properties. Added `zIndex` prop to `Overlay` component and adjusted consumers.
+-   [#233](https://github.com/equinor/webviz-core-components/pull/233) - Settings drawer not collapsing (not collapsable) if no settings group given.
+-   [#234](https://github.com/equinor/webviz-core-components/pull/234) - Adjusted message window width in Webviz tour component according to remaining view width.
 
 ### Added
 
 -   [#207](https://github.com/equinor/webviz-core-components/pull/207) - Added `storybook` and stories for each component. Added publishment of `storybook` to GitHub workflow. Added `storybook` link to README.
 -   [#219](https://github.com/equinor/webviz-core-components/pull/219) - Implemented components required by the new Webviz Layout Framework (WLF)
+-   [#227](https://github.com/equinor/webviz-core-components/pull/227) - Added `EdsIcon` component in order to use icons from the Equinor Design System (EDS) directly in Python.
 
 ### Changed
 

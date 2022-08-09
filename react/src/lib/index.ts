@@ -32,6 +32,7 @@ import { WebvizSettingsGroup } from "./components/WebvizSettingsGroup";
 import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn/WebvizPluginLayoutColumn";
 import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow/WebvizPluginLayoutRow";
 import { WebvizPluginLoadingIndicator } from "./components/WebvizPluginLoadingIndicator";
+import { EdsIcon } from "./components/EdsIcon";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
@@ -62,4 +63,5 @@ export {
     Overlay,
     ScrollArea,
     Dialog,
+    EdsIcon,
 };
