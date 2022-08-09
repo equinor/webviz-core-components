@@ -214,6 +214,22 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                             top: contentPosition.top,
                             right: contentPosition.right,
                             bottom: contentPosition.bottom,
+                            width:
+                                contentPosition.left !== "auto"
+                                    ? Math.min(
+                                          windowSize[0] -
+                                              contentPosition.left -
+                                              32,
+                                          300
+                                      )
+                                    : contentPosition.right !== "auto"
+                                    ? Math.min(
+                                          windowSize[0] -
+                                              contentPosition.right -
+                                              32,
+                                          300
+                                      )
+                                    : 300,
                         }}
                     >
                         {pluginData && (
