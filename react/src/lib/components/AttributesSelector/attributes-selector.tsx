@@ -65,14 +65,27 @@ export const AttributesSelector: React.FC<AttributesSelectorProps> = (
         attributeName: string,
         values: string[]
     ) => {
-        setSelectedAttributeValues(
-            selectedAttributeValues.map((el) =>
-                el.attributeName === attributeName
-                    ? { attributeName: attributeName, values: values }
-                    : el
+        if (
+            selectedAttributeValues.some(
+                (el) => el.attributeName === attributeName
             )
-        );
+        ) {
+            setSelectedAttributeValues(
+                selectedAttributeValues.map((el) =>
+                    el.attributeName === attributeName
+                        ? { attributeName: attributeName, values: values }
+                        : el
+                )
+            );
+        } else {
+        }
+        setSelectedAttributeValues([
+            ...selectedAttributeValues,
+            { attributeName: attributeName, values: values },
+        ]);
     };
+
+    React.useEffect(() => {}, [selectedAttributeValues]);
 
     return (
         <div className="WebvizAttributesSelector">
