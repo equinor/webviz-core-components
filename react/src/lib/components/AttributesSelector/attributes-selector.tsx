@@ -78,11 +78,11 @@ export const AttributesSelector: React.FC<AttributesSelectorProps> = (
                 )
             );
         } else {
+            setSelectedAttributeValues([
+                ...selectedAttributeValues,
+                { attributeName: attributeName, values: values },
+            ]);
         }
-        setSelectedAttributeValues([
-            ...selectedAttributeValues,
-            { attributeName: attributeName, values: values },
-        ]);
     };
 
     React.useEffect(() => {}, [selectedAttributeValues]);
