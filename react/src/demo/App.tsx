@@ -51,6 +51,8 @@ const App: React.FC = () => {
 
     const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
 
+    const [selectedObjects, setSelectedObjects] = React.useState<string[]>([]);
+
     return (
         <div>
             {currentPage.url.split("#")[1] === "dialog" && (
@@ -127,7 +129,10 @@ const App: React.FC = () => {
                             },
                         },
                     ]}
+                    setProps={(p) => setSelectedObjects(p.selectedObjects)}
                 />
+                <br />
+                Selected objects: {selectedObjects.join(", ")}
             </>
             {currentPage.url.split("#")[1] === "smart-node-selector" && (
                 <>

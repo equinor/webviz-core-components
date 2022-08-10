@@ -3,9 +3,14 @@ import React from "react";
 import { AttributeSelector } from "./components";
 import { SelectionObjects, Attribute } from "./types";
 
+type ParentProps = {
+    selectedObjects: string[];
+};
+
 export type AttributesSelectorProps = {
     id: string;
     selectionData: SelectionObjects[];
+    setProps?: (props: ParentProps) => void;
 };
 
 export const AttributesSelector: React.FC<AttributesSelectorProps> = (
@@ -59,7 +64,7 @@ export const AttributesSelector: React.FC<AttributesSelectorProps> = (
         setAttributes(
             attr.map((el) => ({ name: el.name, values: Array.from(el.values) }))
         );
-    }, [props.selectionData, setAttributes]);
+    }, [props.selectionData]);
 
     const handleSelectedValuesChanged = (
         attributeName: string,
@@ -85,7 +90,39 @@ export const AttributesSelector: React.FC<AttributesSelectorProps> = (
         }
     };
 
-    React.useEffect(() => {}, [selectedAttributeValues]);
+    React.useEffect(() => {
+        if (!props.setProps) {
+            return;
+        }
+        let selectedObjects: string[] = [];
+        selectedAttributeValues.forEach((selectedAttribute, index) => {
+            props.selectionData.forEach((object) => {
+                const attributeName = Object.keys(object.attributes).find(
+                    (el) => el === selectedAttribute.attributeName
+                );
+                let check = false;
+                if (attributeName) {
+                    if (
+                        selectedAttribute.values.some((el) =>
+                            object.attributes[attributeName].includes(el)
+                        )
+                    ) {
+                        check = true;
+                    }
+                } else if (selectedAttribute.values.includes("Undefined")) {
+                    check = true;
+                }
+                if (check && index === 0) {
+                    selectedObjects.push(object.name);
+                } else if (!check && selectedObjects.includes(object.name)) {
+                    selectedObjects = selectedObjects.filter(
+                        (el) => el !== object.name
+                    );
+                }
+            });
+        });
+        props.setProps({ selectedObjects: selectedObjects });
+    }, [selectedAttributeValues]);
 
     return (
         <div className="WebvizAttributesSelector">
