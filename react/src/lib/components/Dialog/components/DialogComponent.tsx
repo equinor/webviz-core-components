@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import {
-    withStyles,
     Button,
     Dialog as MuiDialog,
     DialogActions,
@@ -18,12 +17,6 @@ import { close } from "@equinor/eds-icons";
 Icon.add({ close });
 
 import { DraggablePaperComponent } from "./DraggablePaperComponent";
-
-const StyledMuiDialog = withStyles({
-    root: {
-        pointerEvents: "none",
-    },
-})(MuiDialog);
 
 export type DialogParentProps = {
     /**
@@ -114,7 +107,7 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
     };
 
     const content = (
-        <>
+        <div style={{ pointerEvents: "all" }}>
             <DialogTitle
                 style={{
                     cursor: props.draggable ? "move" : "default",
@@ -149,61 +142,28 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
                         </Button>
                     ))}
             </DialogActions>
-        </>
+        </div>
     );
 
-    if (props.backdrop) {
-        return (
-            <MuiDialog
-                id={props.id}
-                open={open}
-                onClose={(_, reason) => handleClose(reason)}
-                PaperComponent={
-                    props.draggable ? DraggablePaperComponent : Paper
-                }
-                aria-labelledby="dialog-title"
-                maxWidth={
-                    (props.max_width as
-                        | "xs"
-                        | "sm"
-                        | "md"
-                        | "lg"
-                        | "xl"
-                        | null) || false
-                }
-                fullScreen={props.full_screen}
-                scroll="body"
-            >
-                {content}
-            </MuiDialog>
-        );
-    } else {
-        return (
-            <StyledMuiDialog
-                id={props.id}
-                open={open}
-                onClose={(_, reason) => handleClose(reason)}
-                hideBackdrop={true}
-                PaperComponent={
-                    props.draggable ? DraggablePaperComponent : Paper
-                }
-                aria-labelledby="dialog-title"
-                maxWidth={
-                    (props.max_width as
-                        | "xs"
-                        | "sm"
-                        | "md"
-                        | "lg"
-                        | "xl"
-                        | null) || false
-                }
-                fullScreen={props.full_screen}
-                scroll="paper"
-            >
-                {content}
-            </StyledMuiDialog>
-        );
-    }
+    return (
+        <MuiDialog
+            id={props.id}
+            open={open}
+            onClose={(_, reason) => handleClose(reason)}
+            hideBackdrop={!props.backdrop}
+            PaperComponent={props.draggable ? DraggablePaperComponent : Paper}
+            aria-labelledby="draggable-dialog-title"
+            maxWidth={
+                (props.max_width as "xs" | "sm" | "md" | "lg" | "xl" | null) ||
+                false
+            }
+            fullScreen={props.full_screen}
+            scroll="body"
+            style={{ pointerEvents: "none" }}
+        >
+            {content}
+        </MuiDialog>
+    );
 };
 
 DialogComponent.propTypes = {

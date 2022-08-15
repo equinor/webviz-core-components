@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   [#220](https://github.com/equinor/webviz-core-components/pull/220) - `Overlay` was hiding menu due to conflicting z-index properties. Added `zIndex` prop to `Overlay` component and adjusted consumers.
 -   [#233](https://github.com/equinor/webviz-core-components/pull/233) - Settings drawer not collapsing (not collapsable) if no settings group given.
 -   [#234](https://github.com/equinor/webviz-core-components/pull/234) - Adjusted message window width in Webviz tour component according to remaining view width.
+-   [#236](https://github.com/equinor/webviz-core-components/pull/236) - Removed usage of `withStyles` in `DialogComponent` in order to avoid class name conflicts with `webviz-subsurface-components` caused by `MaterialUI`/`jss`.
 
 ### Added
 
