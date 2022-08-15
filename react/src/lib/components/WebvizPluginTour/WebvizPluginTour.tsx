@@ -191,7 +191,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     },
                 });
                 store.dispatch({
-                    type: StoreActions.SetOpenSettingsGroupId,
+                    type: StoreActions.AddOpenSettingsGroupId,
                     payload: {
                         settingsGroupId:
                             tourSteps[newTourStep].settingsGroupId || "",

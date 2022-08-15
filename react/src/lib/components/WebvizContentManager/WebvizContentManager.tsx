@@ -56,7 +56,8 @@ export enum StoreActions {
     SetFullScreenActions = "set_full_screen_actions",
     SetFullScreenActionsCallback = "set_full_screen_actions_callback",
     SetActiveViewDownloadCallback = "set_download_callback",
-    SetOpenSettingsGroupId = "set_open_settings_group_id",
+    AddOpenSettingsGroupId = "add_open_settings_group_id",
+    RemoveOpenSettingsGroupId = "remove_open_settings_group_id",
     SetSettingsDrawerOpen = "set_settings_drawer_open",
     IncrementViewUpdates = "increment_view_updated",
 }
@@ -67,7 +68,7 @@ export type StoreState = {
     position: DrawerPosition;
     pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
-    openSettingsGroupId: string;
+    openSettingsGroupIds: string[];
     settingsDrawerOpen: boolean;
     externalTrigger: boolean;
     backdropOpacity: number;
@@ -75,6 +76,13 @@ export type StoreState = {
     activeViewDownloadCallback: () => void;
     fullScreenActions: FullScreenAction[];
     viewUpdates: number;
+};
+
+type StoredState = {
+    activePluginId: string;
+    openSettingsGroupIds: string[];
+    settingsDrawerOpen: boolean;
+    activeViewId: string;
 };
 
 type Payload = {
@@ -123,7 +131,10 @@ type Payload = {
     [StoreActions.SetActiveViewDownloadCallback]: {
         callback: () => void;
     };
-    [StoreActions.SetOpenSettingsGroupId]: {
+    [StoreActions.AddOpenSettingsGroupId]: {
+        settingsGroupId: string;
+    };
+    [StoreActions.RemoveOpenSettingsGroupId]: {
         settingsGroupId: string;
     };
     [StoreActions.SetSettingsDrawerOpen]: {
@@ -142,7 +153,7 @@ const setInitialState = (): StoreState => {
         bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
-        openSettingsGroupId: "",
+        openSettingsGroupIds: [],
         settingsDrawerOpen: false,
         backdropOpacity: 0,
         fullScreenActions: [],
@@ -155,6 +166,46 @@ const setInitialState = (): StoreState => {
         viewUpdates: 0,
         externalTrigger: false,
     };
+};
+
+const makeStoreId = (): string => {
+    const href = window.location.href;
+    return `wlf-store-${href}`;
+};
+
+const readStoredState = (): StoredState => {
+    const stored = JSON.parse(localStorage.getItem(makeStoreId()) || "{}");
+    return {
+        activePluginId:
+            "activePluginId" in Object.keys(stored)
+                ? stored.activePluginId
+                : "",
+        openSettingsGroupIds:
+            "openSettingsGroupIds" in Object.keys(stored)
+                ? stored.openSettingsGroupIds
+                : [],
+        settingsDrawerOpen:
+            "settingsDrawerOpen" in Object.keys(stored)
+                ? stored.settingsDrawerOpen
+                : false,
+        activeViewId:
+            "activeViewId" in Object.keys(stored) ? stored.activeViewId : "",
+    };
+};
+
+const storeState = (
+    activePluginId: string,
+    openSettingsGroupIds: string[],
+    settingsDrawerOpen: boolean,
+    activeViewId: string
+): void => {
+    const data = {
+        activePluginId: activePluginId,
+        openSettingsGroupIds: openSettingsGroupIds,
+        settingsDrawerOpen: settingsDrawerOpen,
+        activeViewId: activeViewId,
+    };
+    localStorage.setItem(makeStoreId(), JSON.stringify(data));
 };
 
 export const StoreReducer = (
@@ -270,10 +321,21 @@ export const StoreReducer = (
             activeViewDownloadCallback: action.payload.callback,
         };
     }
-    if (action.type === StoreActions.SetOpenSettingsGroupId) {
+    if (action.type === StoreActions.AddOpenSettingsGroupId) {
         return {
             ...state,
-            openSettingsGroupId: action.payload.settingsGroupId,
+            openSettingsGroupIds: [
+                ...state.openSettingsGroupIds,
+                action.payload.settingsGroupId,
+            ],
+        };
+    }
+    if (action.type === StoreActions.RemoveOpenSettingsGroupId) {
+        return {
+            ...state,
+            openSettingsGroupIds: state.openSettingsGroupIds.filter(
+                (el) => el !== action.payload.settingsGroupId
+            ),
         };
     }
     if (action.type === StoreActions.SetSettingsDrawerOpen) {
@@ -326,8 +388,8 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
 
     React.useEffect(() => {
         const href = window.location.href;
-        const data = JSON.parse(sessionStorage.getItem(href) || "{}");
-        if (href !== lastHref && Object.keys(data).length === 2) {
+        const data = readStoredState();
+        if (href !== lastHref) {
             dispatch({
                 type: StoreActions.SetActivePluginAndView,
                 payload: {
@@ -349,17 +411,21 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
             )?.activeViewId;
 
             if (activePluginId && activeViewId) {
-                sessionStorage.setItem(
-                    href,
-                    JSON.stringify({
-                        activePluginId: activePluginId,
-                        activeViewId: activeViewId,
-                    })
+                storeState(
+                    activePluginId,
+                    state.openSettingsGroupIds,
+                    state.settingsDrawerOpen,
+                    activeViewId
                 );
             }
         }
         setLastHref(href);
-    }, [state.pluginsData]);
+    }, [
+        state.pluginsData,
+        state.activePluginId,
+        state.openSettingsGroupIds,
+        state.settingsDrawerOpen,
+    ]);
 
     React.useEffect(() => {
         if (props.setProps) {
