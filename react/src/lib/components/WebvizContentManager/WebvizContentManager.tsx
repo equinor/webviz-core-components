@@ -30,7 +30,8 @@ type ActionMap<
                 | View[]
                 | ((action: string) => void)
                 | FullScreenAction[]
-                | TourStep[];
+                | TourStep[]
+                | string[];
         } | null;
     }
 > = {
@@ -49,7 +50,7 @@ export enum StoreActions {
     UnregisterPlugin = "unregister_plugin",
     SetActiveView = "set_active_view",
     SetActivePlugin = "set_active_plugin",
-    SetActivePluginAndView = "set_active_plugin_and_view",
+    ApplyStoredState = "apply_stored_state",
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
     SetBackdropOpacity = "set_backdrop_opacity",
@@ -106,9 +107,11 @@ type Payload = {
     [StoreActions.SetActivePlugin]: {
         pluginId: string;
     };
-    [StoreActions.SetActivePluginAndView]: {
+    [StoreActions.ApplyStoredState]: {
         pluginId: string;
         viewId: string;
+        openSettingsGroupIds: string[];
+        settingsDrawerOpen: boolean;
     };
     [StoreActions.SetMenuPosition]: {
         pinned: boolean;
@@ -169,27 +172,27 @@ const setInitialState = (): StoreState => {
 };
 
 const makeStoreId = (): string => {
-    const href = window.location.href;
-    return `wlf-store-${href}`;
+    const pathname = window.location.pathname;
+    return `wlf-store-${pathname}`;
 };
 
 const readStoredState = (): StoredState => {
     const stored = JSON.parse(localStorage.getItem(makeStoreId()) || "{}");
     return {
-        activePluginId:
-            "activePluginId" in Object.keys(stored)
-                ? stored.activePluginId
-                : "",
-        openSettingsGroupIds:
-            "openSettingsGroupIds" in Object.keys(stored)
-                ? stored.openSettingsGroupIds
-                : [],
-        settingsDrawerOpen:
-            "settingsDrawerOpen" in Object.keys(stored)
-                ? stored.settingsDrawerOpen
-                : false,
-        activeViewId:
-            "activeViewId" in Object.keys(stored) ? stored.activeViewId : "",
+        activePluginId: Object.keys(stored).includes("activePluginId")
+            ? stored.activePluginId
+            : "",
+        openSettingsGroupIds: Object.keys(stored).includes(
+            "openSettingsGroupIds"
+        )
+            ? stored.openSettingsGroupIds
+            : [],
+        settingsDrawerOpen: Object.keys(stored).includes("settingsDrawerOpen")
+            ? stored.settingsDrawerOpen
+            : false,
+        activeViewId: Object.keys(stored).includes("activeViewId")
+            ? stored.activeViewId
+            : "",
     };
 };
 
@@ -261,7 +264,7 @@ export const StoreReducer = (
             ],
         };
     }
-    if (action.type === StoreActions.SetActivePluginAndView) {
+    if (action.type === StoreActions.ApplyStoredState) {
         return {
             ...state,
             activePluginId: action.payload.pluginId,
@@ -272,6 +275,8 @@ export const StoreReducer = (
                         : plugin
                 ),
             ],
+            openSettingsGroupIds: action.payload.openSettingsGroupIds,
+            settingsDrawerOpen: action.payload.settingsDrawerOpen,
         };
     }
     if (action.type === StoreActions.SetActivePlugin) {
@@ -384,17 +389,28 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         null,
         setInitialState
     );
-    const [lastHref, setLastHref] = React.useState<string>("");
+    const [lastUrlPathname, setLastUrlPathname] = React.useState<string>("");
 
     React.useEffect(() => {
-        const href = window.location.href;
+        const activePluginId = state.activePluginId;
+        const activeViewId = state.pluginsData.find(
+            (plugin) => plugin.id === state.activePluginId
+        )?.activeViewId;
+
+        if (!(activePluginId && activeViewId)) {
+            return;
+        }
+
+        const urlPathname = window.location.pathname;
         const data = readStoredState();
-        if (href !== lastHref) {
+        if (urlPathname !== lastUrlPathname) {
             dispatch({
-                type: StoreActions.SetActivePluginAndView,
+                type: StoreActions.ApplyStoredState,
                 payload: {
                     pluginId: data.activePluginId,
                     viewId: data.activeViewId,
+                    openSettingsGroupIds: data.openSettingsGroupIds,
+                    settingsDrawerOpen: data.settingsDrawerOpen,
                 },
             });
 
@@ -405,11 +421,6 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
                 });
             }
         } else {
-            const activePluginId = state.activePluginId;
-            const activeViewId = state.pluginsData.find(
-                (plugin) => plugin.id === state.activePluginId
-            )?.activeViewId;
-
             if (activePluginId && activeViewId) {
                 storeState(
                     activePluginId,
@@ -417,27 +428,24 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
                     state.settingsDrawerOpen,
                     activeViewId
                 );
+                if (props.setProps) {
+                    props.setProps({
+                        activeViewId:
+                            state.pluginsData.find(
+                                (plugin) => plugin.id === state.activePluginId
+                            )?.activeViewId || "",
+                        activePluginId: state.activePluginId,
+                    });
+                }
             }
         }
-        setLastHref(href);
+        setLastUrlPathname(urlPathname);
     }, [
         state.pluginsData,
         state.activePluginId,
         state.openSettingsGroupIds,
         state.settingsDrawerOpen,
     ]);
-
-    React.useEffect(() => {
-        if (props.setProps) {
-            props.setProps({
-                activeViewId:
-                    state.pluginsData.find(
-                        (plugin) => plugin.id === state.activePluginId
-                    )?.activeViewId || "",
-                activePluginId: state.activePluginId,
-            });
-        }
-    }, [state.pluginsData, state.activePluginId]);
 
     return (
         <storeContext.Provider value={{ state, dispatch }}>

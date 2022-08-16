@@ -1,6 +1,6 @@
 export const checkIfUrlIsCurrent = (url: string): boolean => {
     if (url.charAt(0) === "/") {
-        url = url.substr(1);
+        url = url.substring(1);
     }
     const base = window.location.href;
     const stack = base.split("/"),
