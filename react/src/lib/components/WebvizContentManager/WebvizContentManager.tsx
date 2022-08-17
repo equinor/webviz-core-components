@@ -176,24 +176,30 @@ const makeStoreId = (): string => {
     return `wlf-store-${pathname}`;
 };
 
-const readStoredState = (): StoredState => {
-    const stored = JSON.parse(localStorage.getItem(makeStoreId()) || "{}");
-    return {
-        activePluginId: Object.keys(stored).includes("activePluginId")
-            ? stored.activePluginId
-            : "",
-        openSettingsGroupIds: Object.keys(stored).includes(
-            "openSettingsGroupIds"
-        )
-            ? stored.openSettingsGroupIds
-            : [],
-        settingsDrawerOpen: Object.keys(stored).includes("settingsDrawerOpen")
-            ? stored.settingsDrawerOpen
-            : false,
-        activeViewId: Object.keys(stored).includes("activeViewId")
-            ? stored.activeViewId
-            : "",
-    };
+const readStoredState = (): StoredState | null => {
+    const storedString = localStorage.getItem(makeStoreId());
+    if (storedString) {
+        const stored = JSON.parse(storedString || "{}");
+        return {
+            activePluginId: Object.keys(stored).includes("activePluginId")
+                ? stored.activePluginId
+                : "",
+            openSettingsGroupIds: Object.keys(stored).includes(
+                "openSettingsGroupIds"
+            )
+                ? stored.openSettingsGroupIds
+                : [],
+            settingsDrawerOpen: Object.keys(stored).includes(
+                "settingsDrawerOpen"
+            )
+                ? stored.settingsDrawerOpen
+                : false,
+            activeViewId: Object.keys(stored).includes("activeViewId")
+                ? stored.activeViewId
+                : "",
+        };
+    }
+    return null;
 };
 
 const storeState = (
@@ -403,7 +409,7 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
 
         const urlPathname = window.location.pathname;
         const data = readStoredState();
-        if (urlPathname !== lastUrlPathname) {
+        if (urlPathname !== lastUrlPathname && data) {
             dispatch({
                 type: StoreActions.ApplyStoredState,
                 payload: {
