@@ -2,6 +2,7 @@ from typing import Any
 
 from dash import html
 
+
 class LabeledContainer(html.Div):
     """Creates a container with a header label and padded content
 
@@ -19,11 +20,7 @@ class LabeledContainer(html.Div):
     """
 
     def __init__(
-        self,
-        children: Any,
-        label: str = "",
-        className: str = "",
-        **kwargs: Any
+        self, children: Any, label: str = "", className: str = "", **kwargs: Any
     ) -> None:
         super().__init__()
         self.className = className + "webviz-labeled-container"
