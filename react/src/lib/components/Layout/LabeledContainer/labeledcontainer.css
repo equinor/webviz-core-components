@@ -1,0 +1,9 @@
+.webviz-labeled-container {
+    color: #555;
+    margin-top: 0.5vh;
+    margin-bottom: 0.5vh;
+}
+
+.webviz-labeled-container:hover {
+    box-shadow: 0px 0px 1px 0.5px lightgrey;
+}
