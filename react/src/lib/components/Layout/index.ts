@@ -9,6 +9,7 @@ import "./Dropdown/dropdown.css";
 import "./Frame/frame.css";
 import "./Header/header.css";
 import "./Label/label.css";
+import "./LabeledContainer/labeled-container.css"
 import "./RadioItems/radioitems.css";
 import "./Selectors/selectors.css";
 import "./Slider/slider.css";
