@@ -23,7 +23,7 @@ class LabeledContainer(html.Div):
         self, children: Any, label: str = "", className: str = "", **kwargs: Any
     ) -> None:
         super().__init__()
-        self.className = className + "webviz-labeled-container"
+        self.className = (className + " WebvizLabeledContainer").strip()
         if "id" in kwargs:
             self.id = kwargs["id"]
         self.children = [

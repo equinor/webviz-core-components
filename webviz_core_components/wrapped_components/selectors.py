@@ -31,7 +31,7 @@ class Selectors(html.Details):
         **kwargs: Any
     ) -> None:
         super().__init__()
-        self.className = className + "webviz-selectors"
+        self.className = (className + " webviz-selectors").strip()
         self.open = open_details
         if "id" in kwargs:
             self.id = kwargs["id"]
