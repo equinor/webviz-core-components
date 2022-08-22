@@ -7,6 +7,7 @@ from .frame import Frame
 from .graph import Graph
 from .header import Header
 from .label import Label
+from .labeled_container import LabeledContainer
 from .range_slider import RangeSlider
 from .radioitems import RadioItems
 
@@ -26,6 +27,7 @@ __all__ = [
     "Graph",
     "Header",
     "Label",
+    "LabeledContainer",
     "RangeSlider",
     "RadioItems",
     "SelectWithLabel",

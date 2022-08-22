@@ -3,16 +3,13 @@ from typing import Any
 from dash import html
 
 
-class Selectors(html.Details):
-    """Creates a collapsible box with a header label.
+class LabeledContainer(html.Div):
+    """Creates a container with a header label and padded content
 
     Keyword arguments:
 
     - children (a list of or a singular dash component, string or number; required):
         The children of this component.
-
-    - open_details (bool; default True):
-        Used to set initial opened/closed state
 
     - label (str; optional):
         The text of the label
@@ -23,16 +20,10 @@ class Selectors(html.Details):
     """
 
     def __init__(
-        self,
-        children: Any,
-        open_details: bool = True,
-        label: str = "",
-        className: str = "",
-        **kwargs: Any
+        self, children: Any, label: str = "", className: str = "", **kwargs: Any
     ) -> None:
         super().__init__()
-        self.className = (className + " webviz-selectors").strip()
-        self.open = open_details
+        self.className = (className + " WebvizLabeledContainer").strip()
         if "id" in kwargs:
             self.id = kwargs["id"]
         self.children = [
