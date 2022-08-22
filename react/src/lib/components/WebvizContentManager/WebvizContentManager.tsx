@@ -50,7 +50,7 @@ export enum StoreActions {
     UnregisterPlugin = "unregister_plugin",
     SetActiveView = "set_active_view",
     SetActivePlugin = "set_active_plugin",
-    ApplyStoredState = "apply_stored_state",
+    ApplyStoredLocalState = "apply_stored_local_state",
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
     SetBackdropOpacity = "set_backdrop_opacity",
@@ -79,11 +79,14 @@ export type StoreState = {
     viewUpdates: number;
 };
 
-type StoredState = {
+type StoredLocalState = {
     activePluginId: string;
     openSettingsGroupIds: string[];
-    settingsDrawerOpen: boolean;
     activeViewId: string;
+};
+
+type StoredGlobalState = {
+    settingsDrawerOpen: boolean;
 };
 
 type Payload = {
@@ -107,11 +110,10 @@ type Payload = {
     [StoreActions.SetActivePlugin]: {
         pluginId: string;
     };
-    [StoreActions.ApplyStoredState]: {
+    [StoreActions.ApplyStoredLocalState]: {
         pluginId: string;
         viewId: string;
         openSettingsGroupIds: string[];
-        settingsDrawerOpen: boolean;
     };
     [StoreActions.SetMenuPosition]: {
         pinned: boolean;
@@ -171,13 +173,17 @@ const setInitialState = (): StoreState => {
     };
 };
 
-const makeStoreId = (): string => {
+const makeLocalStoreId = (): string => {
     const pathname = window.location.pathname;
     return `wlf-store-${pathname}`;
 };
 
-const readStoredState = (): StoredState | null => {
-    const storedString = localStorage.getItem(makeStoreId());
+const makeGlobalStoreId = (): string => {
+    return `wlf-store`;
+};
+
+const readStoredLocalState = (): StoredLocalState | null => {
+    const storedString = localStorage.getItem(makeLocalStoreId());
     if (storedString) {
         const stored = JSON.parse(storedString || "{}");
         return {
@@ -189,11 +195,6 @@ const readStoredState = (): StoredState | null => {
             )
                 ? stored.openSettingsGroupIds
                 : [],
-            settingsDrawerOpen: Object.keys(stored).includes(
-                "settingsDrawerOpen"
-            )
-                ? stored.settingsDrawerOpen
-                : false,
             activeViewId: Object.keys(stored).includes("activeViewId")
                 ? stored.activeViewId
                 : "",
@@ -202,19 +203,39 @@ const readStoredState = (): StoredState | null => {
     return null;
 };
 
-const storeState = (
+const readStoredGlobalState = (): StoredGlobalState | null => {
+    const storedString = localStorage.getItem(makeGlobalStoreId());
+    if (storedString) {
+        const stored = JSON.parse(storedString || "{}");
+        return {
+            settingsDrawerOpen: Object.keys(stored).includes(
+                "settingsDrawerOpen"
+            )
+                ? stored.settingsDrawerOpen
+                : false,
+        };
+    }
+    return null;
+};
+
+const storeLocalState = (
     activePluginId: string,
     openSettingsGroupIds: string[],
-    settingsDrawerOpen: boolean,
     activeViewId: string
 ): void => {
     const data = {
         activePluginId: activePluginId,
         openSettingsGroupIds: openSettingsGroupIds,
-        settingsDrawerOpen: settingsDrawerOpen,
         activeViewId: activeViewId,
     };
-    localStorage.setItem(makeStoreId(), JSON.stringify(data));
+    localStorage.setItem(makeLocalStoreId(), JSON.stringify(data));
+};
+
+const storeGlobalState = (settingsDrawerOpen: boolean): void => {
+    const data = {
+        settingsDrawerOpen: settingsDrawerOpen,
+    };
+    localStorage.setItem(makeGlobalStoreId(), JSON.stringify(data));
 };
 
 export const StoreReducer = (
@@ -270,7 +291,7 @@ export const StoreReducer = (
             ],
         };
     }
-    if (action.type === StoreActions.ApplyStoredState) {
+    if (action.type === StoreActions.ApplyStoredLocalState) {
         return {
             ...state,
             activePluginId: action.payload.pluginId,
@@ -282,7 +303,6 @@ export const StoreReducer = (
                 ),
             ],
             openSettingsGroupIds: action.payload.openSettingsGroupIds,
-            settingsDrawerOpen: action.payload.settingsDrawerOpen,
         };
     }
     if (action.type === StoreActions.SetActivePlugin) {
@@ -395,7 +415,8 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         null,
         setInitialState
     );
-    const [lastUrlPathname, setLastUrlPathname] = React.useState<string>("");
+    const [lastLocation, setLastLocation] =
+        React.useState<Location | null>(null);
 
     React.useEffect(() => {
         const activePluginId = state.activePluginId;
@@ -407,31 +428,43 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
             return;
         }
 
-        const urlPathname = window.location.pathname;
-        const data = readStoredState();
-        if (urlPathname !== lastUrlPathname && data) {
+        const location = window.location;
+        const localState = readStoredLocalState();
+        const globalState = readStoredGlobalState();
+
+        if (lastLocation === null && globalState) {
             dispatch({
-                type: StoreActions.ApplyStoredState,
+                type: StoreActions.SetSettingsDrawerOpen,
                 payload: {
-                    pluginId: data.activePluginId,
-                    viewId: data.activeViewId,
-                    openSettingsGroupIds: data.openSettingsGroupIds,
-                    settingsDrawerOpen: data.settingsDrawerOpen,
+                    externalTrigger: true,
+                    settingsDrawerOpen: globalState.settingsDrawerOpen,
+                },
+            });
+        } else if (activePluginId && activeViewId) {
+            storeGlobalState(state.settingsDrawerOpen);
+        }
+
+        if (location.pathname !== lastLocation?.pathname && localState) {
+            dispatch({
+                type: StoreActions.ApplyStoredLocalState,
+                payload: {
+                    pluginId: localState.activePluginId,
+                    viewId: localState.activeViewId,
+                    openSettingsGroupIds: localState.openSettingsGroupIds,
                 },
             });
 
             if (props.setProps) {
                 props.setProps({
-                    activeViewId: data.activeViewId,
-                    activePluginId: data.activePluginId,
+                    activeViewId: localState.activeViewId,
+                    activePluginId: localState.activePluginId,
                 });
             }
         } else {
             if (activePluginId && activeViewId) {
-                storeState(
+                storeLocalState(
                     activePluginId,
                     state.openSettingsGroupIds,
-                    state.settingsDrawerOpen,
                     activeViewId
                 );
                 if (props.setProps) {
@@ -445,7 +478,7 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
                 }
             }
         }
-        setLastUrlPathname(urlPathname);
+        setLastLocation(location);
     }, [
         state.pluginsData,
         state.activePluginId,

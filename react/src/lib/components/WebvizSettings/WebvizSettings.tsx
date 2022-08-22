@@ -25,20 +25,6 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
         if (store.state.openSettingsGroupIds.length !== 0) {
             return;
         }
-        React.Children.forEach(props.children, (child, index) => {
-            if (React.isValidElement(child)) {
-                if (index === 0) {
-                    store.dispatch({
-                        type: StoreActions.AddOpenSettingsGroupId,
-                        payload: {
-                            settingsGroupId:
-                                child.props._dashprivate_layout.props.id,
-                        },
-                    });
-                    return;
-                }
-            }
-        });
     }, [props.children]);
 
     const handleGroupToggle = React.useCallback(
