@@ -37,9 +37,15 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
     const completelyVisibleTimeoutRef =
         React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    const [initialCall, setInitialCall] = React.useState<boolean>(true);
+
     const activePlugin = store.state.pluginsData.find(
         (plugin) => plugin.id === store.state.activePluginId
     );
+
+    React.useEffect(() => {
+        setInitialCall(false);
+    }, [props.open]);
 
     let visible = true;
 
@@ -158,7 +164,11 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                 className={
                     props.alwaysOpen
                         ? "WebvizSettingsGroup__FlatContent"
-                        : "WebvizSettingsGroup__Content"
+                        : `WebvizSettingsGroup__Content${
+                              initialCall
+                                  ? " WebvizSettingsGroup__Content__Transition"
+                                  : ""
+                          }`
                 }
                 style={{
                     height: props.open || props.alwaysOpen ? contentSize[1] : 0,

@@ -51,7 +51,11 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
     return (
         <div
             className="WebvizSettings"
-            style={{ opacity: props.visible ? 1 : 0, width: props.width }}
+            style={{
+                opacity: props.visible ? 1 : 0,
+                width: props.width,
+                pointerEvents: props.visible ? "all" : "none",
+            }}
         >
             <ScrollArea>
                 {props.children &&
