@@ -165,7 +165,7 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                     props.alwaysOpen
                         ? "WebvizSettingsGroup__FlatContent"
                         : `WebvizSettingsGroup__Content${
-                              initialCall
+                              !initialCall
                                   ? " WebvizSettingsGroup__Content__Transition"
                                   : ""
                           }`
