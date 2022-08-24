@@ -17,14 +17,38 @@ export default {
     },
 } as ComponentMeta<typeof Select>;
 
-const Template: ComponentStory<typeof Select> = (args) => <Select {...args} />;
+const Template: ComponentStory<typeof Select> = (args) => {
+    const { setProps, debounce_time_ms, ...other } = args;
+
+    const [selected, setSelected] = React.useState<
+        string | number | (string | number)[]
+    >([]);
+
+    return (
+        <>
+            <Select
+                setProps={(prop) => setSelected(prop.value)}
+                debounce_time_ms={debounce_time_ms}
+                {...other}
+            />
+            <div>{`Debounce time: ${debounce_time_ms?.toString()} ms`}</div>
+            <div>{`Selected values: ${selected.toString()}`}</div>
+        </>
+    );
+};
 
 export const Basic = Template.bind({});
 Basic.args = {
     id: Select.defaultProps?.id || "select-component",
-    size: Select.defaultProps?.size || 4,
-    options: Select.defaultProps?.options || [],
+    size: Select.defaultProps?.size || 5,
+    options: [
+        { label: 1, value: 1 },
+        { label: 2, value: 2 },
+        { label: 3, value: 3 },
+        { label: 4, value: 4 },
+    ],
     value: Select.defaultProps?.value || [],
+    debounce_time_ms: Select.defaultProps?.debounce_time_ms || 1000,
     multi: Select.defaultProps?.multi || true,
     className: Select.defaultProps?.className || "",
     style: Select.defaultProps?.style || {},
@@ -33,4 +57,7 @@ Basic.args = {
     persistence: Select.defaultProps?.persistence || false,
     persisted_props: Select.defaultProps?.persisted_props || ["value"],
     persistence_type: Select.defaultProps?.persistence_type || "local",
+    setProps: () => {
+        return;
+    },
 };
