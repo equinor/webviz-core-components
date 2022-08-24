@@ -110,7 +110,7 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                 <Tooltip
                     title={`${props.open ? "Close" : "Open"} settings group '${
                         props.title
-                    }`}
+                    }'`}
                 >
                     {children}
                 </Tooltip>
