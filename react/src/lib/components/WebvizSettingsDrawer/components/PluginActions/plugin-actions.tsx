@@ -99,34 +99,39 @@ export const PluginActions: React.FC<PluginActionsProps> = (
             openCloseAnimation.current.reset();
         }
 
-        openCloseAnimation.current =
-            new Animation<OpenCloseAnimationParameters>(
-                900,
-                20,
-                [
-                    {
-                        t: 0,
-                        state: { marginBottom: 0 },
-                    },
-                    {
-                        t: 2 / 3,
-                        state: { marginBottom: -closedHeight },
-                    },
-                    {
-                        t: 1,
-                        state: { marginBottom: 0 },
-                    },
-                ],
-                Animation.Bezier,
-                (values, t) => {
-                    if (t === 2 / 3) {
-                        setOpen(!open);
+        if (!store.state.externalTrigger) {
+            openCloseAnimation.current =
+                new Animation<OpenCloseAnimationParameters>(
+                    900,
+                    20,
+                    [
+                        {
+                            t: 0,
+                            state: { marginBottom: 0 },
+                        },
+                        {
+                            t: 2 / 3,
+                            state: { marginBottom: -closedHeight },
+                        },
+                        {
+                            t: 1,
+                            state: { marginBottom: 0 },
+                        },
+                    ],
+                    Animation.Bezier,
+                    (values, t) => {
+                        if (t === 2 / 3) {
+                            setOpen(!open);
+                        }
+                        setMarginBottom(values.marginBottom);
                     }
-                    setMarginBottom(values.marginBottom);
-                }
-            );
+                );
 
-        openCloseAnimation.current.start();
+            openCloseAnimation.current.start();
+        } else {
+            setOpen(!open);
+            setMarginBottom(0);
+        }
     }, [props.open]);
 
     const handleScreenShotClick = React.useCallback(() => {
