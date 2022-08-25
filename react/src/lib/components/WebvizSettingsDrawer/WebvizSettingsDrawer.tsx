@@ -4,7 +4,7 @@ import { settings, chevron_right, chevron_left } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({ settings, chevron_right, chevron_left });
 
-import { Button, Tooltip } from "@material-ui/core";
+import { Button, Tooltip } from "@mui/material";
 
 import { DrawerPosition } from "../../shared-types/webviz-content/drawer-position";
 
@@ -157,6 +157,7 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                         }
                     >
                         <Button
+                            color="inherit"
                             className={`WebvizSettingsDrawer__Toggle ${
                                 !store.state.settingsDrawerOpen
                                     ? "WebvizSettingsDrawer__ToggleOpen"

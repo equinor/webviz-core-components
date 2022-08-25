@@ -6,7 +6,7 @@
  */
 
 /* eslint no-magic-numbers: 0 */
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import React from "react";
 
 import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog } from "../lib";
@@ -28,10 +28,6 @@ type SmartNodeSelectorProps = {
     selectedIds: string[];
 };
 
-type MenuProps = {
-    url: string;
-};
-
 const App: React.FC = () => {
     const [nodeSelectorState, setNodeSelectorState] =
         React.useState<SmartNodeSelectorProps>({
@@ -40,9 +36,9 @@ const App: React.FC = () => {
             selectedTags: [],
         });
 
-    const [currentPage, setCurrentPage] = React.useState<MenuProps>({
+    const currentPage = {
         url: "",
-    });
+    };
 
     const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
 

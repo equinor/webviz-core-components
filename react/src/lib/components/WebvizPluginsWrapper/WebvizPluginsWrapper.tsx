@@ -1,6 +1,6 @@
 import React from "react";
 import { useStore } from "../WebvizContentManager/WebvizContentManager";
-import { Snackbar, Slide } from "@material-ui/core";
+import { Snackbar, Slide } from "@mui/material";
 
 import "./webviz-plugins-wrapper.css";
 import PropTypes from "prop-types";
