@@ -23,7 +23,6 @@ Basic.args = {
     screenshot_filename:
         WebvizPluginPlaceholder.defaultProps?.screenshot_filename ||
         "webviz-screenshot.png",
-    tour_steps: WebvizPluginPlaceholder.defaultProps?.tour_steps || [],
     data_requested: WebvizPluginPlaceholder.defaultProps?.data_requested || 0,
     deprecation_warnings:
         WebvizPluginPlaceholder.defaultProps?.deprecation_warnings || [],
