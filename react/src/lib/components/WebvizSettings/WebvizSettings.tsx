@@ -19,47 +19,43 @@ export type WebvizSettingsProps = {
 export const WebvizSettings: React.FC<WebvizSettingsProps> = (
     props: WebvizSettingsProps
 ) => {
-    const [activeGroupId, setActiveGroupId] = React.useState<string>("");
     const store = useStore();
 
     React.useEffect(() => {
-        if (store.state.openSettingsGroupId !== activeGroupId) {
-            setActiveGroupId(store.state.openSettingsGroupId);
-        }
-    }, [store.state.openSettingsGroupId]);
-
-    React.useEffect(() => {
-        if (activeGroupId !== "") {
+        if (store.state.openSettingsGroupIds.length !== 0) {
             return;
         }
-        React.Children.forEach(props.children, (child, index) => {
-            if (React.isValidElement(child)) {
-                if (index === 0) {
-                    setActiveGroupId(child.props._dashprivate_layout.props.id);
-                    return;
-                }
-            }
-        });
-    }, [props.children, activeGroupId]);
+    }, [props.children]);
 
     const handleGroupToggle = React.useCallback(
         (id: string) => {
-            const groupId = id === activeGroupId ? "-" : id;
-            store.dispatch({
-                type: StoreActions.SetOpenSettingsGroupId,
-                payload: {
-                    settingsGroupId: groupId,
-                },
-            });
-            setActiveGroupId(groupId);
+            if (store.state.openSettingsGroupIds.includes(id)) {
+                store.dispatch({
+                    type: StoreActions.RemoveOpenSettingsGroupId,
+                    payload: {
+                        settingsGroupId: id,
+                    },
+                });
+            } else {
+                store.dispatch({
+                    type: StoreActions.AddOpenSettingsGroupId,
+                    payload: {
+                        settingsGroupId: id,
+                    },
+                });
+            }
         },
-        [activeGroupId]
+        [store.state]
     );
 
     return (
         <div
             className="WebvizSettings"
-            style={{ opacity: props.visible ? 1 : 0, width: props.width }}
+            style={{
+                opacity: props.visible ? 1 : 0,
+                width: props.width,
+                pointerEvents: props.visible ? "all" : "none",
+            }}
         >
             <ScrollArea>
                 {props.children &&
@@ -71,10 +67,10 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
                                     props: {
                                         ...child.props._dashprivate_layout
                                             .props,
-                                        open:
-                                            activeGroupId ===
+                                        open: store.state.openSettingsGroupIds.includes(
                                             child.props._dashprivate_layout
-                                                .props.id,
+                                                .props.id
+                                        ),
                                         onToggle: handleGroupToggle,
                                     },
                                 },

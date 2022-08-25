@@ -22,9 +22,9 @@ type GroupProps = {
 
 export const Group: React.FC<GroupProps> = (props) => {
     const [collapsed, setCollapsed] = React.useState<boolean>(
-        localStorage.getItem(`${props.id}-${props.title}`) === "true" ||
-            props.initiallyCollapsed ||
-            false
+        localStorage.getItem(`${props.id}-${props.title}`)
+            ? localStorage.getItem(`${props.id}-${props.title}`) === "true"
+            : props.initiallyCollapsed || false
     );
 
     React.useEffect(() => {

@@ -19,10 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   [#207](https://github.com/equinor/webviz-core-components/pull/207) - Added `storybook` and stories for each component. Added publishment of `storybook` to GitHub workflow. Added `storybook` link to README.
 -   [#219](https://github.com/equinor/webviz-core-components/pull/219) - Implemented components required by the new Webviz Layout Framework (WLF)
 -   [#227](https://github.com/equinor/webviz-core-components/pull/227) - Added `EdsIcon` component in order to use icons from the Equinor Design System (EDS) directly in Python.
+-   [#240](https://github.com/equinor/webviz-core-components/pull/240) - States of menu, active view, settings drawer and settings groups are getting stored now. If no URL path is given, the one of the first page is opened now.
 
 ### Changed
 
 -   [#219](https://github.com/equinor/webviz-core-components/pull/219) - Pinned `dash` version to `2.4.x`, added more info output to GitHub workflow, switched to React version `16.14.0` in order to comply with non-maintained `react-colorscales` requirements, implemented adjustments to `Overlay` and `ScrollArea`
+-   [#240](https://github.com/equinor/webviz-core-components/pull/240) - Settings groups remain open when others are toggled (independent toggle state).
 
 ## [0.5.7] - 2022-05-05
 

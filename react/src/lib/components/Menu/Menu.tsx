@@ -136,6 +136,31 @@ const getNavigationMaxWidth = (
     return recursivelyParseItems(navigationItems);
 };
 
+const getStartPage = (
+    navigationItems: PropertyNavigationType
+): PropertyPageType | null => {
+    let startPage: PropertyPageType | null = null;
+    let abort = false;
+    const recursivelyParseItems = (
+        items: (PropertyPageType | PropertyGroupType | PropertySectionType)[]
+    ) => {
+        items.forEach((item) => {
+            if (abort) {
+                return;
+            }
+            if (item.type !== "page") {
+                recursivelyParseItems(item.content);
+            } else {
+                abort = true;
+                startPage = item as PropertyPageType;
+                return;
+            }
+        });
+    };
+    recursivelyParseItems(navigationItems);
+    return startPage;
+};
+
 /**
  * Menu is a component that allows to create an interactive menu with flexible depth that
  * can be pinned and filtered.
@@ -156,6 +181,19 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const [currentUrl, setCurrentUrl] = React.useState<string>(
         window.location.href
     );
+
+    const [firstPage, setFirstPage] =
+        React.useState<PropertyPageType | null>(null);
+
+    React.useEffect(() => {
+        setFirstPage(getStartPage(props.navigationItems));
+    }, []);
+
+    React.useEffect(() => {
+        if (window.location.pathname === "/" && firstPage) {
+            window.location.pathname = firstPage.href;
+        }
+    }, [firstPage]);
 
     const [menuWidth, setMenuWidth] = React.useState<number>(
         getNavigationMaxWidth(props.navigationItems) + 40
@@ -286,7 +324,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 {showLogo && (
                     <Logo
                         onClick={handlePageChange}
-                        homepage={"/"}
+                        homepage={firstPage?.href || "/"}
                         size="large"
                     />
                 )}

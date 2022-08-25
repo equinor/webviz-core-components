@@ -30,7 +30,8 @@ type ActionMap<
                 | View[]
                 | ((action: string) => void)
                 | FullScreenAction[]
-                | TourStep[];
+                | TourStep[]
+                | string[];
         } | null;
     }
 > = {
@@ -49,14 +50,15 @@ export enum StoreActions {
     UnregisterPlugin = "unregister_plugin",
     SetActiveView = "set_active_view",
     SetActivePlugin = "set_active_plugin",
-    SetActivePluginAndView = "set_active_plugin_and_view",
+    ApplyStoredLocalState = "apply_stored_local_state",
     SetMenuPosition = "set_menu_position",
     SetActivePluginWrapperRef = "set_active_plugin_wrapper_ref",
     SetBackdropOpacity = "set_backdrop_opacity",
     SetFullScreenActions = "set_full_screen_actions",
     SetFullScreenActionsCallback = "set_full_screen_actions_callback",
     SetActiveViewDownloadCallback = "set_download_callback",
-    SetOpenSettingsGroupId = "set_open_settings_group_id",
+    AddOpenSettingsGroupId = "add_open_settings_group_id",
+    RemoveOpenSettingsGroupId = "remove_open_settings_group_id",
     SetSettingsDrawerOpen = "set_settings_drawer_open",
     IncrementViewUpdates = "increment_view_updated",
 }
@@ -67,7 +69,7 @@ export type StoreState = {
     position: DrawerPosition;
     pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
-    openSettingsGroupId: string;
+    openSettingsGroupIds: string[];
     settingsDrawerOpen: boolean;
     externalTrigger: boolean;
     backdropOpacity: number;
@@ -75,6 +77,16 @@ export type StoreState = {
     activeViewDownloadCallback: () => void;
     fullScreenActions: FullScreenAction[];
     viewUpdates: number;
+};
+
+type StoredLocalState = {
+    activePluginId: string;
+    openSettingsGroupIds: string[];
+    activeViewId: string;
+};
+
+type StoredGlobalState = {
+    settingsDrawerOpen: boolean;
 };
 
 type Payload = {
@@ -98,9 +110,10 @@ type Payload = {
     [StoreActions.SetActivePlugin]: {
         pluginId: string;
     };
-    [StoreActions.SetActivePluginAndView]: {
+    [StoreActions.ApplyStoredLocalState]: {
         pluginId: string;
         viewId: string;
+        openSettingsGroupIds: string[];
     };
     [StoreActions.SetMenuPosition]: {
         pinned: boolean;
@@ -123,7 +136,10 @@ type Payload = {
     [StoreActions.SetActiveViewDownloadCallback]: {
         callback: () => void;
     };
-    [StoreActions.SetOpenSettingsGroupId]: {
+    [StoreActions.AddOpenSettingsGroupId]: {
+        settingsGroupId: string;
+    };
+    [StoreActions.RemoveOpenSettingsGroupId]: {
         settingsGroupId: string;
     };
     [StoreActions.SetSettingsDrawerOpen]: {
@@ -142,7 +158,7 @@ const setInitialState = (): StoreState => {
         bodyMargins: { left: 0, right: 0, top: 0, bottom: 0 },
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
-        openSettingsGroupId: "",
+        openSettingsGroupIds: [],
         settingsDrawerOpen: false,
         backdropOpacity: 0,
         fullScreenActions: [],
@@ -155,6 +171,71 @@ const setInitialState = (): StoreState => {
         viewUpdates: 0,
         externalTrigger: false,
     };
+};
+
+const makeLocalStoreId = (): string => {
+    const pathname = window.location.pathname;
+    return `wlf-store-${pathname}`;
+};
+
+const makeGlobalStoreId = (): string => {
+    return `wlf-store`;
+};
+
+const readStoredLocalState = (): StoredLocalState | null => {
+    const storedString = localStorage.getItem(makeLocalStoreId());
+    if (storedString) {
+        const stored = JSON.parse(storedString || "{}");
+        return {
+            activePluginId: Object.keys(stored).includes("activePluginId")
+                ? stored.activePluginId
+                : "",
+            openSettingsGroupIds: Object.keys(stored).includes(
+                "openSettingsGroupIds"
+            )
+                ? stored.openSettingsGroupIds
+                : [],
+            activeViewId: Object.keys(stored).includes("activeViewId")
+                ? stored.activeViewId
+                : "",
+        };
+    }
+    return null;
+};
+
+const readStoredGlobalState = (): StoredGlobalState | null => {
+    const storedString = localStorage.getItem(makeGlobalStoreId());
+    if (storedString) {
+        const stored = JSON.parse(storedString || "{}");
+        return {
+            settingsDrawerOpen: Object.keys(stored).includes(
+                "settingsDrawerOpen"
+            )
+                ? stored.settingsDrawerOpen
+                : false,
+        };
+    }
+    return null;
+};
+
+const storeLocalState = (
+    activePluginId: string,
+    openSettingsGroupIds: string[],
+    activeViewId: string
+): void => {
+    const data = {
+        activePluginId: activePluginId,
+        openSettingsGroupIds: openSettingsGroupIds,
+        activeViewId: activeViewId,
+    };
+    localStorage.setItem(makeLocalStoreId(), JSON.stringify(data));
+};
+
+const storeGlobalState = (settingsDrawerOpen: boolean): void => {
+    const data = {
+        settingsDrawerOpen: settingsDrawerOpen,
+    };
+    localStorage.setItem(makeGlobalStoreId(), JSON.stringify(data));
 };
 
 export const StoreReducer = (
@@ -210,7 +291,7 @@ export const StoreReducer = (
             ],
         };
     }
-    if (action.type === StoreActions.SetActivePluginAndView) {
+    if (action.type === StoreActions.ApplyStoredLocalState) {
         return {
             ...state,
             activePluginId: action.payload.pluginId,
@@ -221,6 +302,7 @@ export const StoreReducer = (
                         : plugin
                 ),
             ],
+            openSettingsGroupIds: action.payload.openSettingsGroupIds,
         };
     }
     if (action.type === StoreActions.SetActivePlugin) {
@@ -270,10 +352,21 @@ export const StoreReducer = (
             activeViewDownloadCallback: action.payload.callback,
         };
     }
-    if (action.type === StoreActions.SetOpenSettingsGroupId) {
+    if (action.type === StoreActions.AddOpenSettingsGroupId) {
         return {
             ...state,
-            openSettingsGroupId: action.payload.settingsGroupId,
+            openSettingsGroupIds: [
+                ...state.openSettingsGroupIds,
+                action.payload.settingsGroupId,
+            ],
+        };
+    }
+    if (action.type === StoreActions.RemoveOpenSettingsGroupId) {
+        return {
+            ...state,
+            openSettingsGroupIds: state.openSettingsGroupIds.filter(
+                (el) => el !== action.payload.settingsGroupId
+            ),
         };
     }
     if (action.type === StoreActions.SetSettingsDrawerOpen) {
@@ -322,56 +415,76 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         null,
         setInitialState
     );
-    const [lastHref, setLastHref] = React.useState<string>("");
+    const [lastLocation, setLastLocation] =
+        React.useState<Location | null>(null);
 
     React.useEffect(() => {
-        const href = window.location.href;
-        const data = JSON.parse(sessionStorage.getItem(href) || "{}");
-        if (href !== lastHref && Object.keys(data).length === 2) {
+        const activePluginId = state.activePluginId;
+        const activeViewId = state.pluginsData.find(
+            (plugin) => plugin.id === state.activePluginId
+        )?.activeViewId;
+
+        if (!(activePluginId && activeViewId)) {
+            return;
+        }
+
+        const location = window.location;
+        const localState = readStoredLocalState();
+        const globalState = readStoredGlobalState();
+
+        if (lastLocation === null && globalState) {
             dispatch({
-                type: StoreActions.SetActivePluginAndView,
+                type: StoreActions.SetSettingsDrawerOpen,
                 payload: {
-                    pluginId: data.activePluginId,
-                    viewId: data.activeViewId,
+                    externalTrigger: true,
+                    settingsDrawerOpen: globalState.settingsDrawerOpen,
+                },
+            });
+        } else if (activePluginId && activeViewId) {
+            storeGlobalState(state.settingsDrawerOpen);
+        }
+
+        if (location.pathname !== lastLocation?.pathname && localState) {
+            dispatch({
+                type: StoreActions.ApplyStoredLocalState,
+                payload: {
+                    pluginId: localState.activePluginId,
+                    viewId: localState.activeViewId,
+                    openSettingsGroupIds: localState.openSettingsGroupIds,
                 },
             });
 
             if (props.setProps) {
                 props.setProps({
-                    activeViewId: data.activeViewId,
-                    activePluginId: data.activePluginId,
+                    activeViewId: localState.activeViewId,
+                    activePluginId: localState.activePluginId,
                 });
             }
         } else {
-            const activePluginId = state.activePluginId;
-            const activeViewId = state.pluginsData.find(
-                (plugin) => plugin.id === state.activePluginId
-            )?.activeViewId;
-
             if (activePluginId && activeViewId) {
-                sessionStorage.setItem(
-                    href,
-                    JSON.stringify({
-                        activePluginId: activePluginId,
-                        activeViewId: activeViewId,
-                    })
+                storeLocalState(
+                    activePluginId,
+                    state.openSettingsGroupIds,
+                    activeViewId
                 );
+                if (props.setProps) {
+                    props.setProps({
+                        activeViewId:
+                            state.pluginsData.find(
+                                (plugin) => plugin.id === state.activePluginId
+                            )?.activeViewId || "",
+                        activePluginId: state.activePluginId,
+                    });
+                }
             }
         }
-        setLastHref(href);
-    }, [state.pluginsData]);
-
-    React.useEffect(() => {
-        if (props.setProps) {
-            props.setProps({
-                activeViewId:
-                    state.pluginsData.find(
-                        (plugin) => plugin.id === state.activePluginId
-                    )?.activeViewId || "",
-                activePluginId: state.activePluginId,
-            });
-        }
-    }, [state.pluginsData, state.activePluginId]);
+        setLastLocation(location);
+    }, [
+        state.pluginsData,
+        state.activePluginId,
+        state.openSettingsGroupIds,
+        state.settingsDrawerOpen,
+    ]);
 
     return (
         <storeContext.Provider value={{ state, dispatch }}>
