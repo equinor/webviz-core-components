@@ -8,12 +8,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes, { InferProps } from "prop-types";
 import html2canvas from "html2canvas";
-import Tour from "reactour";
 import { SnackbarProvider, useSnackbar } from "notistack";
 
 import {
     contact_email,
-    help_outline,
     fullscreen,
     fullscreen_exit,
     camera,
@@ -77,11 +75,6 @@ const propTypes = {
     screenshot_filename: PropTypes.string,
 
     /**
-     * Tour steps. List of dictionaries, each with two keys ('selector' and 'content').
-     */
-    tour_steps: PropTypes.array,
-
-    /**
      * An integer that represents the number of times
      * that the data download button has been clicked.
      */
@@ -121,7 +114,6 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     ],
     children: null,
     contact_person: null,
-    tour_steps: [],
     data_requested: 0,
     download: null,
     screenshot_filename: "webviz-screenshot.png",
@@ -142,7 +134,6 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
         contact_person,
         download,
         screenshot_filename,
-        tour_steps,
         feedback_url,
         data_requested,
         deprecation_warnings,
@@ -151,7 +142,6 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
 
     const [expanded, setExpanded] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
-    const [tourIsOpen, setTourIsOpen] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
 
     const prevExpandedRef = useRef(false);
@@ -211,12 +201,6 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
             });
         }
     };
-
-    const showTour =
-        buttons &&
-        buttons.includes("guided_tour") &&
-        tour_steps &&
-        tour_steps.length > 0;
 
     const ref = React.createRef<HTMLDivElement>();
 
@@ -287,13 +271,6 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                             }
                         />
                     )}
-                    {showTour && (
-                        <WebvizToolbarButton
-                            icon={help_outline}
-                            tooltip="Guided tour"
-                            onClick={() => setTourIsOpen(true)}
-                        />
-                    )}
                     {buttons &&
                         buttons.includes("contact_person") &&
                         contact_person &&
@@ -325,16 +302,6 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                     )}
                 </div>
             </div>
-            {showTour && (
-                <Tour
-                    steps={tour_steps}
-                    isOpen={tourIsOpen}
-                    onRequestClose={() => setTourIsOpen(false)}
-                    showNumber={false}
-                    rounded={5}
-                    accentColor="red"
-                />
-            )}
         </>
     );
 };

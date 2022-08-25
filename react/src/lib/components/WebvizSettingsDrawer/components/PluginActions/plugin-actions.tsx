@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Badge, Tooltip } from "@material-ui/core";
+import { Badge, Tooltip } from "@mui/material";
 
 import {
     camera,

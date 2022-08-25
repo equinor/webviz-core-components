@@ -1,5 +1,5 @@
 import { Icon } from "@equinor/eds-core-react";
-import { IconButton, Tooltip } from "@material-ui/core";
+import { IconButton, Tooltip } from "@mui/material";
 import {
     settings,
     download,
