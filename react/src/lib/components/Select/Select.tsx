@@ -7,6 +7,7 @@
 
 import React from "react";
 import PropTypes, { InferProps } from "prop-types";
+import { isEqual } from "lodash";
 
 import {
     getPropsWithMissingValuesSetToDefault,
@@ -67,6 +68,12 @@ const propTypes = {
         ).isRequired,
     ]),
     /**
+     * Debounce time for props update for user. The value prop for selected
+     * values for Dash callbacks are debounced with the configured number
+     * of milliseconds.
+     */
+    debounce_time_ms: PropTypes.number,
+    /**
      * If true, the user can select multiple values
      */
     multi: PropTypes.bool,
@@ -125,6 +132,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     size: 4,
     value: [],
     multi: true,
+    debounce_time_ms: 500,
     style: {},
     parent_style: {},
     className: "",
@@ -149,6 +157,7 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
         parent_style,
         value,
         multi,
+        debounce_time_ms: debounce_time_ms,
         size,
         className,
         style,
@@ -156,24 +165,49 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
         setProps,
     } = getPropsWithMissingValuesSetToDefault(props, defaultProps);
 
-    const handleChange = (e: React.ChangeEvent) => {
-        const selectedOptions = [].slice.call(
-            (e.target as HTMLSelectElement).selectedOptions
-        );
-        const values: (string | number)[] = [];
+    const [selectedValues, setSelectedValues] =
+        React.useState<string | number | (string | number)[]>(value);
 
-        for (let i = 0; i < options.length; i++) {
-            if (
-                selectedOptions.some(
-                    (el: HTMLOptionElement) =>
-                        el.value === options[i].value.toString()
-                )
-            ) {
-                values.push(options[i].value);
-            }
+    const debounceTimer =
+        React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    React.useEffect(() => {
+        if (!isEqual(value, selectedValues)) {
+            setSelectedValues(value);
         }
-        setProps({ value: values });
-    };
+    }, [value]);
+
+    React.useEffect(() => {
+        return () => {
+            debounceTimer.current && clearTimeout(debounceTimer.current);
+        };
+    }, []);
+
+    const handleChange = React.useCallback(
+        (e: React.ChangeEvent) => {
+            const selectedOptions = [].slice.call(
+                (e.target as HTMLSelectElement).selectedOptions
+            );
+            const values = options
+                .filter((option) =>
+                    selectedOptions.some(
+                        (selectedOption: HTMLOptionElement) =>
+                            selectedOption.value === option.value.toString()
+                    )
+                )
+                .map((option) => option.value);
+
+            if (!isEqual(values, selectedValues)) {
+                setSelectedValues(values);
+            }
+
+            debounceTimer.current && clearTimeout(debounceTimer.current);
+            debounceTimer.current = setTimeout(() => {
+                setProps({ value: values });
+            }, debounce_time_ms);
+        },
+        [debounceTimer.current, setProps]
+    );
 
     return (
         <div
@@ -183,11 +217,12 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
         >
             <select
                 value={
-                    value
-                        ? typeof value === "string" || typeof value === "number"
-                            ? value
-                            : (value as (string | number)[]).map((el) =>
-                                  el.toString()
+                    selectedValues
+                        ? typeof selectedValues === "string" ||
+                          typeof selectedValues === "number"
+                            ? selectedValues
+                            : (selectedValues as (string | number)[]).map(
+                                  (el) => el.toString()
                               )
                         : ""
                 }
