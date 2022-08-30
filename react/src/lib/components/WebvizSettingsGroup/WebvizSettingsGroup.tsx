@@ -37,9 +37,24 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
     const completelyVisibleTimeoutRef =
         React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    const initialCallTimeout =
+        React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const [initialCall, setInitialCall] = React.useState<boolean>(true);
+
     const activePlugin = store.state.pluginsData.find(
         (plugin) => plugin.id === store.state.activePluginId
     );
+
+    React.useEffect(() => {
+        if (initialCallTimeout.current) {
+            clearTimeout(initialCallTimeout.current);
+        }
+        initialCallTimeout.current = setTimeout(
+            () => setInitialCall(false),
+            1000
+        );
+    }, [props.open]);
 
     let visible = true;
 
@@ -75,6 +90,9 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
             if (completelyVisibleTimeoutRef.current) {
                 clearTimeout(completelyVisibleTimeoutRef.current);
             }
+            if (initialCallTimeout.current) {
+                clearTimeout(initialCallTimeout.current);
+            }
         };
     }, []);
 
@@ -104,7 +122,7 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                 <Tooltip
                     title={`${props.open ? "Close" : "Open"} settings group '${
                         props.title
-                    }`}
+                    }'`}
                 >
                     {children}
                 </Tooltip>
@@ -158,7 +176,11 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                 className={
                     props.alwaysOpen
                         ? "WebvizSettingsGroup__FlatContent"
-                        : "WebvizSettingsGroup__Content"
+                        : `WebvizSettingsGroup__Content${
+                              !initialCall
+                                  ? " WebvizSettingsGroup__Content__Transition"
+                                  : ""
+                          }`
                 }
                 style={{
                     height: props.open || props.alwaysOpen ? contentSize[1] : 0,
