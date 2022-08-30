@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   [#219](https://github.com/equinor/webviz-core-components/pull/219) - Pinned `dash` version to `2.4.x`, added more info output to GitHub workflow, switched to React version `16.14.0` in order to comply with non-maintained `react-colorscales` requirements, implemented adjustments to `Overlay` and `ScrollArea`
 -   [#240](https://github.com/equinor/webviz-core-components/pull/240) - Settings groups remain open when others are toggled (independent toggle state).
+-   [#243](https://github.com/equinor/webviz-core-components/pull/243) - Added debounce time for `Select` component to prevent firing selected values immediately. The selected values will be updated after configured amount of milliseconds after last interaction. Reduces number of callback triggers in Dash.
 
 ## [0.5.7] - 2022-05-05
 
