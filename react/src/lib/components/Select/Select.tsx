@@ -7,6 +7,7 @@
 
 import React from "react";
 import PropTypes, { InferProps } from "prop-types";
+import { isEqual } from "lodash";
 
 import {
     getPropsWithMissingValuesSetToDefault,
@@ -171,13 +172,12 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
         React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     React.useEffect(() => {
-        if (value !== selectedValues) {
+        if (!isEqual(value, selectedValues)) {
             setSelectedValues(value);
         }
     }, [value]);
 
     React.useEffect(() => {
-        // Unmount timer
         return () => {
             debounceTimer.current && clearTimeout(debounceTimer.current);
         };
@@ -188,20 +188,16 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
             const selectedOptions = [].slice.call(
                 (e.target as HTMLSelectElement).selectedOptions
             );
-            const values: (string | number)[] = [];
-
-            for (let i = 0; i < options.length; i++) {
-                if (
+            const values = options
+                .filter((option) =>
                     selectedOptions.some(
-                        (el: HTMLOptionElement) =>
-                            el.value === options[i].value.toString()
+                        (selectedOption: HTMLOptionElement) =>
+                            selectedOption.value === option.value.toString()
                     )
-                ) {
-                    values.push(options[i].value);
-                }
-            }
+                )
+                .map((option) => option.value);
 
-            if (values !== selectedValues) {
+            if (!isEqual(values, selectedValues)) {
                 setSelectedValues(values);
             }
 
