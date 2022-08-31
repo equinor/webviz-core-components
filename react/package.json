@@ -41,6 +41,7 @@
     "author": "Equinor <noreply@equinor.com>",
     "license": "MIT",
     "dependencies": {
+        "@emerson-eps/color-tables": "^0.4.9",
         "@emotion/react": "^11.10.0",
         "@emotion/styled": "^11.10.0",
         "@equinor/eds-core-react": "^0.20.4",
@@ -55,7 +56,6 @@
         "html2canvas": "^1.0.0-rc.7",
         "lodash": "^4.17.21",
         "notistack": "^2.0.5",
-        "react-colorscales": "^0.7.3",
         "react-draggable": "^4.4.4",
         "styled-components": "^5.2.1",
         "uuid": "^8.3.2"

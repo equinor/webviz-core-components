@@ -9,18 +9,12 @@
 import { Button } from "@mui/material";
 import React from "react";
 
-import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog } from "../lib";
-
-const steps = [
-    {
-        selector: "#blue-rect",
-        content: "This is my first step",
-    },
-    {
-        selector: "#green-rect",
-        content: "This is my second step",
-    },
-];
+import {
+    WebvizPluginPlaceholder,
+    SmartNodeSelector,
+    Dialog,
+    ColorScales,
+} from "../lib";
 
 type SmartNodeSelectorProps = {
     selectedTags: string[];
@@ -44,6 +38,7 @@ const App: React.FC = () => {
 
     return (
         <div>
+            <ColorScales id="test" />
             {currentPage.url.split("#")[1] === "dialog" && (
                 <>
                     <h1>Dialog</h1>
@@ -80,7 +75,6 @@ const App: React.FC = () => {
                         setProps={() => {
                             return;
                         }}
-                        tour_steps={steps}
                         feedback_url={
                             "https://github.com/equinor/webviz-core-components/issues/" +
                             "new?title=New+feedback&body=Feedback+text&labels=userfeedback"
