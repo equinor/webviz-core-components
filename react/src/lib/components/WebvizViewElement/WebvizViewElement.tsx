@@ -443,6 +443,14 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const settings: React.ReactElement[] = [];
     const content: React.ReactNode[] = [];
 
+    React.useEffect(() => {
+        if (store.state.openViewElementSettingsGroupId === null) {
+            setSettingsVisible(false);
+            return;
+        }
+        setSettingsVisible(true);
+    }, [store.state.openViewElementSettingsGroupId]);
+
     React.Children.forEach(props.children, (child) => {
         if (
             React.isValidElement(child) &&

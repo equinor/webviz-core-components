@@ -15,6 +15,31 @@ export type WebvizPluginTourProps = {
     onClose: () => void;
 };
 
+const waitUntilElementIsAvailable = (
+    query: string,
+    callback: () => void,
+    timestepMs = 100,
+    maxWaitTimeMs = 5000
+) => {
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    let passedTimeMs = 0;
+    const checkIfElementIsAvailable = () => {
+        const element = document.getElementById(query);
+        if (element) {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            callback();
+        }
+        passedTimeMs += timestepMs;
+        if (passedTimeMs >= maxWaitTimeMs && intervalId) {
+            clearInterval(intervalId);
+        }
+    };
+    intervalId = setInterval(checkIfElementIsAvailable, timestepMs);
+    checkIfElementIsAvailable();
+};
+
 export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
     props: WebvizPluginTourProps
 ) => {
@@ -198,6 +223,28 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     },
                 });
             }
+            if (
+                tourSteps[newTourStep].viewElementId &&
+                tourSteps[newTourStep].settingsGroupId
+            ) {
+                store.dispatch({
+                    type: StoreActions.AddOpenViewElementSettingsGroupId,
+                    payload: {
+                        settingsGroupId:
+                            tourSteps[newTourStep].settingsGroupId || "",
+                    },
+                });
+                waitUntilElementIsAvailable(
+                    `${tourSteps[newTourStep].elementId}`,
+                    () => setCurrentTourStep(newTourStep)
+                );
+                return;
+            } else {
+                store.dispatch({
+                    type: StoreActions.RemoveOpenViewElementSettingsGroupId,
+                });
+            }
+
             setCurrentTourStep(newTourStep);
         },
         [tourSteps, pluginData?.activeViewId]

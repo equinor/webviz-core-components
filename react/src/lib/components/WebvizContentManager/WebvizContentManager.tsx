@@ -17,22 +17,25 @@ import { TourStep } from "../../shared-types/webviz-content/tour-step";
 
 type ActionMap<
     M extends {
-        [index: string]: {
-            [key: string]:
-                | ContactPerson
-                | DeprecationWarning[]
-                | string
-                | Margins
-                | number
-                | null
-                | boolean
-                | React.RefObject<HTMLDivElement>
-                | View[]
-                | ((action: string) => void)
-                | FullScreenAction[]
-                | TourStep[]
-                | string[];
-        } | null;
+        [index: string]:
+            | {
+                  [key: string]:
+                      | ContactPerson
+                      | DeprecationWarning[]
+                      | string
+                      | Margins
+                      | number
+                      | null
+                      | boolean
+                      | React.RefObject<HTMLDivElement>
+                      | View[]
+                      | ((action: string) => void)
+                      | FullScreenAction[]
+                      | TourStep[]
+                      | string[];
+              }
+            | null
+            | undefined;
     }
 > = {
     [Key in keyof M]: M[Key] extends undefined
@@ -61,6 +64,8 @@ export enum StoreActions {
     RemoveOpenSettingsGroupId = "remove_open_settings_group_id",
     SetSettingsDrawerOpen = "set_settings_drawer_open",
     IncrementViewUpdates = "increment_view_updated",
+    AddOpenViewElementSettingsGroupId = "add_open_view_element_settings_group_id",
+    RemoveOpenViewElementSettingsGroupId = "remove_open_view_element_settings_group_id",
 }
 
 export type StoreState = {
@@ -70,6 +75,7 @@ export type StoreState = {
     pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
     openSettingsGroupIds: string[];
+    openViewElementSettingsGroupId: string | null;
     settingsDrawerOpen: boolean;
     externalTrigger: boolean;
     backdropOpacity: number;
@@ -147,6 +153,10 @@ type Payload = {
         externalTrigger: boolean;
     };
     [StoreActions.IncrementViewUpdates]: null;
+    [StoreActions.AddOpenViewElementSettingsGroupId]: {
+        settingsGroupId: string;
+    };
+    [StoreActions.RemoveOpenViewElementSettingsGroupId]: undefined;
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
@@ -159,6 +169,7 @@ const setInitialState = (): StoreState => {
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
         openSettingsGroupIds: [],
+        openViewElementSettingsGroupId: null,
         settingsDrawerOpen: false,
         backdropOpacity: 0,
         fullScreenActions: [],
@@ -380,6 +391,18 @@ export const StoreReducer = (
         return {
             ...state,
             viewUpdates: state.viewUpdates + 1,
+        };
+    }
+    if (action.type === StoreActions.AddOpenViewElementSettingsGroupId) {
+        return {
+            ...state,
+            openViewElementSettingsGroupId: action.payload.settingsGroupId,
+        };
+    }
+    if (action.type === StoreActions.RemoveOpenViewElementSettingsGroupId) {
+        return {
+            ...state,
+            openViewElementSettingsGroupId: null,
         };
     }
     return state;
