@@ -59,6 +59,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const store = useStore();
     //const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isHovered, setIsHovered] = React.useState<boolean>(false);
+    const [settings, setSettings] = React.useState<React.ReactElement[]>([]);
+    const [content, setContent] = React.useState<React.ReactNode[]>([]);
     const [settingsVisible, setSettingsVisible] =
         React.useState<boolean>(false);
     const [isFullScreen, setIsFullScreen] = React.useState<boolean>(false);
@@ -440,29 +442,26 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         }
     };
 
-    const settings: React.ReactElement[] = [];
-    const content: React.ReactNode[] = [];
-
     React.useEffect(() => {
-        if (store.state.openViewElementSettingsGroupId === null) {
-            setSettingsVisible(false);
-            return;
-        }
-        setSettingsVisible(true);
-    }, [store.state.openViewElementSettingsGroupId]);
+        const settings: React.ReactElement[] = [];
+        const content: React.ReactNode[] = [];
 
-    React.Children.forEach(props.children, (child) => {
-        if (
-            React.isValidElement(child) &&
-            typeof child.props === "object" &&
-            Object.keys(child.props).includes("_dashprivate_layout") &&
-            child.props._dashprivate_layout.type === "WebvizSettingsGroup"
-        ) {
-            settings.push(child);
-            return;
-        }
-        content.push(child);
-    });
+        React.Children.forEach(props.children, (child) => {
+            if (
+                React.isValidElement(child) &&
+                typeof child.props === "object" &&
+                Object.keys(child.props).includes("_dashprivate_layout") &&
+                child.props._dashprivate_layout.type === "WebvizSettingsGroup"
+            ) {
+                settings.push(child);
+                return;
+            }
+            content.push(child);
+        });
+
+        setSettings(settings);
+        setContent(content);
+    }, [props.children]);
 
     const handleDownloadClick = React.useCallback(() => {
         const requests = downloadRequests + 1;
@@ -475,6 +474,14 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     if (props.hidden) {
         return null;
     }
+
+    React.useEffect(() => {
+        if (store.state.openViewElementSettingsGroupId === null) {
+            setSettingsVisible(false);
+            return;
+        }
+        setSettingsVisible(true);
+    }, [store.state.openViewElementSettingsGroupId]);
 
     return (
         <div

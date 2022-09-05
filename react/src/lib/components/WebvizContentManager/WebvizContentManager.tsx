@@ -293,6 +293,7 @@ export const StoreReducer = (
     if (action.type === StoreActions.SetActiveView) {
         return {
             ...state,
+            openViewElementSettingsGroupId: null,
             pluginsData: [
                 ...state.pluginsData.map((plugin) =>
                     plugin.id === state.activePluginId
