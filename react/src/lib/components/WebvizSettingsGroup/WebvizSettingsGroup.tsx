@@ -133,6 +133,7 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
 
     return (
         <div
+            id={props.id}
             className="WebvizSettingsGroup"
             style={{ display: visible ? "block" : "none" }}
         >
