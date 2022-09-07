@@ -189,14 +189,6 @@ export const Menu: React.FC<MenuProps> = (props) => {
         setFirstPage(getStartPage(props.navigationItems));
     }, []);
 
-    /*
-    React.useEffect(() => {
-        if (window.location.pathname === "/" && firstPage) {
-            window.location.pathname = firstPage.href;
-        }
-    }, [firstPage]);
-    */
-
     const [menuWidth, setMenuWidth] = React.useState<number>(
         getNavigationMaxWidth(props.navigationItems) + 40
     );
