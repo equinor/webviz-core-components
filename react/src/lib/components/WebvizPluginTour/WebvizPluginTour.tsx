@@ -7,37 +7,13 @@ import { Icon } from "@equinor/eds-core-react";
 import { arrow_back, arrow_forward } from "@equinor/eds-icons";
 Icon.add({ arrow_back, arrow_forward });
 
+import { waitUntilElementIsAvailable } from "../../utils/waitUntilElementIsAvailable";
 import "./webviz-plugin-tour.css";
 import { Point } from "lib/shared-types/point";
 
 export type WebvizPluginTourProps = {
     open: boolean;
     onClose: () => void;
-};
-
-const waitUntilElementIsAvailable = (
-    query: string,
-    callback: () => void,
-    timestepMs = 100,
-    maxWaitTimeMs = 5000
-) => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-    let passedTimeMs = 0;
-    const checkIfElementIsAvailable = () => {
-        const element = document.getElementById(query);
-        if (element) {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
-            callback();
-        }
-        passedTimeMs += timestepMs;
-        if (passedTimeMs >= maxWaitTimeMs && intervalId) {
-            clearInterval(intervalId);
-        }
-    };
-    intervalId = setInterval(checkIfElementIsAvailable, timestepMs);
-    checkIfElementIsAvailable();
 };
 
 export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
@@ -235,7 +211,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     },
                 });
                 waitUntilElementIsAvailable(
-                    `${tourSteps[newTourStep].elementId}`,
+                    tourSteps[newTourStep].elementId,
                     () => setCurrentTourStep(newTourStep)
                 );
                 return;
