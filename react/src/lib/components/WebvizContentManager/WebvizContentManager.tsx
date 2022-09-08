@@ -318,7 +318,11 @@ export const StoreReducer = (
         };
     }
     if (action.type === StoreActions.SetActivePlugin) {
-        return { ...state, activePluginId: action.payload.pluginId };
+        return {
+            ...state,
+            openViewElementSettingsGroupId: null,
+            activePluginId: action.payload.pluginId,
+        };
     }
     if (action.type === StoreActions.SetMenuPosition) {
         let position = DrawerPosition.Left;
