@@ -64,8 +64,9 @@ export enum StoreActions {
     RemoveOpenSettingsGroupId = "remove_open_settings_group_id",
     SetSettingsDrawerOpen = "set_settings_drawer_open",
     IncrementViewUpdates = "increment_view_updated",
-    AddOpenViewElementSettingsGroupId = "add_open_view_element_settings_group_id",
-    RemoveOpenViewElementSettingsGroupId = "remove_open_view_element_settings_group_id",
+    AddOpenViewElementSettingsDialogId = "add_open_view_element_settings_dialog_id",
+    RemoveOpenViewElementSettingsDialogId = "remove_open_view_element_settings_dialog_id",
+    RemoveAllOpenViewElementSettingsDialogIds = "remove_all_open_view_element_settings_dialog_ids",
 }
 
 export type StoreState = {
@@ -75,7 +76,7 @@ export type StoreState = {
     pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
     openSettingsGroupIds: string[];
-    openViewElementSettingsGroupId: string | null;
+    openViewElementSettingsDialogIds: string[];
     settingsDrawerOpen: boolean;
     externalTrigger: boolean;
     backdropOpacity: number;
@@ -153,10 +154,13 @@ type Payload = {
         externalTrigger: boolean;
     };
     [StoreActions.IncrementViewUpdates]: null;
-    [StoreActions.AddOpenViewElementSettingsGroupId]: {
-        settingsGroupId: string;
+    [StoreActions.AddOpenViewElementSettingsDialogId]: {
+        settingsDialogId: string;
     };
-    [StoreActions.RemoveOpenViewElementSettingsGroupId]: undefined;
+    [StoreActions.RemoveOpenViewElementSettingsDialogId]: {
+        settingsDialogId: string;
+    };
+    [StoreActions.RemoveAllOpenViewElementSettingsDialogIds]: undefined;
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
@@ -169,7 +173,7 @@ const setInitialState = (): StoreState => {
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
         openSettingsGroupIds: [],
-        openViewElementSettingsGroupId: null,
+        openViewElementSettingsDialogIds: [],
         settingsDrawerOpen: false,
         backdropOpacity: 0,
         fullScreenActions: [],
@@ -293,7 +297,7 @@ export const StoreReducer = (
     if (action.type === StoreActions.SetActiveView) {
         return {
             ...state,
-            openViewElementSettingsGroupId: null,
+            openViewElementSettingsDialogIds: [],
             pluginsData: [
                 ...state.pluginsData.map((plugin) =>
                     plugin.id === state.activePluginId
@@ -320,7 +324,7 @@ export const StoreReducer = (
     if (action.type === StoreActions.SetActivePlugin) {
         return {
             ...state,
-            openViewElementSettingsGroupId: null,
+            openViewElementSettingsDialogIds: [],
             activePluginId: action.payload.pluginId,
         };
     }
@@ -398,16 +402,30 @@ export const StoreReducer = (
             viewUpdates: state.viewUpdates + 1,
         };
     }
-    if (action.type === StoreActions.AddOpenViewElementSettingsGroupId) {
+    if (action.type === StoreActions.AddOpenViewElementSettingsDialogId) {
         return {
             ...state,
-            openViewElementSettingsGroupId: action.payload.settingsGroupId,
+            openViewElementSettingsDialogIds: [
+                ...state.openViewElementSettingsDialogIds,
+                action.payload.settingsDialogId,
+            ],
         };
     }
-    if (action.type === StoreActions.RemoveOpenViewElementSettingsGroupId) {
+    if (action.type === StoreActions.RemoveOpenViewElementSettingsDialogId) {
         return {
             ...state,
-            openViewElementSettingsGroupId: null,
+            openViewElementSettingsDialogIds:
+                state.openViewElementSettingsDialogIds.filter(
+                    (el) => el !== action.payload.settingsDialogId
+                ),
+        };
+    }
+    if (
+        action.type === StoreActions.RemoveAllOpenViewElementSettingsDialogIds
+    ) {
+        return {
+            ...state,
+            openViewElementSettingsDialogIds: [],
         };
     }
     return state;

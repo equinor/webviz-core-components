@@ -94,11 +94,13 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
     }, [store.state.activePluginId, props.id]);
 
     const handlePluginClick = React.useCallback(() => {
-        store.dispatch({
-            type: StoreActions.SetActivePlugin,
-            payload: { pluginId: props.id },
-        });
-    }, [props.id]);
+        if (store.state.activePluginId !== props.id) {
+            store.dispatch({
+                type: StoreActions.SetActivePlugin,
+                payload: { pluginId: props.id },
+            });
+        }
+    }, [props.id, store]);
 
     return (
         <div

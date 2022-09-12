@@ -93,6 +93,9 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
     React.useEffect(() => {
         if (props.open && tourSteps) {
             handleChangeTourStep(0);
+            store.dispatch({
+                type: StoreActions.RemoveAllOpenViewElementSettingsDialogIds,
+            });
             return;
         }
         if (intervalRef.current) {
@@ -201,13 +204,17 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
             }
             if (
                 tourSteps[newTourStep].viewElementId &&
-                tourSteps[newTourStep].settingsGroupId
+                tourSteps[newTourStep].settingsGroupId &&
+                !store.state.openViewElementSettingsDialogIds.some(
+                    (el) =>
+                        el ===
+                        `${tourSteps[newTourStep].viewElementId}-settings`
+                )
             ) {
                 store.dispatch({
-                    type: StoreActions.AddOpenViewElementSettingsGroupId,
+                    type: StoreActions.AddOpenViewElementSettingsDialogId,
                     payload: {
-                        settingsGroupId:
-                            tourSteps[newTourStep].settingsGroupId || "",
+                        settingsDialogId: `${tourSteps[newTourStep].viewElementId}-settings`,
                     },
                 });
                 waitUntilElementIsAvailable(
@@ -215,15 +222,27 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     () => setCurrentTourStep(newTourStep)
                 );
                 return;
-            } else {
+            }
+            if (
+                store.state.openViewElementSettingsDialogIds.some(
+                    (el) =>
+                        el ===
+                        `${tourSteps[currentTourStep].viewElementId}-settings`
+                ) &&
+                tourSteps[currentTourStep].viewElementId !==
+                    tourSteps[newTourStep].viewElementId
+            ) {
                 store.dispatch({
-                    type: StoreActions.RemoveOpenViewElementSettingsGroupId,
+                    type: StoreActions.RemoveOpenViewElementSettingsDialogId,
+                    payload: {
+                        settingsDialogId: `${tourSteps[currentTourStep].viewElementId}-settings`,
+                    },
                 });
             }
 
             setCurrentTourStep(newTourStep);
         },
-        [tourSteps, pluginData?.activeViewId]
+        [tourSteps, currentTourStep, pluginData?.activeViewId, store]
     );
 
     return ReactDOM.createPortal(
