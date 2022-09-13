@@ -12,11 +12,15 @@ type PageProps = {
     level: number;
     icon?: string;
     applyIconIndentation: boolean;
+    homepage: string;
+    firstPage: boolean;
     onClick: () => void;
 };
 
 export const Page: React.FC<PageProps> = (props) => {
-    const active = checkIfUrlIsCurrent(props.href);
+    const active =
+        checkIfUrlIsCurrent(props.href) ||
+        (props.firstPage && checkIfUrlIsCurrent(props.homepage));
 
     return (
         <a
@@ -55,6 +59,7 @@ export const Page: React.FC<PageProps> = (props) => {
 Page.propTypes = {
     title: PropTypes.string.isRequired,
     href: PropTypes.string.isRequired,
+    homepage: PropTypes.string.isRequired,
     level: PropTypes.number.isRequired,
     icon: PropTypes.string,
     applyIconIndentation: PropTypes.bool.isRequired,
