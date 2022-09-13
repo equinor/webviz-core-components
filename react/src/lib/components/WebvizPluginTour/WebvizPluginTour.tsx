@@ -202,6 +202,23 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     },
                 });
             }
+
+            if (
+                store.state.openViewElementSettingsDialogIds.some(
+                    (el) =>
+                        el ===
+                        `${tourSteps[currentTourStep].viewElementId}-settings`
+                ) &&
+                tourSteps[currentTourStep].viewElementId !==
+                    tourSteps[newTourStep].viewElementId
+            ) {
+                store.dispatch({
+                    type: StoreActions.RemoveOpenViewElementSettingsDialogId,
+                    payload: {
+                        settingsDialogId: `${tourSteps[currentTourStep].viewElementId}-settings`,
+                    },
+                });
+            }
             if (
                 tourSteps[newTourStep].viewElementId &&
                 tourSteps[newTourStep].settingsGroupId &&
@@ -222,22 +239,6 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     () => setCurrentTourStep(newTourStep)
                 );
                 return;
-            }
-            if (
-                store.state.openViewElementSettingsDialogIds.some(
-                    (el) =>
-                        el ===
-                        `${tourSteps[currentTourStep].viewElementId}-settings`
-                ) &&
-                tourSteps[currentTourStep].viewElementId !==
-                    tourSteps[newTourStep].viewElementId
-            ) {
-                store.dispatch({
-                    type: StoreActions.RemoveOpenViewElementSettingsDialogId,
-                    payload: {
-                        settingsDialogId: `${tourSteps[currentTourStep].viewElementId}-settings`,
-                    },
-                });
             }
 
             setCurrentTourStep(newTourStep);
