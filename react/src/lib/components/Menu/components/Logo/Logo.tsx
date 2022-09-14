@@ -13,7 +13,7 @@ export const Logo: React.FC<LogoProps> = (props) => {
     const store = useStore();
 
     const handleLogoClick = () => {
-        window.history.pushState({}, "", store.homepage);
+        window.history.pushState({}, "", store.homepage || store.firstPageHref);
         window.dispatchEvent(new CustomEvent("_dashprivate_pushstate"));
         window.scrollTo(0, 0);
     };
