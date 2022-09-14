@@ -114,7 +114,6 @@ const makeNavigation = (
     navigation: NavigationType,
     filtered: boolean,
     initiallyCollapsed: boolean,
-    homepage: string,
     firstPageHref: string
 ): JSX.Element => {
     const recursivelyMakeNavigation = (
@@ -168,7 +167,6 @@ const makeNavigation = (
                             <Page
                                 key={item.id}
                                 level={level}
-                                homepage={homepage}
                                 firstPage={
                                     (item as PageType).href === firstPageHref
                                 }
@@ -228,7 +226,6 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
                         content,
                         filter !== "",
                         props.groupsInitiallyCollapsed || false,
-                        store.homepage,
                         store.firstPageHref
                     )
                 )}
