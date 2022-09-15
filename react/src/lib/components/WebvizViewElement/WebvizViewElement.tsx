@@ -59,6 +59,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     const store = useStore();
     //const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isHovered, setIsHovered] = React.useState<boolean>(false);
+    const [settings, setSettings] = React.useState<React.ReactElement[]>([]);
+    const [content, setContent] = React.useState<React.ReactNode[]>([]);
     const [settingsVisible, setSettingsVisible] =
         React.useState<boolean>(false);
     const [isFullScreen, setIsFullScreen] = React.useState<boolean>(false);
@@ -77,6 +79,8 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         React.useRef<Animation<FullScreenAnimationParameters> | null>(null);
     const flashAnimation =
         React.useRef<Animation<FlashAnimationParameters> | null>(null);
+
+    const settingsDialogId = `${props.id}-settings`;
 
     React.useEffect(() => {
         if (props.download !== null && props.download !== undefined) {
@@ -440,21 +444,26 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
         }
     };
 
-    const settings: React.ReactElement[] = [];
-    const content: React.ReactNode[] = [];
+    React.useEffect(() => {
+        const settings: React.ReactElement[] = [];
+        const content: React.ReactNode[] = [];
 
-    React.Children.forEach(props.children, (child) => {
-        if (
-            React.isValidElement(child) &&
-            typeof child.props === "object" &&
-            Object.keys(child.props).includes("_dashprivate_layout") &&
-            child.props._dashprivate_layout.type === "WebvizSettingsGroup"
-        ) {
-            settings.push(child);
-            return;
-        }
-        content.push(child);
-    });
+        React.Children.forEach(props.children, (child) => {
+            if (
+                React.isValidElement(child) &&
+                typeof child.props === "object" &&
+                Object.keys(child.props).includes("_dashprivate_layout") &&
+                child.props._dashprivate_layout.type === "WebvizSettingsGroup"
+            ) {
+                settings.push(child);
+                return;
+            }
+            content.push(child);
+        });
+
+        setSettings(settings);
+        setContent(content);
+    }, [props.children]);
 
     const handleDownloadClick = React.useCallback(() => {
         const requests = downloadRequests + 1;
@@ -467,6 +476,42 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
     if (props.hidden) {
         return null;
     }
+
+    React.useLayoutEffect(() => {
+        if (
+            store.state.openViewElementSettingsDialogIds.some(
+                (el) => el === settingsDialogId
+            )
+        ) {
+            setSettingsVisible(true);
+            return;
+        }
+        setSettingsVisible(false);
+    }, [store.state.openViewElementSettingsDialogIds, settingsDialogId]);
+
+    const handleOpenSettingsDialog = React.useCallback(() => {
+        if (
+            !store.state.openViewElementSettingsDialogIds.some(
+                (el) => el === settingsDialogId
+            )
+        ) {
+            store.dispatch({
+                type: StoreActions.AddOpenViewElementSettingsDialogId,
+                payload: {
+                    settingsDialogId: settingsDialogId,
+                },
+            });
+        }
+    }, [store, settingsDialogId]);
+
+    const handleCloseSettingsDialog = React.useCallback(() => {
+        store.dispatch({
+            type: StoreActions.RemoveOpenViewElementSettingsDialogId,
+            payload: {
+                settingsDialogId: settingsDialogId,
+            },
+        });
+    }, [store, settingsDialogId]);
 
     return (
         <div
@@ -506,7 +551,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     <div>
                         <Tooltip title="Open settings for view element">
                             <IconButton
-                                onClick={() => setSettingsVisible(true)}
+                                onClick={() => handleOpenSettingsDialog()}
                             >
                                 <Icon name="settings" size={16} />
                             </IconButton>
@@ -539,7 +584,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 </div>
             </div>
             <Dialog
-                id={`${props.id}-settings`}
+                id={settingsDialogId}
                 title="View Element Settings"
                 open={settingsVisible}
                 draggable={true}
@@ -549,7 +594,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     action_called: number;
                 }) => {
                     if (dialogProps.open === false) {
-                        setSettingsVisible(false);
+                        handleCloseSettingsDialog();
                     }
                 }}
             >

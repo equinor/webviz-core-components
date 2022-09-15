@@ -7,6 +7,7 @@ import { Icon } from "@equinor/eds-core-react";
 import { arrow_back, arrow_forward } from "@equinor/eds-icons";
 Icon.add({ arrow_back, arrow_forward });
 
+import { waitUntilElementIsAvailable } from "../../utils/waitUntilElementIsAvailable";
 import "./webviz-plugin-tour.css";
 import { Point } from "lib/shared-types/point";
 
@@ -92,6 +93,9 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
     React.useEffect(() => {
         if (props.open && tourSteps) {
             handleChangeTourStep(0);
+            store.dispatch({
+                type: StoreActions.RemoveAllOpenViewElementSettingsDialogIds,
+            });
             return;
         }
         if (intervalRef.current) {
@@ -198,9 +202,48 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     },
                 });
             }
+
+            if (
+                store.state.openViewElementSettingsDialogIds.some(
+                    (el) =>
+                        el ===
+                        `${tourSteps[currentTourStep].viewElementId}-settings`
+                ) &&
+                tourSteps[currentTourStep].viewElementId !==
+                    tourSteps[newTourStep].viewElementId
+            ) {
+                store.dispatch({
+                    type: StoreActions.RemoveOpenViewElementSettingsDialogId,
+                    payload: {
+                        settingsDialogId: `${tourSteps[currentTourStep].viewElementId}-settings`,
+                    },
+                });
+            }
+            if (
+                tourSteps[newTourStep].viewElementId &&
+                tourSteps[newTourStep].settingsGroupId &&
+                !store.state.openViewElementSettingsDialogIds.some(
+                    (el) =>
+                        el ===
+                        `${tourSteps[newTourStep].viewElementId}-settings`
+                )
+            ) {
+                store.dispatch({
+                    type: StoreActions.AddOpenViewElementSettingsDialogId,
+                    payload: {
+                        settingsDialogId: `${tourSteps[newTourStep].viewElementId}-settings`,
+                    },
+                });
+                waitUntilElementIsAvailable(
+                    tourSteps[newTourStep].elementId,
+                    () => setCurrentTourStep(newTourStep)
+                );
+                return;
+            }
+
             setCurrentTourStep(newTourStep);
         },
-        [tourSteps, pluginData?.activeViewId]
+        [tourSteps, currentTourStep, pluginData?.activeViewId, store]
     );
 
     return ReactDOM.createPortal(
