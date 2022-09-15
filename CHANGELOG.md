@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   [#219](https://github.com/equinor/webviz-core-components/pull/219) - Implemented components required by the new Webviz Layout Framework (WLF)
 -   [#227](https://github.com/equinor/webviz-core-components/pull/227) - Added `EdsIcon` component in order to use icons from the Equinor Design System (EDS) directly in Python.
 -   [#240](https://github.com/equinor/webviz-core-components/pull/240) - States of menu, active view, settings drawer and settings groups are getting stored now. If no URL path is given, the one of the first page is opened now.
+-   [#248](https://github.com/equinor/webviz-core-components/pull/248) - Added missing `id` in `WebvizSettingsGroup` and `key` in `WebvizViewList` (for view groups).
 
 ### Changed
 

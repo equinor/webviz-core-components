@@ -18,7 +18,13 @@ package_name = (
 
 INSTALL_REQUIRES = ["dash>=2.0"]
 
-TESTS_REQUIRE = ["selenium", "pylint", "black>=20.8b1", "bandit"]
+TESTS_REQUIRE = [
+    "bandit",
+    "black>=20.8b1",
+    "dash[testing]",
+    "pylint",
+    "selenium",
+]
 
 # 'dash[testing]' to be added in tests_require when
 # https://github.com/pypa/pip/issues/4957 is closed.
@@ -36,8 +42,8 @@ setup(
     install_requires=INSTALL_REQUIRES,
     tests_require=TESTS_REQUIRE,
     extras_require={"tests": TESTS_REQUIRE, "dependencies": INSTALL_REQUIRES},
-    setup_requires=["setuptools_scm~=3.2"],
-    python_requires="~=3.6",
+    setup_requires=["setuptools_scm~=7.0"],
+    python_requires="~=3.8",
     use_scm_version=True,
     classifiers=[
         "Programming Language :: Python :: 3",

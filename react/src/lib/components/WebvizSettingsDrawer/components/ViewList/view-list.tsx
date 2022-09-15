@@ -126,7 +126,10 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                         );
                     } else {
                         return (
-                            <div className="WebvizViewList__Group">
+                            <div
+                                className="WebvizViewList__Group"
+                                key={el.group}
+                            >
                                 <div className="WebvizViewList__GroupTitle">
                                     {el.group}
                                 </div>
