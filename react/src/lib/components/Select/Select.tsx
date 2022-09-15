@@ -132,7 +132,7 @@ const defaultProps: Optionals<InferProps<typeof propTypes>> = {
     size: 4,
     value: [],
     multi: true,
-    debounce_time_ms: 500,
+    debounce_time_ms: 0,
     style: {},
     parent_style: {},
     className: "",
@@ -157,7 +157,7 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
         parent_style,
         value,
         multi,
-        debounce_time_ms: debounce_time_ms,
+        debounce_time_ms,
         size,
         className,
         style,
@@ -206,7 +206,13 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
                 setProps({ value: values });
             }, debounce_time_ms);
         },
-        [debounceTimer.current, setProps]
+        [
+            debounceTimer.current,
+            debounce_time_ms,
+            options,
+            selectedValues,
+            setProps,
+        ]
     );
 
     return (
