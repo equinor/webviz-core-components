@@ -31,6 +31,14 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
     const [popupContainer, setPopupContainer] =
         React.useState<HTMLDivElement | null>(null);
 
+    const plugin = store.state.pluginsData.find(
+        (plugin) => plugin.id === store.state.activePluginId
+    );
+
+    const activeViewName =
+        plugin?.views.find((elm) => elm.id === plugin.activeViewId)?.name ||
+        "No active view";
+
     React.useEffect(() => {
         const container = document.createElement("div");
         document.body.appendChild(container);
@@ -114,7 +122,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
 
     const handleSelectViewClick = React.useCallback(
         (view: string) => {
-            if (store) {
+            if (store && plugin?.activeViewId !== view) {
                 store.dispatch({
                     type: StoreActions.SetActiveView,
                     payload: { viewId: view },
@@ -123,14 +131,6 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
         },
         [store]
     );
-
-    const plugin = store.state.pluginsData.find(
-        (plugin) => plugin.id === store.state.activePluginId
-    );
-
-    const activeViewName =
-        plugin?.views.find((elm) => elm.id === plugin.activeViewId)?.name ||
-        "No active view";
 
     return (
         <Tooltip title="Change view">
