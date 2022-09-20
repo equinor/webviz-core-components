@@ -51,5 +51,4 @@ Basic.args = {
     menuBarPosition: Menu.defaultProps?.menuBarPosition || "left",
     menuDrawerPosition: Menu.defaultProps?.menuDrawerPosition || "left",
     showLogo: Menu.defaultProps?.showLogo || true,
-    url: Menu.defaultProps?.url || "",
 };
