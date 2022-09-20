@@ -264,6 +264,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
     ]);
 
     React.useEffect(() => {
+        if (props.homepageUrl) {
+            setCurrentUrl(props.homepageUrl);
+            window.history.pushState({}, "", props.homepageUrl);
+            window.dispatchEvent(new CustomEvent("_dashprivate_pushstate"));
+            window.scrollTo(0, 0);
+        }
+
         const handleLocationChange = () => {
             setCurrentUrl(window.location.href);
         };
