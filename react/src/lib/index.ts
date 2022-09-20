@@ -34,11 +34,14 @@ import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow/Webviz
 import { WebvizPluginLoadingIndicator } from "./components/WebvizPluginLoadingIndicator";
 import { EdsIcon } from "./components/EdsIcon";
 
+import { WebvizDialog } from "./components/WebvizDialog/WebvizDialog";
+
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
 
 export {
     WebvizContentManager,
+    WebvizDialog,
     WebvizPluginWrapper,
     WebvizPluginsWrapper,
     WebvizSettingsDrawer,
