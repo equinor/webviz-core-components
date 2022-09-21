@@ -12,29 +12,22 @@ Icon.add({ close });
 
 export type WebvizDialogTitleProps = {
     id?: string;
+    children?: React.ReactNode;
     onClose?: () => void;
-    onClick?: () => void;
 };
 
-export const WebvizDialogTitle: React.FC<WebvizDialogTitleProps> = (props) => {
+export const WebvizDialogTitle = React.forwardRef<
+    HTMLDivElement,
+    WebvizDialogTitleProps
+>((props, ref) => {
     const handleCloseClick = React.useCallback(() => {
         if (props.onClose) {
             props.onClose();
         }
     }, [props.onClose]);
 
-    const handleTitleClick = React.useCallback(() => {
-        if (props.onClick) {
-            props.onClick();
-        }
-    }, [props.onClick]);
-
     return (
-        <div
-            className="WebvizDialogTitle"
-            id={props.id}
-            onClick={() => handleTitleClick()}
-        >
+        <div className="WebvizDialogTitle" id={props.id} ref={ref}>
             {props.children}
             {props.onClose && (
                 <IconButton
@@ -52,10 +45,10 @@ export const WebvizDialogTitle: React.FC<WebvizDialogTitleProps> = (props) => {
             )}
         </div>
     );
-};
+});
 
 WebvizDialogTitle.propTypes = {
     id: PropTypes.string,
+    children: PropTypes.node,
     onClose: PropTypes.func,
-    onClick: PropTypes.func,
 };

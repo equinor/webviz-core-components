@@ -43,11 +43,14 @@ const App: React.FC = () => {
         });
 
     const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
-    const [webvizDialogOpen, setWebvizDialogOpen] =
-        React.useState<boolean>(false);
     const [currentPage, setCurrentPage] = React.useState<string>(
         window.location.hash.replace("#", "")
     );
+
+    const [webvizDialogOpen, setWebvizDialogOpen] =
+        React.useState<boolean>(false);
+    const [webvizDialog2Open, setWebvizDialog2Open] =
+        React.useState<boolean>(false);
 
     React.useEffect(() => {
         const handleLocationChange = () => {
@@ -98,11 +101,17 @@ const App: React.FC = () => {
                         component="button"
                         onClick={() => setWebvizDialogOpen(true)}
                     >
-                        Open Dialog
+                        Open Dialog 1
+                    </Button>
+                    <Button
+                        component="button"
+                        onClick={() => setWebvizDialog2Open(true)}
+                    >
+                        Open Dialog 2
                     </Button>
                     <WebvizDialog
-                        title="Webviz Dialog title"
-                        id="dialog"
+                        title="Webviz Dialog 1 Title"
+                        id="webviz-dialog-1"
                         open={webvizDialogOpen}
                         setProps={(newProps) => {
                             console.log(newProps);
@@ -111,7 +120,21 @@ const App: React.FC = () => {
                         actions={["Cancel", "OK"]}
                     >
                         <div style={{ width: 1000 }}>
-                            This is the content of the dialog.
+                            This is the content of the first dialog.
+                        </div>
+                    </WebvizDialog>
+                    <WebvizDialog
+                        title="Webviz Dialog 2 Title"
+                        id="webviz-dialog-2"
+                        open={webvizDialog2Open}
+                        setProps={(newProps) => {
+                            console.log(newProps);
+                            setWebvizDialog2Open(newProps.open);
+                        }}
+                        actions={["Cancel", "OK"]}
+                    >
+                        <div style={{ width: 1500 }}>
+                            This is the content of the second dialog.
                         </div>
                     </WebvizDialog>
                 </>
