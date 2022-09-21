@@ -8,6 +8,7 @@
 /* eslint no-magic-numbers: 0 */
 import { Button } from "@material-ui/core";
 import React from "react";
+import { ScrollArea } from "../lib";
 
 import {
     WebvizPluginPlaceholder,
@@ -63,8 +64,18 @@ const App: React.FC = () => {
         };
     }, []);
 
+    const commonChildren = (
+        <>
+            <div style={{ height: 200, width: 2000 }} />
+            <div style={{ height: 200, overflow: "auto" }}>
+                <div style={{ height: 300 }} />
+            </div>
+        </>
+    );
+
     return (
         <div>
+            <ScrollArea height={300}>{commonChildren}</ScrollArea>
             <Menu
                 navigationItems={[
                     {
