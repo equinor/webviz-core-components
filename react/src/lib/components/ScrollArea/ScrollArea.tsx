@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import "./ScrollArea.css";
 
@@ -317,10 +318,8 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 
     return (
         <div
-            className="ScrollAreaOuter"
+            className="ScrollArea"
             style={{
-                paddingRight: verticalScrollBarVisible ? 16 : 0,
-                paddingBottom: horizontalScrollBarVisible ? 16 : 0,
                 height: props.height || "auto",
                 width: props.width || "auto",
             }}
@@ -351,11 +350,27 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                     width: horizontalScrollBarProps.size,
                 }}
             ></div>
-            <div className="ScrollArea" ref={scrollAreaRef}>
+            <div
+                className="ScrollAreaInner"
+                ref={scrollAreaRef}
+                style={{
+                    paddingRight: verticalScrollBarVisible ? 16 : 0,
+                    paddingBottom: horizontalScrollBarVisible ? 16 : 0,
+                }}
+            >
                 <div ref={contentRef} className="ScrollArea__Content">
                     {props.children}
                 </div>
             </div>
         </div>
     );
+};
+
+ScrollArea.propTypes = {
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node,
+    ]),
+    width: PropTypes.number,
+    height: PropTypes.number,
 };

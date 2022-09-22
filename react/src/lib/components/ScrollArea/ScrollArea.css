@@ -1,10 +1,10 @@
-.ScrollAreaOuter {
+.ScrollArea {
     position: relative;
     display: flex;
     flex-direction: column;
 }
 
-.ScrollArea {
+.ScrollAreaInner {
     overflow: scroll;
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
@@ -15,46 +15,47 @@
     overflow: visible;
     width: fit-content;
     min-width: 100%;
+    position: relative;
 }
 
-.ScrollAreaOuter .ScrollBar--inactive {
+.ScrollArea .ScrollBar--inactive {
     opacity: 0;
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s opacity;
 }
 
-.ScrollAreaOuter:hover .ScrollBar--inactive,
-.ScrollAreaOuter:active .ScrollBar--inactive {
+.ScrollArea:hover .ScrollBar--inactive,
+.ScrollArea:active .ScrollBar--inactive {
     opacity: 0.5;
 }
 
-.ScrollAreaOuter .ScrollBar:hover {
+.ScrollArea .ScrollBar:hover {
     opacity: 1;
 }
 
-.ScrollAreaOuter .ScrollBar--active {
+.ScrollArea .ScrollBar--active {
     opacity: 1;
     user-select: none;
 }
 
-.ScrollAreaOuter .ScrollBar {
+.ScrollArea .ScrollBar {
     position: absolute;
     background-color: #5c5c5c;
     border-radius: 4px;
     z-index: 10;
 }
 
-.ScrollAreaOuter .VerticalScrollBar {
+.ScrollArea .VerticalScrollBar {
     right: 4px;
     width: 8px;
     min-height: 80px;
 }
 
-.ScrollAreaOuter .HorizontalScrollBar {
+.ScrollArea .HorizontalScrollBar {
     bottom: 4px;
     height: 8px;
     min-width: 80px;
 }
 
-.ScrollArea::-webkit-scrollbar {
+.ScrollAreaInner::-webkit-scrollbar {
     display: none;
 }
