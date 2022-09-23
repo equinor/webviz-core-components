@@ -21,25 +21,32 @@ import {
 export type WebvizDialogParentProps = { open: boolean };
 
 export type WebvizDialogProps = {
-    id?: string;
+    id: string;
     open?: boolean;
     modal?: boolean; // Instead of backdrop prop?
     title: string;
-    actions: string[];
+    actions?: string[];
+    children?: React.ReactNode;
     setProps: (parentProps: WebvizDialogParentProps) => void;
 };
 
 export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const [open, setOpen] = React.useState<boolean>(props.open || false);
     const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
-    const referencePositionRef = React.useRef<Point>({ x: 1, y: 2 });
-    const moveStarted = React.useRef<boolean>(false);
+    // const [dialogWidth, setDialogWidth] =
+    //     React.useState<number | undefined>(undefined);
 
     const dialogRef = React.useRef<HTMLDivElement>(null);
     const dialogTitleRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         setOpen(props.open || false);
+        // if (dialogRef.current) {
+        //     setDialogPosition({
+        //         x: parseInt(dialogRef.current.style.left),
+        //         y: parseInt(dialogRef.current.style.top),
+        //     });
+        // }
         if (!props.open && dialogRef.current) {
             dialogRef.current.className = "WebvizDialogInactive";
         }
@@ -55,7 +62,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 return;
             }
             setOpen(false);
-
+            setDialogPosition(ORIGIN);
             props.setProps({ open: false });
         },
         [props.modal, props.setProps, dialogRef.current]
@@ -92,35 +99,35 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             return;
         }
 
-        const handleMouseDown = () => {
+        let mouseDownPosition: Point = { x: 0, y: 0 };
+        let moveStarted: boolean = false;
+
+        const handleMouseDown = (e: MouseEvent) => {
+            mouseDownPosition.x = e.clientX; // e.pageX?
+            mouseDownPosition.y = e.clientY; // e.pageY?
+
             const handleMouseMove = (e: MouseEvent) => {
-                const referencePosition = referencePositionRef.current;
-                const currentMousePosition = { x: e.pageX, y: e.pageY };
+                const currentMousePosition = { x: e.clientX, y: e.clientY }; // { x: e.pageX, y: e.pageY };
                 const delta = pointDifference(
                     currentMousePosition,
-                    referencePosition
+                    mouseDownPosition
                 );
 
-                if (!moveStarted.current) {
+                if (!moveStarted) {
                     if (vectorLength(delta) > MANHATTAN_LENGTH) {
-                        moveStarted.current = true;
+                        moveStarted = true;
                     }
                 } else {
-                    referencePositionRef.current = currentMousePosition;
-                    setDialogPosition((movePosition) =>
-                        pointSum(movePosition, delta)
-                    );
+                    setDialogPosition(pointSum(delta, dialogPosition));
                 }
-                dialogRef.current?.style.left;
-                dialogRef.current?.style.right;
             };
             const handleMouseUp = (e: MouseEvent) => {
                 document.removeEventListener("mousemove", handleMouseMove);
                 document.removeEventListener("mouseup", handleMouseUp, true);
-                if (moveStarted.current === true) {
+                if (moveStarted === true) {
                     e.stopPropagation();
                 }
-                moveStarted.current = false;
+                moveStarted = false;
             };
 
             document.addEventListener("mousemove", handleMouseMove);
@@ -128,7 +135,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         };
 
         dialogTitleRef.current.addEventListener("mousedown", handleMouseDown);
-
         return () => {
             if (dialogTitleRef.current) {
                 dialogTitleRef.current.removeEventListener(
@@ -137,17 +143,47 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 );
             }
         };
-        // Handle mouse down
-        // Handle mouse move
-        // Handle mouse up
     }, [
         dialogRef.current,
         dialogTitleRef.current,
-        moveStarted,
+        dialogPosition,
         setDialogPosition,
     ]);
 
+    // React.useEffect(() => {
+    //     if (!dialogRef.current) {
+    //         return;
+    //     }
+
+    //     const handleResize = () => {
+    //         if (!dialogWidth) {
+    //             return;
+    //         }
+
+    //         let tmp = dialogWidth || 0;
+
+    //         const windowWidth = document.body.getBoundingClientRect().width;
+    //         const newDialogWidth = Math.floor(
+    //             tmp - 64 - Math.floor(dialogPosition.x)
+    //         );
+
+    //         if (windowWidth < dialogWidth + 64 + Math.floor(dialogPosition.x)) {
+    //             setDialogWidth(newDialogWidth);
+    //         }
+    //     };
+
+    //     const resizeObserver = new ResizeObserver(handleResize);
+
+    //     if (document.body) {
+    //         resizeObserver.observe(document.body);
+    //     }
+    //     return () => {
+    //         resizeObserver.disconnect();
+    //     };
+    // }, [dialogRef.current, document, dialogPosition, setDialogWidth]);
+
     React.useEffect(() => {
+        // TEMP
         console.log(dialogPosition);
     }, [dialogPosition]);
 
@@ -160,8 +196,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 display: open ? "block" : "none",
                 left: Math.floor(dialogPosition.x),
                 top: Math.floor(dialogPosition.y),
+                // width: dialogWidth ? dialogWidth : "auto",
+                // maxWidth: `calc(100% - 64px - ${Math.floor(
+                //     dialogPosition.x
+                // )}px)`,
             }}
-            onClick={() => handleSetActive()}
+            onMouseDown={() => handleSetActive()}
         >
             <WebvizDialogTitle
                 id="webviz-dialog-title"
@@ -191,5 +231,24 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 };
 
 WebvizDialog.propTypes = {
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
+    open: PropTypes.bool,
+    modal: PropTypes.bool,
+    title: PropTypes.string.isRequired,
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node,
+    ]),
+    actions: PropTypes.arrayOf(PropTypes.string.isRequired),
+    setProps: PropTypes.func.isRequired,
+};
+
+WebvizDialog.defaultProps = {
+    open: false,
+    modal: false,
+    children: [],
+    actions: [],
+    setProps: () => {
+        return;
+    },
 };

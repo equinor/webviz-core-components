@@ -2,7 +2,7 @@
     display: flex;
     cursor: move;
     margin-right: 32px;
-    margin-bottom: 32px;
+    /* margin-bottom: 32px; */
     padding: 16px;
     text-align: center;
     font-size: 1.25rem;

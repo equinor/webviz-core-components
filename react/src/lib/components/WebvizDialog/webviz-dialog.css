@@ -1,31 +1,39 @@
-.WebvizDialog {
+/* .WebvizDialog {
     z-index: 1500;
     position: fixed;
     pointer-events: all;
     opacity: 1;
     border-radius: 5px;
     background-color: #e3e3e3;
-}
+} */
 
 .WebvizDialogActive {
     z-index: 1501;
-    position: fixed;
+    min-width: 250px;
+    /* max-width: calc(100% - 64px); */
+    position: absolute;
     pointer-events: all;
     opacity: 1;
     border-radius: 5px;
-    background-color: #e3e3e3;
-    box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 20%),
-        0px 24px 38px 3px rgb(0 0 0 / 14%), 0px 9px 46px 8px rgb(0 0 0 / 12%);
+    background-color: #ffffff;
+    box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 25%),
+        0px 24px 38px 3px rgb(0 0 0 / 25%), 0px 9px 46px 8px rgb(0 0 0 / 25%);
+    -webkit-box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 25%),
+        0px 24px 38px 3px rgb(0 0 0 / 25%), 0px 9px 46px 8px rgb(0 0 0 / 25%);
 }
 
 .WebvizDialogInactive {
     z-index: 1499;
-    position: fixed;
+    /* max-width: calc(100% - 64px); */
+    position: absolute;
     pointer-events: all;
-    opacity: 1;
+    opacity: 1; /* Adjust "opacity" without being transparent */
     border-radius: 5px;
-    background-color: #e3e3e3;
-    box-shadow: none;
+    background-color: #ffffff;
+    box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 5%),
+        0px 24px 38px 3px rgb(0 0 0 / 5%), 0px 9px 46px 8px rgb(0 0 0 / 5%);
+    -webkit-box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 5%),
+        0px 24px 38px 3px rgb(0 0 0 / 5%), 0px 9px 46px 8px rgb(0 0 0 / 5%);
 }
 
 .WebvizDialogModal {
