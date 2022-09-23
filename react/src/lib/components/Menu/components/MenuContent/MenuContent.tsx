@@ -6,6 +6,7 @@ import { Section } from "../Section";
 import { Group } from "../Group";
 import { Page } from "../Page";
 import { ScrollArea } from "../../../ScrollArea";
+import { useStore } from "../../Menu";
 
 import {
     NavigationType,
@@ -20,7 +21,6 @@ import "./MenuContent.css";
 type MenuContentProps = {
     content: NavigationType;
     groupsInitiallyCollapsed?: boolean;
-    onPageChange: (url: string) => void;
 };
 
 const searchTitle = (title: string, query: string): boolean => {
@@ -114,7 +114,7 @@ const makeNavigation = (
     navigation: NavigationType,
     filtered: boolean,
     initiallyCollapsed: boolean,
-    onPageChange: (url: string) => void
+    firstPageHref: string
 ): JSX.Element => {
     const recursivelyMakeNavigation = (
         items: NavigationItemType[],
@@ -167,15 +167,28 @@ const makeNavigation = (
                             <Page
                                 key={item.id}
                                 level={level}
+                                firstPage={
+                                    (item as PageType).href === firstPageHref
+                                }
                                 applyIconIndentation={
                                     atLeastOneIconUsed ||
                                     iconAtParentLevel ||
                                     false
                                 }
                                 {...(item as PageType)}
-                                onClick={() =>
-                                    onPageChange((item as PageType).href)
-                                }
+                                onClick={() => {
+                                    window.history.pushState(
+                                        {},
+                                        "",
+                                        (item as PageType).href
+                                    );
+                                    window.dispatchEvent(
+                                        new CustomEvent(
+                                            "_dashprivate_pushstate"
+                                        )
+                                    );
+                                    window.scrollTo(0, 0);
+                                }}
                             />
                         );
                     } else {
@@ -191,6 +204,8 @@ const makeNavigation = (
 export const MenuContent: React.FC<MenuContentProps> = (props) => {
     const [filter, setFilter] = React.useState<string>("");
     const [content, setContent] = React.useState<NavigationType>(props.content);
+
+    const store = useStore();
 
     React.useEffect(() => {
         setContent(recursivelyFilterNavigation(props.content, filter));
@@ -211,7 +226,7 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
                         content,
                         filter !== "",
                         props.groupsInitiallyCollapsed || false,
-                        props.onPageChange
+                        store.firstPageHref
                     )
                 )}
             </ScrollArea>
@@ -222,5 +237,4 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
 MenuContent.propTypes = {
     content: PropTypes.any.isRequired,
     groupsInitiallyCollapsed: PropTypes.bool,
-    onPageChange: PropTypes.func.isRequired,
 };

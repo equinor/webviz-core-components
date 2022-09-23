@@ -5,6 +5,7 @@ import { Icon } from "../Icon";
 import { checkIfUrlIsCurrent } from "../../utils/check-url";
 
 import "./Page.css";
+import { useStore } from "../../Menu";
 
 type PageProps = {
     title: string;
@@ -12,11 +13,15 @@ type PageProps = {
     level: number;
     icon?: string;
     applyIconIndentation: boolean;
+    firstPage: boolean;
     onClick: () => void;
 };
 
 export const Page: React.FC<PageProps> = (props) => {
-    const active = checkIfUrlIsCurrent(props.href);
+    const store = useStore();
+    const active =
+        checkIfUrlIsCurrent(props.href) ||
+        (props.firstPage && checkIfUrlIsCurrent(store.homepage));
 
     return (
         <a
@@ -55,6 +60,7 @@ export const Page: React.FC<PageProps> = (props) => {
 Page.propTypes = {
     title: PropTypes.string.isRequired,
     href: PropTypes.string.isRequired,
+    firstPage: PropTypes.bool.isRequired,
     level: PropTypes.number.isRequired,
     icon: PropTypes.string,
     applyIconIndentation: PropTypes.bool.isRequired,

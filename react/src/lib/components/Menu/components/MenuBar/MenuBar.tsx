@@ -16,9 +16,7 @@ type MenuBarProps = {
     menuButtonPosition: MenuDrawerPosition;
     visible: boolean;
     showLogo: boolean;
-    homepage: string;
     onMenuOpen: () => void;
-    onLogoClick: (url: string) => void;
 };
 
 type Position = {
@@ -316,13 +314,7 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                     bottom: position.bottom,
                 }}
             >
-                {props.showLogo && (
-                    <Logo
-                        onClick={props.onLogoClick}
-                        homepage={props.homepage}
-                        size="small"
-                    />
-                )}
+                {props.showLogo && <Logo size="small" />}
                 <div
                     style={{
                         flexGrow: 1,
@@ -362,7 +354,5 @@ MenuBar.propTypes = {
     ]).isRequired,
     visible: PropTypes.bool.isRequired,
     showLogo: PropTypes.bool.isRequired,
-    homepage: PropTypes.string.isRequired,
     onMenuOpen: PropTypes.func.isRequired,
-    onLogoClick: PropTypes.func.isRequired,
 };
