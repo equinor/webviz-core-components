@@ -3,7 +3,7 @@ export const waitUntilElementIsAvailable = (
     callback: () => void,
     timestepMs = 100,
     maxWaitTimeMs = 5000
-) => {
+): void => {
     let intervalId: ReturnType<typeof setInterval> | null = null;
     let passedTimeMs = 0;
     const checkIfElementIsAvailable = () => {
