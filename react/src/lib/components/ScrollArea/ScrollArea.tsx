@@ -7,6 +7,7 @@ export type ScrollAreaProps = {
     children: React.ReactNode;
     height?: number | string;
     width?: number | string;
+    noScrollbarPadding?: boolean;
 };
 
 type ScrollBarProps = {
@@ -320,8 +321,8 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         <div
             className="ScrollArea"
             style={{
-                height: props.height || "auto",
-                width: props.width || "auto",
+                height: props.height || "",
+                width: props.width || "",
             }}
         >
             <div
@@ -354,8 +355,14 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                 className="ScrollAreaInner"
                 ref={scrollAreaRef}
                 style={{
-                    paddingRight: verticalScrollBarVisible ? 16 : 0,
-                    paddingBottom: horizontalScrollBarVisible ? 16 : 0,
+                    paddingRight:
+                        verticalScrollBarVisible && !props.noScrollbarPadding
+                            ? 16
+                            : 0,
+                    paddingBottom:
+                        horizontalScrollBarVisible && !props.noScrollbarPadding
+                            ? 16
+                            : 0,
                 }}
             >
                 <div ref={contentRef} className="ScrollArea__Content">
@@ -373,4 +380,5 @@ ScrollArea.propTypes = {
     ]),
     width: PropTypes.number,
     height: PropTypes.number,
+    noScrollbarPadding: PropTypes.bool,
 };

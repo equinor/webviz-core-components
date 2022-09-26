@@ -2,8 +2,6 @@
     flex-grow: 4;
     border-top: 1px #ccc solid;
     transition: opacity 1s ease-in-out;
-}
-
-.WebvizSettings .ScrollArea {
-    height: 100%;
+    min-height: 0;
+    display: flex;
 }

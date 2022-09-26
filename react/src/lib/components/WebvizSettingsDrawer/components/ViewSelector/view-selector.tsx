@@ -138,7 +138,8 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                 className="WebvizViewSelector"
                 style={{
                     width: isCollapsed ? "auto" : props.width - 36,
-                    height: plugin?.views && plugin.views.length > 1 ? 56 : 0,
+                    minHeight:
+                        plugin?.views && plugin.views.length > 1 ? 56 : 0,
                     opacity: plugin?.views && plugin.views.length > 1 ? 1 : 0,
                 }}
                 onClick={() => setMenuOpen(true)}

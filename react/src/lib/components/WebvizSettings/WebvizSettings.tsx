@@ -57,7 +57,7 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
                 pointerEvents: props.visible ? "all" : "none",
             }}
         >
-            <ScrollArea>
+            <ScrollArea noScrollbarPadding={true}>
                 {props.children &&
                     React.Children.map(props.children, (child) => {
                         if (React.isValidElement(child)) {

@@ -75,7 +75,7 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <ScrollArea height={300}>{commonChildren}</ScrollArea>
+            <ScrollArea>{commonChildren}</ScrollArea>
             <Menu
                 navigationItems={[
                     {
