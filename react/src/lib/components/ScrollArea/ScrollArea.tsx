@@ -21,8 +21,6 @@ enum ScrollDirection {
 }
 
 const isElementScrollable = (scrollArea: HTMLElement, content: HTMLElement, direction: ScrollDirection): boolean => {
-    console.log(content.scrollHeight);
-    console.log(scrollArea.clientHeight);
     if (direction === ScrollDirection.HORIZONTAL) {
         return content.scrollWidth > scrollArea.clientWidth;
     }
