@@ -5,3 +5,7 @@
     min-height: 0;
     display: flex;
 }
+
+.WebvizSettings > .ScrollArea {
+    width: 100%;
+}

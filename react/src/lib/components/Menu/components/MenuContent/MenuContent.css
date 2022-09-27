@@ -5,6 +5,10 @@
     min-height: 0px;
 }
 
+.Menu__ContentWrapper > .ScrollArea {
+    width: 100%;
+}
+
 .Menu__FilterInputWrapper {
     padding: 16px;
 }
