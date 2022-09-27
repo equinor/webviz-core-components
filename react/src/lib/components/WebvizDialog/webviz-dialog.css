@@ -7,9 +7,20 @@
     background-color: #e3e3e3;
 } */
 
+.WebvizDialog__root {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    inset: 0px;
+    z-index: 1500;
+    overflow: hidden;
+    pointer-events: none;
+}
+
 .WebvizDialogActive {
-    z-index: 1501;
-    min-width: 250px;
+    z-index: 1502;
+    /* min-width: max-content; */
+    /* min-width: 250px; */
     /* max-width: calc(100% - 64px); */
     position: absolute;
     pointer-events: all;
@@ -23,8 +34,9 @@
 }
 
 .WebvizDialogInactive {
-    z-index: 1499;
+    z-index: 1501;
     /* max-width: calc(100% - 64px); */
+    /* min-width: max-content; */
     position: absolute;
     pointer-events: all;
     opacity: 1; /* Adjust "opacity" without being transparent */
@@ -37,4 +49,12 @@
 }
 
 .WebvizDialogModal {
+}
+
+.WebvizDialogActions {
+    padding: 16px;
+}
+
+.WebvizDialogContent {
+    padding: 16px;
 }

@@ -11,7 +11,6 @@ import { close } from "@equinor/eds-icons";
 Icon.add({ close });
 
 export type WebvizDialogTitleProps = {
-    id?: string;
     children?: React.ReactNode;
     onClose?: () => void;
 };
@@ -27,8 +26,8 @@ export const WebvizDialogTitle = React.forwardRef<
     }, [props.onClose]);
 
     return (
-        <div className="WebvizDialogTitle" id={props.id} ref={ref}>
-            {props.children}
+        <div className="WebvizDialogTitle" ref={ref}>
+            <div>{props.children}</div>
             {props.onClose && (
                 <IconButton
                     aria-label="close"
@@ -36,7 +35,6 @@ export const WebvizDialogTitle = React.forwardRef<
                     style={{
                         position: "absolute",
                         right: 8,
-                        top: 8,
                         // color: "#ccc",
                     }}
                 >
@@ -48,7 +46,6 @@ export const WebvizDialogTitle = React.forwardRef<
 });
 
 WebvizDialogTitle.propTypes = {
-    id: PropTypes.string,
     children: PropTypes.node,
     onClose: PropTypes.func,
 };
