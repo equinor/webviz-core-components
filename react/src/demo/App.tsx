@@ -113,6 +113,7 @@ const App: React.FC = () => {
                         title="Webviz Dialog 1 Title"
                         id="webviz-dialog-1"
                         open={webvizDialogOpen}
+                        modal={true}
                         setProps={(newProps) => {
                             console.log(newProps);
                             setWebvizDialogOpen(newProps.open);

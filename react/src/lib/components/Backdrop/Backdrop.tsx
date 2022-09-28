@@ -5,12 +5,19 @@ import "./backdrop.css";
 
 export type BackdropProps = {
     opacity: number;
+    onClick?: () => void;
 };
 
 export const Backdrop: React.FC<BackdropProps> = (props: BackdropProps) => {
+    const handleOnClick = React.useCallback(() => {
+        if (props.onClick !== undefined) {
+            props.onClick();
+        }
+    }, [props.onClick]);
     return (
         <div
             className="Webviz__Backdrop"
+            onClick={() => handleOnClick()}
             style={{
                 opacity: props.opacity,
                 display: props.opacity === 0 ? "none" : "block",
