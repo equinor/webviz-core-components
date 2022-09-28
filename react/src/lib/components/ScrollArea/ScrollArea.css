@@ -14,7 +14,6 @@
 
 .ScrollArea__Content {
     overflow: visible;
-    width: fit-content;
     min-width: 100%;
     position: relative;
 }
