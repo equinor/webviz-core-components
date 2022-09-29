@@ -8,14 +8,8 @@
 /* eslint no-magic-numbers: 0 */
 import { Button } from "@material-ui/core";
 import React from "react";
-import { ScrollArea } from "../lib";
 
-import {
-    WebvizPluginPlaceholder,
-    SmartNodeSelector,
-    Dialog,
-    Menu,
-} from "../lib";
+import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog, Menu } from "../lib";
 
 const steps = [
     {
@@ -35,17 +29,14 @@ type SmartNodeSelectorProps = {
 };
 
 const App: React.FC = () => {
-    const [nodeSelectorState, setNodeSelectorState] =
-        React.useState<SmartNodeSelectorProps>({
-            selectedNodes: [],
-            selectedIds: [],
-            selectedTags: [],
-        });
+    const [nodeSelectorState, setNodeSelectorState] = React.useState<SmartNodeSelectorProps>({
+        selectedNodes: [],
+        selectedIds: [],
+        selectedTags: [],
+    });
 
     const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
-    const [currentPage, setCurrentPage] = React.useState<string>(
-        window.location.hash.replace("#", "")
-    );
+    const [currentPage, setCurrentPage] = React.useState<string>(window.location.hash.replace("#", ""));
 
     React.useEffect(() => {
         const handleLocationChange = () => {
@@ -57,25 +48,11 @@ const App: React.FC = () => {
 
         return () => {
             window.removeEventListener("popstate", handleLocationChange);
-            window.removeEventListener(
-                "_dashprivate_pushstate",
-                handleLocationChange
-            );
+            window.removeEventListener("_dashprivate_pushstate", handleLocationChange);
         };
     }, []);
-
-    const commonChildren = (
-        <>
-            <div style={{ height: 200, width: 2000 }} />
-            <div style={{ height: 200, overflow: "auto" }}>
-                <div style={{ height: 300 }} />
-            </div>
-        </>
-    );
-
     return (
         <div>
-            <ScrollArea>{commonChildren}</ScrollArea>
             <Menu
                 navigationItems={[
                     {
@@ -98,10 +75,7 @@ const App: React.FC = () => {
             {currentPage === "dialog" && (
                 <>
                     <h1>Dialog</h1>
-                    <Button
-                        component="button"
-                        onClick={() => setDialogOpen(true)}
-                    >
+                    <Button component="button" onClick={() => setDialogOpen(true)}>
                         Open Dialog
                     </Button>
                     <Dialog
@@ -117,9 +91,7 @@ const App: React.FC = () => {
                         }}
                         actions={["Cancel", "OK"]}
                     >
-                        <div style={{ width: 2000 }}>
-                            This is the content of the dialog.
-                        </div>
+                        <div style={{ width: 2000 }}>This is the content of the dialog.</div>
                     </Dialog>
                 </>
             )}
@@ -180,88 +152,74 @@ const App: React.FC = () => {
                                             {
                                                 id: "1.1.1",
                                                 name: "Node-1",
-                                                description:
-                                                    "A first data node",
+                                                description: "A first data node",
                                                 children: [
                                                     {
                                                         id: "1.1.1.1",
                                                         name: "Subnode 1",
-                                                        description:
-                                                            "A first sub node",
+                                                        description: "A first sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.2",
                                                         name: "Subnode 2",
-                                                        description:
-                                                            "A second sub node",
+                                                        description: "A second sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.3",
                                                         name: "Subnode 3",
-                                                        description:
-                                                            "A third sub node",
+                                                        description: "A third sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.4",
                                                         name: "Subnode 4",
-                                                        description:
-                                                            "A fourth sub node",
+                                                        description: "A fourth sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.5",
                                                         name: "Subnode 5",
-                                                        description:
-                                                            "A first sub node",
+                                                        description: "A first sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.6",
                                                         name: "Subnode 6",
-                                                        description:
-                                                            "A second sub node",
+                                                        description: "A second sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.7",
                                                         name: "Subnode 7",
-                                                        description:
-                                                            "A third sub node",
+                                                        description: "A third sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.8",
                                                         name: "Subnode 8",
-                                                        description:
-                                                            "A fourth sub node",
+                                                        description: "A fourth sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.9",
                                                         name: "Subnode 9",
-                                                        description:
-                                                            "A first sub node",
+                                                        description: "A first sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.10",
                                                         name: "Subnode 10",
-                                                        description:
-                                                            "A second sub node",
+                                                        description: "A second sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.11",
                                                         name: "Subnode 11",
-                                                        description:
-                                                            "A third sub node",
+                                                        description: "A third sub node",
                                                     },
                                                     {
                                                         id: "1.1.1.12",
                                                         name: "Subnode 12",
-                                                        description:
-                                                            "A fourth sub node",
+                                                        description: "A fourth sub node",
                                                     },
                                                 ],
                                             },
                                             {
                                                 id: "1.1.2",
                                                 name: "Node 2",
-                                                description:
-                                                    "A second data node",
+                                                description: "A second data node",
                                             },
                                         ],
                                     },
@@ -292,40 +250,34 @@ const App: React.FC = () => {
                                             {
                                                 id: "2.1.1",
                                                 name: "Node 1",
-                                                description:
-                                                    "A first data node",
+                                                description: "A first data node",
                                                 children: [
                                                     {
                                                         id: "2.1.1.1",
                                                         name: "Subnode 1",
-                                                        description:
-                                                            "A first sub node",
+                                                        description: "A first sub node",
                                                     },
                                                     {
                                                         id: "2.1.1.2",
                                                         name: "Subnode 2",
-                                                        description:
-                                                            "A second sub node",
+                                                        description: "A second sub node",
                                                     },
                                                     {
                                                         id: "2.1.1.3",
                                                         name: "Subnode 3",
-                                                        description:
-                                                            "A third sub node",
+                                                        description: "A third sub node",
                                                     },
                                                     {
                                                         id: "2.1.1.4",
                                                         name: "Subnode 4",
-                                                        description:
-                                                            "A fourth sub node",
+                                                        description: "A fourth sub node",
                                                     },
                                                 ],
                                             },
                                             {
                                                 id: "2.1.2",
                                                 name: "Node 2",
-                                                description:
-                                                    "A second data node",
+                                                description: "A second data node",
                                             },
                                         ],
                                     },
@@ -344,17 +296,13 @@ const App: React.FC = () => {
                     Selected nodes:
                     <br />
                     {nodeSelectorState.selectedNodes.length > 0 &&
-                        nodeSelectorState.selectedNodes.map((node, index) => (
-                            <div key={`node-${index}`}>{node}</div>
-                        ))}
+                        nodeSelectorState.selectedNodes.map((node, index) => <div key={`node-${index}`}>{node}</div>)}
                     {nodeSelectorState.selectedNodes.length == 0 && <i>None</i>}
                     <br />
                     Selected tags:
                     <br />
                     {nodeSelectorState.selectedTags.length > 0 &&
-                        nodeSelectorState.selectedTags.map((tag, index) => (
-                            <div key={`tag-${index}`}>{tag}</div>
-                        ))}
+                        nodeSelectorState.selectedTags.map((tag, index) => <div key={`tag-${index}`}>{tag}</div>)}
                     {nodeSelectorState.selectedTags.length === 0 && <i>None</i>}
                 </>
             )}
