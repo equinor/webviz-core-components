@@ -216,7 +216,7 @@ export const MenuContent: React.FC<MenuContentProps> = (props) => {
             <div className="Menu__FilterInputWrapper">
                 <FilterInput filter={filter} onFilterChange={setFilter} />
             </div>
-            <ScrollArea>
+            <ScrollArea noScrollbarPadding={true}>
                 {content.length === 0 ? (
                     <div className="Menu__NoResults">
                         No pages matching the query...

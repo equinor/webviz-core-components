@@ -2,6 +2,11 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    min-height: 0px;
+}
+
+.Menu__ContentWrapper > .ScrollArea {
+    width: 100%;
 }
 
 .Menu__FilterInputWrapper {

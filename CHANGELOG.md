@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   [#240](https://github.com/equinor/webviz-core-components/pull/240) - Settings groups remain open when others are toggled (independent toggle state).
 -   [#252](https://github.com/equinor/webviz-core-components/pull/252) - Refactored `Menu` component in order to make it work seamlessly with `dcc.Location` and `dcc.Link`.
 -   [#257](https://github.com/equinor/webviz-core-components/pull/257) - Added debounce time for `Select` component to prevent firing selected values immediately. The selected values will be updated after configured amount of milliseconds after last interaction. Reduces number of callback triggers in Dash.
+-   [#265](https://github.com/equinor/webviz-core-components/pull/265) - Refactored `ScrollArea` component in order to improve scrolling experience.
 
 ## [0.5.7] - 2022-05-05
 

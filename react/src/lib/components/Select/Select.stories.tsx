@@ -18,7 +18,7 @@ export default {
 } as ComponentMeta<typeof Select>;
 
 const Template: ComponentStory<typeof Select> = (args) => {
-    const { setProps, debounce_time_ms, ...other } = args;
+    const { debounce_time_ms, ...other } = args;
 
     const [selected, setSelected] = React.useState<
         string | number | (string | number)[]
@@ -27,9 +27,9 @@ const Template: ComponentStory<typeof Select> = (args) => {
     return (
         <>
             <Select
+                {...other}
                 setProps={(prop) => setSelected(prop.value)}
                 debounce_time_ms={debounce_time_ms}
-                {...other}
             />
             <div>{`Debounce time: ${debounce_time_ms?.toString()} ms`}</div>
             <div>{`Selected values: ${selected.toString()}`}</div>
