@@ -169,192 +169,109 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         };
     }, [dialogRef.current, initialDialogWidth]);
 
-    // TEST DRAG WITHOUT NESTED EventListeners
-    // React.useEffect(() => {
-    //     console.log("Use effect called!");
-    //     let mouseDownPosition: Point = { x: 0, y: 0 };
-    //     let isMouseDown: boolean = false;
-    //     let moveStarted: boolean = false;
-
-    //     const handleMouseDown = (e: MouseEvent) => {
-    //         handleStartDrag(e.clientX, e.clientY);
-    //     };
-
-    //     const handleStartDrag = (clientX: number, clientY: number) => {
-    //         console.log("Start drag");
-    //         mouseDownPosition.x = clientX;
-    //         mouseDownPosition.y = clientY;
-    //         isMouseDown = true;
-    //         moveStarted = false;
-    //     };
-
-    //     const handleMouseUpAndTouchEnd = (e: MouseEvent | TouchEvent) => {
-    //         console.log("Mouse Up");
-    //         if (moveStarted === true) {
-    //             e.stopPropagation();
-    //         }
-    //         isMouseDown = false;
-    //         moveStarted = false;
-    //     };
-
-    //     const handleMouseMove = (e: MouseEvent) => {
-    //         handleDragMove(e.clientX, e.clientY);
-    //     };
-
-    //     const handleDragMove = (clientX: number, clientY: number) => {
-    //         console.log(`Drag Move1 with mouse down: ${isMouseDown}`);
-    //         if (dialogRef.current && isMouseDown) {
-    //             console.log("Drag Move2");
-    //             const currentMousePosition = { x: clientX, y: clientY };
-    //             const delta = pointDifference(
-    //                 currentMousePosition,
-    //                 mouseDownPosition
-    //             );
-
-    //             if (!moveStarted) {
-    //                 if (vectorLength(delta) > MANHATTAN_LENGTH) {
-    //                     moveStarted = true;
-    //                 }
-    //             } else {
-    //                 const _dialogPosition: Point = {
-    //                     x: dialogRef.current.getBoundingClientRect().left,
-    //                     y: dialogRef.current.getBoundingClientRect().top,
-    //                 };
-    //                 setDialogPosition(pointSum(delta, _dialogPosition));
-
-    //                 if (!dialogRef.current) {
-    //                     return;
-    //                 }
-    //                 const dialogRectangle: Rectangle = {
-    //                     topLeft: {
-    //                         x: dialogRef.current.getBoundingClientRect().left,
-    //                         y: dialogRef.current.getBoundingClientRect().top,
-    //                     },
-    //                     size: {
-    //                         width: dialogRef.current.getBoundingClientRect()
-    //                             .width,
-    //                         height: dialogRef.current.getBoundingClientRect()
-    //                             .height,
-    //                     },
-    //                 };
-    //                 const windowRectangle: Rectangle = {
-    //                     topLeft: { x: 0, y: 0 },
-    //                     size: {
-    //                         width: window.innerWidth,
-    //                         height: window.innerHeight,
-    //                     },
-    //                 };
-    //                 setIsMovedOutsideWindow(
-    //                     !isRectangleContained(dialogRectangle, windowRectangle)
-    //                 );
-    //             }
-    //             mouseDownPosition = currentMousePosition;
-    //         }
-    //     };
-
-    //     // const handleBlur = () => {
-    //     //     moveStarted = false;
-    //     // };
-    //     // window.addEventListener("blur", handleBlur);
-
-    //     if (dialogRef.current && dialogTitleRef.current) {
-    //         document.addEventListener("mousemove", handleMouseMove);
-    //         document.addEventListener("mouseup", handleMouseUpAndTouchEnd);
-    //         dialogTitleRef.current.addEventListener(
-    //             "mousedown",
-    //             handleMouseDown
-    //         );
-    //     }
-
-    //     return () => {
-    //         if (dialogTitleRef.current) {
-    //             dialogTitleRef.current.removeEventListener(
-    //                 "mousedown",
-    //                 handleMouseDown
-    //             );
-    //         }
-    //         // window.removeEventListener("blur", handleBlur);
-    //         document.removeEventListener("mousemove", handleMouseMove);
-    //         document.removeEventListener(
-    //             "mouseup",
-    //             handleMouseUpAndTouchEnd,
-    //             true
-    //         );
-    //     };
-    // }, [dialogRef.current, dialogTitleRef.current]);
-
     React.useEffect(() => {
-        if (!dialogRef.current || !dialogTitleRef.current) {
-            return;
-        }
-
-        let mouseDownPosition: Point = { x: 0, y: 0 };
+        let prevMousePosition: Point = { x: 0, y: 0 };
+        let isMouseDown: boolean = false;
         let moveStarted: boolean = false;
 
         const handleMouseDown = (e: MouseEvent) => {
-            mouseDownPosition.x = e.clientX;
-            mouseDownPosition.y = e.clientY;
-
-            const handleMouseMove = (e: MouseEvent) => {
-                const currentMousePosition = { x: e.clientX, y: e.clientY };
-                const delta = pointDifference(
-                    currentMousePosition,
-                    mouseDownPosition
-                );
-
-                if (!moveStarted) {
-                    if (vectorLength(delta) > MANHATTAN_LENGTH) {
-                        moveStarted = true;
-                    }
-                } else {
-                    setDialogPosition(pointSum(delta, dialogPosition));
-
-                    if (!dialogRef.current) {
-                        return;
-                    }
-                    const dialogRectangle: Rectangle = {
-                        topLeft: {
-                            x: dialogRef.current?.getBoundingClientRect().left,
-                            y: dialogRef.current?.getBoundingClientRect().top,
-                        },
-                        size: {
-                            width: dialogRef.current.getBoundingClientRect()
-                                .width,
-                            height: dialogRef.current.getBoundingClientRect()
-                                .height,
-                        },
-                    };
-                    const windowRectangle: Rectangle = {
-                        topLeft: { x: 0, y: 0 },
-                        size: {
-                            width: window.innerWidth,
-                            height: window.innerHeight,
-                        },
-                    };
-                    setIsMovedOutsideWindow(
-                        !isRectangleContained(dialogRectangle, windowRectangle)
-                    );
-                }
-            };
-            const handleMouseUp = (e: MouseEvent) => {
-                document.removeEventListener("mousemove", handleMouseMove);
-                document.removeEventListener("mouseup", handleMouseUp, true);
-                if (moveStarted === true) {
-                    e.stopPropagation();
-                }
-                moveStarted = false;
-            };
-
-            document.addEventListener("mousemove", handleMouseMove);
-            document.addEventListener("mouseup", handleMouseUp);
+            handleStartDrag(e.clientX, e.clientY);
         };
 
-        const handleBlur = () => {
+        const handleTouchStart = (e: TouchEvent) => {
+            handleStartDrag(e.touches[0].clientX, e.touches[0].clientY);
+        };
+
+        const handleStartDrag = (clientX: number, clientY: number) => {
+            prevMousePosition.x = clientX;
+            prevMousePosition.y = clientY;
+            isMouseDown = true;
             moveStarted = false;
         };
 
-        window.addEventListener("blur", handleBlur);
-        dialogTitleRef.current.addEventListener("mousedown", handleMouseDown);
+        const handleMouseUpAndTouchEnd = (e: MouseEvent | TouchEvent) => {
+            if (moveStarted === true) {
+                e.stopPropagation();
+            }
+            isMouseDown = false;
+            moveStarted = false;
+        };
+
+        const handleMouseMove = (e: MouseEvent) => {
+            handleDragMove(e.clientX, e.clientY);
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+        };
+
+        const handleDragMove = (clientX: number, clientY: number) => {
+            if (!dialogRef.current || !isMouseDown) {
+                return;
+            }
+
+            const currentMousePosition = { x: clientX, y: clientY };
+            const delta = pointDifference(
+                currentMousePosition,
+                prevMousePosition
+            );
+
+            if (!moveStarted) {
+                if (vectorLength(delta) > MANHATTAN_LENGTH) {
+                    moveStarted = true;
+                }
+            } else {
+                setDialogPosition((prev) => pointSum(delta, prev));
+
+                if (!dialogRef.current) {
+                    return;
+                }
+                const dialogRectangle: Rectangle = {
+                    topLeft: {
+                        x: dialogRef.current.getBoundingClientRect().left,
+                        y: dialogRef.current.getBoundingClientRect().top,
+                    },
+                    size: {
+                        width: dialogRef.current.getBoundingClientRect().width,
+                        height: dialogRef.current.getBoundingClientRect()
+                            .height,
+                    },
+                };
+                const windowRectangle: Rectangle = {
+                    topLeft: { x: 0, y: 0 },
+                    size: {
+                        width: window.innerWidth,
+                        height: window.innerHeight,
+                    },
+                };
+                setIsMovedOutsideWindow(
+                    !isRectangleContained(dialogRectangle, windowRectangle)
+                );
+                prevMousePosition = currentMousePosition;
+            }
+        };
+
+        // const handleBlur = () => {
+        //     moveStarted = false;
+        // };
+        // window.addEventListener("blur", handleBlur);
+
+        if (dialogTitleRef.current) {
+            dialogTitleRef.current.addEventListener(
+                "mousedown",
+                handleMouseDown
+            );
+            dialogTitleRef.current.addEventListener(
+                "touchstart",
+                handleTouchStart
+            );
+        }
+
+        document.addEventListener("mouseup", handleMouseUpAndTouchEnd);
+        document.addEventListener("mousemove", handleMouseMove);
+
+        document.addEventListener("touchend", handleMouseUpAndTouchEnd);
+        document.addEventListener("touchmove", handleTouchMove);
 
         return () => {
             if (dialogTitleRef.current) {
@@ -363,14 +280,15 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     handleMouseDown
                 );
             }
-            window.removeEventListener("blur", handleBlur);
+            // window.removeEventListener("blur", handleBlur);
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener(
+                "mouseup",
+                handleMouseUpAndTouchEnd,
+                true
+            );
         };
-    }, [
-        dialogRef.current,
-        dialogTitleRef.current,
-        dialogPosition,
-        setDialogPosition,
-    ]);
+    }, [dialogRef.current, dialogTitleRef.current]);
 
     React.useEffect(() => {
         if (!dialogRef.current) {
@@ -446,6 +364,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                                 .height,
                         },
                     };
+
                     const windowRectangle: Rectangle = {
                         topLeft: { x: 0, y: 0 },
                         size: {
