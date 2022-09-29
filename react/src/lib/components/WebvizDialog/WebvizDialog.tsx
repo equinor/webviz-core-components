@@ -8,35 +8,20 @@ import { WebvizDialogTitle } from "./components/WebvizDialogTitle/WebvizDialogTi
 import "./webviz-dialog.css";
 
 import { Point } from "../../shared-types/point";
-import { Size } from "../../shared-types/size";
 import {
     MANHATTAN_LENGTH,
     ORIGIN,
     pointDifference,
     pointSum,
     vectorLength,
+    isDOMRectContained,
 } from "../../utils/geometry";
 import { Backdrop } from "../Backdrop";
-
-type Rectangle = {
-    topLeft: Point;
-    size: Size;
-};
 
 enum DialogCloseReason {
     ButtonClick,
     BackdropClick,
 }
-
-const isRectangleContained = (inner: Rectangle, outer: Rectangle): boolean => {
-    return (
-        inner.topLeft.x >= outer.topLeft.x &&
-        inner.topLeft.y >= outer.topLeft.y &&
-        inner.topLeft.y + inner.size.height <=
-            outer.topLeft.y + outer.size.height &&
-        inner.topLeft.x + inner.size.width <= outer.topLeft.x + outer.size.width
-    );
-};
 
 export type WebvizDialogParentProps = {
     /**
@@ -124,16 +109,19 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     const handleSetActive = React.useCallback(() => {
         let activeDialogs = Array.from(
-            document.getElementsByClassName("WebvizDialogActive")
+            document.getElementsByClassName("WebvizDialog--active")
         );
         for (let elm of activeDialogs) {
             if (elm.id !== props.id) {
-                elm.className = "WebvizDialogInactive";
+                elm.classList.remove("WebvizDialog--active");
             }
         }
 
-        if (dialogRef.current?.className === "WebvizDialogInactive") {
-            dialogRef.current.className = "WebvizDialogActive";
+        if (
+            dialogRef.current &&
+            !dialogRef.current?.classList.contains("WebvizDialog--active")
+        ) {
+            dialogRef.current.classList.add("WebvizDialog--active");
         }
     }, [document, dialogRef.current]);
 
@@ -226,35 +214,21 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 if (!dialogRef.current) {
                     return;
                 }
-                const dialogRectangle: Rectangle = {
-                    topLeft: {
-                        x: dialogRef.current.getBoundingClientRect().left,
-                        y: dialogRef.current.getBoundingClientRect().top,
-                    },
-                    size: {
-                        width: dialogRef.current.getBoundingClientRect().width,
-                        height: dialogRef.current.getBoundingClientRect()
-                            .height,
-                    },
-                };
-                const windowRectangle: Rectangle = {
-                    topLeft: { x: 0, y: 0 },
-                    size: {
-                        width: window.innerWidth,
-                        height: window.innerHeight,
-                    },
-                };
+
                 setIsMovedOutsideWindow(
-                    !isRectangleContained(dialogRectangle, windowRectangle)
+                    !isDOMRectContained(
+                        dialogRef.current.getBoundingClientRect(),
+                        new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+                    )
                 );
                 prevMousePosition = currentMousePosition;
             }
         };
 
-        // const handleBlur = () => {
-        //     moveStarted = false;
-        // };
-        // window.addEventListener("blur", handleBlur);
+        const handleBlur = () => {
+            moveStarted = false;
+            isMouseDown = false;
+        };
 
         if (dialogTitleRef.current) {
             dialogTitleRef.current.addEventListener(
@@ -269,9 +243,9 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
         document.addEventListener("mouseup", handleMouseUpAndTouchEnd);
         document.addEventListener("mousemove", handleMouseMove);
-
         document.addEventListener("touchend", handleMouseUpAndTouchEnd);
         document.addEventListener("touchmove", handleTouchMove);
+        window.addEventListener("blur", handleBlur);
 
         return () => {
             if (dialogTitleRef.current) {
@@ -280,10 +254,17 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     handleMouseDown
                 );
             }
-            // window.removeEventListener("blur", handleBlur);
+
+            window.removeEventListener("blur", handleBlur);
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener(
                 "mouseup",
+                handleMouseUpAndTouchEnd,
+                true
+            );
+            document.removeEventListener("touchmove", handleTouchMove);
+            document.removeEventListener(
+                "touchend",
                 handleMouseUpAndTouchEnd,
                 true
             );
@@ -350,30 +331,16 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         });
                     }
 
-                    // Update state
-                    const dialogRectangle: Rectangle = {
-                        topLeft: {
-                            x: dialogLeft,
-                            y: dialogRef.current.getBoundingClientRect().top,
-                        },
-                        size: {
-                            width:
-                                dialogRef.current.getBoundingClientRect()
-                                    .width + paddingRight,
-                            height: dialogRef.current.getBoundingClientRect()
-                                .height,
-                        },
-                    };
-
-                    const windowRectangle: Rectangle = {
-                        topLeft: { x: 0, y: 0 },
-                        size: {
-                            width: window.innerWidth,
-                            height: window.innerHeight,
-                        },
-                    };
                     setIsMovedOutsideWindow(
-                        !isRectangleContained(dialogRectangle, windowRectangle)
+                        !isDOMRectContained(
+                            dialogRef.current.getBoundingClientRect(),
+                            new DOMRect(
+                                0,
+                                0,
+                                window.innerWidth,
+                                window.innerHeight
+                            )
+                        )
                     );
                 }
 
@@ -448,8 +415,8 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                   <div
                       className={
                           props.modal
-                              ? "WebvizDialogModal"
-                              : "WebvizDialogActive"
+                              ? "WebvizDialog WebvizDialog--modal"
+                              : "WebvizDialog WebvizDialog--active"
                       }
                       id={props.id}
                       ref={dialogRef}
