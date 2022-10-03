@@ -92,17 +92,14 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     React.useEffect(() => {
         let node: HTMLDivElement | null = null;
-        if (
-            Array.from(document.getElementsByClassName("WebvizDialog__root"))
-                .length === 0
-        ) {
+        if (!document.getElementById("WebvizDialog__root")) {
             node = document.createElement("div");
-            node.classList.add("WebvizDialog__root");
+            node.setAttribute("id", "WebvizDialog__root");
             document.body.appendChild(node);
         } else {
-            node = document.getElementsByClassName(
+            node = document.getElementById(
                 "WebvizDialog__root"
-            )[0] as HTMLDivElement;
+            ) as HTMLDivElement;
         }
 
         placeholderRef.current = document.createElement("div");
@@ -114,17 +111,18 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     placeholderRef.current
                 );
             }
-            const nodes = document.getElementsByClassName("WebvizDialog__root");
-            Array.from(nodes).forEach((elm) => {
-                const dialogNodes = elm.getElementsByClassName("WebvizDialog");
+            const dialogRoot = document.getElementById("WebvizDialog__root");
+            if (dialogRoot) {
+                const dialogNodes =
+                    dialogRoot.getElementsByClassName("WebvizDialog");
                 if (
                     (dialogNodes.length == 1 &&
                         dialogNodes[0] === dialogRef.current) ||
                     dialogNodes.length === 0
                 ) {
-                    document.body.removeChild(elm);
+                    document.body.removeChild(dialogRoot);
                 }
-            });
+            }
         };
     }, []);
 
