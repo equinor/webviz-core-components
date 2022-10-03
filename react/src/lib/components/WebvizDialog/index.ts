@@ -1,1 +1,2 @@
-export { WebvizDialog, WebvizDialogProps } from "./WebvizDialog";
+export { WebvizDialogProps } from "./WebvizDialog";
+export { WebvizDialog } from "./WebvizDialog";

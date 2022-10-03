@@ -45,6 +45,8 @@ export const WebvizDialogTitle = React.forwardRef<
     );
 });
 
+WebvizDialogTitle.displayName = "WebvizDialogTitle";
+
 WebvizDialogTitle.propTypes = {
     children: PropTypes.node,
     onClose: PropTypes.func,

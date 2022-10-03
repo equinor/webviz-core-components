@@ -88,18 +88,32 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     const dialogRef = React.useRef<HTMLDivElement>(null);
     const dialogTitleRef = React.useRef<HTMLDivElement>(null);
+    const placeholderRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
+        let node: HTMLDivElement | null = null;
         if (
             Array.from(document.getElementsByClassName("WebvizDialog__root"))
                 .length === 0
         ) {
-            const node = document.createElement("div");
+            node = document.createElement("div");
             node.classList.add("WebvizDialog__root");
             document.body.appendChild(node);
+        } else {
+            node = document.getElementsByClassName(
+                "WebvizDialog__root"
+            )[0] as HTMLDivElement;
         }
 
+        placeholderRef.current = document.createElement("div");
+        node.appendChild(placeholderRef.current);
+
         return () => {
+            if (placeholderRef.current) {
+                placeholderRef.current.parentElement?.removeChild(
+                    placeholderRef.current
+                );
+            }
             const nodes = document.getElementsByClassName("WebvizDialog__root");
             Array.from(nodes).forEach((elm) => {
                 const dialogNodes = elm.getElementsByClassName("WebvizDialog");
@@ -134,10 +148,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     }, [dialogPosition]);
 
     const handleSetActive = React.useCallback(() => {
-        let activeDialogs = Array.from(
+        const activeDialogs = Array.from(
             document.getElementsByClassName("WebvizDialog--active")
         );
-        for (let elm of activeDialogs) {
+        for (const elm of activeDialogs) {
             if (elm.id !== props.id) {
                 elm.classList.remove("WebvizDialog--active");
             }
@@ -186,8 +200,8 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     React.useLayoutEffect(() => {
         let prevMousePosition: Point = { x: 0, y: 0 };
-        let isMouseDown: boolean = false;
-        let moveStarted: boolean = false;
+        let isMouseDown = false;
+        let moveStarted = false;
 
         const handleMouseDown = (e: MouseEvent) => {
             handleStartDrag(e.clientX, e.clientY);
@@ -205,7 +219,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         };
 
         const handleMouseUpAndTouchEnd = (e: MouseEvent | TouchEvent) => {
-            if (moveStarted === true) {
+            if (moveStarted) {
                 e.stopPropagation();
             }
             isMouseDown = false;
@@ -414,65 +428,69 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         setActionsCalled(actionsCalled + 1);
     };
 
-    return document.getElementsByClassName("WebvizDialog__root").length > 0
-        ? ReactDOM.createPortal(
-              <div style={{ display: open ? "block" : "none" }}>
-                  {props.modal && (
-                      <Backdrop
-                          opacity={0.7}
-                          onClick={() =>
-                              handleClose(DialogCloseReason.BACKDROP_CLICK)
-                          }
-                      ></Backdrop>
-                  )}
-                  <div
-                      className={
-                          props.modal
-                              ? "WebvizDialog WebvizDialog--modal"
-                              : "WebvizDialog WebvizDialog--active"
-                      }
-                      id={props.id}
-                      ref={dialogRef}
-                      style={{
-                          left: Math.floor(dialogPosition.x),
-                          top: Math.floor(dialogPosition.y),
-                          width: dialogWidth,
-                          minWidth: props.min_width,
-                      }}
-                      onMouseDown={() => handleSetActive()}
-                  >
-                      <WebvizDialogTitle
-                          onClose={() =>
-                              handleClose(DialogCloseReason.BUTTON_CLICK)
-                          }
-                          ref={dialogTitleRef}
-                      >
-                          {props.title}
-                      </WebvizDialogTitle>
-                      <div className="WebvizDialogContent">
-                          {props.children}
-                      </div>
-                      <div className="WebvizDialogActions">
-                          {props.actions &&
-                              props.actions.map((action) => (
-                                  <Button
-                                      key={action}
-                                      component="button"
-                                      onClick={() =>
-                                          handleActionButtonClick(
-                                              action as string
-                                          )
-                                      }
-                                  >
-                                      {action}
-                                  </Button>
-                              ))}
-                      </div>
-                  </div>
-              </div>,
-              document.getElementsByClassName("WebvizDialog__root")[0]
-          )
-        : null;
+    React.useEffect(() => {
+        if (placeholderRef.current) {
+            ReactDOM.render(
+                <div style={{ display: open ? "block" : "none" }}>
+                    {props.modal && (
+                        <Backdrop
+                            opacity={0.7}
+                            onClick={() =>
+                                handleClose(DialogCloseReason.BACKDROP_CLICK)
+                            }
+                        ></Backdrop>
+                    )}
+                    <div
+                        className={
+                            props.modal
+                                ? "WebvizDialog WebvizDialog--modal"
+                                : "WebvizDialog WebvizDialog--active"
+                        }
+                        id={props.id}
+                        ref={dialogRef}
+                        style={{
+                            left: Math.floor(dialogPosition.x),
+                            top: Math.floor(dialogPosition.y),
+                            width: dialogWidth,
+                            minWidth: props.min_width,
+                        }}
+                        onMouseDown={() => handleSetActive()}
+                    >
+                        <WebvizDialogTitle
+                            onClose={() =>
+                                handleClose(DialogCloseReason.BUTTON_CLICK)
+                            }
+                            ref={dialogTitleRef}
+                        >
+                            {props.title}
+                        </WebvizDialogTitle>
+                        <div className="WebvizDialogContent">
+                            {props.children}
+                        </div>
+                        <div className="WebvizDialogActions">
+                            {props.actions &&
+                                props.actions.map((action) => (
+                                    <Button
+                                        key={action}
+                                        component="button"
+                                        onClick={() =>
+                                            handleActionButtonClick(
+                                                action as string
+                                            )
+                                        }
+                                    >
+                                        {action}
+                                    </Button>
+                                ))}
+                        </div>
+                    </div>
+                </div>,
+                placeholderRef.current
+            );
+        }
+    });
+
+    return <></>;
 };
 
 WebvizDialog.propTypes = {

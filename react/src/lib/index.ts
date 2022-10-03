@@ -29,12 +29,12 @@ import { WebvizView } from "./components/WebvizView";
 import { WebvizViewElement } from "./components/WebvizViewElement";
 import { ViewVisibilityContainer } from "./components/ViewVisibilityContainer";
 import { WebvizSettingsGroup } from "./components/WebvizSettingsGroup";
-import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn/WebvizPluginLayoutColumn";
-import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow/WebvizPluginLayoutRow";
+import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn";
+import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow";
 import { WebvizPluginLoadingIndicator } from "./components/WebvizPluginLoadingIndicator";
 import { EdsIcon } from "./components/EdsIcon";
 
-import { WebvizDialog } from "./components/WebvizDialog/WebvizDialog";
+import { WebvizDialog } from "./components/WebvizDialog";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
