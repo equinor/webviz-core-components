@@ -19,8 +19,8 @@ import {
 import { Backdrop } from "../Backdrop";
 
 enum DialogCloseReason {
-    ButtonClick,
-    BackdropClick,
+    BUTTON_CLICK,
+    BACKDROP_CLICK,
 }
 
 export type WebvizDialogParentProps = {
@@ -153,7 +153,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     const handleClose = React.useCallback(
         (reason: DialogCloseReason) => {
-            if (reason == DialogCloseReason.BackdropClick && !props.modal) {
+            if (reason == DialogCloseReason.BACKDROP_CLICK && !props.modal) {
                 return;
             }
             setOpen(false);
@@ -421,7 +421,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                       <Backdrop
                           opacity={0.7}
                           onClick={() =>
-                              handleClose(DialogCloseReason.BackdropClick)
+                              handleClose(DialogCloseReason.BACKDROP_CLICK)
                           }
                       ></Backdrop>
                   )}
@@ -443,7 +443,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                   >
                       <WebvizDialogTitle
                           onClose={() =>
-                              handleClose(DialogCloseReason.ButtonClick)
+                              handleClose(DialogCloseReason.BUTTON_CLICK)
                           }
                           ref={dialogTitleRef}
                       >
