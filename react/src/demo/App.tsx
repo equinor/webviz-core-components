@@ -125,7 +125,7 @@ const App: React.FC = () => {
                         </div>
                     </WebvizDialog>
                     <WebvizDialog
-                        title="Webviz Dialog 2 Title"
+                        title="Webviz Dialog 2 Title is very long to check how title wrap works"
                         id="webviz-dialog-2"
                         open={webvizDialog2Open}
                         setProps={(newProps) => {

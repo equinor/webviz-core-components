@@ -32,11 +32,11 @@ export const WebvizDialogTitle = React.forwardRef<
                 <IconButton
                     aria-label="close"
                     onClick={() => handleCloseClick()}
-                    style={{
-                        position: "absolute",
-                        right: 8,
-                        // color: "#ccc",
-                    }}
+                    style={
+                        {
+                            // color: "#ccc",
+                        }
+                    }
                 >
                     <Icon name="close" />
                 </IconButton>

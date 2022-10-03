@@ -10,3 +10,8 @@
     user-select: none; /* Standard syntax */
     overflow: hidden;
 }
+
+.WebvizDialogTitle > div {
+    flex-grow: 4;
+    margin-right: 8px;
+}
