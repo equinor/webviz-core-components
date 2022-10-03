@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+## [0.6.0] - 2022-10-03
+
 ### Fixed
 
 -   [#220](https://github.com/equinor/webviz-core-components/pull/220) - `Overlay` was hiding menu due to conflicting z-index properties. Added `zIndex` prop to `Overlay` component and adjusted consumers.
