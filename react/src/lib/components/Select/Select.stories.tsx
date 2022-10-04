@@ -40,8 +40,9 @@ const Template: ComponentStory<typeof Select> = (args) => {
 export const Basic = Template.bind({});
 Basic.args = {
     id: Select.defaultProps?.id || "select-component",
-    size: Select.defaultProps?.size || 5,
+    size: 6,
     options: [
+        { label: 0, value: 0 },
         { label: 1, value: 1 },
         { label: 2, value: 2 },
         { label: 3, value: 3 },
