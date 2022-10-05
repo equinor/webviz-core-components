@@ -78,11 +78,15 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const [open, setOpen] = React.useState<boolean>(props.open || false);
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
     const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
+
+    const [runOpenDialogResizeEffect, setRunOpenDialogResizeEffect] =
+        React.useState<boolean>(false);
     const [isMovedOutsideWindow, setIsMovedOutsideWindow] =
         React.useState<boolean>(false);
-    const [isMovedOutsideWindowPadding, setIsMovedOutsideWindowPadding] =
-        React.useState<boolean>(false);
 
+    const [minDialogWidth, setMinDialogWidth] = React.useState<number>(
+        props.min_width || 0
+    );
     const [dialogWidth, setDialogWidth] =
         React.useState<number | undefined>(undefined);
     const [initialDialogWidth, setInitialDialogWidth] =
@@ -94,6 +98,24 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     const paddingLeft = 16;
     const paddingRight = 16;
+
+    const handleSetActive = React.useCallback(() => {
+        const activeDialogs = Array.from(
+            document.getElementsByClassName("WebvizDialog--active")
+        );
+        for (const elm of activeDialogs) {
+            if (elm.id !== props.id) {
+                elm.classList.remove("WebvizDialog--active");
+            }
+        }
+
+        if (
+            dialogRef.current &&
+            !dialogRef.current?.classList.contains("WebvizDialog--active")
+        ) {
+            dialogRef.current.classList.add("WebvizDialog--active");
+        }
+    }, [document, dialogRef.current]);
 
     React.useEffect(() => {
         let node: HTMLDivElement | null = null;
@@ -132,46 +154,17 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     }, []);
 
     React.useEffect(() => {
+        setMinDialogWidth(props.min_width || 0);
+    }, [props.min_width]);
+
+    React.useEffect(() => {
         setOpen(props.open || false);
 
         if (props.open && dialogRef.current) {
             handleSetActive();
+            setRunOpenDialogResizeEffect(true);
         }
     }, [props.open, dialogRef.current]);
-
-    React.useEffect(() => {
-        if (dialogRef.current) {
-            const innerX = dialogRef.current.getBoundingClientRect().x;
-            const innerWidth = dialogRef.current.getBoundingClientRect().width;
-            const outerX = paddingLeft;
-            const outerWidth = window.innerWidth - paddingLeft - paddingRight;
-            setIsMovedOutsideWindowPadding(
-                innerX < outerX || innerX + innerWidth > outerX + outerWidth
-            );
-
-            setIsMovedOutsideWindow(
-                innerX < 0 || innerX + innerWidth > window.innerWidth
-            );
-        }
-    }, [dialogPosition]);
-
-    const handleSetActive = React.useCallback(() => {
-        const activeDialogs = Array.from(
-            document.getElementsByClassName("WebvizDialog--active")
-        );
-        for (const elm of activeDialogs) {
-            if (elm.id !== props.id) {
-                elm.classList.remove("WebvizDialog--active");
-            }
-        }
-
-        if (
-            dialogRef.current &&
-            !dialogRef.current?.classList.contains("WebvizDialog--active")
-        ) {
-            dialogRef.current.classList.add("WebvizDialog--active");
-        }
-    }, [document, dialogRef.current]);
 
     const handleClose = React.useCallback(
         (reason: DialogCloseReason) => {
@@ -187,13 +180,31 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     React.useEffect(() => {
         const handleResize = () => {
-            if (!dialogRef.current || initialDialogWidth !== null) {
-                return;
+            if (dialogRef.current && runOpenDialogResizeEffect) {
+                const left = dialogRef.current.getBoundingClientRect().left;
+                if (initialDialogWidth === null) {
+                    const width =
+                        dialogRef.current.getBoundingClientRect().width;
+                    setInitialDialogWidth(width);
+                    setDialogWidth(width);
+                    setIsMovedOutsideWindow(
+                        left < 0 || left + width > window.innerWidth
+                    );
+                } else {
+                    const newDialogWidth = Math.max(
+                        minDialogWidth,
+                        Math.min(
+                            initialDialogWidth,
+                            window.innerWidth - left - paddingRight
+                        )
+                    );
+                    setDialogWidth(newDialogWidth);
+                    setIsMovedOutsideWindow(
+                        left < 0 || left + newDialogWidth > window.innerWidth
+                    );
+                }
+                setRunOpenDialogResizeEffect(false);
             }
-
-            const width = dialogRef.current.getBoundingClientRect().width;
-            setInitialDialogWidth(width);
-            setDialogWidth(width);
         };
 
         const resizeObserver = new ResizeObserver(handleResize);
@@ -204,7 +215,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         return () => {
             resizeObserver.disconnect();
         };
-    }, [dialogRef.current, initialDialogWidth]);
+    }, [dialogRef.current, initialDialogWidth, runOpenDialogResizeEffect]);
 
     React.useLayoutEffect(() => {
         let prevMousePosition: Point = { x: 0, y: 0 };
@@ -262,6 +273,13 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 }
             } else {
                 setDialogPosition((prev) => pointSum(delta, prev));
+
+                const width = dialogRef.current.getBoundingClientRect().width;
+                const left = dialogRef.current.getBoundingClientRect().left;
+                setIsMovedOutsideWindow(
+                    left < 0 || left + width > window.innerWidth
+                );
+
                 prevMousePosition = currentMousePosition;
             }
         };
@@ -320,7 +338,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         let previousWindowWidth = window.innerWidth;
 
         const handleWindowResize = () => {
-            if (!dialogRef.current || initialDialogWidth === null) {
+            if (!open || !dialogRef.current || initialDialogWidth === null) {
                 return;
             }
 
@@ -329,9 +347,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             const windowWidth = window.innerWidth;
             const deltaWidth = windowWidth - previousWindowWidth;
 
-            const minDialogWidth = props.min_width || 0;
-
-            // When dialog is outside window with padding
             if (isMovedOutsideWindow) {
                 if (dialogLeft < 0) {
                     if (
@@ -357,169 +372,52 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     }
                 } else if (dialogLeft > 0) {
                     if (deltaWidth < 0) {
-                        setDialogPosition({
-                            x: Math.max(paddingLeft, dialogLeft + deltaWidth),
-                            y: dialogPosition.y,
+                        setDialogPosition((prev) => {
+                            return {
+                                x: Math.max(
+                                    paddingLeft,
+                                    dialogLeft + deltaWidth
+                                ),
+                                y: prev.y,
+                            };
                         });
                     }
-
-                    const innerX = dialogRef.current.getBoundingClientRect().x;
-                    const innerWidth =
-                        dialogRef.current.getBoundingClientRect().width;
-                    setIsMovedOutsideWindow(
-                        innerX < 0 || innerX + innerWidth > window.innerWidth
-                    );
                 }
+                setIsMovedOutsideWindow(
+                    dialogLeft < 0 ||
+                        dialogLeft + dialogWidth > window.innerWidth
+                );
                 previousWindowWidth = windowWidth;
                 return;
             }
-            // const outerPaddedWidth =
-            //     window.innerWidth - paddingLeft - paddingRight;
-            // const isMovedOutsidePadding =
-            //     dialogLeft < paddingLeft ||
-            //     dialogLeft + dialogWidth > outerPaddedWidth;
 
-            // if (isMovedOutsidePadding) {
-            //     if (dialogLeft <= paddingLeft) {
-            //         if (
-            //             deltaWidth < 0 &&
-            //             windowWidth < dialogLeft + dialogWidth + paddingRight
-            //         ) {
-            //             // Decrease dialog width when window width decrease
-            //             const newDialogWidth = Math.min(
-            //                 Math.max(minDialogWidth, dialogWidth + deltaWidth),
-            //                 initialDialogWidth
-            //             );
-            //             setDialogWidth(newDialogWidth);
-            //         } else if (
-            //             deltaWidth > 0 &&
-            //             dialogWidth < initialDialogWidth &&
-            //             windowWidth > dialogLeft + dialogWidth + paddingRight
-            //         ) {
-            //             // Increase dialog width when window width increase
-            //             const newDialogWidth = Math.min(
-            //                 Math.max(minDialogWidth, dialogWidth + deltaWidth),
-            //                 initialDialogWidth
-            //             );
-            //             setDialogWidth(newDialogWidth);
-            //         } else if (deltaWidth > 0) {
-            //             setDialogPosition({
-            //                 x: dialogLeft + deltaWidth,
-            //                 y: dialogPosition.y,
-            //             });
-            //         }
-            //     } else if (dialogLeft > paddingLeft) {
-            //         if (deltaWidth < 0) {
-            //             setDialogPosition({
-            //                 x: Math.max(paddingLeft, dialogLeft + deltaWidth),
-            //                 y: dialogPosition.y,
-            //             });
-            //             previousWindowWidth = windowWidth;
-            //             return;
-            //         }
-            //         const innerX = dialogRef.current.getBoundingClientRect().x;
-            //         const innerWidth =
-            //             dialogRef.current.getBoundingClientRect().width;
-            //         const outerX = paddingLeft;
-            //         const outerWidth =
-            //             window.innerWidth - paddingLeft - paddingRight;
-            //         setIsMovedOutsideWindowPadding(
-            //             innerX < outerX ||
-            //                 innerX + innerWidth > outerX + outerWidth
-            //         );
-            //     }
-            //     previousWindowWidth = windowWidth;
-            //     return;
-            // }
-
-            // if (isMovedOutsideWindowPadding) {
-            //     if (dialogLeft <= paddingLeft) {
-            //         const previousDialogRight =
-            //             previousWindowWidth - dialogLeft - dialogWidth;
-            //         if (
-            //             deltaWidth < 0 &&
-            //             previousDialogRight >= 0 &&
-            //             windowWidth < dialogLeft + dialogWidth + paddingRight
-            //         ) {
-            //             // Decrease dialog width when window width decrease
-            //             const newDialogWidth = Math.min(
-            //                 Math.max(minDialogWidth, dialogWidth + deltaWidth),
-            //                 initialDialogWidth
-            //             );
-            //             setDialogWidth(newDialogWidth);
-            //         } else if (
-            //             deltaWidth > 0 &&
-            //             dialogWidth < initialDialogWidth &&
-            //             windowWidth > dialogLeft + dialogWidth + paddingRight
-            //         ) {
-            //             // Increase dialog width when window width increase
-            //             const newDialogWidth = Math.min(
-            //                 Math.max(minDialogWidth, dialogWidth + deltaWidth),
-            //                 initialDialogWidth
-            //             );
-            //             setDialogWidth(newDialogWidth);
-            //         } else if (deltaWidth > 0 && dialogLeft >= 0) {
-            //             setDialogPosition({
-            //                 x: dialogLeft + deltaWidth,
-            //                 y: dialogPosition.y,
-            //             });
-            //         }
-            //     } else if (dialogLeft > paddingLeft) {
-            //         if (deltaWidth < 0) {
-            //             setDialogPosition({
-            //                 x: Math.max(paddingLeft, dialogLeft + deltaWidth),
-            //                 y: dialogPosition.y,
-            //             });
-            //             previousWindowWidth = windowWidth;
-            //             return;
-            //         }
-            //         const innerX = dialogRef.current.getBoundingClientRect().x;
-            //         const innerWidth =
-            //             dialogRef.current.getBoundingClientRect().width;
-            //         const outerX = paddingLeft;
-            //         const outerWidth =
-            //             window.innerWidth - paddingLeft - paddingRight;
-            //         setIsMovedOutsideWindowPadding(
-            //             innerX < outerX ||
-            //                 innerX + innerWidth > outerX + outerWidth
-            //         );
-            //     }
-            //     previousWindowWidth = windowWidth;
-            //     return;
-            // }
-
-            // const actualDeltaWidth = isMovedOutsidePadding
-            //     ? deltaWidth
-            //     : deltaWidth / 2;
-
-            const actualPaddingLeft =
-                dialogLeft < paddingLeft ? dialogLeft : paddingLeft;
-
-            // When within padding
             if (deltaWidth < 0) {
+                const actualPaddingLeft =
+                    dialogLeft < paddingLeft ? dialogLeft : paddingLeft;
                 const dialogRight = windowWidth - dialogLeft - dialogWidth;
                 const newDialogLeft =
                     dialogRight > paddingRight
                         ? Math.max(
                               actualPaddingLeft,
-                              dialogLeft + deltaWidth / 2
+                              dialogLeft + Math.ceil(deltaWidth / 2)
                           )
                         : Math.max(actualPaddingLeft, dialogLeft + deltaWidth);
 
                 if (newDialogLeft !== dialogLeft) {
-                    setDialogPosition({
-                        y: dialogPosition.y,
-                        x: newDialogLeft,
+                    setDialogPosition((prev) => {
+                        return { y: prev.y, x: newDialogLeft };
                     });
                 }
 
+                const remainingDelta =
+                    deltaWidth + (dialogLeft - newDialogLeft);
                 const newDialogWidth =
                     newDialogLeft === actualPaddingLeft &&
                     dialogWidth > windowWidth - actualPaddingLeft - paddingRight
                         ? Math.max(
                               minDialogWidth,
                               Math.min(
-                                  dialogWidth + deltaWidth,
+                                  dialogWidth + remainingDelta,
                                   initialDialogWidth
                               )
                           )
@@ -539,12 +437,11 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
                 const newDialogLeft =
                     newDialogWidth === dialogWidth
-                        ? dialogLeft + deltaWidth / 2
+                        ? dialogLeft + Math.ceil(deltaWidth / 2)
                         : dialogLeft;
                 if (newDialogLeft !== dialogLeft) {
-                    setDialogPosition({
-                        y: dialogPosition.y,
-                        x: newDialogLeft,
+                    setDialogPosition((prev) => {
+                        return { y: prev.y, x: newDialogLeft };
                     });
                 }
             }
@@ -556,12 +453,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         return () => {
             window.removeEventListener("resize", handleWindowResize);
         };
-    }, [
-        dialogRef.current,
-        dialogPosition,
-        initialDialogWidth,
-        isMovedOutsideWindowPadding,
-    ]);
+    }, [dialogRef.current, open, initialDialogWidth, isMovedOutsideWindow]);
 
     const handleActionButtonClick = (action: string) => {
         props.setProps({
