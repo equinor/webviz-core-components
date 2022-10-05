@@ -25,6 +25,12 @@ export const WebvizDialogTitle = React.forwardRef<
         }
     }, [props.onClose]);
 
+    const handleMouseMove = (e: React.MouseEvent | undefined) => {
+        if (e !== undefined) {
+            e.stopPropagation();
+        }
+    };
+
     return (
         <div className="WebvizDialogTitle" ref={ref}>
             <div>{props.children}</div>
@@ -32,11 +38,7 @@ export const WebvizDialogTitle = React.forwardRef<
                 <IconButton
                     aria-label="close"
                     onClick={() => handleCloseClick()}
-                    style={
-                        {
-                            // color: "#ccc",
-                        }
-                    }
+                    onMouseMove={(e) => handleMouseMove(e)}
                 >
                     <Icon name="close" />
                 </IconButton>

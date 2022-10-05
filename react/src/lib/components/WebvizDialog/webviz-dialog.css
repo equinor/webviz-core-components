@@ -12,6 +12,8 @@
     z-index: 1151;
     position: absolute;
     pointer-events: all;
+    /* margin-left: 16px;
+    margin-right: 16px; */
     opacity: 1;
     border-radius: 5px;
     background-color: #ffffff;
