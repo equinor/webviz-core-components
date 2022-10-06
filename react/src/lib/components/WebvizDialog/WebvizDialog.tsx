@@ -10,7 +10,6 @@ import "./webviz-dialog.css";
 import { Point } from "../../shared-types/point";
 import {
     MANHATTAN_LENGTH,
-    ORIGIN,
     pointDifference,
     pointSum,
     vectorLength,
@@ -75,9 +74,14 @@ export type WebvizDialogProps = {
 };
 
 export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
+    const paddingLeft = 16;
+    const paddingRight = 16;
+    const initPosition: Point = { x: paddingLeft, y: 0 };
+
     const [open, setOpen] = React.useState<boolean>(props.open || false);
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
-    const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
+    const [dialogPosition, setDialogPosition] =
+        React.useState<Point>(initPosition);
 
     const [runOpenDialogResizeEffect, setRunOpenDialogResizeEffect] =
         React.useState<boolean>(false);
@@ -95,9 +99,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const dialogRef = React.useRef<HTMLDivElement>(null);
     const dialogTitleRef = React.useRef<HTMLDivElement>(null);
     const placeholderRef = React.useRef<HTMLDivElement | null>(null);
-
-    const paddingLeft = 16;
-    const paddingRight = 16;
 
     const handleSetActive = React.useCallback(() => {
         const activeDialogs = Array.from(
@@ -172,7 +173,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 return;
             }
             setOpen(false);
-            setDialogPosition(ORIGIN);
+            setDialogPosition(initPosition);
             props.setProps({ open: false });
         },
         [props.modal, props.setProps, dialogRef.current]
@@ -180,29 +181,29 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
 
     React.useEffect(() => {
         const handleResize = () => {
-            if (dialogRef.current && runOpenDialogResizeEffect) {
-                const left = dialogRef.current.getBoundingClientRect().left;
+            if (dialogRef.current && open && runOpenDialogResizeEffect) {
                 if (initialDialogWidth === null) {
-                    const width =
-                        dialogRef.current.getBoundingClientRect().width;
-                    setInitialDialogWidth(width);
-                    setDialogWidth(width);
-                    setIsMovedOutsideWindow(
-                        left < 0 || left + width > window.innerWidth
-                    );
-                } else {
-                    const newDialogWidth = Math.max(
-                        minDialogWidth,
-                        Math.min(
-                            initialDialogWidth,
-                            window.innerWidth - left - paddingRight
-                        )
-                    );
-                    setDialogWidth(newDialogWidth);
-                    setIsMovedOutsideWindow(
-                        left < 0 || left + newDialogWidth > window.innerWidth
+                    setInitialDialogWidth(
+                        dialogRef.current.getBoundingClientRect().width
                     );
                 }
+
+                const initialWidth =
+                    initialDialogWidth !== null
+                        ? initialDialogWidth
+                        : dialogRef.current.getBoundingClientRect().width;
+                const left = dialogRef.current.getBoundingClientRect().left;
+                const adjustedWidth = Math.max(
+                    minDialogWidth,
+                    Math.min(
+                        initialWidth,
+                        window.innerWidth - left - paddingRight
+                    )
+                );
+                setDialogWidth(adjustedWidth);
+                setIsMovedOutsideWindow(
+                    left < 0 || left + adjustedWidth > window.innerWidth
+                );
                 setRunOpenDialogResizeEffect(false);
             }
         };
@@ -215,7 +216,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         return () => {
             resizeObserver.disconnect();
         };
-    }, [dialogRef.current, initialDialogWidth, runOpenDialogResizeEffect]);
+    }, [
+        dialogRef.current,
+        open,
+        initialDialogWidth,
+        runOpenDialogResizeEffect,
+    ]);
 
     React.useLayoutEffect(() => {
         let prevMousePosition: Point = { x: 0, y: 0 };
