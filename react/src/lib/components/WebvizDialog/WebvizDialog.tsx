@@ -10,10 +10,10 @@ import "./webviz-dialog.css";
 import { Point } from "../../shared-types/point";
 import {
     MANHATTAN_LENGTH,
+    ORIGIN,
     pointDifference,
     pointSum,
     vectorLength,
-    // isDOMRectContained,
 } from "../../utils/geometry";
 import { Backdrop } from "../Backdrop";
 
@@ -57,7 +57,7 @@ export type WebvizDialogProps = {
     /**
      * Set the minimum width in px
      */
-    min_width?: number;
+    minWidth?: number;
     /**
      * A list of actions to be displayed as buttons in the lower right corner of the dialog.
      */
@@ -76,26 +76,22 @@ export type WebvizDialogProps = {
 export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const paddingLeft = 16;
     const paddingRight = 16;
-    const initPosition: Point = { x: paddingLeft, y: 0 };
 
     const [open, setOpen] = React.useState<boolean>(props.open || false);
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
-    const [dialogPosition, setDialogPosition] =
-        React.useState<Point>(initPosition);
-
-    const [runOpenDialogResizeEffect, setRunOpenDialogResizeEffect] =
-        React.useState<boolean>(false);
+    const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
     const [isMovedOutsideWindow, setIsMovedOutsideWindow] =
         React.useState<boolean>(false);
 
     const [minDialogWidth, setMinDialogWidth] = React.useState<number>(
-        props.min_width || 0
+        props.minWidth || 0
     );
     const [dialogWidth, setDialogWidth] =
         React.useState<number | undefined>(undefined);
     const [initialDialogWidth, setInitialDialogWidth] =
         React.useState<number | null>(null);
 
+    const wrapperRef = React.useRef<HTMLDivElement>(null);
     const dialogRef = React.useRef<HTMLDivElement>(null);
     const dialogTitleRef = React.useRef<HTMLDivElement>(null);
     const placeholderRef = React.useRef<HTMLDivElement | null>(null);
@@ -155,15 +151,14 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     }, []);
 
     React.useEffect(() => {
-        setMinDialogWidth(props.min_width || 0);
-    }, [props.min_width]);
+        setMinDialogWidth(props.minWidth || 0);
+    }, [props.minWidth]);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         setOpen(props.open || false);
 
         if (props.open && dialogRef.current) {
             handleSetActive();
-            setRunOpenDialogResizeEffect(true);
         }
     }, [props.open, dialogRef.current]);
 
@@ -173,54 +168,90 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 return;
             }
             setOpen(false);
-            setDialogPosition(initPosition);
             props.setProps({ open: false });
         },
         [props.modal, props.setProps, dialogRef.current]
     );
 
     React.useEffect(() => {
-        const handleResize = () => {
-            if (dialogRef.current && open && runOpenDialogResizeEffect) {
-                if (initialDialogWidth === null) {
-                    setInitialDialogWidth(
-                        dialogRef.current.getBoundingClientRect().width
-                    );
+        const handleMutation = (mutationRecords: MutationRecord[]) => {
+            mutationRecords.forEach((mutation) => {
+                if (!dialogRef.current) {
+                    return;
                 }
 
-                const initialWidth =
-                    initialDialogWidth !== null
-                        ? initialDialogWidth
-                        : dialogRef.current.getBoundingClientRect().width;
-                const left = dialogRef.current.getBoundingClientRect().left;
-                const adjustedWidth = Math.max(
-                    minDialogWidth,
-                    Math.min(
-                        initialWidth,
-                        window.innerWidth - left - paddingRight
-                    )
-                );
-                setDialogWidth(adjustedWidth);
-                setIsMovedOutsideWindow(
-                    left < 0 || left + adjustedWidth > window.innerWidth
-                );
-                setRunOpenDialogResizeEffect(false);
-            }
+                if (
+                    mutation.type === "attributes" &&
+                    mutation.attributeName === "style" &&
+                    (mutation.target as HTMLElement).style.display === "block"
+                ) {
+                    if (initialDialogWidth === null) {
+                        setInitialDialogWidth(
+                            dialogRef.current.getBoundingClientRect().width
+                        );
+                    }
+
+                    const initialWidth =
+                        initialDialogWidth !== null
+                            ? initialDialogWidth
+                            : dialogRef.current.getBoundingClientRect().width;
+
+                    const height =
+                        dialogRef.current.getBoundingClientRect().height;
+                    const top = Math.max(
+                        0,
+                        Math.round(window.innerHeight / 2 - height / 2)
+                    );
+
+                    if (
+                        window.innerWidth <
+                        paddingLeft + initialWidth + paddingRight
+                    ) {
+                        const adjustedWidth = Math.max(
+                            minDialogWidth,
+                            Math.min(
+                                initialWidth,
+                                window.innerWidth - paddingLeft - paddingRight
+                            )
+                        );
+                        setDialogWidth(adjustedWidth);
+                        setDialogPosition({ x: paddingLeft, y: top });
+                        setIsMovedOutsideWindow(
+                            paddingLeft + adjustedWidth > window.innerWidth
+                        );
+                    } else {
+                        const adjustedLeft = Math.round(
+                            window.innerWidth / 2 - initialWidth / 2
+                        );
+                        setDialogWidth(initialWidth);
+                        setDialogPosition({ x: adjustedLeft, y: top });
+                        setIsMovedOutsideWindow(
+                            adjustedLeft < 0 ||
+                                adjustedLeft + initialWidth > window.innerWidth
+                        );
+                    }
+                }
+            });
         };
 
-        const resizeObserver = new ResizeObserver(handleResize);
-        if (dialogRef.current) {
-            resizeObserver.observe(dialogRef.current);
+        const mutationObserver = new MutationObserver(handleMutation);
+        if (wrapperRef.current) {
+            const config = {
+                attributes: true,
+                childList: false,
+                subtree: false,
+            };
+            mutationObserver.observe(wrapperRef.current, config);
         }
 
         return () => {
-            resizeObserver.disconnect();
+            mutationObserver.disconnect();
         };
     }, [
+        wrapperRef.current,
         dialogRef.current,
-        open,
         initialDialogWidth,
-        runOpenDialogResizeEffect,
+        minDialogWidth,
     ]);
 
     React.useLayoutEffect(() => {
@@ -473,7 +504,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     React.useEffect(() => {
         if (placeholderRef.current) {
             ReactDOM.render(
-                <div style={{ display: open ? "block" : "none" }}>
+                <div
+                    ref={wrapperRef}
+                    style={{ display: open ? "block" : "none" }}
+                >
                     {props.modal && (
                         <Backdrop
                             opacity={0.7}
@@ -494,7 +528,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                             left: Math.floor(dialogPosition.x),
                             top: Math.floor(dialogPosition.y),
                             width: dialogWidth,
-                            minWidth: props.min_width,
+                            minWidth: props.minWidth,
                         }}
                         onMouseDown={() => handleSetActive()}
                     >
@@ -540,7 +574,7 @@ WebvizDialog.propTypes = {
     open: PropTypes.bool,
     modal: PropTypes.bool,
     title: PropTypes.string.isRequired,
-    min_width: PropTypes.number,
+    minWidth: PropTypes.number,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,
@@ -552,7 +586,7 @@ WebvizDialog.propTypes = {
 WebvizDialog.defaultProps = {
     open: false,
     modal: false,
-    min_width: 200,
+    minWidth: 200,
     children: [],
     actions: [],
     setProps: () => {
