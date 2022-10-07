@@ -263,7 +263,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         let prevMousePosition: Point = { x: 0, y: 0 };
         let isMouseDown = false;
         let isMoveStarted = false;
-        let isEscapeBtnDown = false;
 
         const handleMouseDown = (e: MouseEvent) => {
             handleStartDrag(e.clientX, e.clientY);
@@ -332,26 +331,13 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             isMouseDown = false;
         };
 
-        const handleEscapeKeyDown = (e: KeyboardEvent) => {
-            const isActive = dialogRef.current?.classList.contains(
-                "WebvizDialog--active"
-            );
-            if (e.key === "Escape" && isActive && !isEscapeBtnDown) {
-                isEscapeBtnDown = true;
-                e.preventDefault();
-            }
-        };
-
         const handleEscapeKeyUp = (e: KeyboardEvent) => {
-            const isActive = dialogRef.current?.classList.contains(
-                "WebvizDialog--active"
-            );
-            if (e.key === "Escape" && isEscapeBtnDown) {
-                isActive &&
-                    handleClose(DialogCloseReason.ESCAPE_BUTTON_PRESSED);
-                isEscapeBtnDown = false;
-                e.preventDefault();
+            if (e.key !== "Escape") {
+                return;
             }
+            dialogRef.current?.classList.contains("WebvizDialog--active") &&
+                handleClose(DialogCloseReason.ESCAPE_BUTTON_PRESSED);
+            e.preventDefault();
         };
 
         if (dialogTitleRef.current) {
@@ -371,7 +357,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         document.addEventListener("touchmove", handleTouchMove);
         window.addEventListener("blur", handleBlur);
         if (!props.disableEscapeKeyDown) {
-            window.addEventListener("keydown", handleEscapeKeyDown);
             window.addEventListener("keyup", handleEscapeKeyUp);
         }
 
@@ -398,11 +383,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             );
 
             if (!props.disableEscapeKeyDown) {
-                window.removeEventListener("keydown", handleEscapeKeyDown);
                 window.removeEventListener("keyup", handleEscapeKeyUp);
             }
         };
-    }, [dialogRef.current, dialogTitleRef.current]);
+    }, [dialogRef.current, dialogTitleRef.current, props.disableEscapeKeyDown]);
 
     React.useEffect(() => {
         if (!dialogRef.current) {
