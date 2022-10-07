@@ -20,6 +20,7 @@ import { Backdrop } from "../Backdrop";
 enum DialogCloseReason {
     BUTTON_CLICK,
     BACKDROP_CLICK,
+    ESCAPE_BUTTON_PRESSED,
 }
 
 export type WebvizDialogParentProps = {
@@ -58,6 +59,10 @@ export type WebvizDialogProps = {
      * Set the minimum width in px
      */
     minWidth?: number;
+    /**
+     * If true, hitting escape will not fire the close callback
+     */
+    disableEscapeKeyDown?: boolean;
     /**
      * A list of actions to be displayed as buttons in the lower right corner of the dialog.
      */
@@ -254,10 +259,11 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         minDialogWidth,
     ]);
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         let prevMousePosition: Point = { x: 0, y: 0 };
         let isMouseDown = false;
         let isMoveStarted = false;
+        let isEscapeBtnDown = false;
 
         const handleMouseDown = (e: MouseEvent) => {
             handleStartDrag(e.clientX, e.clientY);
@@ -326,6 +332,28 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             isMouseDown = false;
         };
 
+        const handleEscapeKeyDown = (e: KeyboardEvent) => {
+            const isActive = dialogRef.current?.classList.contains(
+                "WebvizDialog--active"
+            );
+            if (e.key === "Escape" && isActive && !isEscapeBtnDown) {
+                isEscapeBtnDown = true;
+                e.preventDefault();
+            }
+        };
+
+        const handleEscapeKeyUp = (e: KeyboardEvent) => {
+            const isActive = dialogRef.current?.classList.contains(
+                "WebvizDialog--active"
+            );
+            if (e.key === "Escape" && isEscapeBtnDown) {
+                isActive &&
+                    handleClose(DialogCloseReason.ESCAPE_BUTTON_PRESSED);
+                isEscapeBtnDown = false;
+                e.preventDefault();
+            }
+        };
+
         if (dialogTitleRef.current) {
             dialogTitleRef.current.addEventListener(
                 "mousedown",
@@ -342,6 +370,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         document.addEventListener("touchend", handleMouseUpAndTouchEnd);
         document.addEventListener("touchmove", handleTouchMove);
         window.addEventListener("blur", handleBlur);
+        if (!props.disableEscapeKeyDown) {
+            window.addEventListener("keydown", handleEscapeKeyDown);
+            window.addEventListener("keyup", handleEscapeKeyUp);
+        }
 
         return () => {
             if (dialogTitleRef.current) {
@@ -364,6 +396,11 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 handleMouseUpAndTouchEnd,
                 true
             );
+
+            if (!props.disableEscapeKeyDown) {
+                window.removeEventListener("keydown", handleEscapeKeyDown);
+                window.removeEventListener("keyup", handleEscapeKeyUp);
+            }
         };
     }, [dialogRef.current, dialogTitleRef.current]);
 
@@ -519,7 +556,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     <div
                         className={
                             props.modal
-                                ? "WebvizDialog WebvizDialog--modal"
+                                ? "WebvizDialog WebvizDialog--modal WebvizDialog WebvizDialog--active"
                                 : "WebvizDialog WebvizDialog--active"
                         }
                         id={props.id}
@@ -575,6 +612,7 @@ WebvizDialog.propTypes = {
     modal: PropTypes.bool,
     title: PropTypes.string.isRequired,
     minWidth: PropTypes.number,
+    disableEscapeKeyDown: PropTypes.bool,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,
@@ -587,6 +625,7 @@ WebvizDialog.defaultProps = {
     open: false,
     modal: false,
     minWidth: 200,
+    disableEscapeKeyDown: false,
     children: [],
     actions: [],
     setProps: () => {
