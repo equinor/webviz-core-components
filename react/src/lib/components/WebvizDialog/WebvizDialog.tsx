@@ -555,9 +555,11 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     )}
                     <div
                         className={
-                            props.modal
-                                ? "WebvizDialog WebvizDialog--modal WebvizDialog WebvizDialog--active"
-                                : "WebvizDialog WebvizDialog--active"
+                            open
+                                ? props.modal
+                                    ? "WebvizDialog WebvizDialog--modal WebvizDialog--active"
+                                    : "WebvizDialog WebvizDialog--active"
+                                : "WebvizDialog"
                         }
                         id={props.id}
                         ref={dialogRef}
