@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 -   [#270](https://github.com/equinor/webviz-core-components/pull/270) - Fixed bug in `Select `component not allowing value to be `0`.
+-   [#271](https://github.com/equinor/webviz-core-components/pull/271) - Invalid states for active plugin and view are now replaced with the first plugin of the current page and its first view.
 
 ## [0.6.0] - 2022-10-03
 

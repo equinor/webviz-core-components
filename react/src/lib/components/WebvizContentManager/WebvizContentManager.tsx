@@ -491,19 +491,33 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         }
 
         if (location.pathname !== lastLocation?.pathname && localState) {
+            const checkedActivePluginId = state.pluginsData.some(
+                (plugin) => plugin.id === localState.activePluginId
+            )
+                ? localState.activePluginId
+                : state.pluginsData.at(0)?.id ?? "";
+
+            const checkedActiveViewId = state.pluginsData
+                .find((plugin) => plugin.id === checkedActivePluginId)
+                ?.views.some((view) => view.id === localState.activeViewId)
+                ? localState.activeViewId
+                : state.pluginsData
+                      .find((plugin) => plugin.id === checkedActivePluginId)
+                      ?.views.at(0)?.id ?? "";
+
             dispatch({
                 type: StoreActions.ApplyStoredLocalState,
                 payload: {
-                    pluginId: localState.activePluginId,
-                    viewId: localState.activeViewId,
+                    pluginId: checkedActivePluginId,
+                    viewId: checkedActiveViewId,
                     openSettingsGroupIds: localState.openSettingsGroupIds,
                 },
             });
 
             if (props.setProps) {
                 props.setProps({
-                    activeViewId: localState.activeViewId,
-                    activePluginId: localState.activePluginId,
+                    activeViewId: checkedActiveViewId,
+                    activePluginId: checkedActivePluginId,
                 });
             }
         } else {
