@@ -10,7 +10,8 @@ import {
 import React from "react";
 
 import { Animation } from "../../utils/Animation";
-import { Dialog } from "../Dialog";
+import { WebvizDialog } from "../WebvizDialog";
+// import { Dialog } from "../Dialog";
 import PropTypes from "prop-types";
 import {
     DownloadData,
@@ -583,16 +584,12 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     </Tooltip>
                 </div>
             </div>
-            <Dialog
+            <WebvizDialog
                 id={settingsDialogId}
                 title="View Element Settings"
                 open={settingsVisible}
-                draggable={true}
-                setProps={(dialogProps: {
-                    action: string;
-                    open: boolean;
-                    action_called: number;
-                }) => {
+                // draggable={true}
+                setProps={(dialogProps) => {
                     if (dialogProps.open === false) {
                         handleCloseSettingsDialog();
                     }
@@ -605,7 +602,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                         });
                     })}
                 </div>
-            </Dialog>
+            </WebvizDialog>
         </div>
     );
 };
