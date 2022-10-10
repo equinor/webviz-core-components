@@ -19,22 +19,56 @@ export const WebvizDialogTitle = React.forwardRef<
     HTMLDivElement,
     WebvizDialogTitleProps
 >((props, ref) => {
+    const buttonWrapperRef = React.useRef<HTMLDivElement>(null);
+
     const handleCloseClick = React.useCallback(() => {
         if (props.onClose) {
             props.onClose();
         }
     }, [props.onClose]);
 
+    React.useEffect(() => {
+        const handleMouseDownAndTouchStart = (e: MouseEvent | TouchEvent) => {
+            e.stopPropagation();
+        };
+
+        if (buttonWrapperRef.current) {
+            buttonWrapperRef.current.addEventListener(
+                "mousedown",
+                handleMouseDownAndTouchStart
+            );
+            buttonWrapperRef.current.addEventListener(
+                "touchstart",
+                handleMouseDownAndTouchStart
+            );
+        }
+
+        return () => {
+            if (buttonWrapperRef.current) {
+                buttonWrapperRef.current.removeEventListener(
+                    "mousedown",
+                    handleMouseDownAndTouchStart
+                );
+                buttonWrapperRef.current.removeEventListener(
+                    "touchstart",
+                    handleMouseDownAndTouchStart
+                );
+            }
+        };
+    }, [buttonWrapperRef]);
+
     return (
         <div className="WebvizDialogTitle" ref={ref}>
             <div>{props.children}</div>
             {props.onClose && (
-                <IconButton
-                    aria-label="close"
-                    onClick={() => handleCloseClick()}
-                >
-                    <Icon name="close" />
-                </IconButton>
+                <div ref={buttonWrapperRef}>
+                    <IconButton
+                        aria-label="close"
+                        onClick={() => handleCloseClick()}
+                    >
+                        <Icon name="close" />
+                    </IconButton>
+                </div>
             )}
         </div>
     );
