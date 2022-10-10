@@ -366,21 +366,17 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     "mousedown",
                     handleMouseDown
                 );
+                dialogTitleRef.current.removeEventListener(
+                    "touchstart",
+                    handleTouchStart
+                );
             }
 
             window.removeEventListener("blur", handleBlur);
             document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener(
-                "mouseup",
-                handleMouseUpAndTouchEnd,
-                true
-            );
+            document.removeEventListener("mouseup", handleMouseUpAndTouchEnd);
             document.removeEventListener("touchmove", handleTouchMove);
-            document.removeEventListener(
-                "touchend",
-                handleMouseUpAndTouchEnd,
-                true
-            );
+            document.removeEventListener("touchend", handleMouseUpAndTouchEnd);
 
             if (!props.disableEscapeKeyDown) {
                 window.removeEventListener("keyup", handleEscapeKeyUp);
