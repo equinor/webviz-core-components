@@ -497,11 +497,13 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
                 ? localState.activePluginId
                 : state.pluginsData[0].id;
 
-            const checkedActiveViewId = state.pluginsData.some((plugin) =>
-                plugin.views.some((view) => view.id === localState.activeViewId)
-            )
+            const checkedActiveViewId = state.pluginsData
+                .find((plugin) => plugin.id === checkedActivePluginId)
+                ?.views.some((view) => view.id === localState.activeViewId)
                 ? localState.activeViewId
-                : state.pluginsData[0].views[0].id;
+                : state.pluginsData.find(
+                      (plugin) => plugin.id === checkedActivePluginId
+                  )?.views[0].id || "";
 
             dispatch({
                 type: StoreActions.ApplyStoredLocalState,
