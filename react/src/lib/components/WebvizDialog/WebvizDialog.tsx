@@ -1,5 +1,4 @@
 import React from "react";
-import * as ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
 import { Button } from "@material-ui/core";
@@ -16,6 +15,7 @@ import {
     vectorLength,
 } from "../../utils/geometry";
 import { Backdrop } from "../Backdrop";
+import { Renderer } from "./components/renderer";
 
 enum DialogCloseReason {
     BUTTON_CLICK,
@@ -534,74 +534,64 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         setActionsCalled(actionsCalled + 1);
     };
 
-    React.useEffect(() => {
-        if (placeholderRef.current) {
-            ReactDOM.render(
-                <div
-                    ref={wrapperRef}
-                    style={{ display: open ? "block" : "none" }}
-                >
-                    {props.modal && (
-                        <Backdrop
-                            opacity={0.7}
-                            onClick={() =>
-                                handleClose(DialogCloseReason.BACKDROP_CLICK)
-                            }
-                        ></Backdrop>
-                    )}
-                    <div
-                        className={
-                            open
-                                ? props.modal
-                                    ? "WebvizDialog WebvizDialog--modal WebvizDialog--active"
-                                    : "WebvizDialog WebvizDialog--active"
-                                : "WebvizDialog"
+    return (
+        <Renderer target={placeholderRef.current}>
+            <div ref={wrapperRef} style={{ display: open ? "block" : "none" }}>
+                {props.modal && (
+                    <Backdrop
+                        opacity={0.7}
+                        onClick={() =>
+                            handleClose(DialogCloseReason.BACKDROP_CLICK)
                         }
-                        id={props.id}
-                        ref={dialogRef}
-                        style={{
-                            left: Math.floor(dialogPosition.x),
-                            top: Math.floor(dialogPosition.y),
-                            width: dialogWidth,
-                            minWidth: props.minWidth,
-                        }}
-                        onMouseDown={() => handleSetActive()}
+                    ></Backdrop>
+                )}
+                <div
+                    className={
+                        open
+                            ? props.modal
+                                ? "WebvizDialog WebvizDialog--modal WebvizDialog--active"
+                                : "WebvizDialog WebvizDialog--active"
+                            : "WebvizDialog"
+                    }
+                    id={props.id}
+                    ref={dialogRef}
+                    style={{
+                        left: Math.floor(dialogPosition.x),
+                        top: Math.floor(dialogPosition.y),
+                        width: dialogWidth,
+                        minWidth: props.minWidth,
+                    }}
+                    onMouseDown={() => handleSetActive()}
+                >
+                    <WebvizDialogTitle
+                        onClose={() =>
+                            handleClose(DialogCloseReason.BUTTON_CLICK)
+                        }
+                        ref={dialogTitleRef}
                     >
-                        <WebvizDialogTitle
-                            onClose={() =>
-                                handleClose(DialogCloseReason.BUTTON_CLICK)
-                            }
-                            ref={dialogTitleRef}
-                        >
-                            {props.title}
-                        </WebvizDialogTitle>
-                        <div className="WebvizDialogContent">
-                            {props.children}
-                        </div>
-                        <div className="WebvizDialogActions">
-                            {props.actions &&
-                                props.actions.map((action) => (
-                                    <Button
-                                        key={action}
-                                        component="button"
-                                        onClick={() =>
-                                            handleActionButtonClick(
-                                                action as string
-                                            )
-                                        }
-                                    >
-                                        {action}
-                                    </Button>
-                                ))}
-                        </div>
+                        {props.title}
+                    </WebvizDialogTitle>
+                    <div className="WebvizDialogContent">{props.children}</div>
+                    <div className="WebvizDialogActions">
+                        {props.actions &&
+                            props.actions.map((action) => (
+                                <Button
+                                    key={action}
+                                    component="button"
+                                    onClick={() =>
+                                        handleActionButtonClick(
+                                            action as string
+                                        )
+                                    }
+                                >
+                                    {action}
+                                </Button>
+                            ))}
                     </div>
-                </div>,
-                placeholderRef.current
-            );
-        }
-    });
-
-    return <></>;
+                </div>
+            </div>
+        </Renderer>
+    );
 };
 
 WebvizDialog.propTypes = {
