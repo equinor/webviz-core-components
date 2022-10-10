@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+## [0.6.1] - 2022-10-10
+
 ### Fixed
 
 -   [#270](https://github.com/equinor/webviz-core-components/pull/270) - Fixed bug in `Select `component not allowing value to be `0`.
