@@ -20,7 +20,11 @@ enum ScrollDirection {
     VERTICAL,
 }
 
-const isElementScrollable = (scrollArea: HTMLElement, content: HTMLElement, direction: ScrollDirection): boolean => {
+const isElementScrollable = (
+    scrollArea: HTMLElement,
+    content: HTMLElement,
+    direction: ScrollDirection
+): boolean => {
     if (direction === ScrollDirection.HORIZONTAL) {
         return content.scrollWidth > scrollArea.clientWidth;
     }
@@ -35,36 +39,51 @@ const calcScrollBarPositionAndSize = (
     if (direction === ScrollDirection.VERTICAL) {
         const scrollAreaHeight = scrollArea.clientHeight;
         const contentHeight = content.scrollHeight;
-        const scrollBarHeight = (scrollAreaHeight * scrollAreaHeight) / contentHeight;
-        const scrollBarTop = contentHeight > 0 ? (scrollArea.scrollTop / contentHeight) * scrollAreaHeight : 0;
+        const scrollBarHeight =
+            (scrollAreaHeight * scrollAreaHeight) / contentHeight;
+        const scrollBarTop =
+            contentHeight > 0
+                ? (scrollArea.scrollTop / contentHeight) * scrollAreaHeight
+                : 0;
         return { position: scrollBarTop, size: scrollBarHeight };
     }
 
     const scrollAreaWidth = scrollArea.clientWidth;
     const contentWidth = content.scrollWidth;
     const scrollBarWidth = (scrollAreaWidth * scrollAreaWidth) / contentWidth;
-    const scrollBarLeft = contentWidth > 0 ? (scrollArea.scrollLeft / contentWidth) * scrollAreaWidth : 0;
+    const scrollBarLeft =
+        contentWidth > 0
+            ? (scrollArea.scrollLeft / contentWidth) * scrollAreaWidth
+            : 0;
 
     return { position: scrollBarLeft, size: scrollBarWidth };
 };
 
 export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
-    const [verticalScrollBarVisible, setVerticalScrollBarVisible] = React.useState<boolean>(false);
-    const [horizontalScrollBarVisible, setHorizontalScrollBarVisible] = React.useState<boolean>(false);
+    const [verticalScrollBarVisible, setVerticalScrollBarVisible] =
+        React.useState<boolean>(false);
+    const [horizontalScrollBarVisible, setHorizontalScrollBarVisible] =
+        React.useState<boolean>(false);
 
-    const [verticalScrollBarPositionAndSize, setVerticalScrollBarPositionAndSize] =
-        React.useState<ScrollBarPositionAndSize>({
-            position: 0,
-            size: 0,
-        });
-    const [horizontalScrollBarPositionAndSize, setHorizontalScrollBarPositionAndSize] =
-        React.useState<ScrollBarPositionAndSize>({
-            position: 0,
-            size: 0,
-        });
+    const [
+        verticalScrollBarPositionAndSize,
+        setVerticalScrollBarPositionAndSize,
+    ] = React.useState<ScrollBarPositionAndSize>({
+        position: 0,
+        size: 0,
+    });
+    const [
+        horizontalScrollBarPositionAndSize,
+        setHorizontalScrollBarPositionAndSize,
+    ] = React.useState<ScrollBarPositionAndSize>({
+        position: 0,
+        size: 0,
+    });
 
-    const [verticalScrollBarActive, setVerticalScrollBarActive] = React.useState<boolean>(false);
-    const [horizontalScrollBarActive, setHorizontalScrollBarActive] = React.useState<boolean>(false);
+    const [verticalScrollBarActive, setVerticalScrollBarActive] =
+        React.useState<boolean>(false);
+    const [horizontalScrollBarActive, setHorizontalScrollBarActive] =
+        React.useState<boolean>(false);
 
     const contentRef = React.useRef<HTMLDivElement>(null);
     const scrollAreaRef = React.useRef<HTMLDivElement>(null);
@@ -81,10 +100,18 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         };
 
         const handleTouchStart = (e: TouchEvent) => {
-            handleStartDrag(e.target, e.touches[0].clientX, e.touches[0].clientY);
+            handleStartDrag(
+                e.target,
+                e.touches[0].clientX,
+                e.touches[0].clientY
+            );
         };
 
-        const handleStartDrag = (target: EventTarget | null, clientX: number, clientY: number) => {
+        const handleStartDrag = (
+            target: EventTarget | null,
+            clientX: number,
+            clientY: number
+        ) => {
             if (scrollAreaRef.current) {
                 if (target === horizontalScrollBarRef.current) {
                     mouseDown = ScrollDirection.HORIZONTAL;
@@ -122,9 +149,11 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                     scrollAreaRef.current.scrollTop = Math.max(
                         0,
                         Math.min(
-                            scrollAreaRef.current.scrollHeight - scrollAreaRef.current.clientHeight,
+                            scrollAreaRef.current.scrollHeight -
+                                scrollAreaRef.current.clientHeight,
                             scrollPosition +
-                                ((clientY - mouseDownPosition) * scrollAreaRef.current.scrollHeight) /
+                                ((clientY - mouseDownPosition) *
+                                    scrollAreaRef.current.scrollHeight) /
                                     scrollAreaRef.current.clientHeight
                         )
                     );
@@ -133,9 +162,11 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                     scrollAreaRef.current.scrollLeft = Math.max(
                         0,
                         Math.min(
-                            scrollAreaRef.current.scrollWidth - scrollAreaRef.current.clientWidth,
+                            scrollAreaRef.current.scrollWidth -
+                                scrollAreaRef.current.clientWidth,
                             scrollPosition +
-                                ((clientX - mouseDownPosition) * scrollAreaRef.current.scrollWidth) /
+                                ((clientX - mouseDownPosition) *
+                                    scrollAreaRef.current.scrollWidth) /
                                     scrollAreaRef.current.clientWidth
                         )
                     );
@@ -144,14 +175,26 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         };
 
         if (horizontalScrollBarRef.current) {
-            horizontalScrollBarRef.current.addEventListener("mousedown", handleMouseDown);
-            horizontalScrollBarRef.current.addEventListener("touchstart", handleTouchStart);
+            horizontalScrollBarRef.current.addEventListener(
+                "mousedown",
+                handleMouseDown
+            );
+            horizontalScrollBarRef.current.addEventListener(
+                "touchstart",
+                handleTouchStart
+            );
         }
 
         if (verticalScrollBarRef.current) {
-            verticalScrollBarRef.current.addEventListener("mousedown", handleMouseDown);
+            verticalScrollBarRef.current.addEventListener(
+                "mousedown",
+                handleMouseDown
+            );
 
-            verticalScrollBarRef.current.addEventListener("touchstart", handleTouchStart);
+            verticalScrollBarRef.current.addEventListener(
+                "touchstart",
+                handleTouchStart
+            );
         }
 
         document.addEventListener("mouseup", handleMouseUpTouchEnd);
@@ -161,13 +204,25 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 
         return () => {
             if (horizontalScrollBarRef.current) {
-                horizontalScrollBarRef.current.removeEventListener("mousedown", handleMouseDown);
-                horizontalScrollBarRef.current.removeEventListener("touchstart", handleTouchStart);
+                horizontalScrollBarRef.current.removeEventListener(
+                    "mousedown",
+                    handleMouseDown
+                );
+                horizontalScrollBarRef.current.removeEventListener(
+                    "touchstart",
+                    handleTouchStart
+                );
             }
 
             if (verticalScrollBarRef.current) {
-                verticalScrollBarRef.current.removeEventListener("mousedown", handleMouseDown);
-                verticalScrollBarRef.current.removeEventListener("touchstart", handleTouchStart);
+                verticalScrollBarRef.current.removeEventListener(
+                    "mousedown",
+                    handleMouseDown
+                );
+                verticalScrollBarRef.current.removeEventListener(
+                    "touchstart",
+                    handleTouchStart
+                );
             }
 
             document.removeEventListener("mouseup", handleMouseUpTouchEnd);
@@ -175,22 +230,42 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("touchmove", handleTouchMove);
         };
-    }, [scrollAreaRef.current, horizontalScrollBarRef.current, verticalScrollBarRef.current]);
+    }, [
+        scrollAreaRef.current,
+        horizontalScrollBarRef.current,
+        verticalScrollBarRef.current,
+    ]);
 
     React.useEffect(() => {
         const handleResize = () => {
             if (scrollAreaRef.current && contentRef.current) {
                 setHorizontalScrollBarVisible(
-                    isElementScrollable(scrollAreaRef.current, contentRef.current, ScrollDirection.HORIZONTAL)
+                    isElementScrollable(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.HORIZONTAL
+                    )
                 );
                 setVerticalScrollBarVisible(
-                    isElementScrollable(scrollAreaRef.current, contentRef.current, ScrollDirection.VERTICAL)
+                    isElementScrollable(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.VERTICAL
+                    )
                 );
                 setHorizontalScrollBarPositionAndSize(
-                    calcScrollBarPositionAndSize(scrollAreaRef.current, contentRef.current, ScrollDirection.HORIZONTAL)
+                    calcScrollBarPositionAndSize(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.HORIZONTAL
+                    )
                 );
                 setVerticalScrollBarPositionAndSize(
-                    calcScrollBarPositionAndSize(scrollAreaRef.current, contentRef.current, ScrollDirection.VERTICAL)
+                    calcScrollBarPositionAndSize(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.VERTICAL
+                    )
                 );
             }
         };
@@ -198,10 +273,18 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         const handleScrollOrTouchMoveEvent = () => {
             if (scrollAreaRef.current && contentRef.current) {
                 setHorizontalScrollBarPositionAndSize(
-                    calcScrollBarPositionAndSize(scrollAreaRef.current, contentRef.current, ScrollDirection.HORIZONTAL)
+                    calcScrollBarPositionAndSize(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.HORIZONTAL
+                    )
                 );
                 setVerticalScrollBarPositionAndSize(
-                    calcScrollBarPositionAndSize(scrollAreaRef.current, contentRef.current, ScrollDirection.VERTICAL)
+                    calcScrollBarPositionAndSize(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.VERTICAL
+                    )
                 );
             }
         };
@@ -211,12 +294,21 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 
         if (scrollAreaRef.current) {
             resizeObserver.observe(scrollAreaRef.current);
-            scrollAreaRef.current.addEventListener("touchmove", handleScrollOrTouchMoveEvent);
-            scrollAreaRef.current.addEventListener("scroll", handleScrollOrTouchMoveEvent);
+            scrollAreaRef.current.addEventListener(
+                "touchmove",
+                handleScrollOrTouchMoveEvent
+            );
+            scrollAreaRef.current.addEventListener(
+                "scroll",
+                handleScrollOrTouchMoveEvent
+            );
         }
         if (contentRef.current) {
             resizeObserver.observe(contentRef.current);
-            mutationObserver.observe(contentRef.current, { subtree: true, childList: true });
+            mutationObserver.observe(contentRef.current, {
+                subtree: true,
+                childList: true,
+            });
         }
 
         return () => {
@@ -224,8 +316,14 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
             mutationObserver.disconnect();
 
             if (scrollAreaRef.current) {
-                scrollAreaRef.current.removeEventListener("touchmove", handleScrollOrTouchMoveEvent);
-                scrollAreaRef.current.removeEventListener("scroll", handleScrollOrTouchMoveEvent);
+                scrollAreaRef.current.removeEventListener(
+                    "touchmove",
+                    handleScrollOrTouchMoveEvent
+                );
+                scrollAreaRef.current.removeEventListener(
+                    "scroll",
+                    handleScrollOrTouchMoveEvent
+                );
             }
         };
     }, [
@@ -245,7 +343,9 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         >
             <div
                 className={`ScrollBar VerticalScrollBar${
-                    verticalScrollBarActive ? " ScrollBar--active" : " ScrollBar--inactive"
+                    verticalScrollBarActive
+                        ? " ScrollBar--active"
+                        : " ScrollBar--inactive"
                 }`}
                 ref={verticalScrollBarRef}
                 style={{
@@ -256,7 +356,9 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
             ></div>
             <div
                 className={`ScrollBar HorizontalScrollBar${
-                    horizontalScrollBarActive ? " ScrollBar--active" : " ScrollBar--inactive"
+                    horizontalScrollBarActive
+                        ? " ScrollBar--active"
+                        : " ScrollBar--inactive"
                 }`}
                 ref={horizontalScrollBarRef}
                 style={{
@@ -269,8 +371,14 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
                 className="ScrollAreaInner"
                 ref={scrollAreaRef}
                 style={{
-                    paddingRight: verticalScrollBarVisible && !props.noScrollbarPadding ? 16 : 0,
-                    paddingBottom: horizontalScrollBarVisible && !props.noScrollbarPadding ? 16 : 0,
+                    paddingRight:
+                        verticalScrollBarVisible && !props.noScrollbarPadding
+                            ? 16
+                            : 0,
+                    paddingBottom:
+                        horizontalScrollBarVisible && !props.noScrollbarPadding
+                            ? 16
+                            : 0,
                 }}
             >
                 <div ref={contentRef} className="ScrollArea__Content">
@@ -282,8 +390,11 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 };
 
 ScrollArea.propTypes = {
-    children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
-    width: PropTypes.number,
-    height: PropTypes.number,
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node,
+    ]),
+    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     noScrollbarPadding: PropTypes.bool,
 };
