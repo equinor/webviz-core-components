@@ -584,25 +584,27 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     </Tooltip>
                 </div>
             </div>
-            <WebvizDialog
-                id={settingsDialogId}
-                title="View Element Settings"
-                open={settingsVisible}
-                // draggable={true}
-                setProps={(dialogProps) => {
-                    if (dialogProps.open === false) {
-                        handleCloseSettingsDialog();
-                    }
-                }}
-            >
-                <div className="WebvizViewElement__SettingsContainer">
-                    {settings.map((setting) => {
-                        return React.cloneElement(setting, {
-                            ...setting.props,
-                        });
-                    })}
-                </div>
-            </WebvizDialog>
+            {settings.length > 0 && (
+                <WebvizDialog
+                    id={settingsDialogId}
+                    title="View Element Settings"
+                    open={settingsVisible}
+                    // draggable={true}
+                    setProps={(dialogProps) => {
+                        if (dialogProps.open === false) {
+                            handleCloseSettingsDialog();
+                        }
+                    }}
+                >
+                    <div className="WebvizViewElement__SettingsContainer">
+                        {settings.map((setting) => {
+                            return React.cloneElement(setting, {
+                                ...setting.props,
+                            });
+                        })}
+                    </div>
+                </WebvizDialog>
+            )}
         </div>
     );
 };

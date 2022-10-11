@@ -16,6 +16,7 @@ import {
 } from "../../utils/geometry";
 import { Backdrop } from "../Backdrop";
 import { Renderer } from "./components/renderer";
+import { ScrollArea } from "../ScrollArea";
 
 enum DialogCloseReason {
     BUTTON_CLICK,
@@ -60,6 +61,10 @@ export type WebvizDialogProps = {
      */
     minWidth?: number;
     /**
+     * Set the minimum height in px
+     */
+    minHeight?: number;
+    /**
      * If true, hitting escape will not fire the close callback
      */
     disableEscapeKeyDown?: boolean;
@@ -81,25 +86,36 @@ export type WebvizDialogProps = {
 export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const marginLeft = 16;
     const marginRight = 16;
+    const marginTop = 16;
 
     const [open, setOpen] = React.useState<boolean>(props.open || false);
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
-    const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
-    const [isMovedOutsideWindow, setIsMovedOutsideWindow] =
-        React.useState<boolean>(false);
 
+    const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
     const [minDialogWidth, setMinDialogWidth] = React.useState<number>(
         props.minWidth || 0
     );
     const [dialogWidth, setDialogWidth] =
         React.useState<number | undefined>(undefined);
+    const [dialogHeight, setDialogHeight] =
+        React.useState<number | undefined>(undefined);
     const [initialDialogWidth, setInitialDialogWidth] =
         React.useState<number | null>(null);
+    const [isMovedOutsideWindow, setIsMovedOutsideWindow] =
+        React.useState<boolean>(false);
+    const [initialContentHeight, setInitialContentHeight] =
+        React.useState<number | null>(null);
+    const [useScrollArea, setUseScrollArea] =
+        React.useState<boolean | undefined>(undefined);
+    const [scrollAreaHeight, setScrollAreaHeight] = React.useState<number>(0);
 
+    const [placeholderDiv, setPlaceholderDiv] =
+        React.useState<HTMLDivElement | null>(null);
     const wrapperRef = React.useRef<HTMLDivElement>(null);
     const dialogRef = React.useRef<HTMLDivElement>(null);
     const dialogTitleRef = React.useRef<HTMLDivElement>(null);
-    const placeholderRef = React.useRef<HTMLDivElement | null>(null);
+    const dialogContentRef = React.useRef<HTMLDivElement>(null);
+    const dialogActionsRef = React.useRef<HTMLDivElement>(null);
 
     const handleSetActive = React.useCallback(() => {
         const activeDialogs = Array.from(
@@ -131,14 +147,13 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             ) as HTMLDivElement;
         }
 
-        placeholderRef.current = document.createElement("div");
-        node.appendChild(placeholderRef.current);
+        const placeholder = document.createElement("div");
+        node.appendChild(placeholder);
+        setPlaceholderDiv(placeholder);
 
         return () => {
-            if (placeholderRef.current) {
-                placeholderRef.current.parentElement?.removeChild(
-                    placeholderRef.current
-                );
+            if (placeholder) {
+                placeholder.parentElement?.removeChild(placeholder);
             }
             const dialogRoot = document.getElementById("WebvizDialog__root");
             if (dialogRoot) {
@@ -181,7 +196,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     React.useEffect(() => {
         const handleMutation = (mutationRecords: MutationRecord[]) => {
             mutationRecords.forEach((mutation) => {
-                if (!dialogRef.current) {
+                if (
+                    !dialogRef.current ||
+                    !dialogTitleRef.current ||
+                    !dialogContentRef.current ||
+                    !dialogActionsRef.current
+                ) {
                     return;
                 }
 
@@ -195,18 +215,46 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                             dialogRef.current.getBoundingClientRect().width
                         );
                     }
+                    if (initialContentHeight === null) {
+                        setInitialContentHeight(
+                            dialogContentRef.current.getBoundingClientRect()
+                                .height
+                        );
+                        setUseScrollArea(
+                            dialogRef.current.getBoundingClientRect().height >=
+                                window.innerHeight / 2
+                        );
+                    }
 
                     const initialWidth =
                         initialDialogWidth !== null
                             ? initialDialogWidth
                             : dialogRef.current.getBoundingClientRect().width;
 
-                    const height =
-                        dialogRef.current.getBoundingClientRect().height;
-                    const top = Math.max(
-                        0,
-                        Math.round(window.innerHeight / 2 - height / 2)
+                    const initialHeight =
+                        initialContentHeight !== null
+                            ? initialContentHeight
+                            : dialogContentRef.current.getBoundingClientRect()
+                                  .height;
+
+                    const adjustedHeight = Math.max(
+                        props.minHeight || 0,
+                        Math.min(window.innerHeight / 2, initialHeight)
                     );
+                    const top = Math.max(
+                        marginTop,
+                        Math.round(window.innerHeight / 2 - adjustedHeight / 2)
+                    );
+
+                    setScrollAreaHeight(
+                        adjustedHeight -
+                            dialogTitleRef.current.getBoundingClientRect()
+                                .height -
+                            dialogActionsRef.current.getBoundingClientRect()
+                                .height -
+                            32
+                    );
+                    setDialogHeight(adjustedHeight);
 
                     if (
                         window.innerWidth <
@@ -255,6 +303,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     }, [
         wrapperRef.current,
         dialogRef.current,
+        dialogTitleRef.current,
+        dialogContentRef.current,
+        dialogActionsRef.current,
+        initialContentHeight,
         initialDialogWidth,
         minDialogWidth,
     ]);
@@ -535,8 +587,8 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     };
 
     return (
-        <Renderer target={placeholderRef.current}>
-            <div ref={wrapperRef} style={{ display: open ? "block" : "none" }}>
+        <Renderer target={placeholderDiv} ref={wrapperRef} open={open}>
+            <>
                 {props.modal && (
                     <Backdrop
                         opacity={0.7}
@@ -559,7 +611,9 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         left: Math.floor(dialogPosition.x),
                         top: Math.floor(dialogPosition.y),
                         width: dialogWidth,
+                        height: dialogHeight,
                         minWidth: props.minWidth,
+                        minHeight: props.minHeight,
                     }}
                     onMouseDown={() => handleSetActive()}
                 >
@@ -571,8 +625,16 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     >
                         {props.title}
                     </WebvizDialogTitle>
-                    <div className="WebvizDialogContent">{props.children}</div>
-                    <div className="WebvizDialogActions">
+                    <div className="WebvizDialogContent" ref={dialogContentRef}>
+                        {useScrollArea ? (
+                            <ScrollArea height={scrollAreaHeight}>
+                                {props.children}
+                            </ScrollArea>
+                        ) : (
+                            props.children
+                        )}
+                    </div>
+                    <div className="WebvizDialogActions" ref={dialogActionsRef}>
                         {props.actions &&
                             props.actions.map((action) => (
                                 <Button
@@ -589,7 +651,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                             ))}
                     </div>
                 </div>
-            </div>
+            </>
         </Renderer>
     );
 };
@@ -600,6 +662,7 @@ WebvizDialog.propTypes = {
     modal: PropTypes.bool,
     title: PropTypes.string.isRequired,
     minWidth: PropTypes.number,
+    minHeight: PropTypes.number,
     disableEscapeKeyDown: PropTypes.bool,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
@@ -613,6 +676,7 @@ WebvizDialog.defaultProps = {
     open: false,
     modal: false,
     minWidth: 200,
+    minHeight: 200,
     disableEscapeKeyDown: false,
     children: [],
     actions: [],

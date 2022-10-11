@@ -120,7 +120,7 @@ const App: React.FC = () => {
                         }}
                         actions={["Cancel", "OK"]}
                     >
-                        <div style={{ width: 1000 }}>
+                        <div style={{ width: 1000, height: 1800 }}>
                             This is the content of the first dialog.
                         </div>
                     </WebvizDialog>
