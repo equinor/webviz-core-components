@@ -51,6 +51,8 @@ const App: React.FC = () => {
         React.useState<boolean>(false);
     const [webvizDialog2Open, setWebvizDialog2Open] =
         React.useState<boolean>(false);
+    const [webvizDialog3Open, setWebvizDialog3Open] =
+        React.useState<boolean>(false);
 
     React.useEffect(() => {
         const handleLocationChange = () => {
@@ -109,6 +111,12 @@ const App: React.FC = () => {
                     >
                         Open Dialog 2
                     </Button>
+                    <Button
+                        component="button"
+                        onClick={() => setWebvizDialog3Open(true)}
+                    >
+                        Open Dialog 3
+                    </Button>
                     <WebvizDialog
                         title="Webviz Dialog 1 Title"
                         id="webviz-dialog-1"
@@ -120,7 +128,7 @@ const App: React.FC = () => {
                         }}
                         actions={["Cancel", "OK"]}
                     >
-                        <div style={{ width: 1000, height: 1800 }}>
+                        <div style={{ width: 1000, height: 500 }}>
                             This is the content of the first dialog.
                         </div>
                     </WebvizDialog>
@@ -134,8 +142,21 @@ const App: React.FC = () => {
                         }}
                         actions={["Cancel", "OK"]}
                     >
-                        {/* <div style={{ width: 1500 }}> */}
                         <div>This is the content of the second dialog.</div>
+                    </WebvizDialog>
+                    <WebvizDialog
+                        title="Webviz Dialog 3 Title is very long to check how title wrap works"
+                        id="webviz-dialog-3"
+                        open={webvizDialog3Open}
+                        setProps={(newProps) => {
+                            console.log(newProps);
+                            setWebvizDialog3Open(newProps.open);
+                        }}
+                        actions={["Cancel", "OK"]}
+                    >
+                        <div style={{ width: 1000 }}>
+                            This is the content of the third dialog.
+                        </div>
                     </WebvizDialog>
                 </>
             )}
