@@ -104,7 +104,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         React.useState<number | null>(null);
     const [isMovedOutsideWindow, setIsMovedOutsideWindow] =
         React.useState<boolean>(false);
-    const [initialDialogContentHeight, setInitialDialogContentHeight] =
+    const [sumDialogElementsHeight, setSumDialogElementsHeight] =
         React.useState<number | null>(null);
     const [useScrollArea, setUseScrollArea] =
         React.useState<boolean | undefined>(undefined);
@@ -194,126 +194,91 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         [props.modal, props.setProps, dialogRef.current]
     );
 
-    React.useEffect(() => {
-        const handleMutation = (mutationRecords: MutationRecord[]) => {
-            mutationRecords.forEach((mutation) => {
-                if (
-                    !dialogRef.current ||
-                    !dialogTitleRef.current ||
-                    !dialogContentRef.current ||
-                    !dialogActionsRef.current
-                ) {
-                    return;
-                }
-
-                if (
-                    mutation.type === "attributes" &&
-                    mutation.attributeName === "style" &&
-                    (mutation.target as HTMLElement).style.display === "block"
-                ) {
-                    const initialWidth =
-                        initialDialogWidth !== null
-                            ? initialDialogWidth
-                            : dialogRef.current.getBoundingClientRect().width;
-                    const initialContentHeight =
-                        initialDialogContentHeight !== null
-                            ? initialDialogContentHeight
-                            : dialogContentRef.current.getBoundingClientRect()
-                                  .height;
-
-                    if (initialDialogWidth === null) {
-                        setInitialDialogWidth(initialWidth);
-                    }
-                    if (initialDialogContentHeight === null) {
-                        setInitialDialogContentHeight(initialContentHeight);
-                    }
-
-                    const dialogContentPadding = 32;
-                    const sumDialogElementHeights =
-                        dialogTitleRef.current.getBoundingClientRect().height +
-                        initialContentHeight +
-                        dialogContentPadding +
-                        dialogActionsRef.current.getBoundingClientRect().height;
-                    setUseScrollArea(
-                        marginTop + marginBottom + sumDialogElementHeights >
-                            window.innerHeight / 2
-                    );
-
-                    const adjustedHeight = Math.max(
-                        props.minHeight || 0,
-                        Math.min(
-                            window.innerHeight / 2,
-                            sumDialogElementHeights
-                        )
-                    );
-                    const top = Math.max(
-                        marginTop,
-                        Math.round(window.innerHeight / 2 - adjustedHeight / 2)
-                    );
-
-                    setScrollAreaHeight(
-                        adjustedHeight -
-                            dialogContentPadding -
-                            dialogTitleRef.current.getBoundingClientRect()
-                                .height -
-                            dialogActionsRef.current.getBoundingClientRect()
-                                .height
-                    );
-                    setDialogHeight(adjustedHeight);
-
-                    if (
-                        window.innerWidth <
-                        marginLeft + initialWidth + marginRight
-                    ) {
-                        const adjustedWidth = Math.max(
-                            minDialogWidth,
-                            Math.min(
-                                initialWidth,
-                                window.innerWidth - marginLeft - marginRight
-                            )
-                        );
-                        setDialogWidth(adjustedWidth);
-                        setDialogPosition({ x: marginLeft, y: top });
-                        setIsMovedOutsideWindow(
-                            marginLeft + adjustedWidth > window.innerWidth
-                        );
-                    } else {
-                        const adjustedLeft = Math.round(
-                            window.innerWidth / 2 - initialWidth / 2
-                        );
-                        setDialogWidth(initialWidth);
-                        setDialogPosition({ x: adjustedLeft, y: top });
-                        setIsMovedOutsideWindow(
-                            adjustedLeft < 0 ||
-                                adjustedLeft + initialWidth > window.innerWidth
-                        );
-                    }
-                }
-            });
-        };
-
-        const mutationObserver = new MutationObserver(handleMutation);
-        if (wrapperRef.current) {
-            const config = {
-                attributes: true,
-                childList: false,
-                subtree: false,
-            };
-            mutationObserver.observe(wrapperRef.current, config);
+    React.useLayoutEffect(() => {
+        if (
+            !wrapperRef.current ||
+            wrapperRef.current.style.display !== "block" ||
+            !dialogRef.current ||
+            !dialogTitleRef.current ||
+            !dialogContentRef.current ||
+            !dialogActionsRef.current
+        ) {
+            return;
         }
 
-        return () => {
-            mutationObserver.disconnect();
-        };
+        let initialWidth = initialDialogWidth || 0;
+        let sumElementHeights = sumDialogElementsHeight || 0;
+        const dialogContentPadding = 32;
+        if (initialDialogWidth === null) {
+            initialWidth = dialogRef.current.getBoundingClientRect().width;
+            setInitialDialogWidth(initialWidth);
+        }
+        if (sumDialogElementsHeight === null) {
+            const initialContentHeight =
+                dialogContentRef.current.getBoundingClientRect().height;
+            sumElementHeights =
+                dialogTitleRef.current.getBoundingClientRect().height +
+                initialContentHeight +
+                dialogContentPadding +
+                dialogActionsRef.current.getBoundingClientRect().height;
+            setSumDialogElementsHeight(sumElementHeights);
+        }
+
+        const adjustedHeight = Math.max(
+            props.minHeight || 0,
+            Math.min(window.innerHeight / 2, sumElementHeights)
+        );
+        const top = Math.max(
+            marginTop,
+            Math.round(window.innerHeight / 2 - adjustedHeight / 2)
+        );
+
+        setUseScrollArea(
+            marginTop + marginBottom + sumElementHeights >
+                window.innerHeight / 2
+        );
+        setScrollAreaHeight(
+            adjustedHeight -
+                dialogContentPadding -
+                dialogTitleRef.current.getBoundingClientRect().height -
+                dialogActionsRef.current.getBoundingClientRect().height
+        );
+        setDialogHeight(adjustedHeight);
+
+        if (window.innerWidth < marginLeft + initialWidth + marginRight) {
+            const adjustedWidth = Math.max(
+                minDialogWidth,
+                Math.min(
+                    initialWidth,
+                    window.innerWidth - marginLeft - marginRight
+                )
+            );
+            setDialogWidth(adjustedWidth);
+            setDialogPosition({ x: marginLeft, y: top });
+            setIsMovedOutsideWindow(
+                marginLeft + adjustedWidth > window.innerWidth
+            );
+        } else {
+            const adjustedLeft = Math.round(
+                window.innerWidth / 2 - initialWidth / 2
+            );
+            setDialogWidth(initialWidth);
+            setDialogPosition({ x: adjustedLeft, y: top });
+            setIsMovedOutsideWindow(
+                adjustedLeft < 0 ||
+                    adjustedLeft + initialWidth > window.innerWidth
+            );
+        }
     }, [
+        open,
         wrapperRef.current,
         dialogRef.current,
         dialogTitleRef.current,
         dialogContentRef.current,
         dialogActionsRef.current,
-        initialDialogContentHeight,
         initialDialogWidth,
         minDialogWidth,
+        sumDialogElementsHeight,
     ]);
 
     React.useEffect(() => {
