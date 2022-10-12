@@ -31,43 +31,77 @@ const isElementScrollable = (
     return content.scrollHeight > scrollArea.clientHeight;
 };
 
+const calcScrollBarSize = (
+    scrollArea: HTMLDivElement,
+    content: HTMLDivElement,
+    direction: ScrollDirection
+): number => {
+    if (direction === ScrollDirection.VERTICAL) {
+        const scrollAreaHeight = scrollArea.clientHeight;
+        const contentHeight = content.scrollHeight;
+        return contentHeight > 0
+            ? Math.max(
+                  20,
+                  (scrollAreaHeight * scrollAreaHeight) / contentHeight
+              )
+            : 0;
+    }
+
+    const scrollAreaWidth = scrollArea.clientWidth;
+    const contentWidth = content.scrollWidth;
+    return contentWidth > 0
+        ? Math.max((scrollAreaWidth * scrollAreaWidth) / contentWidth, 20)
+        : 0;
+};
+
 const calcScrollBarPositionAndSize = (
     scrollArea: HTMLDivElement,
     content: HTMLDivElement,
     direction: ScrollDirection
 ): ScrollBarPositionAndSize => {
+    const scrollBarSize = calcScrollBarSize(scrollArea, content, direction);
+
+    const twoScrollbars =
+        isElementScrollable(scrollArea, content, ScrollDirection.HORIZONTAL) &&
+        isElementScrollable(scrollArea, content, ScrollDirection.VERTICAL);
+
     if (direction === ScrollDirection.VERTICAL) {
         const scrollAreaHeight = scrollArea.clientHeight;
         const contentHeight = content.scrollHeight;
-        const scrollBarHeight =
-            contentHeight > 0
-                ? Math.max(
-                      (scrollAreaHeight * scrollAreaHeight) / contentHeight,
-                      20
-                  )
+
+        const relativeScrollTop =
+            contentHeight - scrollAreaHeight > 0
+                ? scrollArea.scrollTop / (contentHeight - scrollAreaHeight)
                 : 0;
-        const scrollBarRelativeAreaHeight =
-            (scrollBarHeight / scrollAreaHeight) * contentHeight;
+
         const scrollBarTop =
-            contentHeight > 0
-                ? (scrollArea.scrollTop / contentHeight) *
-                  scrollBarRelativeAreaHeight
+            scrollAreaHeight > 0
+                ? relativeScrollTop *
+                  (scrollAreaHeight -
+                      (twoScrollbars ? 1 : 0) * 10 -
+                      scrollBarSize)
                 : 0;
-        return { position: scrollBarTop, size: scrollBarHeight };
+        return {
+            position: scrollBarTop,
+            size: scrollBarSize,
+        };
     }
 
     const scrollAreaWidth = scrollArea.clientWidth;
     const contentWidth = content.scrollWidth;
-    const scrollBarWidth =
-        contentWidth > 0
-            ? Math.max((scrollAreaWidth * scrollAreaWidth) / contentWidth, 20)
-            : 0;
-    const scrollBarLeft =
-        contentWidth > 0
-            ? (scrollArea.scrollLeft / contentWidth) * scrollAreaWidth
+
+    const relativeScrollLeft =
+        contentWidth - scrollAreaWidth > 0
+            ? scrollArea.scrollLeft / (contentWidth - scrollAreaWidth)
             : 0;
 
-    return { position: scrollBarLeft, size: scrollBarWidth };
+    const scrollBarLeft =
+        scrollAreaWidth > 0
+            ? relativeScrollLeft *
+              (scrollAreaWidth - (twoScrollbars ? 1 : 0) * 10 - scrollBarSize)
+            : 0;
+
+    return { position: scrollBarLeft, size: scrollBarSize };
 };
 
 export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
@@ -155,32 +189,52 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         };
 
         const handleDragMove = (clientX: number, clientY: number) => {
-            if (scrollAreaRef.current) {
-                if (mouseDown == ScrollDirection.VERTICAL) {
-                    scrollAreaRef.current.scrollTop = Math.max(
-                        0,
-                        Math.min(
-                            scrollAreaRef.current.scrollHeight -
-                                scrollAreaRef.current.clientHeight,
-                            scrollPosition +
-                                ((clientY - mouseDownPosition) *
-                                    scrollAreaRef.current.scrollHeight) /
-                                    scrollAreaRef.current.clientHeight
-                        )
+            if (
+                scrollAreaRef.current &&
+                contentRef.current &&
+                mouseDown !== null
+            ) {
+                const scrollBarSize = calcScrollBarSize(
+                    scrollAreaRef.current,
+                    contentRef.current,
+                    mouseDown
+                );
+
+                const twoScrollbars =
+                    isElementScrollable(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.HORIZONTAL
+                    ) &&
+                    isElementScrollable(
+                        scrollAreaRef.current,
+                        contentRef.current,
+                        ScrollDirection.VERTICAL
                     );
+
+                if (mouseDown === ScrollDirection.VERTICAL) {
+                    const trackRatio =
+                        (contentRef.current.scrollHeight -
+                            scrollAreaRef.current.clientHeight) /
+                        (scrollAreaRef.current.clientHeight -
+                            10 * (twoScrollbars ? 1 : 0) -
+                            scrollBarSize);
+
+                    scrollAreaRef.current.scrollTop =
+                        scrollPosition +
+                        (clientY - mouseDownPosition) * trackRatio;
                 }
-                if (mouseDown == ScrollDirection.HORIZONTAL) {
-                    scrollAreaRef.current.scrollLeft = Math.max(
-                        0,
-                        Math.min(
-                            scrollAreaRef.current.scrollWidth -
-                                scrollAreaRef.current.clientWidth,
-                            scrollPosition +
-                                ((clientX - mouseDownPosition) *
-                                    scrollAreaRef.current.scrollWidth) /
-                                    scrollAreaRef.current.clientWidth
-                        )
-                    );
+                if (mouseDown === ScrollDirection.HORIZONTAL) {
+                    const trackRatio =
+                        (contentRef.current.scrollWidth -
+                            scrollAreaRef.current.clientWidth) /
+                        (scrollAreaRef.current.clientWidth -
+                            10 * (twoScrollbars ? 1 : 0) -
+                            scrollBarSize);
+
+                    scrollAreaRef.current.scrollLeft =
+                        scrollPosition +
+                        (clientX - mouseDownPosition) * trackRatio;
                 }
             }
         };
@@ -245,6 +299,7 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
         scrollAreaRef.current,
         horizontalScrollBarRef.current,
         verticalScrollBarRef.current,
+        contentRef.current,
     ]);
 
     React.useEffect(() => {
