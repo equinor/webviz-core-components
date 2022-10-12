@@ -40,17 +40,28 @@ const calcScrollBarPositionAndSize = (
         const scrollAreaHeight = scrollArea.clientHeight;
         const contentHeight = content.scrollHeight;
         const scrollBarHeight =
-            (scrollAreaHeight * scrollAreaHeight) / contentHeight;
+            contentHeight > 0
+                ? Math.max(
+                      (scrollAreaHeight * scrollAreaHeight) / contentHeight,
+                      20
+                  )
+                : 0;
+        const scrollBarRelativeAreaHeight =
+            (scrollBarHeight / scrollAreaHeight) * contentHeight;
         const scrollBarTop =
             contentHeight > 0
-                ? (scrollArea.scrollTop / contentHeight) * scrollAreaHeight
+                ? (scrollArea.scrollTop / contentHeight) *
+                  scrollBarRelativeAreaHeight
                 : 0;
         return { position: scrollBarTop, size: scrollBarHeight };
     }
 
     const scrollAreaWidth = scrollArea.clientWidth;
     const contentWidth = content.scrollWidth;
-    const scrollBarWidth = (scrollAreaWidth * scrollAreaWidth) / contentWidth;
+    const scrollBarWidth =
+        contentWidth > 0
+            ? Math.max((scrollAreaWidth * scrollAreaWidth) / contentWidth, 20)
+            : 0;
     const scrollBarLeft =
         contentWidth > 0
             ? (scrollArea.scrollLeft / contentWidth) * scrollAreaWidth
