@@ -133,7 +133,7 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setModalDialogOpen(newProps.open)}
             >
-                "This is a modal dialog. Closes when clicking on backdrop"
+                This is a modal dialog. Closes when clicking on backdrop
             </WebvizDialog>
         </>
     );
