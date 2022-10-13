@@ -14,7 +14,6 @@ import {
     SmartNodeSelector,
     Dialog,
     Menu,
-    WebvizDialog,
 } from "../lib";
 
 const steps = [
@@ -47,13 +46,6 @@ const App: React.FC = () => {
         window.location.hash.replace("#", "")
     );
 
-    const [webvizDialogOpen, setWebvizDialogOpen] =
-        React.useState<boolean>(false);
-    const [webvizDialog2Open, setWebvizDialog2Open] =
-        React.useState<boolean>(false);
-    const [webvizDialog3Open, setWebvizDialog3Open] =
-        React.useState<boolean>(false);
-
     React.useEffect(() => {
         const handleLocationChange = () => {
             setCurrentPage(window.location.hash.replace("#", ""));
@@ -76,11 +68,6 @@ const App: React.FC = () => {
                 navigationItems={[
                     {
                         type: "page",
-                        title: "Webviz Dialog",
-                        href: "#webviz-dialog",
-                    },
-                    {
-                        type: "page",
                         title: "Dialog",
                         href: "#dialog",
                     },
@@ -96,70 +83,6 @@ const App: React.FC = () => {
                     },
                 ]}
             />
-            {currentPage === "webviz-dialog" && (
-                <>
-                    <h1>Webviz Dialog</h1>
-                    <Button
-                        component="button"
-                        onClick={() => setWebvizDialogOpen(true)}
-                    >
-                        Open Dialog 1
-                    </Button>
-                    <Button
-                        component="button"
-                        onClick={() => setWebvizDialog2Open(true)}
-                    >
-                        Open Dialog 2
-                    </Button>
-                    <Button
-                        component="button"
-                        onClick={() => setWebvizDialog3Open(true)}
-                    >
-                        Open Dialog 3
-                    </Button>
-                    <WebvizDialog
-                        title="Webviz Dialog 1 Title"
-                        id="webviz-dialog-1"
-                        open={webvizDialogOpen}
-                        modal={true}
-                        setProps={(newProps) => {
-                            console.log(newProps);
-                            setWebvizDialogOpen(newProps.open);
-                        }}
-                        actions={["Cancel", "OK"]}
-                    >
-                        <div style={{ width: 1000, height: 500 }}>
-                            This is the content of the first dialog.
-                        </div>
-                    </WebvizDialog>
-                    <WebvizDialog
-                        title="Webviz Dialog 2 Title is very long to check how title wrap works"
-                        id="webviz-dialog-2"
-                        open={webvizDialog2Open}
-                        setProps={(newProps) => {
-                            console.log(newProps);
-                            setWebvizDialog2Open(newProps.open);
-                        }}
-                        actions={["Cancel", "OK"]}
-                    >
-                        <div>This is the content of the second dialog.</div>
-                    </WebvizDialog>
-                    <WebvizDialog
-                        title="Webviz Dialog 3 Title is very long to check how title wrap works"
-                        id="webviz-dialog-3"
-                        open={webvizDialog3Open}
-                        setProps={(newProps) => {
-                            console.log(newProps);
-                            setWebvizDialog3Open(newProps.open);
-                        }}
-                        actions={["Cancel", "OK"]}
-                    >
-                        <div style={{ width: 1000 }}>
-                            This is the content of the third dialog.
-                        </div>
-                    </WebvizDialog>
-                </>
-            )}
             {currentPage === "dialog" && (
                 <>
                     <h1>Dialog</h1>
