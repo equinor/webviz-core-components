@@ -90,13 +90,20 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
             }}
             ref={ref}
         >
+            {props.location === "aside" && (
+                <div
+                    className={`WebvizViewList__Arrow WebvizViewList__Arrow${
+                        props.location.charAt(0).toUpperCase() +
+                        (props.location as string).slice(1)
+                    }`}
+                />
+            )}
             <div
-                className={`WebvizViewList__Arrow WebvizViewList__Arrow${
+                className={`WebvizViewList__Content__${
                     props.location.charAt(0).toUpperCase() +
                     (props.location as string).slice(1)
                 }`}
-            />
-            <div className="WebvizViewList__Content">
+            >
                 {viewGroups.map((el) => {
                     if (el.group === "") {
                         return (
@@ -107,7 +114,11 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                                 enterNextDelay={1000}
                             >
                                 <div
-                                    className="WebvizViewList__Item"
+                                    className={`WebvizViewList__Item${
+                                        el.views[0].id === props.activeViewId
+                                            ? " WebvizViewList__Item__Active"
+                                            : ""
+                                    }`}
                                     onClick={() =>
                                         props.onActiveViewChange(el.views[0].id)
                                     }
@@ -141,7 +152,11 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                                         enterNextDelay={1000}
                                     >
                                         <div
-                                            className="WebvizViewList__Item"
+                                            className={`WebvizViewList__Item${
+                                                view.id === props.activeViewId
+                                                    ? " WebvizViewList__Item__Active"
+                                                    : ""
+                                            }`}
                                             onClick={() =>
                                                 props.onActiveViewChange(
                                                     view.id
