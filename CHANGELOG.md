@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+### Fixes
+
+-   [#273](https://github.com/equinor/webviz-core-components/pull/273) - Adjusted `propTypes` for `width` and `height` properties of `ScrollArea` component to also accept strings. Adjusted its handle sizes and their positions and improved UX with small areas and large content as well as with two scrollbars.
+
+## [0.6.1] - 2022-10-10
+
+### Fixed
+
+-   [#270](https://github.com/equinor/webviz-core-components/pull/270) - Fixed bug in `Select `component not allowing value to be `0`.
+-   [#271](https://github.com/equinor/webviz-core-components/pull/271) - Invalid states for active plugin and view are now replaced with the first plugin of the current page and its first view.
+
+## [0.6.0] - 2022-10-03
+
 ### Fixed
 
 -   [#220](https://github.com/equinor/webviz-core-components/pull/220) - `Overlay` was hiding menu due to conflicting z-index properties. Added `zIndex` prop to `Overlay` component and adjusted consumers.

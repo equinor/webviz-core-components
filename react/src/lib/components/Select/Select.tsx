@@ -223,14 +223,14 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
         >
             <select
                 value={
-                    selectedValues
-                        ? typeof selectedValues === "string" ||
-                          typeof selectedValues === "number"
-                            ? selectedValues
-                            : (selectedValues as (string | number)[]).map(
-                                  (el) => el.toString()
-                              )
-                        : ""
+                    typeof selectedValues === "string" ||
+                    typeof selectedValues === "number"
+                        ? multi
+                            ? [selectedValues.toString()]
+                            : selectedValues
+                        : (selectedValues as (string | number)[]).map((el) =>
+                              el.toString()
+                          )
                 }
                 multiple={multi}
                 size={size}
