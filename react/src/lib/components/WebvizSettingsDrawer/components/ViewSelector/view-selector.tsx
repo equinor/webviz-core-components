@@ -124,14 +124,16 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
     const handleSelectViewClick = React.useCallback(
         (view: string) => {
             if (store && plugin?.activeViewId !== view) {
-                setMenuOpen(false);
+                if (!props.open) {
+                    setMenuOpen(false);
+                }
                 store.dispatch({
                     type: StoreActions.SetActiveView,
                     payload: { viewId: view },
                 });
             }
         },
-        [store]
+        [store, props.open]
     );
 
     return (
