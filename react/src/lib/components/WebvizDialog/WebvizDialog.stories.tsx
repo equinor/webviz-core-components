@@ -23,14 +23,13 @@ const Template: ComponentStory<typeof WebvizDialog> = (
             </Button>
             <WebvizDialog
                 {...other}
-                children={
-                    other.modal
-                        ? "This is a modal dialog. Closes when clicking on backdrop"
-                        : "This is non-modal dialog"
-                }
                 open={dialogOpen}
                 setProps={(newProps) => setDialogOpen(newProps.open)}
-            />
+            >
+                {other.modal
+                    ? "This is a modal dialog. Closes when clicking on backdrop"
+                    : "This is non-modal dialog"}
+            </WebvizDialog>
         </>
     );
 };
@@ -63,7 +62,9 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
             WebvizDialog.defaultProps?.disableEscapeKeyDown || false,
         children: [],
         actions: WebvizDialog.defaultProps?.actions || [],
-        setProps: () => {},
+        setProps: () => {
+            return;
+        },
     };
 
     const [firstDialogOpen, setFirstDialogOpen] =
@@ -106,12 +107,11 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 actions={args.actions}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setFirstDialogOpen(newProps.open)}
-                children={
-                    <div style={{ width: 400 }}>
-                        This is the content of the first dialog
-                    </div>
-                }
-            />
+            >
+                <div style={{ width: 400 }}>
+                    This is the content of the first dialog
+                </div>
+            </WebvizDialog>
             <WebvizDialog
                 {...DialogProps}
                 id={"Second Dialog"}
@@ -120,8 +120,9 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 actions={args.actions}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setSecondDialogOpen(newProps.open)}
-                children={"This is the content of the second dialog"}
-            />
+            >
+                This is the content of the second dialog
+            </WebvizDialog>
             <WebvizDialog
                 {...DialogProps}
                 id={"Modal Dialog"}
@@ -131,10 +132,9 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 actions={args.actions}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setModalDialogOpen(newProps.open)}
-                children={
-                    "This is a modal dialog. Closes when clicking on backdrop"
-                }
-            />
+            >
+                "This is a modal dialog. Closes when clicking on backdrop"
+            </WebvizDialog>
         </>
     );
 };

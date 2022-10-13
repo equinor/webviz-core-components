@@ -24,3 +24,5 @@ export const Renderer = React.forwardRef<HTMLDivElement, RendererProps>(
         );
     }
 );
+
+Renderer.displayName = "WebvizRenderer";
