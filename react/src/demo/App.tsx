@@ -14,7 +14,6 @@ import {
     SmartNodeSelector,
     Dialog,
     Menu,
-    ScrollArea,
 } from "../lib";
 
 const steps = [
