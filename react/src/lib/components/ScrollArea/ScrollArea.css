@@ -2,7 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: 0px;
+    min-height: 60px;
 }
 
 .ScrollAreaInner {
@@ -47,13 +47,11 @@
 .ScrollArea .VerticalScrollBar {
     right: 4px;
     width: 8px;
-    min-height: 80px;
 }
 
 .ScrollArea .HorizontalScrollBar {
     bottom: 4px;
     height: 8px;
-    min-width: 80px;
 }
 
 .ScrollAreaInner::-webkit-scrollbar {
