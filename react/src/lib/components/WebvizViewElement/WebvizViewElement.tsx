@@ -11,7 +11,6 @@ import React from "react";
 
 import { Animation } from "../../utils/Animation";
 import { WebvizDialog } from "../WebvizDialog";
-// import { Dialog } from "../Dialog";
 import PropTypes from "prop-types";
 import {
     DownloadData,
@@ -589,7 +588,6 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     id={settingsDialogId}
                     title="View Element Settings"
                     open={settingsVisible}
-                    // draggable={true}
                     setProps={(dialogProps) => {
                         if (dialogProps.open === false) {
                             handleCloseSettingsDialog();
