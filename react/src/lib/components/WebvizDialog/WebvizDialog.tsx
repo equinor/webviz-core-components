@@ -93,7 +93,7 @@ export type WebvizDialogProps = {
 };
 
 export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
-    const [open, setOpen] = React.useState<boolean>(props.open || false);
+    const [open, setOpen] = React.useState<boolean>(false);
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
 
     const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
@@ -136,7 +136,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         }
     }, [dialogRef.current]);
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         let node: HTMLDivElement | null = null;
         if (!document.getElementById("WebvizDialog__root")) {
             node = document.createElement("div");
@@ -172,12 +172,15 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     }, []);
 
     React.useLayoutEffect(() => {
-        setOpen(props.open || false);
+        if (props.open === open) {
+            return;
+        }
 
-        if (props.open && dialogRef.current) {
+        setOpen(props.open || false);
+        if (props.open) {
             handleSetActive();
         }
-    }, [props.open, dialogRef.current]);
+    }, [props.open]);
 
     const handleClose = React.useCallback(
         (reason: DialogCloseReason) => {
@@ -187,7 +190,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             setOpen(false);
             props.setProps({ open: false });
         },
-        [props.modal, props.setProps, dialogRef.current]
+        [props.modal, props.setProps]
     );
 
     React.useLayoutEffect(() => {
