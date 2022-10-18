@@ -220,23 +220,23 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             setInitialDialogContentHeight(initialContentHeight);
         }
 
-        const newUseScrollArea =
-            initialContentHeight >= minScrollAreaHeight &&
-            margin.top + margin.bottom + initialSize.height >
-                window.innerHeight / 2;
         const wantedDialogHeight = Math.max(
             props.minHeight || 0,
             Math.min(window.innerHeight / 2, initialSize.height)
         );
+        const useScrollArea =
+            initialContentHeight >= minScrollAreaHeight &&
+            margin.top + margin.bottom + initialSize.height >
+                window.innerHeight / 2;
         const dialogContentHeight = Math.max(
-            newUseScrollArea ? minScrollAreaHeight : 0,
+            useScrollArea ? minScrollAreaHeight : 0,
             wantedDialogHeight -
                 2 * dialogContentPadding -
                 dialogTitleRef.current.getBoundingClientRect().height -
                 dialogActionsRef.current.getBoundingClientRect().height
         );
         setScrollAreaHeight(dialogContentHeight);
-        setUseScrollArea(newUseScrollArea);
+        setUseScrollArea(useScrollArea);
 
         const adjustedDialogHeight =
             dialogContentHeight +
@@ -632,7 +632,16 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         }
                         ref={dialogTitleRef}
                     />
-                    <div className="WebvizDialogContent" ref={dialogContentRef}>
+                    <div
+                        className="WebvizDialogContent"
+                        ref={dialogContentRef}
+                        style={{
+                            maxHeight: initialDialogContentHeight
+                                ? initialDialogContentHeight -
+                                  2 * dialogContentPadding
+                                : undefined,
+                        }}
+                    >
                         {useScrollArea ? (
                             <ScrollArea height={scrollAreaHeight}>
                                 {props.children}
