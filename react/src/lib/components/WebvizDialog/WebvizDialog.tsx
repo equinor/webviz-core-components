@@ -685,7 +685,7 @@ WebvizDialog.defaultProps = {
     modal: false,
     minWidth: 200,
     minHeight: 200,
-    disableDraggable: true,
+    disableDraggable: false,
     disableEscapeKeyDown: false,
     children: [],
     actions: [],
