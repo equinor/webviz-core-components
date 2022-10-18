@@ -42,6 +42,7 @@ Basic.args = {
     modal: false,
     minWidth: WebvizDialog.defaultProps?.minWidth || 100,
     minHeight: WebvizDialog.defaultProps?.minHeight || 100,
+    disableDraggable: WebvizDialog.defaultProps?.disableDraggable || false,
     disableEscapeKeyDown:
         WebvizDialog.defaultProps?.disableEscapeKeyDown || false,
     children: [],
@@ -105,6 +106,7 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 title={"First Dialog Title"}
                 open={firstDialogOpen}
                 actions={args.actions}
+                disableDraggable={false}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setFirstDialogOpen(newProps.open)}
             >
@@ -118,6 +120,7 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 title={"Second Dialog Title"}
                 open={secondDialogOpen}
                 actions={args.actions}
+                disableDraggable={false}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setSecondDialogOpen(newProps.open)}
             >
@@ -130,6 +133,7 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 open={modalDialogOpen}
                 modal={true}
                 actions={args.actions}
+                disableDraggable={false}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setModalDialogOpen(newProps.open)}
             >
