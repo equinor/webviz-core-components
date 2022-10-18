@@ -16,7 +16,7 @@ import {
     vectorLength,
 } from "../../utils/geometry";
 import { Backdrop } from "../Backdrop";
-import { Renderer } from "./components/renderer";
+import { WebvizRenderer } from "./components/WebvizRenderer";
 import { ScrollArea } from "../ScrollArea";
 
 enum DialogCloseReason {
@@ -592,7 +592,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     };
 
     return (
-        <Renderer target={placeholderDiv} ref={wrapperRef} open={open}>
+        <WebvizRenderer target={placeholderDiv} ref={wrapperRef} open={open}>
             <>
                 {props.modal && (
                     <Backdrop
@@ -656,7 +656,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     </div>
                 </div>
             </>
-        </Renderer>
+        </WebvizRenderer>
     );
 };
 

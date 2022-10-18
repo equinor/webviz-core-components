@@ -7,7 +7,7 @@ type RendererProps = {
     open?: boolean;
 };
 
-export const Renderer = React.forwardRef<HTMLDivElement, RendererProps>(
+export const WebvizRenderer = React.forwardRef<HTMLDivElement, RendererProps>(
     (props, ref) => {
         return props.target ? (
             ReactDOM.createPortal(
@@ -25,4 +25,4 @@ export const Renderer = React.forwardRef<HTMLDivElement, RendererProps>(
     }
 );
 
-Renderer.displayName = "WebvizRenderer";
+WebvizRenderer.displayName = "WebvizRenderer";
