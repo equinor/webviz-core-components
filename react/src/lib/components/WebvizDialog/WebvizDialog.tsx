@@ -104,8 +104,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const [initialDialogContentHeight, setInitialDialogContentHeight] =
         React.useState<number | null>(null);
 
-    const [isMovedOutsideWindow, setIsMovedOutsideWindow] =
-        React.useState<boolean>(false);
     const [useScrollArea, setUseScrollArea] =
         React.useState<boolean | undefined>(undefined);
     const [scrollAreaHeight, setScrollAreaHeight] = React.useState<number>(0);
@@ -263,9 +261,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 height: adjustedDialogHeight,
             });
             setDialogPosition({ x: margin.left, y: top });
-            setIsMovedOutsideWindow(
-                margin.left + adjustedWidth > window.innerWidth
-            );
         } else {
             const adjustedLeft = Math.round(
                 window.innerWidth / 2 - initialSize.width / 2
@@ -275,10 +270,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 height: adjustedDialogHeight,
             });
             setDialogPosition({ x: adjustedLeft, y: top });
-            setIsMovedOutsideWindow(
-                adjustedLeft < 0 ||
-                    adjustedLeft + initialSize.width > window.innerWidth
-            );
         }
     }, [
         open,
@@ -348,12 +339,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 }
             } else {
                 setDialogPosition((prev) => pointSum(delta, prev));
-                const width = dialogRef.current.getBoundingClientRect().width;
-                const left = dialogRef.current.getBoundingClientRect().left;
-                setIsMovedOutsideWindow(
-                    left < 0 || left + width > window.innerWidth
-                );
-
                 prevMousePosition = currentMousePosition;
             }
         };
@@ -438,7 +423,11 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             const windowWidth = window.innerWidth;
             const deltaWidth = windowWidth - previousWindowWidth;
 
-            if (isMovedOutsideWindow) {
+            const wasDialogOutsideWindow =
+                dialogLeft < 0 ||
+                dialogLeft + dialogWidth > previousWindowWidth;
+
+            if (wasDialogOutsideWindow) {
                 if (dialogLeft < 0) {
                     if (
                         deltaWidth < 0 &&
@@ -486,10 +475,6 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         });
                     }
                 }
-                setIsMovedOutsideWindow(
-                    dialogLeft < 0 ||
-                        dialogLeft + dialogWidth > window.innerWidth
-                );
                 previousWindowWidth = windowWidth;
                 return;
             }
@@ -497,10 +482,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             if (deltaWidth < 0) {
                 const actualMarginLeft =
                     dialogLeft < margin.left ? dialogLeft : margin.left;
-                const dialogRight =
+                const actualMarginRight =
                     previousWindowWidth - dialogLeft - dialogWidth;
                 const newDialogLeft =
-                    dialogRight > margin.right
+                    actualMarginRight > margin.right
                         ? Math.max(
                               actualMarginLeft,
                               dialogLeft + Math.ceil(deltaWidth / 2)
@@ -552,14 +537,20 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     }));
                 }
 
+                const actualMarginRight = Math.min(
+                    margin.right,
+                    previousWindowWidth - dialogLeft - dialogWidth
+                );
                 const remainingDelta =
                     deltaWidth - (newDialogWidth - dialogWidth);
                 const newDialogLeft = Math.max(
                     actualMarginLeft,
                     Math.min(
-                        windowWidth - newDialogWidth - margin.right,
+                        windowWidth - newDialogWidth - actualMarginRight,
                         windowWidth >
-                            actualMarginLeft + newDialogWidth + margin.right
+                            actualMarginLeft +
+                                newDialogWidth +
+                                actualMarginRight
                             ? dialogLeft + remainingDelta / 2
                             : dialogLeft
                     )
@@ -577,13 +568,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         return () => {
             window.removeEventListener("resize", handleWindowResize);
         };
-    }, [
-        dialogRef.current,
-        open,
-        initialDialogSize,
-        isMovedOutsideWindow,
-        props.minWidth,
-    ]);
+    }, [dialogRef.current, open, initialDialogSize, props.minWidth]);
 
     const handleActionButtonClick = (action: string) => {
         props.setProps({
