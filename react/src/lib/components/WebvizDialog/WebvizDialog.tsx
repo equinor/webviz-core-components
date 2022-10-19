@@ -104,7 +104,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const [initialDialogContentHeight, setInitialDialogContentHeight] =
         React.useState<number | null>(null);
     const [dialogContentHeight, setDialogContentHeight] =
-        React.useState<number>(0);
+        React.useState<number | null>(null);
     const [useScrollArea, setUseScrollArea] =
         React.useState<boolean | undefined>(undefined);
 
@@ -622,12 +622,11 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         className="WebvizDialogContent"
                         ref={dialogContentRef}
                         style={{
-                            minHeight: dialogContentHeight,
-                            maxHeight: dialogContentHeight,
+                            height: dialogContentHeight || undefined,
                         }}
                     >
                         {useScrollArea ? (
-                            <ScrollArea height={dialogContentHeight}>
+                            <ScrollArea height={dialogContentHeight || 0}>
                                 {props.children}
                             </ScrollArea>
                         ) : (
