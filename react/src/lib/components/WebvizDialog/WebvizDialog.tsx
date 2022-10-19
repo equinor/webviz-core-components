@@ -120,11 +120,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         const activeDialogs = Array.from(
             document.getElementsByClassName("WebvizDialog--active")
         );
-        activeDialogs.forEach((dialog) => {
-            if (dialog.id !== props.id) {
-                dialog.classList.remove("WebvizDialog--active");
-            }
-        });
+        !props.modal &&
+            activeDialogs.forEach((dialog) => {
+                if (dialog.id !== props.id) {
+                    dialog.classList.remove("WebvizDialog--active");
+                }
+            });
 
         if (
             dialogRef.current &&
@@ -132,7 +133,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         ) {
             dialogRef.current.classList.add("WebvizDialog--active");
         }
-    }, [dialogRef.current]);
+    }, [dialogRef.current, props.modal]);
 
     React.useLayoutEffect(() => {
         let node: HTMLDivElement | null = null;
