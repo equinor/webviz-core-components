@@ -103,10 +103,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         React.useState<Size | null>(null);
     const [initialDialogContentHeight, setInitialDialogContentHeight] =
         React.useState<number | null>(null);
-
+    const [dialogContentHeight, setDialogContentHeight] =
+        React.useState<number>(0);
     const [useScrollArea, setUseScrollArea] =
         React.useState<boolean | undefined>(undefined);
-    const [scrollAreaHeight, setScrollAreaHeight] = React.useState<number>(0);
 
     const [placeholderDiv, setPlaceholderDiv] =
         React.useState<HTMLDivElement | null>(null);
@@ -234,7 +234,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 dialogTitleRef.current.getBoundingClientRect().height -
                 dialogActionsRef.current.getBoundingClientRect().height
         );
-        setScrollAreaHeight(dialogContentHeight);
+        setDialogContentHeight(dialogContentHeight);
         setUseScrollArea(useScrollArea);
 
         const adjustedDialogHeight =
@@ -622,14 +622,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         className="WebvizDialogContent"
                         ref={dialogContentRef}
                         style={{
-                            maxHeight: initialDialogContentHeight
-                                ? initialDialogContentHeight -
-                                  2 * dialogContentPadding
-                                : undefined,
+                            minHeight: dialogContentHeight,
+                            maxHeight: dialogContentHeight,
                         }}
                     >
                         {useScrollArea ? (
-                            <ScrollArea height={scrollAreaHeight}>
+                            <ScrollArea height={dialogContentHeight}>
                                 {props.children}
                             </ScrollArea>
                         ) : (
