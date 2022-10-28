@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED] - YYYY-MM-DD
 
+### Fixes
+
+-   [#273](https://github.com/equinor/webviz-core-components/pull/273) - Adjusted `propTypes` for `width` and `height` properties of `ScrollArea` component to also accept strings. Adjusted its handle sizes and their positions and improved UX with small areas and large content as well as with two scrollbars.
+
 ## [0.6.1] - 2022-10-10
 
 ### Fixed
