@@ -14,21 +14,30 @@ export default {
 const Template: ComponentStory<typeof WebvizDialog> = (
     args: WebvizDialogProps
 ) => {
-    const { open, ...other } = args;
-    const [dialogOpen, setDialogOpen] = React.useState<boolean>(open || false);
+    const { ...other } = args;
+    const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
+
     return (
         <>
-            <Button variant="outlined" onClick={() => setDialogOpen(true)}>
-                {`Open ${other.id}`}
-            </Button>
+            <Button
+                variant="outlined"
+                onClick={() => setDialogOpen(true)}
+            >{`Open ${other.id}`}</Button>
             <WebvizDialog
                 {...other}
                 open={dialogOpen}
                 setProps={(newProps) => setDialogOpen(newProps.open)}
             >
-                {other.modal
-                    ? "This is a modal dialog. Closes when clicking on backdrop"
-                    : "This is non-modal dialog"}
+                {other.modal ? (
+                    <div style={{ width: 400, height: 200 }}>
+                        This is the content of the modal dialog. Closes when
+                        clicking on backdrop.
+                    </div>
+                ) : (
+                    <div style={{ width: 400, height: 600 }}>
+                        This is the content of the non-modal dialog
+                    </div>
+                )}
             </WebvizDialog>
         </>
     );
@@ -39,9 +48,11 @@ Basic.args = {
     id: "Dialog",
     title: "My Dialog Title",
     open: WebvizDialog.defaultProps?.open || false,
-    modal: false,
+    modal: true,
+    heightOwner: "content",
+    height: 150,
+    maxWidth: WebvizDialog.defaultProps?.maxWidth || 1200,
     minWidth: WebvizDialog.defaultProps?.minWidth || 100,
-    minHeight: WebvizDialog.defaultProps?.minHeight || 100,
     disableDraggable: WebvizDialog.defaultProps?.disableDraggable || false,
     disableEscapeKeyDown:
         WebvizDialog.defaultProps?.disableEscapeKeyDown || false,
@@ -57,8 +68,10 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
         title: "",
         open: false,
         modal: false,
-        minWidth: WebvizDialog.defaultProps?.minWidth || 100,
-        minHeight: WebvizDialog.defaultProps?.minHeight || 100,
+        heightOwner: undefined,
+        height: undefined,
+        minWidth: WebvizDialog.defaultProps?.minWidth || 200,
+        maxWidth: undefined,
         disableEscapeKeyDown:
             WebvizDialog.defaultProps?.disableEscapeKeyDown || false,
         children: [],

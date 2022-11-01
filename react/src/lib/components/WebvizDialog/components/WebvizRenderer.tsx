@@ -12,6 +12,7 @@ export const WebvizRenderer = React.forwardRef<HTMLDivElement, RendererProps>(
         return props.target ? (
             ReactDOM.createPortal(
                 <div
+                    aria-label="WebvizRenderer"
                     ref={ref}
                     style={{ display: props.open ? "block" : "none" }}
                 >

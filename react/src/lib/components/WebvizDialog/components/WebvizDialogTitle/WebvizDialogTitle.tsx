@@ -12,6 +12,7 @@ Icon.add({ close });
 
 export type WebvizDialogTitleProps = {
     title: string;
+    height: number;
     onClose?: () => void;
 };
 
@@ -58,7 +59,11 @@ export const WebvizDialogTitle = React.forwardRef<
     }, [buttonWrapperRef]);
 
     return (
-        <div className="WebvizDialogTitle" ref={ref}>
+        <div
+            className="WebvizDialogTitle"
+            ref={ref}
+            style={{ height: props.height }}
+        >
             <div>{props.title}</div>
             {props.onClose && (
                 <div ref={buttonWrapperRef}>
@@ -78,5 +83,6 @@ WebvizDialogTitle.displayName = "WebvizDialogTitle";
 
 WebvizDialogTitle.propTypes = {
     title: PropTypes.string.isRequired,
+    height: PropTypes.number.isRequired,
     onClose: PropTypes.func,
 };

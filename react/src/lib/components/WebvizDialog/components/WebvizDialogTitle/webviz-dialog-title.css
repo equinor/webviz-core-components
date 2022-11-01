@@ -2,6 +2,7 @@
     display: flex;
     cursor: move;
     padding: 16px;
+    box-sizing: border-box;
     align-items: center;
     font-size: 1.25rem;
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
@@ -12,6 +13,9 @@
 }
 
 .WebvizDialogTitle > div:first-of-type {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
     flex-grow: 4;
     margin-right: 8px;
 }

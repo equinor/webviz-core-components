@@ -1,0 +1,11 @@
+.WebvizDialogContent {
+    padding: 16px;
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    flex-grow: 4;
+}
+
+.WebvizDialogContent > .ScrollArea {
+    flex-grow: 4;
+}

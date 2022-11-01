@@ -1,23 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Button } from "@material-ui/core";
-
 import { WebvizDialogTitle } from "./components/WebvizDialogTitle/WebvizDialogTitle";
 import "./webviz-dialog.css";
 
 import { Point } from "../../shared-types/point";
-import { Size } from "../../shared-types/size";
 import {
     MANHATTAN_LENGTH,
-    ORIGIN,
     pointDifference,
-    pointSum,
     vectorLength,
 } from "../../utils/geometry";
 import { Backdrop } from "../Backdrop";
 import { WebvizRenderer } from "./components/WebvizRenderer";
-import { ScrollArea } from "../ScrollArea";
+import { WebvizDialogActions } from "./components/WebvizDialogActions/WebvizDialogActions";
+import { WebvizDialogContent } from "./components/WebvizDialogContent/WebvizDialogContent";
 
 enum DialogCloseReason {
     BUTTON_CLICK,
@@ -26,8 +22,8 @@ enum DialogCloseReason {
 }
 
 const margin = { left: 16, right: 16, top: 16, bottom: 16 };
-const minScrollAreaHeight = 100;
-const dialogContentPadding = 16;
+const dialogTitleHeight = 80;
+const dialogActionsHeight = 70;
 
 export type WebvizDialogParentProps = {
     /**
@@ -62,13 +58,21 @@ export type WebvizDialogProps = {
      */
     title: string;
     /**
+     * Set owner of height prop. If no owner is provided height is automatically according to content
+     */
+    heightOwner?: "content" | "dialog";
+    /**
+     * Set the height of height owner element in px or vw
+     */
+    height?: number | string;
+    /**
      * Set the minimum width in px
      */
     minWidth?: number;
     /**
-     * Set the minimum height in px
+     * Set the max width in px or vw
      */
-    minHeight?: number;
+    maxWidth?: number | string;
     /**
      * If true, dragging of dialog is disabled
      */
@@ -96,17 +100,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const [open, setOpen] = React.useState<boolean>(false);
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
 
-    const [dialogPosition, setDialogPosition] = React.useState<Point>(ORIGIN);
+    const [dialogLeft, setDialogLeft] = React.useState<number>(0);
+    const [dialogTop, setDialogTop] = React.useState<number>(0);
 
-    const [dialogSize, setDialogSize] = React.useState<Size | null>(null);
-    const [initialDialogSize, setInitialDialogSize] =
-        React.useState<Size | null>(null);
-    const [initialDialogContentHeight, setInitialDialogContentHeight] =
+    const [dialogWidth, setDialogWidth] = React.useState<number | null>(null);
+    const [initialDialogWidth, setInitialDialogWidth] =
         React.useState<number | null>(null);
-    const [dialogContentHeight, setDialogContentHeight] =
-        React.useState<number | null>(null);
-    const [useScrollArea, setUseScrollArea] =
-        React.useState<boolean | undefined>(undefined);
 
     const [placeholderDiv, setPlaceholderDiv] =
         React.useState<HTMLDivElement | null>(null);
@@ -196,91 +195,45 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         if (
             !wrapperRef.current ||
             wrapperRef.current.style.display !== "block" ||
-            !dialogRef.current ||
-            !dialogTitleRef.current ||
-            !dialogContentRef.current ||
-            !dialogActionsRef.current
+            !dialogRef.current
         ) {
             return;
         }
 
-        let initialSize = initialDialogSize || { width: 0, height: 0 };
-        let initialContentHeight = initialDialogContentHeight || 0;
-        if (initialDialogSize === null) {
-            initialSize = {
-                width: dialogRef.current.getBoundingClientRect().width,
-                height: dialogRef.current.getBoundingClientRect().height,
-            };
-            setInitialDialogSize(initialSize);
-        }
-        if (initialDialogContentHeight === null) {
-            initialContentHeight =
-                dialogContentRef.current.getBoundingClientRect().height;
-            setInitialDialogContentHeight(initialContentHeight);
+        let initialWidth = initialDialogWidth || 0;
+        const dialogHeight = dialogRef.current.getBoundingClientRect().height;
+        if (initialDialogWidth === null) {
+            initialWidth = dialogRef.current.getBoundingClientRect().width;
+            setInitialDialogWidth(initialWidth);
         }
 
-        const wantedDialogHeight = Math.max(
-            props.minHeight || 0,
-            Math.min(window.innerHeight / 2, initialSize.height)
-        );
-        const useScrollArea =
-            initialContentHeight >= minScrollAreaHeight &&
-            margin.top + margin.bottom + initialSize.height >
-                window.innerHeight / 2;
-        const dialogContentHeight = Math.max(
-            useScrollArea ? minScrollAreaHeight : 0,
-            wantedDialogHeight -
-                2 * dialogContentPadding -
-                dialogTitleRef.current.getBoundingClientRect().height -
-                dialogActionsRef.current.getBoundingClientRect().height
-        );
-        setDialogContentHeight(dialogContentHeight);
-        setUseScrollArea(useScrollArea);
-
-        const adjustedDialogHeight =
-            dialogContentHeight +
-            2 * dialogContentPadding +
-            dialogTitleRef.current.getBoundingClientRect().height +
-            dialogActionsRef.current.getBoundingClientRect().height;
         const top = Math.max(
             margin.top,
-            Math.round(window.innerHeight / 2 - adjustedDialogHeight / 2)
+            Math.round(window.innerHeight / 2 - dialogHeight / 2)
         );
-        if (
-            window.innerWidth <
-            margin.left + initialSize.width + margin.right
-        ) {
+        setDialogTop(top);
+        if (window.innerWidth < margin.left + initialWidth + margin.right) {
             const adjustedWidth = Math.max(
                 props.minWidth || 0,
                 Math.min(
-                    initialSize.width,
+                    initialWidth,
                     window.innerWidth - margin.left - margin.right
                 )
             );
-            setDialogSize({
-                width: adjustedWidth,
-                height: adjustedDialogHeight,
-            });
-            setDialogPosition({ x: margin.left, y: top });
+            setDialogWidth(adjustedWidth);
+            setDialogLeft(margin.left);
         } else {
             const adjustedLeft = Math.round(
-                window.innerWidth / 2 - initialSize.width / 2
+                window.innerWidth / 2 - initialWidth / 2
             );
-            setDialogSize({
-                width: initialSize.width,
-                height: adjustedDialogHeight,
-            });
-            setDialogPosition({ x: adjustedLeft, y: top });
+            setDialogWidth(initialWidth);
+            setDialogLeft(adjustedLeft);
         }
     }, [
         open,
         wrapperRef.current,
         dialogRef.current,
-        dialogTitleRef.current,
-        dialogContentRef.current,
-        dialogActionsRef.current,
-        initialDialogContentHeight,
-        initialDialogSize,
+        initialDialogWidth,
         props.minWidth,
     ]);
 
@@ -339,7 +292,8 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     isMoveStarted = true;
                 }
             } else {
-                setDialogPosition((prev) => pointSum(delta, prev));
+                setDialogLeft((prev) => delta.x + prev);
+                setDialogTop((prev) => delta.y + prev);
                 prevMousePosition = currentMousePosition;
             }
         };
@@ -413,9 +367,10 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         }
 
         let previousWindowWidth = window.innerWidth;
+        let previousWindowHeight = window.innerHeight;
 
-        const handleWindowResize = () => {
-            if (!open || !dialogRef.current || initialDialogSize === null) {
+        const handleWindowWidthResize = () => {
+            if (!open || !dialogRef.current || initialDialogWidth === null) {
                 return;
             }
 
@@ -428,52 +383,31 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 dialogLeft < 0 ||
                 dialogLeft + dialogWidth > previousWindowWidth;
 
+            // Width resize: Handle width and left position
             if (wasDialogOutsideWindow) {
                 if (dialogLeft < 0) {
+                    const newDialogWidth = Math.min(
+                        Math.max(props.minWidth || 0, dialogWidth + deltaWidth),
+                        initialDialogWidth
+                    );
                     if (
                         deltaWidth < 0 &&
                         windowWidth < dialogLeft + dialogWidth + margin.right
                     ) {
                         // Decrease dialog width when window width decrease
-                        const newDialogWidth = Math.min(
-                            Math.max(
-                                props.minWidth || 0,
-                                dialogWidth + deltaWidth
-                            ),
-                            initialDialogSize.width
-                        );
-                        setDialogSize((prev) => ({
-                            height: prev?.height || 0,
-                            width: newDialogWidth,
-                        }));
+                        setDialogWidth(newDialogWidth);
                     } else if (
                         deltaWidth > 0 &&
                         windowWidth > dialogLeft + dialogWidth + margin.right
                     ) {
                         // Increase dialog width when window width increase
-                        const newDialogWidth = Math.min(
-                            Math.max(
-                                props.minWidth || 0,
-                                dialogWidth + deltaWidth
-                            ),
-                            initialDialogSize.width
-                        );
-                        setDialogSize((prev) => ({
-                            height: prev?.height || 0,
-                            width: newDialogWidth,
-                        }));
+                        setDialogWidth(newDialogWidth);
                     }
                 } else if (dialogLeft > 0) {
                     if (deltaWidth < 0) {
-                        setDialogPosition((prev) => {
-                            return {
-                                x: Math.max(
-                                    margin.left,
-                                    dialogLeft + deltaWidth
-                                ),
-                                y: prev.y,
-                            };
-                        });
+                        setDialogLeft(
+                            Math.max(margin.left, dialogLeft + deltaWidth)
+                        );
                     }
                 }
                 previousWindowWidth = windowWidth;
@@ -494,9 +428,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         : Math.max(actualMarginLeft, dialogLeft + deltaWidth);
 
                 if (newDialogLeft !== dialogLeft) {
-                    setDialogPosition((prev) => {
-                        return { y: prev.y, x: newDialogLeft };
-                    });
+                    setDialogLeft(newDialogLeft);
                 }
 
                 const remainingDelta =
@@ -510,15 +442,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     dialogWidth > windowWidth - actualMarginLeft - margin.right
                         ? Math.max(
                               props.minWidth || 0,
-                              Math.min(calculatedWidth, initialDialogSize.width)
+                              Math.min(calculatedWidth, initialDialogWidth)
                           )
                         : dialogWidth;
 
                 if (newDialogWidth !== dialogWidth) {
-                    setDialogSize((prev) => ({
-                        height: prev?.height || 0,
-                        width: newDialogWidth,
-                    }));
+                    setDialogWidth(newDialogWidth);
                 }
             } else if (deltaWidth > 0) {
                 const actualMarginLeft =
@@ -528,14 +457,11 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     windowWidth - actualMarginLeft - margin.right
                 );
                 const newDialogWidth = Math.min(
-                    initialDialogSize.width,
+                    initialDialogWidth,
                     calculatedWidth
                 );
                 if (newDialogWidth !== dialogWidth) {
-                    setDialogSize((prev) => ({
-                        height: prev?.height || 0,
-                        width: newDialogWidth,
-                    }));
+                    setDialogWidth(newDialogWidth);
                 }
 
                 const actualMarginRight = Math.min(
@@ -557,19 +483,70 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     )
                 );
                 if (newDialogLeft !== dialogLeft) {
-                    setDialogPosition((prev) => {
-                        return { y: prev.y, x: newDialogLeft };
-                    });
+                    setDialogLeft(newDialogLeft);
                 }
             }
             previousWindowWidth = windowWidth;
         };
 
-        window.addEventListener("resize", handleWindowResize);
-        return () => {
-            window.removeEventListener("resize", handleWindowResize);
+        const handleWindowHeightResize = () => {
+            if (!dialogRef.current) {
+                return;
+            }
+
+            const dialogTop = dialogRef.current.getBoundingClientRect().top;
+            const dialogHeight =
+                dialogRef.current.getBoundingClientRect().height;
+            const windowHeight = window.innerHeight;
+            const deltaHeight = windowHeight - previousWindowHeight;
+
+            const wasDialogOutsideWindow =
+                dialogTop < 0 ||
+                dialogTop + dialogHeight > previousWindowHeight;
+
+            // Height resize: Handle top position
+            if (wasDialogOutsideWindow) {
+                if (dialogTop > 0 && deltaHeight < 0) {
+                    const actualMarginTop =
+                        dialogTop < margin.top ? dialogTop : margin.top;
+                    setDialogTop(
+                        Math.max(actualMarginTop, dialogTop + deltaHeight)
+                    );
+                }
+                previousWindowHeight = windowHeight;
+                return;
+            }
+
+            const actualMarginTop =
+                dialogTop < margin.top ? dialogTop : margin.top;
+            if (
+                deltaHeight > 0 &&
+                actualMarginTop + dialogHeight + margin.bottom < windowHeight
+            ) {
+                setDialogTop(dialogTop + Math.ceil(deltaHeight / 2));
+            } else if (deltaHeight < 0) {
+                const actualMarginBottom =
+                    previousWindowHeight - dialogTop - dialogHeight;
+                setDialogTop(
+                    actualMarginBottom > margin.bottom
+                        ? Math.max(
+                              actualMarginTop,
+                              dialogTop + Math.ceil(deltaHeight / 2)
+                          )
+                        : Math.max(actualMarginTop, dialogTop + deltaHeight)
+                );
+            }
+
+            previousWindowHeight = windowHeight;
         };
-    }, [dialogRef.current, open, initialDialogSize, props.minWidth]);
+
+        window.addEventListener("resize", handleWindowWidthResize);
+        window.addEventListener("resize", handleWindowHeightResize);
+        return () => {
+            window.removeEventListener("resize", handleWindowWidthResize);
+            window.removeEventListener("resize", handleWindowHeightResize);
+        };
+    }, [dialogRef.current, open, initialDialogWidth, props.minWidth]);
 
     const handleActionButtonClick = (action: string) => {
         props.setProps({
@@ -602,12 +579,14 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     id={props.id}
                     ref={dialogRef}
                     style={{
-                        left: Math.floor(dialogPosition.x),
-                        top: Math.floor(dialogPosition.y),
-                        width: dialogSize?.width || undefined,
-                        height: dialogSize?.height || undefined,
+                        left: Math.floor(dialogLeft),
+                        top: Math.floor(dialogTop),
+                        width: dialogWidth || props.maxWidth || undefined,
                         minWidth: props.minWidth,
-                        minHeight: props.minHeight,
+                        height:
+                            props.heightOwner === "dialog"
+                                ? props.height
+                                : undefined,
                     }}
                     onMouseDown={() => handleSetActive()}
                 >
@@ -616,39 +595,39 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                         onClose={() =>
                             handleClose(DialogCloseReason.BUTTON_CLICK)
                         }
+                        height={dialogTitleHeight}
                         ref={dialogTitleRef}
                     />
-                    <div
-                        className="WebvizDialogContent"
+                    <WebvizDialogContent
+                        height={
+                            props.heightOwner === "content"
+                                ? props.height
+                                : props.heightOwner === "dialog"
+                                ? `calc(100% - ${dialogTitleHeight}px - ${
+                                      props.actions ? dialogActionsHeight : 0
+                                  }px)`
+                                : undefined
+                        }
+                        useScrollArea={
+                            props.heightOwner === "content" ||
+                            props.heightOwner === "dialog"
+                        }
                         ref={dialogContentRef}
-                        style={{
-                            height: dialogContentHeight || undefined,
-                        }}
                     >
-                        {useScrollArea ? (
-                            <ScrollArea height={dialogContentHeight || 0}>
-                                {props.children}
-                            </ScrollArea>
-                        ) : (
-                            props.children
-                        )}
-                    </div>
-                    <div className="WebvizDialogActions" ref={dialogActionsRef}>
-                        {props.actions &&
-                            props.actions.map((action) => (
-                                <Button
-                                    key={action}
-                                    component="button"
-                                    onClick={() =>
-                                        handleActionButtonClick(
-                                            action as string
-                                        )
-                                    }
-                                >
-                                    {action}
-                                </Button>
-                            ))}
-                    </div>
+                        {props.children}
+                    </WebvizDialogContent>
+                    {props.actions && props.actions.length > 0 && (
+                        <WebvizDialogActions
+                            height={dialogActionsHeight}
+                            actions={props.actions}
+                            onActionClick={(action) => {
+                                handleActionButtonClick(
+                                    action.last_action_called as string
+                                );
+                            }}
+                            ref={dialogActionsRef}
+                        />
+                    )}
                 </div>
             </>
         </WebvizRenderer>
@@ -660,8 +639,10 @@ WebvizDialog.propTypes = {
     open: PropTypes.bool,
     modal: PropTypes.bool,
     title: PropTypes.string.isRequired,
+    heightOwner: PropTypes.oneOf(["dialog", "content"]),
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     minWidth: PropTypes.number,
-    minHeight: PropTypes.number,
+    maxWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     disableDraggable: PropTypes.bool,
     disableEscapeKeyDown: PropTypes.bool,
     children: PropTypes.oneOfType([
@@ -675,8 +656,10 @@ WebvizDialog.propTypes = {
 WebvizDialog.defaultProps = {
     open: false,
     modal: false,
+    heightOwner: undefined,
+    height: undefined,
     minWidth: 200,
-    minHeight: 200,
+    maxWidth: undefined,
     disableDraggable: false,
     disableEscapeKeyDown: false,
     children: [],
