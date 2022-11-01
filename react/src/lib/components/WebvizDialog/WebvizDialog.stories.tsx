@@ -132,7 +132,7 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 id={"Second Dialog"}
                 title={"Second Dialog Title"}
                 open={secondDialogOpen}
-                actions={args.actions}
+                actions={["cancel", "ok"]}
                 disableDraggable={false}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
                 setProps={(newProps) => setSecondDialogOpen(newProps.open)}
@@ -145,6 +145,8 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 title={"Modal Dialog Title"}
                 open={modalDialogOpen}
                 modal={true}
+                heightOwner={"dialog"}
+                height={500}
                 actions={args.actions}
                 disableDraggable={false}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}

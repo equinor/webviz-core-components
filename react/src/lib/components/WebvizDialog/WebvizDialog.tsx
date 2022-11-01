@@ -616,18 +616,16 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                     >
                         {props.children}
                     </WebvizDialogContent>
-                    {props.actions && props.actions.length > 0 && (
-                        <WebvizDialogActions
-                            height={dialogActionsHeight}
-                            actions={props.actions}
-                            onActionClick={(action) => {
-                                handleActionButtonClick(
-                                    action.last_action_called as string
-                                );
-                            }}
-                            ref={dialogActionsRef}
-                        />
-                    )}
+                    <WebvizDialogActions
+                        height={dialogActionsHeight}
+                        actions={props.actions}
+                        onActionClick={(action) => {
+                            handleActionButtonClick(
+                                action.last_action_called as string
+                            );
+                        }}
+                        ref={dialogActionsRef}
+                    />
                 </div>
             </>
         </WebvizRenderer>

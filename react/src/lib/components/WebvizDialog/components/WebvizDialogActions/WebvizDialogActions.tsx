@@ -10,7 +10,7 @@ export type WebvizDialogActionsParentProps = {
 
 export type WebvizDialogActionsProps = {
     height?: number;
-    actions: string[];
+    actions?: string[];
     onActionClick: (parentProps: WebvizDialogActionsParentProps) => void;
 };
 
@@ -31,17 +31,26 @@ export const WebvizDialogActions = React.forwardRef<
         <div
             className="WebvizDialogActions"
             ref={ref}
-            style={{ height: props.height }}
+            style={{
+                height:
+                    props.actions && props.actions.length > 0
+                        ? props.height
+                        : 0,
+            }}
         >
-            {props.actions.map((action) => (
-                <Button
-                    key={action}
-                    component="button"
-                    onClick={() => handleActionClick(action as string)}
-                >
-                    {action}
-                </Button>
-            ))}
+            {props.actions ? (
+                props.actions.map((action) => (
+                    <Button
+                        key={action}
+                        component="button"
+                        onClick={() => handleActionClick(action as string)}
+                    >
+                        {action}
+                    </Button>
+                ))
+            ) : (
+                <></>
+            )}
         </div>
     );
 });
