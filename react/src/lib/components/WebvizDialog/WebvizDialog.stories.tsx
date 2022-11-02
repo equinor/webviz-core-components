@@ -29,13 +29,14 @@ const Template: ComponentStory<typeof WebvizDialog> = (
                 setProps={(newProps) => setDialogOpen(newProps.open)}
             >
                 {other.modal ? (
-                    <div style={{ width: 400, height: 200 }}>
-                        This is the content of the modal dialog. Closes when
-                        clicking on backdrop.
+                    <div style={{ width: 400, height: 300 }}>
+                        This is the content of the modal dialog div (width: 400,
+                        height: 300). Closes when clicking on backdrop.
                     </div>
                 ) : (
                     <div style={{ width: 400, height: 600 }}>
-                        This is the content of the non-modal dialog
+                        This is the content of the non-modal dialog div (width:
+                        400, height: 600)
                     </div>
                 )}
             </WebvizDialog>
@@ -50,7 +51,7 @@ Basic.args = {
     open: WebvizDialog.defaultProps?.open || false,
     modal: true,
     heightOwner: "content",
-    height: 150,
+    height: 250,
     maxWidth: WebvizDialog.defaultProps?.maxWidth || 1200,
     minWidth: WebvizDialog.defaultProps?.minWidth || 100,
     disableDraggable: WebvizDialog.defaultProps?.disableDraggable || false,
@@ -146,7 +147,7 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 open={modalDialogOpen}
                 modal={true}
                 heightOwner={"dialog"}
-                height={500}
+                height={400}
                 actions={args.actions}
                 disableDraggable={false}
                 disableEscapeKeyDown={args.disableEscapeKeyDown}
