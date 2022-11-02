@@ -3,13 +3,12 @@
     width: 100vw;
     height: 100vh;
     inset: 0px;
-    z-index: 1150;
+    z-index: 1050;
     overflow: hidden;
     pointer-events: none;
 }
 
 .WebvizDialog {
-    z-index: 1151;
     position: absolute;
     pointer-events: all;
     display: flex;
@@ -24,7 +23,6 @@
 }
 
 .WebvizDialog--active {
-    z-index: 1152;
     box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 20%),
         0px 24px 38px 3px rgb(0 0 0 / 20%), 0px 9px 46px 8px rgb(0 0 0 / 20%);
     -webkit-box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 20%),
@@ -37,4 +35,12 @@
         0px 24px 38px 3px rgb(0 0 0 / 20%), 0px 9px 46px 8px rgb(0 0 0 / 20%);
     -webkit-box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 20%),
         0px 24px 38px 3px rgb(0 0 0 / 20%), 0px 9px 46px 8px rgb(0 0 0 / 20%);
+}
+
+.WebvizDialogPlaceholder {
+    position: relative;
+}
+
+.WebvizDialogPlaceholderModal {
+    position: relative;
 }

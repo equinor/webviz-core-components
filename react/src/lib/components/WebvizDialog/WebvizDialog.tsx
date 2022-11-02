@@ -24,6 +24,8 @@ enum DialogCloseReason {
 const margin = { left: 16, right: 16, top: 16, bottom: 16 };
 const dialogTitleHeight = 80;
 const dialogActionsHeight = 70;
+const zIndex = 1051;
+const zIndexModal = 1199;
 
 export type WebvizDialogParentProps = {
     /**
@@ -96,6 +98,8 @@ export type WebvizDialogProps = {
     setProps: (parentProps: WebvizDialogParentProps) => void;
 };
 
+// const setDialogZIndex;
+
 export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     const [open, setOpen] = React.useState<boolean>(false);
     const [actionsCalled, setActionsCalled] = React.useState<number>(0);
@@ -119,20 +123,56 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         const activeDialogs = Array.from(
             document.getElementsByClassName("WebvizDialog--active")
         );
-        !props.modal &&
-            activeDialogs.forEach((dialog) => {
-                if (dialog.id !== props.id) {
-                    dialog.classList.remove("WebvizDialog--active");
-                }
-            });
-
+        activeDialogs.forEach((dialog) => {
+            if (dialog.id !== props.id) {
+                dialog.classList.remove("WebvizDialog--active");
+            }
+        });
         if (
             dialogRef.current &&
             !dialogRef.current?.classList.contains("WebvizDialog--active")
         ) {
             dialogRef.current.classList.add("WebvizDialog--active");
         }
-    }, [dialogRef.current, props.modal]);
+
+        if (
+            !placeholderDiv ||
+            placeholderDiv.className === "WebvizDialogPlaceholderModal"
+        ) {
+            return;
+        }
+
+        // Non-modal placeholders
+        const placeholders = Array.from(
+            document.getElementsByClassName("WebvizDialogPlaceholder")
+        );
+        const zIndexes = Array.from(
+            document.getElementsByClassName("WebvizDialogPlaceholder")
+        ).map((elm) => {
+            return parseInt((elm as HTMLElement).style.zIndex);
+        });
+
+        if (placeholderDiv) {
+            const dialogZIndex = parseInt(placeholderDiv.style.zIndex);
+            const highestZIndex = Math.max(...zIndexes);
+            if (dialogZIndex !== highestZIndex) {
+                placeholderDiv.style.zIndex = `${highestZIndex}`;
+                placeholders.forEach((placeholder) => {
+                    const zIndex = parseInt(
+                        (placeholder as HTMLElement).style.zIndex
+                    );
+                    if (
+                        placeholder !== placeholderDiv &&
+                        zIndex > dialogZIndex
+                    ) {
+                        (placeholder as HTMLElement).style.zIndex = `${
+                            zIndex - 1
+                        }`;
+                    }
+                });
+            }
+        }
+    }, [dialogRef.current, placeholderDiv, props.modal, props.id]);
 
     React.useLayoutEffect(() => {
         let node: HTMLDivElement | null = null;
@@ -146,7 +186,16 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             ) as HTMLDivElement;
         }
 
+        const className = props.modal
+            ? "WebvizDialogPlaceholderModal"
+            : "WebvizDialogPlaceholder";
+        const numDialogs = document.getElementsByClassName(className).length;
+
         const placeholder = document.createElement("div");
+        placeholder.classList.add(className);
+        placeholder.style.zIndex = `${
+            (props.modal ? zIndexModal : zIndex) + numDialogs
+        }`;
         node.appendChild(placeholder);
         setPlaceholderDiv(placeholder);
 
@@ -167,7 +216,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 }
             }
         };
-    }, []);
+    }, [props.modal]);
 
     React.useLayoutEffect(() => {
         if (props.open === open) {
@@ -571,10 +620,12 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 <div
                     className={
                         open
-                            ? props.modal
-                                ? "WebvizDialog WebvizDialog--modal WebvizDialog--active"
-                                : "WebvizDialog WebvizDialog--active"
-                            : "WebvizDialog"
+                            ? `WebvizDialog WebvizDialog--active${
+                                  props.modal ? " WebvizDialog--modal" : ""
+                              }`
+                            : `WebvizDialog${
+                                  props.modal ? " WebvizDialog--modal" : ""
+                              }`
                     }
                     id={props.id}
                     ref={dialogRef}
