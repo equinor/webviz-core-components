@@ -27,6 +27,20 @@ const dialogActionsHeight = 70;
 const zIndex = 1051;
 const zIndexModal = 1199;
 
+const setWebvizDialogPlaceholderAttributes = (
+    placeholder: HTMLDivElement,
+    isModal: boolean
+): void => {
+    const className = isModal
+        ? "WebvizDialogPlaceholderModal"
+        : "WebvizDialogPlaceholder";
+    const numDialogs = document.getElementsByClassName(className).length;
+    placeholder.className = className;
+    placeholder.style.zIndex = `${
+        (isModal ? zIndexModal : zIndex) + numDialogs
+    }`;
+};
+
 export type WebvizDialogParentProps = {
     /**
      * States if the dialog is open or not.
@@ -175,6 +189,17 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
     }, [dialogRef.current, placeholderDiv, props.modal, props.id]);
 
     React.useLayoutEffect(() => {
+        if (!placeholderDiv) {
+            return;
+        }
+
+        setWebvizDialogPlaceholderAttributes(
+            placeholderDiv,
+            props.modal || false
+        );
+    }, [props.modal]);
+
+    React.useLayoutEffect(() => {
         let node: HTMLDivElement | null = null;
         if (!document.getElementById("WebvizDialog__root")) {
             node = document.createElement("div");
@@ -186,16 +211,8 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             ) as HTMLDivElement;
         }
 
-        const className = props.modal
-            ? "WebvizDialogPlaceholderModal"
-            : "WebvizDialogPlaceholder";
-        const numDialogs = document.getElementsByClassName(className).length;
-
         const placeholder = document.createElement("div");
-        placeholder.classList.add(className);
-        placeholder.style.zIndex = `${
-            (props.modal ? zIndexModal : zIndex) + numDialogs
-        }`;
+        setWebvizDialogPlaceholderAttributes(placeholder, props.modal || false);
         node.appendChild(placeholder);
         setPlaceholderDiv(placeholder);
 
@@ -216,7 +233,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
                 }
             }
         };
-    }, [props.modal]);
+    }, []);
 
     React.useLayoutEffect(() => {
         if (props.open === open) {
