@@ -27,7 +27,7 @@ const dialogActionsHeight = 70;
 const zIndex = 1051;
 const zIndexModal = 1199;
 
-const setWebvizDialogPlaceholderAttributes = (
+const setPlaceholderClassNameAndZIndex = (
     placeholder: HTMLDivElement,
     isModal: boolean
 ): void => {
@@ -192,11 +192,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         if (!placeholderDiv) {
             return;
         }
-
-        setWebvizDialogPlaceholderAttributes(
-            placeholderDiv,
-            props.modal || false
-        );
+        setPlaceholderClassNameAndZIndex(placeholderDiv, props.modal || false);
     }, [props.modal]);
 
     React.useLayoutEffect(() => {
@@ -212,7 +208,7 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
         }
 
         const placeholder = document.createElement("div");
-        setWebvizDialogPlaceholderAttributes(placeholder, props.modal || false);
+        setPlaceholderClassNameAndZIndex(placeholder, props.modal || false);
         node.appendChild(placeholder);
         setPlaceholderDiv(placeholder);
 
