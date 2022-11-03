@@ -22,6 +22,7 @@ import { Overlay } from "./components/Overlay";
 import { ScrollArea } from "./components/ScrollArea";
 import { Dialog } from "./components/Dialog";
 import { WebvizContentManager } from "./components/WebvizContentManager";
+import { WebvizDialog } from "./components/WebvizDialog";
 import { WebvizPluginsWrapper } from "./components/WebvizPluginsWrapper";
 import { WebvizPluginWrapper } from "./components/WebvizPluginWrapper";
 import { WebvizSettingsDrawer } from "./components/WebvizSettingsDrawer";
@@ -33,8 +34,6 @@ import { WebvizPluginLayoutColumn } from "./components/WebvizPluginLayoutColumn"
 import { WebvizPluginLayoutRow } from "./components/WebvizPluginLayoutRow";
 import { WebvizPluginLoadingIndicator } from "./components/WebvizPluginLoadingIndicator";
 import { EdsIcon } from "./components/EdsIcon";
-
-import { WebvizDialog } from "./components/WebvizDialog";
 
 import "./components/FlexBox/flexbox.css";
 import "./components/Layout";
