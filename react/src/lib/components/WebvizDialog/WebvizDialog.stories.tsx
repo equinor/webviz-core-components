@@ -86,6 +86,8 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
         React.useState<boolean>(false);
     const [secondDialogOpen, setSecondDialogOpen] =
         React.useState<boolean>(false);
+    const [thirdDialogOpen, setThirdDialogOpen] =
+        React.useState<boolean>(false);
     const [modalDialogOpen, setModalDialogOpen] =
         React.useState<boolean>(false);
     return (
@@ -93,8 +95,8 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
             <div style={{ marginBottom: 20 }}>
                 This is a pre-configured advanced example to show the
                 functionality for interacting with multiple WebvizDialog
-                components at the same time. The example consist of 3 dialogs,
-                two non-modal dialogs and one modal dialog. The dialogs can be
+                components at the same time. The example consist of 4 dialogs,
+                three non-modal dialogs and one modal dialog. The dialogs can be
                 opened and the active dialog is shown on top with a shadow to
                 highlight it being the currently active dialog. When the modal
                 dialog is opened, it is placed on top, with a backdrop to fade
@@ -109,7 +111,10 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 variant="outlined"
                 onClick={() => setSecondDialogOpen(true)}
             >
-                Open second Dialog
+                Open Second Dialog
+            </Button>
+            <Button variant="outlined" onClick={() => setThirdDialogOpen(true)}>
+                Open Third Dialog
             </Button>
             <Button variant="outlined" onClick={() => setModalDialogOpen(true)}>
                 Open Modal Dialog
@@ -139,6 +144,20 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
                 setProps={(newProps) => setSecondDialogOpen(newProps.open)}
             >
                 This is the content of the second dialog
+            </WebvizDialog>
+            <WebvizDialog
+                {...DialogProps}
+                id={"Third Dialog"}
+                title={"Third Dialog Title"}
+                open={thirdDialogOpen}
+                actions={["No", "Yes"]}
+                heightOwner={"content"}
+                height={200}
+                disableDraggable={false}
+                disableEscapeKeyDown={args.disableEscapeKeyDown}
+                setProps={(newProps) => setThirdDialogOpen(newProps.open)}
+            >
+                This is the content of the third dialog
             </WebvizDialog>
             <WebvizDialog
                 {...DialogProps}
