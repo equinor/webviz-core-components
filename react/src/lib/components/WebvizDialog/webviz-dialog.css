@@ -1,0 +1,49 @@
+#WebvizDialog__root {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    inset: 0px;
+    z-index: 1050;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.WebvizDialog {
+    position: absolute;
+    pointer-events: all;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    border-radius: 4px;
+    background-color: #ffffff;
+    box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.12), 0px 2px 4px 0px rgba(0, 0, 0, 0.14);
+    -webkit-box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.12), 0px 2px 4px 0px rgba(0, 0, 0, 0.14);
+}
+
+.WebvizDialog > * {
+    opacity: 0.7;
+}
+
+.WebvizDialog--active {
+    box-shadow: 0px 7px 8px 0px rgba(0, 0, 0, 0.2),
+        0px 5px 22px 0px rgba(0, 0, 0, 0.12),
+        0px 12px 17px 0px rgba(0, 0, 0, 0.14);
+    -webkit-box-shadow: 0px 7px 8px 0px rgba(0, 0, 0, 0.2),
+        0px 5px 22px 0px rgba(0, 0, 0, 0.12),
+        0px 12px 17px 0px rgba(0, 0, 0, 0.14);
+}
+
+.WebvizDialog--active > * {
+    opacity: 1;
+}
+
+.WebvizDialog--modal {
+    z-index: 1199;
+}
+
+.WebvizDialogPlaceholder,
+.WebvizDialogPlaceholderModal {
+    position: relative;
+}

@@ -10,7 +10,7 @@ import {
 import React from "react";
 
 import { Animation } from "../../utils/Animation";
-import { Dialog } from "../Dialog";
+import { WebvizDialog } from "../WebvizDialog";
 import PropTypes from "prop-types";
 import {
     DownloadData,
@@ -583,29 +583,26 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     </Tooltip>
                 </div>
             </div>
-            <Dialog
-                id={settingsDialogId}
-                title="View Element Settings"
-                open={settingsVisible}
-                draggable={true}
-                setProps={(dialogProps: {
-                    action: string;
-                    open: boolean;
-                    action_called: number;
-                }) => {
-                    if (dialogProps.open === false) {
-                        handleCloseSettingsDialog();
-                    }
-                }}
-            >
-                <div className="WebvizViewElement__SettingsContainer">
-                    {settings.map((setting) => {
-                        return React.cloneElement(setting, {
-                            ...setting.props,
-                        });
-                    })}
-                </div>
-            </Dialog>
+            {settings.length > 0 && (
+                <WebvizDialog
+                    id={settingsDialogId}
+                    title="View Element Settings"
+                    open={settingsVisible}
+                    setProps={(dialogProps) => {
+                        if (dialogProps.open === false) {
+                            handleCloseSettingsDialog();
+                        }
+                    }}
+                >
+                    <div className="WebvizViewElement__SettingsContainer">
+                        {settings.map((setting) => {
+                            return React.cloneElement(setting, {
+                                ...setting.props,
+                            });
+                        })}
+                    </div>
+                </WebvizDialog>
+            )}
         </div>
     );
 };
