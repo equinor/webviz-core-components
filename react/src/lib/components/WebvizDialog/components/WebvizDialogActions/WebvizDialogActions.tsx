@@ -38,19 +38,15 @@ export const WebvizDialogActions = React.forwardRef<
                         : 0,
             }}
         >
-            {props.actions ? (
-                props.actions.map((action) => (
-                    <Button
-                        key={action}
-                        component="button"
-                        onClick={() => handleActionClick(action as string)}
-                    >
-                        {action}
-                    </Button>
-                ))
-            ) : (
-                <></>
-            )}
+            {props.actions?.map((action) => (
+                <Button
+                    key={action}
+                    component="button"
+                    onClick={() => handleActionClick(action as string)}
+                >
+                    {action}
+                </Button>
+            ))}
         </div>
     );
 });

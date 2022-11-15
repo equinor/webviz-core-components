@@ -14,19 +14,29 @@
     display: flex;
     flex-direction: column;
     opacity: 1;
-    border-radius: 5px;
+    border-radius: 4px;
     background-color: #ffffff;
-    box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 5%),
-        0px 24px 38px 3px rgb(0 0 0 / 5%), 0px 9px 46px 8px rgb(0 0 0 / 5%);
-    -webkit-box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 5%),
-        0px 24px 38px 3px rgb(0 0 0 / 5%), 0px 9px 46px 8px rgb(0 0 0 / 5%);
+    box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.12), 0px 2px 4px 0px rgba(0, 0, 0, 0.14);
+    -webkit-box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.12), 0px 2px 4px 0px rgba(0, 0, 0, 0.14);
+}
+
+.WebvizDialog > * {
+    opacity: 0.7;
 }
 
 .WebvizDialog--active {
-    box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 20%),
-        0px 24px 38px 3px rgb(0 0 0 / 20%), 0px 9px 46px 8px rgb(0 0 0 / 20%);
-    -webkit-box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 20%),
-        0px 24px 38px 3px rgb(0 0 0 / 20%), 0px 9px 46px 8px rgb(0 0 0 / 20%);
+    box-shadow: 0px 7px 8px 0px rgba(0, 0, 0, 0.2),
+        0px 5px 22px 0px rgba(0, 0, 0, 0.12),
+        0px 12px 17px 0px rgba(0, 0, 0, 0.14);
+    -webkit-box-shadow: 0px 7px 8px 0px rgba(0, 0, 0, 0.2),
+        0px 5px 22px 0px rgba(0, 0, 0, 0.12),
+        0px 12px 17px 0px rgba(0, 0, 0, 0.14);
+}
+
+.WebvizDialog--active > * {
+    opacity: 1;
 }
 
 .WebvizDialog--modal {

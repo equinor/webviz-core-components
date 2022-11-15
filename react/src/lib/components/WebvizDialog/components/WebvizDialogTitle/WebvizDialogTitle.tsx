@@ -1,18 +1,18 @@
 import React from "react";
-import PropTypes from "prop-types";
 
 import { IconButton } from "@material-ui/core";
 
-import "./webviz-dialog-title.css";
-
 import { Icon } from "@equinor/eds-core-react";
 import { close } from "@equinor/eds-icons";
+
+import "./webviz-dialog-title.css";
 
 Icon.add({ close });
 
 export type WebvizDialogTitleProps = {
     title: string;
     height: number;
+    draggable?: boolean;
     onClose?: () => void;
 };
 
@@ -33,7 +33,7 @@ export const WebvizDialogTitle = React.forwardRef<
             e.stopPropagation();
         };
 
-        if (buttonWrapperRef.current) {
+        if (buttonWrapperRef.current && props.draggable) {
             buttonWrapperRef.current.addEventListener(
                 "mousedown",
                 handleMouseDownAndTouchStart
@@ -45,7 +45,7 @@ export const WebvizDialogTitle = React.forwardRef<
         }
 
         return () => {
-            if (buttonWrapperRef.current) {
+            if (buttonWrapperRef.current && props.draggable) {
                 buttonWrapperRef.current.removeEventListener(
                     "mousedown",
                     handleMouseDownAndTouchStart
@@ -56,13 +56,16 @@ export const WebvizDialogTitle = React.forwardRef<
                 );
             }
         };
-    }, [buttonWrapperRef]);
+    }, [props.draggable]);
 
     return (
         <div
             className="WebvizDialogTitle"
             ref={ref}
-            style={{ height: props.height }}
+            style={{
+                height: props.height,
+                cursor: props.draggable ? "move" : "",
+            }}
         >
             <div>{props.title}</div>
             {props.onClose && (
@@ -80,9 +83,3 @@ export const WebvizDialogTitle = React.forwardRef<
 });
 
 WebvizDialogTitle.displayName = "WebvizDialogTitle";
-
-WebvizDialogTitle.propTypes = {
-    title: PropTypes.string.isRequired,
-    height: PropTypes.number.isRequired,
-    onClose: PropTypes.func,
-};
