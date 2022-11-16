@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import useSize from "@react-hook/size";
 
-import { useStore } from "../WebvizContentManager";
+import { useStore as useWebvizStore } from "../WebvizContentManager";
 
 import { TopMenu } from "./components/TopMenu/TopMenu";
 import { MenuBar } from "./components/MenuBar/MenuBar";
@@ -28,10 +28,6 @@ import "./Menu.css";
 import { StoreActions } from "../WebvizContentManager/WebvizContentManager";
 import { Margins } from "lib/shared-types/margins";
 
-export type ParentProps = {
-    url: string;
-};
-
 export type MenuProps = {
     id?: string;
     navigationItems: PropertyNavigationType;
@@ -40,8 +36,7 @@ export type MenuProps = {
     menuBarPosition?: "top" | "left" | "right" | "bottom";
     menuDrawerPosition?: "left" | "right";
     showLogo?: boolean;
-    url?: string;
-    setProps?: (props: ParentProps) => void;
+    homepageUrl?: string;
 };
 
 const calculateTextWidth = (text: string): number => {
@@ -62,12 +57,15 @@ const calculateTextWidth = (text: string): number => {
 
 const makeNavigationItemsWithAssignedIds = (
     navigationItems: PropertyNavigationType
-): NavigationType => {
+): { navigationItems: NavigationType; firstPageHref: string } => {
     const indices = {
         section: 0,
         group: 0,
         page: 0,
     };
+
+    let firstPageHref: string | null = null;
+
     const recursivelyAssignUuids = (
         item: PropertyPageType | PropertyGroupType | PropertySectionType
     ): GroupType | PageType | SectionType => {
@@ -81,6 +79,9 @@ const makeNavigationItemsWithAssignedIds = (
                 id: `group-${indices.group++}`,
             };
         } else if (item.type === "page") {
+            if (firstPageHref === null) {
+                firstPageHref = item.href;
+            }
             return {
                 ...item,
                 type: "page",
@@ -97,10 +98,13 @@ const makeNavigationItemsWithAssignedIds = (
             };
         }
     };
-    return navigationItems.map(
-        (el: PropertySectionType | PropertyGroupType | PropertyPageType) =>
-            recursivelyAssignUuids(el)
-    ) as NavigationType;
+    return {
+        navigationItems: navigationItems.map(
+            (el: PropertySectionType | PropertyGroupType | PropertyPageType) =>
+                recursivelyAssignUuids(el)
+        ) as NavigationType,
+        firstPageHref: firstPageHref || "",
+    };
 };
 
 const getNavigationMaxWidth = (
@@ -136,30 +140,12 @@ const getNavigationMaxWidth = (
     return recursivelyParseItems(navigationItems);
 };
 
-const getStartPage = (
-    navigationItems: PropertyNavigationType
-): PropertyPageType | null => {
-    let startPage: PropertyPageType | null = null;
-    let abort = false;
-    const recursivelyParseItems = (
-        items: (PropertyPageType | PropertyGroupType | PropertySectionType)[]
-    ) => {
-        items.forEach((item) => {
-            if (abort) {
-                return;
-            }
-            if (item.type !== "page") {
-                recursivelyParseItems(item.content);
-            } else {
-                abort = true;
-                startPage = item as PropertyPageType;
-                return;
-            }
-        });
-    };
-    recursivelyParseItems(navigationItems);
-    return startPage;
+type MenuContext = {
+    homepage: string;
+    firstPageHref: string;
 };
+
+const menuContext = React.createContext<MenuContext | undefined>(undefined);
 
 /**
  * Menu is a component that allows to create an interactive menu with flexible depth that
@@ -170,7 +156,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const menuDrawerPosition = props.menuDrawerPosition || "left";
     const showLogo = props.showLogo || false;
 
-    const webvizContentStore = useStore();
+    const webvizContentStore = useWebvizStore();
 
     const [open, setOpen] = React.useState<boolean>(false);
     const [pinned, setPinned] = React.useState<boolean>(
@@ -181,22 +167,16 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const [currentUrl, setCurrentUrl] = React.useState<string>(
         window.location.href
     );
-
-    const [firstPage, setFirstPage] =
-        React.useState<PropertyPageType | null>(null);
-
-    React.useEffect(() => {
-        setFirstPage(getStartPage(props.navigationItems));
-    }, []);
+    const [firstPageHref, setFirstPageHref] = React.useState<string>(
+        props.homepageUrl || ""
+    );
 
     const [menuWidth, setMenuWidth] = React.useState<number>(
         getNavigationMaxWidth(props.navigationItems) + 40
     );
 
     const [navigationItemsWithAssignedIds, setNavigationsItemsWithAssignedIds] =
-        React.useState<NavigationType>(
-            makeNavigationItemsWithAssignedIds(props.navigationItems)
-        );
+        React.useState<NavigationType>([]);
 
     React.useEffect(() => {
         localStorage.setItem("pinned", pinned ? "true" : "false");
@@ -212,8 +192,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
     const menuPadding = 32;
 
     React.useEffect(() => {
+        const navigationItemsAndFirstPageHref =
+            makeNavigationItemsWithAssignedIds(props.navigationItems);
         setNavigationsItemsWithAssignedIds(
-            makeNavigationItemsWithAssignedIds(props.navigationItems)
+            navigationItemsAndFirstPageHref.navigationItems
+        );
+        setFirstPageHref(
+            props.homepageUrl || navigationItemsAndFirstPageHref.firstPageHref
         );
         setMenuWidth(
             Math.max(
@@ -225,7 +210,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
                 )
             )
         );
-    }, [props.navigationItems, windowSize.width]);
+    }, [props.navigationItems, windowSize.width, props.homepageUrl]);
 
     React.useEffect(() => {
         const bodyMargins: Margins = {
@@ -278,71 +263,83 @@ export const Menu: React.FC<MenuProps> = (props) => {
         menuDrawerPosition,
     ]);
 
-    const handlePageChange = React.useCallback(
-        (url: string) => {
-            setOpen(false);
-            setTimeout(() => {
-                props.setProps && props.setProps({ url: url });
-                window.history.pushState({}, "", url);
-                setCurrentUrl(url);
-            }, 350);
-        },
-        [setOpen]
-    );
+    React.useEffect(() => {
+        if (props.homepageUrl) {
+            setCurrentUrl(props.homepageUrl);
+            window.history.pushState({}, "", props.homepageUrl);
+            window.dispatchEvent(new CustomEvent("_dashprivate_pushstate"));
+            window.scrollTo(0, 0);
+        }
+
+        const handleLocationChange = () => {
+            setCurrentUrl(window.location.href);
+        };
+
+        window.addEventListener("popstate", handleLocationChange);
+        window.addEventListener("_dashprivate_pushstate", handleLocationChange);
+
+        return () => {
+            window.removeEventListener("popstate", handleLocationChange);
+            window.removeEventListener(
+                "_dashprivate_pushstate",
+                handleLocationChange
+            );
+        };
+    }, []);
 
     return (
-        <div className="Menu" id={props.id}>
-            <Overlay visible={open && !pinned} onClick={() => setOpen(false)} />
-            <MenuBar
-                position={menuBarPosition as MenuBarPosition}
-                menuButtonPosition={menuDrawerPosition as MenuDrawerPosition}
-                visible={!pinned}
-                onMenuOpen={() => setOpen(true)}
-                ref={menuBarRef}
-                homepage={"/"}
-                showLogo={showLogo}
-                onLogoClick={handlePageChange}
-            />
-            <MenuDrawer
-                position={menuDrawerPosition as MenuDrawerPosition}
-                open={open || pinned}
-                pinned={pinned}
-                ref={menuDrawerRef}
-                maxWidth={menuWidth}
-                currentUrl={currentUrl}
-            >
-                <TopMenu
+        <menuContext.Provider
+            value={{
+                homepage: props.homepageUrl || "",
+                firstPageHref: firstPageHref,
+            }}
+        >
+            <div className="Menu" id={props.id}>
+                <Overlay
+                    visible={open && !pinned}
+                    onClick={() => setOpen(false)}
+                />
+                <MenuBar
+                    position={menuBarPosition as MenuBarPosition}
+                    menuButtonPosition={
+                        menuDrawerPosition as MenuDrawerPosition
+                    }
+                    visible={!pinned}
+                    onMenuOpen={() => setOpen(true)}
+                    ref={menuBarRef}
+                    showLogo={showLogo}
+                />
+                <MenuDrawer
+                    position={menuDrawerPosition as MenuDrawerPosition}
+                    open={open || pinned}
                     pinned={pinned}
-                    onPinnedChange={() => setPinned(!pinned)}
-                />
-                {showLogo && (
-                    <Logo
-                        onClick={handlePageChange}
-                        homepage={firstPage?.href || "/"}
-                        size="large"
+                    ref={menuDrawerRef}
+                    maxWidth={menuWidth}
+                    currentUrl={currentUrl}
+                >
+                    <TopMenu
+                        pinned={pinned}
+                        onPinnedChange={() => setPinned(!pinned)}
                     />
-                )}
-                <MenuContent
-                    content={navigationItemsWithAssignedIds}
-                    groupsInitiallyCollapsed={props.initiallyCollapsed}
-                    onPageChange={handlePageChange}
-                />
-            </MenuDrawer>
-        </div>
+                    {showLogo && <Logo size="large" />}
+                    <MenuContent
+                        content={navigationItemsWithAssignedIds}
+                        groupsInitiallyCollapsed={props.initiallyCollapsed}
+                    />
+                </MenuDrawer>
+            </div>
+        </menuContext.Provider>
     );
 };
+
+export const useStore = (): MenuContext =>
+    React.useContext<MenuContext>(menuContext as React.Context<MenuContext>);
 
 Menu.propTypes = {
     /**
      * The ID used to identify this component in Dash callbacks
      */
     id: PropTypes.string,
-
-    /**
-     * Dash-assigned callback that should be called whenever any of the
-     * properties change
-     */
-    setProps: PropTypes.func,
 
     /**
      * Set to true if the menu shall be initially shown as pinned.
@@ -375,19 +372,15 @@ Menu.propTypes = {
     navigationItems: PropTypes.any.isRequired,
 
     /**
-     * Currently selected URL. Leave blank.
+     * URL to be shown when clicking on the logo. If not defined, the first page will be used.
      */
-    url: PropTypes.string,
+    homepageUrl: PropTypes.string,
 };
 
 Menu.defaultProps = {
     id: "some-id",
-    setProps: () => {
-        return;
-    },
     initiallyPinned: false,
     showLogo: true,
     menuBarPosition: "left",
     menuDrawerPosition: "left",
-    url: "",
 };

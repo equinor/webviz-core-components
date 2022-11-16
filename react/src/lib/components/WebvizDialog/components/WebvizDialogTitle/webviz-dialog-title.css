@@ -1,0 +1,19 @@
+.WebvizDialogTitle {
+    display: flex;
+    padding: 16px;
+    box-sizing: border-box;
+    align-items: center;
+    font-size: 1.25rem;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+    overflow: hidden;
+}
+
+.WebvizDialogTitle > div:first-of-type {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    flex-grow: 4;
+    margin-right: 8px;
+}

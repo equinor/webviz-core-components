@@ -16,8 +16,8 @@ export type Optionals<T> = Required<
 
 type NoUndefinedField<T> = { [P in keyof T]: Exclude<T[P], null | undefined> };
 
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export function getPropsWithMissingValuesSetToDefault<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Props extends { [index: string]: any }
 >(props: Props, defaults: Optionals<Props>): Required<NoUndefinedField<Props>> {
     return Object.assign(

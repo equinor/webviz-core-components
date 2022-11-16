@@ -17,22 +17,25 @@ import { TourStep } from "../../shared-types/webviz-content/tour-step";
 
 type ActionMap<
     M extends {
-        [index: string]: {
-            [key: string]:
-                | ContactPerson
-                | DeprecationWarning[]
-                | string
-                | Margins
-                | number
-                | null
-                | boolean
-                | React.RefObject<HTMLDivElement>
-                | View[]
-                | ((action: string) => void)
-                | FullScreenAction[]
-                | TourStep[]
-                | string[];
-        } | null;
+        [index: string]:
+            | {
+                  [key: string]:
+                      | ContactPerson
+                      | DeprecationWarning[]
+                      | string
+                      | Margins
+                      | number
+                      | null
+                      | boolean
+                      | React.RefObject<HTMLDivElement>
+                      | View[]
+                      | ((action: string) => void)
+                      | FullScreenAction[]
+                      | TourStep[]
+                      | string[];
+              }
+            | null
+            | undefined;
     }
 > = {
     [Key in keyof M]: M[Key] extends undefined
@@ -61,6 +64,9 @@ export enum StoreActions {
     RemoveOpenSettingsGroupId = "remove_open_settings_group_id",
     SetSettingsDrawerOpen = "set_settings_drawer_open",
     IncrementViewUpdates = "increment_view_updated",
+    AddOpenViewElementSettingsDialogId = "add_open_view_element_settings_dialog_id",
+    RemoveOpenViewElementSettingsDialogId = "remove_open_view_element_settings_dialog_id",
+    RemoveAllOpenViewElementSettingsDialogIds = "remove_all_open_view_element_settings_dialog_ids",
 }
 
 export type StoreState = {
@@ -70,6 +76,7 @@ export type StoreState = {
     pluginsData: PluginData[];
     activePluginWrapperRef: React.RefObject<HTMLDivElement> | null;
     openSettingsGroupIds: string[];
+    openViewElementSettingsDialogIds: string[];
     settingsDrawerOpen: boolean;
     externalTrigger: boolean;
     backdropOpacity: number;
@@ -147,6 +154,13 @@ type Payload = {
         externalTrigger: boolean;
     };
     [StoreActions.IncrementViewUpdates]: null;
+    [StoreActions.AddOpenViewElementSettingsDialogId]: {
+        settingsDialogId: string;
+    };
+    [StoreActions.RemoveOpenViewElementSettingsDialogId]: {
+        settingsDialogId: string;
+    };
+    [StoreActions.RemoveAllOpenViewElementSettingsDialogIds]: undefined;
 };
 
 export type Actions = ActionMap<Payload>[keyof ActionMap<Payload>];
@@ -159,6 +173,7 @@ const setInitialState = (): StoreState => {
         position: DrawerPosition.Left,
         activePluginWrapperRef: null,
         openSettingsGroupIds: [],
+        openViewElementSettingsDialogIds: [],
         settingsDrawerOpen: false,
         backdropOpacity: 0,
         fullScreenActions: [],
@@ -282,6 +297,7 @@ export const StoreReducer = (
     if (action.type === StoreActions.SetActiveView) {
         return {
             ...state,
+            openViewElementSettingsDialogIds: [],
             pluginsData: [
                 ...state.pluginsData.map((plugin) =>
                     plugin.id === state.activePluginId
@@ -306,7 +322,11 @@ export const StoreReducer = (
         };
     }
     if (action.type === StoreActions.SetActivePlugin) {
-        return { ...state, activePluginId: action.payload.pluginId };
+        return {
+            ...state,
+            openViewElementSettingsDialogIds: [],
+            activePluginId: action.payload.pluginId,
+        };
     }
     if (action.type === StoreActions.SetMenuPosition) {
         let position = DrawerPosition.Left;
@@ -382,6 +402,32 @@ export const StoreReducer = (
             viewUpdates: state.viewUpdates + 1,
         };
     }
+    if (action.type === StoreActions.AddOpenViewElementSettingsDialogId) {
+        return {
+            ...state,
+            openViewElementSettingsDialogIds: [
+                ...state.openViewElementSettingsDialogIds,
+                action.payload.settingsDialogId,
+            ],
+        };
+    }
+    if (action.type === StoreActions.RemoveOpenViewElementSettingsDialogId) {
+        return {
+            ...state,
+            openViewElementSettingsDialogIds:
+                state.openViewElementSettingsDialogIds.filter(
+                    (el) => el !== action.payload.settingsDialogId
+                ),
+        };
+    }
+    if (
+        action.type === StoreActions.RemoveAllOpenViewElementSettingsDialogIds
+    ) {
+        return {
+            ...state,
+            openViewElementSettingsDialogIds: [],
+        };
+    }
     return state;
 };
 
@@ -445,19 +491,33 @@ export const WebvizContentManager: React.FC<WebvizContentManagerProps> = (
         }
 
         if (location.pathname !== lastLocation?.pathname && localState) {
+            const checkedActivePluginId = state.pluginsData.some(
+                (plugin) => plugin.id === localState.activePluginId
+            )
+                ? localState.activePluginId
+                : state.pluginsData.at(0)?.id ?? "";
+
+            const checkedActiveViewId = state.pluginsData
+                .find((plugin) => plugin.id === checkedActivePluginId)
+                ?.views.some((view) => view.id === localState.activeViewId)
+                ? localState.activeViewId
+                : state.pluginsData
+                      .find((plugin) => plugin.id === checkedActivePluginId)
+                      ?.views.at(0)?.id ?? "";
+
             dispatch({
                 type: StoreActions.ApplyStoredLocalState,
                 payload: {
-                    pluginId: localState.activePluginId,
-                    viewId: localState.activeViewId,
+                    pluginId: checkedActivePluginId,
+                    viewId: checkedActiveViewId,
                     openSettingsGroupIds: localState.openSettingsGroupIds,
                 },
             });
 
             if (props.setProps) {
                 props.setProps({
-                    activeViewId: localState.activeViewId,
-                    activePluginId: localState.activePluginId,
+                    activeViewId: checkedActiveViewId,
+                    activePluginId: checkedActivePluginId,
                 });
             }
         } else {

@@ -9,7 +9,12 @@
 import { Button } from "@material-ui/core";
 import React from "react";
 
-import { WebvizPluginPlaceholder, SmartNodeSelector, Dialog } from "../lib";
+import {
+    WebvizPluginPlaceholder,
+    SmartNodeSelector,
+    Dialog,
+    Menu,
+} from "../lib";
 
 const steps = [
     {
@@ -28,10 +33,6 @@ type SmartNodeSelectorProps = {
     selectedIds: string[];
 };
 
-type MenuProps = {
-    url: string;
-};
-
 const App: React.FC = () => {
     const [nodeSelectorState, setNodeSelectorState] =
         React.useState<SmartNodeSelectorProps>({
@@ -40,15 +41,49 @@ const App: React.FC = () => {
             selectedTags: [],
         });
 
-    const [currentPage, setCurrentPage] = React.useState<MenuProps>({
-        url: "",
-    });
-
     const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
+    const [currentPage, setCurrentPage] = React.useState<string>(
+        window.location.hash.replace("#", "")
+    );
 
+    React.useEffect(() => {
+        const handleLocationChange = () => {
+            setCurrentPage(window.location.hash.replace("#", ""));
+        };
+
+        window.addEventListener("popstate", handleLocationChange);
+        window.addEventListener("_dashprivate_pushstate", handleLocationChange);
+
+        return () => {
+            window.removeEventListener("popstate", handleLocationChange);
+            window.removeEventListener(
+                "_dashprivate_pushstate",
+                handleLocationChange
+            );
+        };
+    }, []);
     return (
         <div>
-            {currentPage.url.split("#")[1] === "dialog" && (
+            <Menu
+                navigationItems={[
+                    {
+                        type: "page",
+                        title: "Dialog",
+                        href: "#dialog",
+                    },
+                    {
+                        type: "page",
+                        title: "Plugin placeholder",
+                        href: "#webviz-plugin-placeholder",
+                    },
+                    {
+                        type: "page",
+                        title: "SmartNodeSelector",
+                        href: "#smart-node-selector",
+                    },
+                ]}
+            />
+            {currentPage === "dialog" && (
                 <>
                     <h1>Dialog</h1>
                     <Button
@@ -76,7 +111,7 @@ const App: React.FC = () => {
                     </Dialog>
                 </>
             )}
-            {currentPage.url.split("#")[1] === "webviz-plugin-placeholder" && (
+            {currentPage === "webviz-plugin-placeholder" && (
                 <>
                     <h1>WebvizPluginPlaceholder</h1>
                     <WebvizPluginPlaceholder
@@ -102,7 +137,7 @@ const App: React.FC = () => {
                     />
                 </>
             )}
-            {currentPage.url.split("#")[1] === "smart-node-selector" && (
+            {currentPage === "smart-node-selector" && (
                 <>
                     <h1>SmartNodeSelector</h1>
                     <SmartNodeSelector

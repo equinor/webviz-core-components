@@ -17,7 +17,7 @@ export default {
 } as ComponentMeta<typeof Dialog>;
 
 const Template: ComponentStory<typeof Dialog> = (args: DialogProps) => {
-    const { open, setProps, ...other } = args;
+    const { open, ...other } = args;
     const [dialogOpen, setDialogOpen] = React.useState<boolean>(open || false);
     return (
         <>
@@ -25,9 +25,9 @@ const Template: ComponentStory<typeof Dialog> = (args: DialogProps) => {
                 Open dialog
             </Button>
             <Dialog
+                {...other}
                 open={dialogOpen}
                 setProps={(newProps) => setDialogOpen(newProps.open)}
-                {...other}
             />
         </>
     );

@@ -91,3 +91,12 @@ export const pointsAreEqual = (point1: Point, point2: Point): boolean =>
 
 export const sizesAreEqual = (size1: Size, size2: Size): boolean =>
     size1.width === size2.width && size1.height === size2.height;
+
+export const isDOMRectContained = (inner: DOMRect, outer: DOMRect): boolean => {
+    return (
+        inner.x >= outer.x &&
+        inner.y >= outer.y &&
+        inner.y + inner.height <= outer.y + outer.height &&
+        inner.x + inner.width <= outer.x + outer.width
+    );
+};
