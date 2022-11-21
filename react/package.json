@@ -108,7 +108,7 @@
         "url-loader": "^4.1.1",
         "webpack": "^5.27.2",
         "webpack-cli": "^4.5.0",
-        "webpack-dev-server": "^3.11.2"
+        "webpack-dev-server": "^4.11.0"
     },
     "engines": {
         "node": ">=12.14.0",

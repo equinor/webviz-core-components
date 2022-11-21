@@ -4,7 +4,9 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 const packagejson = require("./package.json");
 
-const dashLibraryName = packagejson.name.replace(/[-\/]/g, "_").replace(/@/g, "");
+const dashLibraryName = packagejson.name
+    .replace(/[-\/]/g, "_")
+    .replace(/@/g, "");
 
 module.exports = (env, argv) => {
     const overrides = module.exports || {};
@@ -14,11 +16,9 @@ module.exports = (env, argv) => {
     let mode;
     if (argv && argv.mode) {
         mode = argv.mode;
-    }
-    else if (overrides.mode) {
+    } else if (overrides.mode) {
         mode = overrides.mode;
-    }
-    else {
+    } else {
         mode = "production";
     }
 
@@ -48,10 +48,10 @@ module.exports = (env, argv) => {
     const externals = demo
         ? undefined
         : {
-            react: "React",
-            "react-dom": "ReactDOM",
-            "plotly.js": "Plotly",
-        };
+              react: "React",
+              "react-dom": "ReactDOM",
+              "plotly.js": "Plotly",
+          };
 
     // NOTE: Keep order of the following configuration output
     // See: https://webpack.js.org/configuration/
@@ -60,11 +60,18 @@ module.exports = (env, argv) => {
         mode: mode,
         entry,
         output: {
-            path: demo ? __dirname : path.resolve(__dirname, "..", dashLibraryName),
+            path: demo
+                ? __dirname
+                : path.resolve(__dirname, "..", dashLibraryName),
             filename: filenameJs,
             library: {
                 type: "window",
                 name: dashLibraryName,
+            },
+        },
+        devServer: {
+            static: {
+                directory: path.resolve(__dirname),
             },
         },
         module: {
@@ -72,7 +79,7 @@ module.exports = (env, argv) => {
                 {
                     test: /\.jsx?$/,
                     exclude: /node_modules/,
-                    use: "babel-loader"
+                    use: "babel-loader",
                 },
                 {
                     test: /\.tsx?$/,
@@ -94,7 +101,7 @@ module.exports = (env, argv) => {
                 {
                     test: /\.(png|svg|jpg|jpeg|gif)$/i,
                     use: {
-                        loader: 'url-loader',
+                        loader: "url-loader",
                     },
                 },
             ],
@@ -114,9 +121,9 @@ module.exports = (env, argv) => {
                 () => {
                     return () => {
                         return {
-                            terserOptions: {}
-                        }
-                    }
+                            terserOptions: {},
+                        };
+                    };
                 },
                 new CssMinimizerPlugin({}),
             ],
