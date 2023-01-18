@@ -20,7 +20,7 @@ INSTALL_REQUIRES = ["dash>=2.0"]
 
 TESTS_REQUIRE = [
     "bandit",
-    "black>=20.8b1",
+    "black>=22.12",
     "dash[testing]",
     "pylint",
     "selenium",
