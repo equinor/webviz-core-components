@@ -37,7 +37,7 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
           <path
             class="Icon__StyledPath-sc-6evbi1-1"
             clip-rule="evenodd"
-            d="M16.83 5H20c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h3.17L9 3h6l1.83 2zM4 19h16V7h-4.05l-.59-.65L14.12 5H9.88L8.64 6.35 8.05 7H4v12zm8-11c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm-3.2 5c0 1.77 1.43 3.2 3.2 3.2 1.77 0 3.2-1.43 3.2-3.2 0-1.77-1.43-3.2-3.2-3.2-1.77 0-3.2 1.43-3.2 3.2z"
+            d="M16.83 5H20c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h3.17L9 3h6l1.83 2ZM4 19h16V7h-4.05l-.59-.65L14.12 5H9.88L8.64 6.35 8.05 7H4v12Zm8-11c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5Zm-3.2 5c0 1.77 1.43 3.2 3.2 3.2 1.77 0 3.2-1.43 3.2-3.2 0-1.77-1.43-3.2-3.2-3.2-1.77 0-3.2 1.43-3.2 3.2Z"
             data-testid="eds-icon-path"
             fill-rule="evenodd"
             height="24"
@@ -64,7 +64,7 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
           <path
             class="Icon__StyledPath-sc-6evbi1-1"
             clip-rule="evenodd"
-            d="M7 10H5V5h5v2H7v3zm-2 4h2v3h3v2H5v-5zm12 3h-3v2h5v-5h-2v3zM14 7V5h5v5h-2V7h-3z"
+            d="M7 10H5V5h5v2H7v3Zm-2 4h2v3h3v2H5v-5Zm12 3h-3v2h5v-5h-2v3ZM14 7V5h5v5h-2V7h-3Z"
             data-testid="eds-icon-path"
             fill-rule="evenodd"
             height="24"
@@ -91,7 +91,7 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
           <path
             class="Icon__StyledPath-sc-6evbi1-1"
             clip-rule="evenodd"
-            d="M19 9.5h-4v-6H9v6H5l7 7 7-7zm-8 2v-6h2v6h1.17L12 13.67 9.83 11.5H11zm8 9v-2H5v2h14z"
+            d="M19 9.5h-4v-6H9v6H5l7 7 7-7Zm-8 2v-6h2v6h1.17L12 13.67 9.83 11.5H11Zm8 9v-2H5v2h14Z"
             data-testid="eds-icon-path"
             fill-rule="evenodd"
             height="24"
@@ -118,7 +118,7 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
           <path
             class="Icon__StyledPath-sc-6evbi1-1"
             clip-rule="evenodd"
-            d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm11 4v2h-2v-2h2zm-1 4c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM8 10c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.283-.79 1.973-1.56 2.646C13.712 13.283 13 13.905 13 15h-2c0-1.821.942-2.543 1.77-3.178.65-.498 1.23-.943 1.23-1.822 0-1.1-.9-2-2-2s-2 .9-2 2H8z"
+            d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12Zm11 4v2h-2v-2h2Zm-1 4c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8ZM8 10c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.283-.79 1.973-1.56 2.646C13.712 13.283 13 13.905 13 15h-2c0-1.821.942-2.543 1.77-3.178.65-.498 1.23-.943 1.23-1.822 0-1.1-.9-2-2-2s-2 .9-2 2H8Z"
             data-testid="eds-icon-path"
             fill-rule="evenodd"
             height="24"
@@ -146,7 +146,7 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
           <path
             class="Icon__StyledPath-sc-6evbi1-1"
             clip-rule="evenodd"
-            d="m23 21.5-11-19-11 19h22zm-12-3v-2h2v2h-2zm0-4h2v-4h-2v4z"
+            d="m23 21.5-11-19-11 19h22Zm-12-3v-2h2v2h-2Zm0-4h2v-4h-2v4Z"
             data-testid="eds-icon-path"
             fill-rule="evenodd"
             height="24"
@@ -161,109 +161,99 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
     </div>
   </div>
   <div
-    class="makeStyles-bottom-4 makeStyles-right-6 makeStyles-root-1"
+    class="notistack-SnackbarContainer go1453831412 go2989568495 go1141946668"
   >
     <div
-      class="MuiCollapse-root MuiCollapse-entered"
-      style="min-height: 0px;"
+      class="go1475592160 go1671063245"
+      style="pointer-events: all; overflow: visible; min-height: 0px; transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;"
     >
       <div
-        class="MuiCollapse-wrapper"
+        class="notistack-CollapseWrapper"
+        style="display: flex; width: 100%;"
       >
         <div
-          class="MuiCollapse-wrapperInner"
+          class="notistack-Snackbar go3963613292"
         >
           <div
-            class="SnackbarItem-root-8 SnackbarItem-wrappedRoot-23 SnackbarItem-anchorOriginBottomRight-12"
+            aria-describedby="notistack-snackbar"
+            class="go1888806478 notistack-MuiContent notistack-MuiContent-warning go167266335 go4215275574 go3162094071"
+            role="alert"
+            style="webkit-transform: none; transform: none; webkit-transition: -webkit-transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"
           >
             <div
-              aria-describedby="notistack-snackbar"
-              class="ForwardRef-root-24 SnackbarItem-contentRoot-15 SnackbarItem-variantWarning-20 SnackbarItem-lessPadding-16"
-              role="alert"
-              style="webkit-transform: none; transform: none; webkit-transition: -webkit-transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"
+              class="go946087465"
+              id="notistack-snackbar"
             >
-              <div
-                class="SnackbarItem-message-21"
-                id="notistack-snackbar"
+              <svg
+                focusable="false"
+                style="font-size: 20px; margin-inline-end: 8px; user-select: none; width: 1em; height: 1em; display: inline-block; fill: currentColor; flex-shrink: 0;"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  style="font-size: 20px; margin-inline-end: 8px;"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"
-                  />
-                </svg>
-                Deprecated 1
-              </div>
-              <div
-                class="SnackbarItem-action-22"
+                <path
+                  d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"
+                />
+              </svg>
+              Deprecated 1
+            </div>
+            <div
+              class="go703367398"
+            >
+              <a
+                class="webviz-config-plugin-deprecation-link"
+                href="https://github.com/equinor/webviz-core-components"
+                rel="noopener noreferrer"
+                target="_blank"
               >
-                <a
-                  class="webviz-config-plugin-deprecation-link"
-                  href="https://github.com/equinor/webviz-core-components"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  More info
-                </a>
-              </div>
+                More info
+              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div
-      class="MuiCollapse-root MuiCollapse-entered"
-      style="min-height: 0px;"
+      class="go1475592160 go1671063245"
+      style="pointer-events: all; overflow: visible; min-height: 0px; transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;"
     >
       <div
-        class="MuiCollapse-wrapper"
+        class="notistack-CollapseWrapper"
+        style="display: flex; width: 100%;"
       >
         <div
-          class="MuiCollapse-wrapperInner"
+          class="notistack-Snackbar go3963613292"
         >
           <div
-            class="SnackbarItem-root-8 SnackbarItem-wrappedRoot-23 SnackbarItem-anchorOriginBottomRight-12"
+            aria-describedby="notistack-snackbar"
+            class="go1888806478 notistack-MuiContent notistack-MuiContent-warning go167266335 go4215275574 go3162094071"
+            role="alert"
+            style="webkit-transform: none; transform: none; webkit-transition: -webkit-transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"
           >
             <div
-              aria-describedby="notistack-snackbar"
-              class="ForwardRef-root-24 SnackbarItem-contentRoot-15 SnackbarItem-variantWarning-20 SnackbarItem-lessPadding-16"
-              role="alert"
-              style="webkit-transform: none; transform: none; webkit-transition: -webkit-transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"
+              class="go946087465"
+              id="notistack-snackbar"
             >
-              <div
-                class="SnackbarItem-message-21"
-                id="notistack-snackbar"
+              <svg
+                focusable="false"
+                style="font-size: 20px; margin-inline-end: 8px; user-select: none; width: 1em; height: 1em; display: inline-block; fill: currentColor; flex-shrink: 0;"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  style="font-size: 20px; margin-inline-end: 8px;"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"
-                  />
-                </svg>
-                Deprecated 2
-              </div>
-              <div
-                class="SnackbarItem-action-22"
+                <path
+                  d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"
+                />
+              </svg>
+              Deprecated 2
+            </div>
+            <div
+              class="go703367398"
+            >
+              <a
+                class="webviz-config-plugin-deprecation-link"
+                href="https://github.com/equinor/webviz-core-components"
+                rel="noopener noreferrer"
+                target="_blank"
               >
-                <a
-                  class="webviz-config-plugin-deprecation-link"
-                  href="https://github.com/equinor/webviz-core-components"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  More info
-                </a>
-              </div>
+                More info
+              </a>
             </div>
           </div>
         </div>
