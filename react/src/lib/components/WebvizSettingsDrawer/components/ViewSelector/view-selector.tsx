@@ -10,7 +10,7 @@ import "./view-selector.css";
 import { ViewList } from "../ViewList/view-list";
 import { Overlay } from "../../../Overlay";
 import ReactDOM from "react-dom";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 
 type ViewSelectorProps = {
     open: boolean;

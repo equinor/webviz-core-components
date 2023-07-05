@@ -3,7 +3,7 @@ import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
 import { WebvizDialog, WebvizDialogProps } from "./WebvizDialog";
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 
 export default {
     title: "Components/WebvizDialog",

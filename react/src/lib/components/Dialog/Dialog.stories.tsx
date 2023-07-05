@@ -6,7 +6,7 @@ import {
     DialogComponent as Dialog,
     DialogProps,
 } from "./components/DialogComponent";
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 
 export default {
     title: "Components/Dialog",

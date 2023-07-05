@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IconButton } from "@material-ui/core";
+import { IconButton } from "@mui/material";
 
 import { Icon } from "@equinor/eds-core-react";
 import { close } from "@equinor/eds-icons";
