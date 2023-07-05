@@ -42,7 +42,7 @@
     "license": "MIT",
     "dependencies": {
         "@equinor/eds-core-react": "^0.31.1",
-        "@equinor/eds-icons": "^0.19.1",
+        "@equinor/eds-icons": "^0.19.2",
         "@material-ui/core": "^4.11.3",
         "@material-ui/lab": "^4.0.0-alpha.57",
         "@react-hook/size": "^2.1.2",
