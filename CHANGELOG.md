@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--   [#290](https://github.com/equinor/webviz-core-components/pull/290) - Updated JavaScript dependencies 
+-   [#290](https://github.com/equinor/webviz-core-components/pull/290) - Updated various JavaScript dependencies.
 
 ## [0.6.1] - 2022-10-10
 
