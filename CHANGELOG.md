@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -	[#275](https://github.com/equinor/webviz-core-components/pull/275) - Added `WebvizDialog` component. New dialog component which handles multiple instances simultaneously, where the currently active dialog is placed on top and highlighted with box shadow.
 
+### Changed
+
+-   [#290](https://github.com/equinor/webviz-core-components/pull/290) - Updated JavaScript dependencies 
+
 ## [0.6.1] - 2022-10-10
 
 ### Fixed
