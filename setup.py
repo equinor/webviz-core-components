@@ -23,7 +23,7 @@ TESTS_REQUIRE = [
     "black>=22.12",
     "dash[testing]",
     "pylint",
-    "selenium",
+    "selenium>=3.141.0,<=4.2.0",
 ]
 
 # 'dash[testing]' to be added in tests_require when
