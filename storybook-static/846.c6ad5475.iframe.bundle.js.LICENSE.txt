@@ -5,6 +5,12 @@ object-assign
 */
 
 /*!
+	Copyright (c) 2018 Jed Watson.
+	Licensed under the MIT License (MIT), see
+	http://jedwatson.github.io/classnames
+*/
+
+/*!
   Copyright (c) 2018 Jed Watson.
   Licensed under the MIT License (MIT), see
   http://jedwatson.github.io/classnames
@@ -42,6 +48,11 @@ object-assign
  * Copyright (c) 2014-2017, Jon Schlinkert.
  * Released under the MIT License.
  */
+
+/*!
+* tabbable 6.1.2
+* @license MIT, https://github.com/focus-trap/tabbable/blob/master/LICENSE
+*/
 
 /*! *****************************************************************************
     Copyright (c) Microsoft Corporation.
