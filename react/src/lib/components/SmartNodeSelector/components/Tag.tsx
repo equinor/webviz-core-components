@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { Component, ReactFragment } from "react";
+import React, { Component, ReactNode } from "react";
 import classNames from "classnames";
 import PropTypes from "prop-types";
 
@@ -130,8 +130,9 @@ export default class Tag extends Component<TagProps> {
             text = "";
         }
         span.classList.add("SmartNodeSelector__Ruler");
-        const input = (treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
-            .current as HTMLInputElement;
+        const input = (
+            treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
+        ).current as HTMLInputElement;
         if (input) {
             const fontSize = window.getComputedStyle(input).fontSize;
             span.style.fontSize = fontSize;
@@ -171,7 +172,7 @@ export default class Tag extends Component<TagProps> {
     private createBrowseButtons(
         nodeSelection: TreeNodeSelection,
         index: number
-    ): ReactFragment | null {
+    ): ReactNode | null {
         const { currentTag } = this.props;
         if (
             ((nodeSelection.isValidUpToFocussedNode() && currentTag) ||
@@ -244,8 +245,9 @@ export default class Tag extends Component<TagProps> {
         e.preventDefault();
         e.stopPropagation();
         const { hideSuggestions, updateSelectedTagsAndNodes } = this.props;
-        const inputElement = (nodeSelection.getRef() as React.RefObject<HTMLInputElement>)
-            .current as HTMLInputElement;
+        const inputElement = (
+            nodeSelection.getRef() as React.RefObject<HTMLInputElement>
+        ).current as HTMLInputElement;
         const currentSelection = [
             inputElement.selectionStart,
             inputElement.selectionEnd,
@@ -308,10 +310,13 @@ export default class Tag extends Component<TagProps> {
     private createFocusOverlay(
         treeNodeSelection: TreeNodeSelection
     ): React.ReactNode | null {
-        const inputElement = (treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
-            .current as HTMLInputElement;
+        const inputElement = (
+            treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
+        ).current as HTMLInputElement;
         if (inputElement) {
-            const inputContainerBoundingRect = (inputElement.parentElement as HTMLElement).getBoundingClientRect();
+            const inputContainerBoundingRect = (
+                inputElement.parentElement as HTMLElement
+            ).getBoundingClientRect();
             const inputBoundingRect = inputElement.getBoundingClientRect();
             let left = inputBoundingRect.left - inputContainerBoundingRect.left;
 
@@ -404,8 +409,9 @@ export default class Tag extends Component<TagProps> {
     }
 
     private handleClickEvent(e: React.MouseEvent<HTMLLIElement>): void {
-        const input = (this.props.treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>)
-            .current as HTMLInputElement;
+        const input = (
+            this.props.treeNodeSelection.getRef() as React.RefObject<HTMLInputElement>
+        ).current as HTMLInputElement;
         if (input) {
             input.focus();
             e.preventDefault();

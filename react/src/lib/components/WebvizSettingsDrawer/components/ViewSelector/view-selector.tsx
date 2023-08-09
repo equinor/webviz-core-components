@@ -1,4 +1,7 @@
 import React from "react";
+import { Root, createRoot } from "react-dom/client";
+
+import { Tooltip } from "@mui/material";
 
 import { view_carousel, chevron_down } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
@@ -9,8 +12,6 @@ import { StoreActions, useStore } from "../../../WebvizContentManager";
 import "./view-selector.css";
 import { ViewList } from "../ViewList/view-list";
 import { Overlay } from "../../../Overlay";
-import ReactDOM from "react-dom";
-import { Tooltip } from "@mui/material";
 
 type ViewSelectorProps = {
     open: boolean;
@@ -30,6 +31,8 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
     const viewNameRef = React.useRef<HTMLDivElement>(null);
     const [popupContainer, setPopupContainer] =
         React.useState<HTMLDivElement | null>(null);
+    const [popupContainerRoot, setPopupContainerRoot] =
+        React.useState<Root | null>(null);
 
     const plugin = store.state.pluginsData.find(
         (plugin) => plugin.id === store.state.activePluginId
@@ -43,6 +46,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
         const container = document.createElement("div");
         document.body.appendChild(container);
         setPopupContainer(container);
+        setPopupContainerRoot(createRoot(container));
 
         return () => {
             document.body.removeChild(container);
@@ -83,9 +87,14 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                         />
                     </>
                 );
-                ReactDOM.render(<ViewListElements />, popupContainer);
+
+                if (popupContainerRoot) {
+                    popupContainerRoot.render(<ViewListElements />);
+                }
             } else {
-                ReactDOM.render(<></>, popupContainer);
+                if (popupContainerRoot) {
+                    popupContainerRoot.render(<></>);
+                }
             }
         }
     }, [
