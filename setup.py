@@ -22,8 +22,9 @@ TESTS_REQUIRE = [
     "bandit",
     "black>=22.12",
     "dash[testing]",
+    "flask<2.3",
     "pylint",
-    "selenium",
+    "selenium>=3.141.0,<=4.2.0",
 ]
 
 # 'dash[testing]' to be added in tests_require when

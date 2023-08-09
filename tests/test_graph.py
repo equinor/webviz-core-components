@@ -12,7 +12,6 @@ import webviz_core_components
 
 
 def test_container_placeholder(dash_duo):
-
     app = Dash(__name__)
 
     app.layout = html.Div(

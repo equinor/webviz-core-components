@@ -10,7 +10,6 @@ class Graph(dcc.Graph):
     """
 
     def __init__(self, *args, **kwargs):
-
         args, kwargs = argument_modifier(
             dcc.Graph, "config", Graph.populate_config, args, kwargs
         )
