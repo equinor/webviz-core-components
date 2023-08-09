@@ -22,6 +22,7 @@ TESTS_REQUIRE = [
     "bandit",
     "black>=22.12",
     "dash[testing]",
+    "flask<2.3",
     "pylint",
     "selenium>=3.141.0,<=4.2.0",
 ]
