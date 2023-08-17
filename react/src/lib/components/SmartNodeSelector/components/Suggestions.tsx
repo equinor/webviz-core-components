@@ -6,7 +6,8 @@
  */
 
 import React, { Component, Fragment, MouseEvent } from "react";
-import ReactDOM from "react-dom";
+import { Root, createRoot } from "react-dom/client";
+
 import classNames from "classnames";
 import PropTypes from "prop-types";
 
@@ -54,6 +55,7 @@ class Suggestions extends Component<SuggestionsProps> {
     private lastNodeSelection?: TreeNodeSelection;
     private positionRef: React.RefObject<HTMLDivElement>;
     private popup: HTMLDivElement | null;
+    private popupRoot: Root | null;
     private showingAllSuggestions: boolean;
 
     constructor(props: SuggestionsProps) {
@@ -70,6 +72,7 @@ class Suggestions extends Component<SuggestionsProps> {
         this.allOptions = [];
         this.positionRef = React.createRef();
         this.popup = null;
+        this.popupRoot = null;
         this.showingAllSuggestions = false;
 
         this.state = {
@@ -78,7 +81,8 @@ class Suggestions extends Component<SuggestionsProps> {
 
         if (this.props.treeNodeSelection) {
             this.allOptions = this.props.treeNodeSelection.getSuggestions();
-            this.currentNodeLevel = this.props.treeNodeSelection.getFocussedLevel();
+            this.currentNodeLevel =
+                this.props.treeNodeSelection.getFocussedLevel();
         }
     }
 
@@ -97,6 +101,7 @@ class Suggestions extends Component<SuggestionsProps> {
         window.addEventListener("scroll", () => this.renderPopup(), true);
 
         this.popup = document.createElement("div");
+        this.popupRoot = createRoot(this.popup);
         document.body.appendChild(this.popup);
     }
 
@@ -145,11 +150,8 @@ class Suggestions extends Component<SuggestionsProps> {
     }
 
     private maybeLoadNewOptions(): void {
-        const {
-            treeNodeSelection,
-            suggestionsRef,
-            showAllSuggestions,
-        } = this.props;
+        const { treeNodeSelection, suggestionsRef, showAllSuggestions } =
+            this.props;
         if (
             treeNodeSelection !== undefined &&
             (treeNodeSelection.getFocussedLevel() !== this.currentNodeLevel ||
@@ -160,9 +162,8 @@ class Suggestions extends Component<SuggestionsProps> {
                 this.props.showAllSuggestions !== this.showingAllSuggestions)
         ) {
             this.showingAllSuggestions = this.props.showAllSuggestions;
-            this.allOptions = treeNodeSelection.getSuggestions(
-                showAllSuggestions
-            );
+            this.allOptions =
+                treeNodeSelection.getSuggestions(showAllSuggestions);
             this.currentNodeLevel = treeNodeSelection.getFocussedLevel();
             this.lastNodeSelection = treeNodeSelection;
             this.currentNodeName = treeNodeSelection.getFocussedNodeName();
@@ -340,9 +341,8 @@ class Suggestions extends Component<SuggestionsProps> {
             "i"
         );
         const matchName = option.nodeName.match(regexName);
-        const matchDescription = option.metaData.description?.match(
-            regexDescription
-        );
+        const matchDescription =
+            option.metaData.description?.match(regexDescription);
 
         const matchedNodePart = matchName
             ? option.nodeName.substring(0, matchName[0].length)
@@ -396,12 +396,9 @@ class Suggestions extends Component<SuggestionsProps> {
 
     private createSuggestionsForCurrentTag(
         maxHeight: number
-    ): React.ReactFragment | null {
-        const {
-            treeNodeSelection,
-            enableInputBlur,
-            disableInputBlur,
-        } = this.props;
+    ): React.ReactNode | null {
+        const { treeNodeSelection, enableInputBlur, disableInputBlur } =
+            this.props;
         if (treeNodeSelection === undefined) return "";
         if (!treeNodeSelection.focussedNodeNameContainsWildcard()) {
             const options = this.allOptions.slice(
@@ -513,8 +510,9 @@ class Suggestions extends Component<SuggestionsProps> {
                   height: 0,
               };
 
-        ReactDOM.render(
+        const suggestion = (
             <div
+                id={"foo"}
                 ref={suggestionsRef}
                 className="Suggestions"
                 onScroll={(): void => this.handleOnScroll()}
@@ -539,9 +537,12 @@ class Suggestions extends Component<SuggestionsProps> {
                         height: lowerSpacerHeight + "px",
                     }}
                 ></div>
-            </div>,
-            this.popup
+            </div>
         );
+
+        if (this.popupRoot) {
+            this.popupRoot.render(suggestion);
+        }
     }
 
     render(): React.ReactNode {

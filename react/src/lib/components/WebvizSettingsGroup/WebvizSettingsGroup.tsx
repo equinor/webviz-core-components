@@ -1,6 +1,6 @@
 import { Icon } from "@equinor/eds-core-react";
 import { chevron_down, chevron_up, world } from "@equinor/eds-icons";
-import { IconButton, Tooltip } from "@material-ui/core";
+import { IconButton, Tooltip } from "@mui/material";
 import useSize from "@react-hook/size";
 import React from "react";
 

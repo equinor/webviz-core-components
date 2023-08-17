@@ -9,7 +9,7 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import { close, email, person, phone } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";

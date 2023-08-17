@@ -8,7 +8,7 @@ import { View } from "../../../../shared-types/webviz-content/webviz";
 import { Point } from "../../../../shared-types/point";
 
 import "./view-list.css";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 
 export type ViewListProps = {
     open: boolean;

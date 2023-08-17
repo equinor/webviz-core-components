@@ -1,4 +1,4 @@
-import { Button, MobileStepper } from "@material-ui/core";
+import { Button, MobileStepper } from "@mui/material";
 import useSize from "@react-hook/size";
 import React from "react";
 import * as ReactDOM from "react-dom";

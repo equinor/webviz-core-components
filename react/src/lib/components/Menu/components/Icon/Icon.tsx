@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import * as edsIcons from "@equinor/eds-icons";
 import { IconData } from "@equinor/eds-icons";
 import { Icon as EdsIcon } from "@equinor/eds-core-react";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 
 type IconProps = {
     icon: string;

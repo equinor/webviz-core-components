@@ -130,7 +130,6 @@ exports[`WebvizPluginPlaceholder Renders correctly (compare to snapshot in ./__s
           Guided tour
         </div>
       </div>
-      
       <div
         class="webviz-config-tooltip-wrapper"
       >
