@@ -54,9 +54,8 @@ class RadioItems(html.Div):
             dcc.RadioItems(
                 persistence=persistence,
                 persistence_type=persistence_type,
-                className=className + " webviz-block-options"
-                if vertical
-                else className,
+                inline=not vertical,
+                className=className,
                 **kwargs,
             )
         )
