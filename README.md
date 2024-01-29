@@ -4,7 +4,7 @@
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/equinor/webviz-core-components.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/equinor/webviz-core-components/alerts/)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/equinor/webviz-core-components.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/equinor/webviz-core-components/context:javascript)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/equinor/webviz-core-components.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/equinor/webviz-core-components/context:python)
-[![Python 3.8 | 3.9 | 3.10](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10-blue.svg)](https://www.python.org/)
+[![Python 3.8 | 3.9 | 3.10 | 3.11 | 3.12](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black%20%28Python%29-000000.svg)](https://github.com/psf/black)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier%20%28JavaScript%29-ff69b4.svg)](https://github.com/prettier/prettier)
 

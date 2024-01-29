@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [UNRELEASED] - YYYY-MM-DD
+## [0.7.0] - 2024-01-29
 
 ### Fixed
 
@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -	[#275](https://github.com/equinor/webviz-core-components/pull/275) - Added `WebvizDialog` component. New dialog component which handles multiple instances simultaneously, where the currently active dialog is placed on top and highlighted with box shadow.
+-   [#299](https://github.com/equinor/webviz-core-components/pull/299) - Support Python 3.11 and 3.12.
 
 ### Changed
 

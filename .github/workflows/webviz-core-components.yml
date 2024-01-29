@@ -19,16 +19,16 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ["3.8", "3.9", "3.10"]
+                python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
         steps:
             - name: 📖 Checkout commit locally
               uses: actions/checkout@v3
 
-            - name: 🐍 Set up Python ${{ matrix.python-version }}
+            - name: 🐍 Set up Python 3.8
               uses: actions/setup-python@v4
               with:
-                  python-version: ${{ matrix.python-version }}
+                  python-version: 3.8  # For compiling the JavaScript part we need dash<2.5, which is not supported on recent versions of Python
 
             - name: ℹ️ Node and npm versions
               run: |
@@ -49,6 +49,11 @@ jobs:
             - name: 🏗️ Build JavaScript part
               run: |
                   npm run build --prefix ./react
+
+            - name: 🐍 Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
 
             - name: 📦 Install webviz-core-components with dependencies
               run: |
