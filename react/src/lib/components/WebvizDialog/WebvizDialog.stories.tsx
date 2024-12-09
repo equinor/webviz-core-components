@@ -1,19 +1,29 @@
 import React from "react";
 
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { WebvizDialog, WebvizDialogProps } from "./WebvizDialog";
 import { Button } from "@mui/material";
 
-export default {
+const meta: Meta<typeof WebvizDialog> = {
     title: "Components/WebvizDialog",
-    subcomponents: { WebvizDialog },
-    argTypes: { actions: { control: "array" } },
-} as ComponentMeta<typeof WebvizDialog>;
+    component: WebvizDialog,
+    argTypes: {
+        actions: { control: "object" },
+        setProps: { action: "dialog props changed" },
+    },
+    args: {
+        // Provide default args if needed
+        actions: [],
+        disableEscapeKeyDown: false,
+    },
+};
 
-const Template: ComponentStory<typeof WebvizDialog> = (
-    args: WebvizDialogProps
-) => {
+export default meta;
+
+type Story = StoryObj<typeof WebvizDialog>;
+
+const Template = (args: WebvizDialogProps) => {
     const { ...other } = args;
     const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
 
@@ -44,26 +54,26 @@ const Template: ComponentStory<typeof WebvizDialog> = (
     );
 };
 
-export const Basic = Template.bind({});
-Basic.args = {
-    id: "Dialog",
-    title: "My Dialog Title",
-    open: WebvizDialog.defaultProps?.open || false,
-    modal: true,
-    heightOwner: "content",
-    height: 250,
-    maxWidth: WebvizDialog.defaultProps?.maxWidth || 1200,
-    minWidth: WebvizDialog.defaultProps?.minWidth || 100,
-    disableDraggable: WebvizDialog.defaultProps?.disableDraggable || false,
-    disableEscapeKeyDown:
-        WebvizDialog.defaultProps?.disableEscapeKeyDown || false,
-    children: [],
-    actions: ["Action 1", "Action 2"],
+export const Basic: Story = {
+    render: Template,
+    args: {
+        id: "Dialog",
+        title: "My Dialog Title",
+        open: WebvizDialog.defaultProps?.open || false,
+        modal: true,
+        heightOwner: "content",
+        height: 250,
+        maxWidth: WebvizDialog.defaultProps?.maxWidth || 1200,
+        minWidth: WebvizDialog.defaultProps?.minWidth || 100,
+        disableDraggable: WebvizDialog.defaultProps?.disableDraggable || false,
+        disableEscapeKeyDown:
+            WebvizDialog.defaultProps?.disableEscapeKeyDown || false,
+        children: [],
+        actions: ["Action 1", "Action 2"],
+    },
 };
 
-const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
-    args
-) => {
+const MultipleDialogsTemplate = (args: WebvizDialogProps) => {
     const DialogProps: WebvizDialogProps = {
         id: "",
         title: "",
@@ -178,9 +188,10 @@ const ExampleMultipleDialogsTemplate: ComponentStory<typeof WebvizDialog> = (
     );
 };
 
-export const ExampleMultipleDialogs = ExampleMultipleDialogsTemplate.bind({});
-ExampleMultipleDialogs.args = {
-    disableEscapeKeyDown:
-        WebvizDialog.defaultProps?.disableEscapeKeyDown || false,
-    actions: WebvizDialog.defaultProps?.actions || [],
+export const ExampleMultipleDialogs: Story = {
+    render: MultipleDialogsTemplate,
+    args: {
+        disableEscapeKeyDown: false,
+        actions: [],
+    },
 };

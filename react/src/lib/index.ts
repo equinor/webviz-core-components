@@ -6,7 +6,7 @@
  */
 
 import { WebvizPluginPlaceholder } from "./components/WebvizPluginPlaceholder";
-import { ColorScales } from "./components/ColorScales";
+
 import { Select } from "./components/Select";
 import {
     SmartNodeSelector,
@@ -52,7 +52,6 @@ export {
     WebvizPluginLayoutColumn,
     WebvizPluginLayoutRow,
     WebvizPluginLoadingIndicator,
-    ColorScales,
     Select,
     SmartNodeSelector,
     TreeData,
