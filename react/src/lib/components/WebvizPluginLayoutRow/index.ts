@@ -1,2 +1,2 @@
 export { WebvizPluginLayoutRow } from "./WebvizPluginLayoutRow";
-export { WebvizPluginLayoutRowProps } from "./WebvizPluginLayoutRow";
+export type { WebvizPluginLayoutRowProps } from "./WebvizPluginLayoutRow";

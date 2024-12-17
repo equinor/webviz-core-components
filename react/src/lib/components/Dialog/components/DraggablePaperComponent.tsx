@@ -1,6 +1,6 @@
 import React from "react";
 
-import Paper, { PaperProps } from "@material-ui/core/Paper";
+import Paper, { PaperProps } from "@mui/material/Paper";
 import Draggable from "react-draggable";
 
 export const DraggablePaperComponent: React.FC<PaperProps> = (props) => {

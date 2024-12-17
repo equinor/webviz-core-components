@@ -8,7 +8,7 @@ import { View } from "../../../../shared-types/webviz-content/webviz";
 import { Point } from "../../../../shared-types/point";
 
 import "./view-list.css";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 
 export type ViewListProps = {
     open: boolean;
@@ -114,8 +114,10 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                                 >
                                     <div>
                                         {el.views[0].id ===
-                                            props.activeViewId && (
+                                            props.activeViewId && (<>
+                                            { /* @ts-expect-error - this is a very weird bug */}
                                             <Icon name="check" />
+                                            </>
                                         )}
                                     </div>
                                     <div className="WebvizViewList__Item__Text">
@@ -150,8 +152,10 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                                         >
                                             <div>
                                                 {view.id ===
-                                                    props.activeViewId && (
+                                                    props.activeViewId && (<>
+                                                    { /* @ts-expect-error - this is a very weird bug */}
                                                     <Icon name="check" />
+                                                    </>
                                                 )}
                                             </div>
                                             <div className="WebvizViewList__Item__Text">

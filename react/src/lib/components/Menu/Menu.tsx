@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import useSize from "@react-hook/size";
 
 import { useStore as useWebvizStore } from "../WebvizContentManager";
 
@@ -11,6 +10,7 @@ import { Overlay } from "../Overlay/Overlay";
 import { Logo } from "./components/Logo/Logo";
 import { MenuBarPosition, MenuDrawerPosition } from "./types/menu-position";
 import { MenuContent } from "./components/MenuContent/MenuContent";
+import { useSize } from "../../hooks/useSize";
 import { useWindowSize } from "../../hooks/useWindowSize";
 
 import {

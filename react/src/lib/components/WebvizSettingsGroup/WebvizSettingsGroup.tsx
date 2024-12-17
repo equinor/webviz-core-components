@@ -1,12 +1,12 @@
 import { Icon } from "@equinor/eds-core-react";
 import { chevron_down, chevron_up, world } from "@equinor/eds-icons";
-import { IconButton, Tooltip } from "@material-ui/core";
-import useSize from "@react-hook/size";
+import { IconButton, Tooltip } from "@mui/material";
 import React from "react";
 
 import "./webviz-settings-group.css";
 import PropTypes from "prop-types";
 import { useStore } from "../WebvizContentManager/WebvizContentManager";
+import { useSize } from "../../hooks/useSize";
 
 Icon.add({ chevron_down, chevron_up, world });
 
@@ -148,6 +148,7 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                 >
                     {props.viewId === "" && (
                         <div className="WebvizSettingsGroup__GlobalIcon">
+                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon
                                 name="world"
                                 title="Global settings group"
@@ -161,6 +162,7 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                     {!props.alwaysOpen && (
                         <div>
                             <IconButton>
+                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon
                                     name={
                                         props.open === true

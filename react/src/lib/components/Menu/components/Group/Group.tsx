@@ -73,6 +73,7 @@ export const Group: React.FC<GroupProps> = (props) => {
                             : "Collapse group"
                     }
                 >
+                    { /* @ts-expect-error - this is a very weird bug */}
                     <EdsIcon
                         name={
                             !collapsed || props.forceOpen

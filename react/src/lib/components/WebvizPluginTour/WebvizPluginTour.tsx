@@ -1,5 +1,4 @@
-import { Button, MobileStepper } from "@material-ui/core";
-import useSize from "@react-hook/size";
+import { Button, MobileStepper } from "@mui/material";
 import React from "react";
 import * as ReactDOM from "react-dom";
 import { StoreActions, useStore } from "../WebvizContentManager";
@@ -10,6 +9,7 @@ Icon.add({ arrow_back, arrow_forward });
 import { waitUntilElementIsAvailable } from "../../utils/waitUntilElementIsAvailable";
 import "./webviz-plugin-tour.css";
 import { Point } from "lib/shared-types/point";
+import { useSize } from "../../hooks/useSize";
 
 export type WebvizPluginTourProps = {
     open: boolean;
@@ -42,7 +42,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
     const intervalRef =
         React.useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const windowSize = useSize(webvizPluginTourRef.current);
+    const windowSize = useSize(webvizPluginTourRef);
 
     const pluginData = store.state.pluginsData.find(
         (el) => el.id === store.state.activePluginId
@@ -277,6 +277,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     >
                         {pluginData && (
                             <div className="WebvizPluginTour__View">
+                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon name="view_carousel" />
                                 <span>
                                     {pluginData.views.find(
@@ -313,6 +314,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                                         }
                                     >
                                         Next
+                                        { /* @ts-expect-error - this is a very weird bug */}
                                         <Icon name="arrow_forward" />
                                     </Button>
                                 }
@@ -327,6 +329,7 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                                         }}
                                         disabled={currentTourStep === 0}
                                     >
+                                        { /* @ts-expect-error - this is a very weird bug */}
                                         <Icon name="arrow_back" />
                                         Back
                                     </Button>

@@ -43,12 +43,14 @@ const WebvizContentOverlay: React.FC<InferProps<typeof propTypes>> = ({
             <div className="webviz-plugin-data-owner">
                 {contactPerson && "name" in contactPerson && (
                     <p>
+                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="person" style={{ marginRight: "5px" }} />
                         {contactPerson.name}
                     </p>
                 )}
                 {contactPerson && "email" in contactPerson && (
                     <p>
+                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="email" style={{ marginRight: "5px" }} />
                         <a href="mailto:{this.props.contactPerson.email}">
                             {contactPerson.email}
@@ -57,6 +59,7 @@ const WebvizContentOverlay: React.FC<InferProps<typeof propTypes>> = ({
                 )}
                 {contactPerson && "phone" in contactPerson && (
                     <p>
+                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="call" style={{ marginRight: "5px" }} />
                         {contactPerson.phone}
                     </p>

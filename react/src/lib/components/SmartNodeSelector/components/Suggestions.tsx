@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment, MouseEvent } from "react";
-import ReactDOM from "react-dom";
+import { Root, createRoot } from "react-dom/client";
 import classNames from "classnames";
 import PropTypes from "prop-types";
 
@@ -54,6 +54,7 @@ class Suggestions extends Component<SuggestionsProps> {
     private lastNodeSelection?: TreeNodeSelection;
     private positionRef: React.RefObject<HTMLDivElement>;
     private popup: HTMLDivElement | null;
+    private popupRoot: Root | null;
     private showingAllSuggestions: boolean;
 
     constructor(props: SuggestionsProps) {
@@ -70,6 +71,7 @@ class Suggestions extends Component<SuggestionsProps> {
         this.allOptions = [];
         this.positionRef = React.createRef();
         this.popup = null;
+        this.popupRoot = null;
         this.showingAllSuggestions = false;
 
         this.state = {
@@ -98,6 +100,7 @@ class Suggestions extends Component<SuggestionsProps> {
 
         this.popup = document.createElement("div");
         document.body.appendChild(this.popup);
+        this.popupRoot = createRoot(this.popup);
     }
 
     componentWillUnmount(): void {
@@ -396,7 +399,7 @@ class Suggestions extends Component<SuggestionsProps> {
 
     private createSuggestionsForCurrentTag(
         maxHeight: number
-    ): React.ReactFragment | null {
+    ): React.ReactNode | null {
         const {
             treeNodeSelection,
             enableInputBlur,
@@ -464,8 +467,15 @@ class Suggestions extends Component<SuggestionsProps> {
     }
 
     renderPopup(): void {
-        this.maybeLoadNewOptions();
         const { tagInputFieldRef, visible, suggestionsRef } = this.props;
+
+        if (!visible) {
+            this.popupRoot?.render(null);
+            return;
+        }
+
+        this.maybeLoadNewOptions();
+
         const maxHeight =
             window.innerHeight -
             (tagInputFieldRef.current
@@ -513,7 +523,11 @@ class Suggestions extends Component<SuggestionsProps> {
                   height: 0,
               };
 
-        ReactDOM.render(
+        if (!this.popupRoot) {
+            return;
+        }
+
+        this.popupRoot.render(
             <div
                 ref={suggestionsRef}
                 className="Suggestions"
@@ -539,8 +553,7 @@ class Suggestions extends Component<SuggestionsProps> {
                         height: lowerSpacerHeight + "px",
                     }}
                 ></div>
-            </div>,
-            this.popup
+            </div>
         );
     }
 

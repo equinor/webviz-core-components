@@ -229,13 +229,14 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                 }
             >
                 <div id={id} ref={ref} className="webviz-plugin-content">
+                    <>
                     {children}
-
                     <WebvizContentOverlay
                         id={"overlay".concat(id)}
                         contactPerson={contact_person}
                         showOverlay={showOverlay}
                     />
+                    </>
                 </div>
                 <div className="webviz-config-plugin-buttonbar">
                     {buttons && buttons.includes("screenshot") && (
@@ -243,7 +244,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                             icon={camera}
                             tooltip="Take screenshot"
                             onClick={() => {
-                                ref.current &&
+                                if (ref.current) {
                                     html2canvas(ref.current, {
                                         scrollX: -window.scrollX,
                                         scrollY: -window.scrollY,
@@ -259,6 +260,7 @@ const InnerWebvizPluginPlaceholder: React.FC<InferProps<typeof propTypes>> = (
                                             }
                                         })
                                     );
+                                }
                             }}
                         />
                     )}

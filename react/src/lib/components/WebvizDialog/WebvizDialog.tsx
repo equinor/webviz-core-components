@@ -355,8 +355,9 @@ export const WebvizDialog: React.FC<WebvizDialogProps> = (props) => {
             if (e.key !== "Escape") {
                 return;
             }
-            dialogRef.current?.classList.contains("WebvizDialog--active") &&
+            if (dialogRef.current?.classList.contains("WebvizDialog--active")) {
                 handleClose();
+            }
             e.preventDefault();
         };
 

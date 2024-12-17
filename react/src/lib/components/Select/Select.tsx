@@ -179,7 +179,9 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
 
     React.useEffect(() => {
         return () => {
-            debounceTimer.current && clearTimeout(debounceTimer.current);
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
         };
     }, []);
 
@@ -201,7 +203,9 @@ export const Select: React.FC<InferProps<typeof propTypes>> = (
                 setSelectedValues(values);
             }
 
-            debounceTimer.current && clearTimeout(debounceTimer.current);
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
             debounceTimer.current = setTimeout(() => {
                 setProps({ value: values });
             }, debounce_time_ms);

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import * as edsIcons from "@equinor/eds-icons";
 import { IconData } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 
 export type EdsIconProps = {
     id?: string;
@@ -28,6 +28,7 @@ export const EdsIcon: React.FC<EdsIconProps> = (props) => {
                     `https://eds-storybook-react.azurewebsites.net/?path=/story/icons--preview.`
                 }
             >
+                { /* @ts-expect-error - this is a very weird bug */}
                 <Icon
                     id={props.id}
                     data={edsIcons.report}
@@ -40,7 +41,10 @@ export const EdsIcon: React.FC<EdsIconProps> = (props) => {
     }
 
     return (
+        <>
+        { /* @ts-expect-error - this is a very weird bug */}
         <Icon id={props.id} data={icon} size={props.size} color={props.color} />
+        </>
     );
 };
 

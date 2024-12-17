@@ -8,8 +8,8 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-} from "@material-ui/core";
-import Paper from "@material-ui/core/Paper";
+} from "@mui/material";
+import Paper from "@mui/material/Paper";
 
 import { Icon } from "@equinor/eds-core-react";
 import { close } from "@equinor/eds-icons";
@@ -126,6 +126,7 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
                         color: "#ccc",
                     }}
                 >
+                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="close" />
                 </IconButton>
             </DialogTitle>
@@ -161,7 +162,7 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
             scroll="body"
             style={{ pointerEvents: "none" }}
         >
-            {content}
+            <>{content}</>
         </MuiDialog>
     );
 };

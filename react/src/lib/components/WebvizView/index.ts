@@ -1,2 +1,2 @@
 export { WebvizView } from "./WebvizView";
-export { WebvizViewProps } from "./WebvizView";
+export type { WebvizViewProps } from "./WebvizView";

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { IconButton } from "@material-ui/core";
+import { IconButton } from "@mui/material";
 
 import { Icon } from "@equinor/eds-core-react";
 import { close } from "@equinor/eds-icons";
@@ -74,6 +74,7 @@ export const WebvizDialogTitle = React.forwardRef<
                         aria-label="close"
                         onClick={() => handleCloseClick()}
                     >
+                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="close" />
                     </IconButton>
                 </div>
