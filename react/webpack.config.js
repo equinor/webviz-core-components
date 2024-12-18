@@ -1,4 +1,6 @@
 const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 const packagejson = require("./package.json");
 
@@ -34,6 +36,8 @@ module.exports = (env, argv) => {
     const filenameJs = demo
         ? "output.js"
         : `${dashLibraryName}.${mode === "development" ? "dev" : "min"}.js`;
+
+    const filenameCss = demo ? "output.css" : `${dashLibraryName}.css`;
 
     // Devtool
 
@@ -82,9 +86,15 @@ module.exports = (env, argv) => {
                 },
                 {
                     test: /\.css$/,
-                    use: {
-                        loader: "css-loader",
-                    },
+                    use: [
+                        {
+                            loader:
+                                mode === "production"
+                                    ? MiniCssExtractPlugin.loader
+                                    : "style-loader",
+                        },
+                        "css-loader",
+                    ],
                 },
                 {
                     test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -99,11 +109,22 @@ module.exports = (env, argv) => {
         },
         devtool: devtool,
         externals: externals,
+        plugins: [
+            new MiniCssExtractPlugin({
+                filename: filenameCss,
+            }),
+        ],
         optimization: {
-            minimize: true,
-            splitChunks: {
-                name: "[name].js",
-            },
+            minimizer: [
+                () => {
+                    return () => {
+                        return {
+                            terserOptions: {},
+                        };
+                    };
+                },
+                new CssMinimizerPlugin({}),
+            ],
         },
     };
 };
