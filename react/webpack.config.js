@@ -22,7 +22,10 @@ module.exports = (env, argv) => {
 
     // Entry
 
-    const entry = argv && argv.entry ? [argv.entry] : [path.join(__dirname, "src/demo/index.tsx")];
+    const entry =
+        argv && argv.entry
+            ? argv.entry[0]
+            : path.join(__dirname, "src/demo/index.tsx");
 
     // Output
 
@@ -35,7 +38,8 @@ module.exports = (env, argv) => {
     // Devtool
 
     const devtool =
-        argv.devtool || (mode === "development" ? "eval-source-map" : false);
+        argv.devtool ||
+        (mode === "development" ? "eval-source-map" : "source-map");
 
     // Externals
 
