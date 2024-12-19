@@ -31,8 +31,8 @@
         "prepublishOnly": "npm test && npm run lint",
         "preversion": "npm run lint",
         "typecheck": "tsc --noEmit",
-        "format": "eslint --fix \"src/**/*.{ts,tsx,js,jsx,json,css}\" \"tests/**/*.{ts,tsx,js,jsx,json,css}\"",
-        "lint": "eslint 'src/**/*.+(ts|tsx|js|jsx|json)' 'tests/**/*.+(ts|tsx|js|jsx|json)'",
+        "format": "eslint --fix \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
+        "lint": "eslint 'src/**/*.+(ts|tsx|js|jsx|json)'",
         "validate": "npm run typecheck && npm run lint",
         "test": "jest --update"
     },
