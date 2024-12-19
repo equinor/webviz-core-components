@@ -34,7 +34,7 @@
         "format": "eslint --fix \"src/**/*.{ts,tsx,js,jsx,json,css}\" \"tests/**/*.{ts,tsx,js,jsx,json,css}\"",
         "lint": "eslint 'src/**/*.+(ts|tsx|js|jsx|json)' 'tests/**/*.+(ts|tsx|js|jsx|json)'",
         "validate": "npm run typecheck && npm run lint",
-        "test": "jest --updateSnapshot"
+        "test": "jest --update"
     },
     "author": "Equinor <noreply@equinor.com>",
     "license": "MIT",
