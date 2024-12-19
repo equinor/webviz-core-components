@@ -20,7 +20,7 @@ INSTALL_REQUIRES = ["dash>=2.0"]
 
 TESTS_REQUIRE = [
     "bandit",
-    "black>=22.12",
+    "black>=22.12,<24",
     "dash[testing]",
     "flask<2.3",
     "pylint",
