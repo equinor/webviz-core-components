@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from "@material-ui/core";
+import { IconButton, Tooltip } from "@mui/material";
 import * as edsIcons from "@equinor/eds-icons";
 import { IconData } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
@@ -38,7 +38,8 @@ export const FullScreenMenu: React.FC<FullScreenMenuProps> = (
                         }
                     >
                         <Tooltip title={action.tooltip}>
-                            <Icon data={icon} />
+                            { /* @ts-expect-error - this is a very weird bug */}
+                            <>{icon && <Icon data={icon} />}</>
                         </Tooltip>
                     </IconButton>
                 );

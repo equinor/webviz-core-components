@@ -1,5 +1,5 @@
 import { Icon } from "@equinor/eds-core-react";
-import { IconButton, Tooltip } from "@material-ui/core";
+import { IconButton, Tooltip } from "@mui/material";
 import {
     settings,
     download,
@@ -553,6 +553,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                             <IconButton
                                 onClick={() => handleOpenSettingsDialog()}
                             >
+                                 { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon name="settings" size={16} />
                             </IconButton>
                         </Tooltip>
@@ -563,6 +564,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                     <div>
                         <Tooltip title="Download data from view element">
                             <IconButton onClick={() => handleDownloadClick()}>
+                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon name="download" size={16} />
                             </IconButton>
                         </Tooltip>
@@ -571,6 +573,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 <div>
                     <Tooltip title="Take screenshot">
                         <IconButton onClick={handleScreenShotClick}>
+                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon name="camera" size={16} />
                         </IconButton>
                     </Tooltip>
@@ -578,6 +581,7 @@ export const WebvizViewElement: React.FC<WebvizViewElementProps> = (props) => {
                 <div>
                     <Tooltip title="View in fullscreen">
                         <IconButton onClick={handleFullScreenClick}>
+                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon name="fullscreen" size={16} />
                         </IconButton>
                     </Tooltip>

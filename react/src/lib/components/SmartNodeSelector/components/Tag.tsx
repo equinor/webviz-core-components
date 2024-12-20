@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { Component, ReactFragment } from "react";
+import React, { Component } from "react";
 import classNames from "classnames";
 import PropTypes from "prop-types";
 
@@ -171,7 +171,7 @@ export default class Tag extends Component<TagProps> {
     private createBrowseButtons(
         nodeSelection: TreeNodeSelection,
         index: number
-    ): ReactFragment | null {
+    ): React.ReactNode | null {
         const { currentTag } = this.props;
         if (
             ((nodeSelection.isValidUpToFocussedNode() && currentTag) ||

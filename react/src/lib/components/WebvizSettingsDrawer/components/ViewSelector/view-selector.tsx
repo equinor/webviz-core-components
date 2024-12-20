@@ -9,8 +9,8 @@ import { StoreActions, useStore } from "../../../WebvizContentManager";
 import "./view-selector.css";
 import { ViewList } from "../ViewList/view-list";
 import { Overlay } from "../../../Overlay";
-import ReactDOM from "react-dom";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
+import { createRoot } from "react-dom/client";
 
 type ViewSelectorProps = {
     open: boolean;
@@ -51,6 +51,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
 
     React.useEffect(() => {
         if (popupContainer) {
+            const popupContainerRoot = createRoot(popupContainer);
             if (menuOpen) {
                 const ViewListElements = () => (
                     <>
@@ -83,9 +84,9 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                         />
                     </>
                 );
-                ReactDOM.render(<ViewListElements />, popupContainer);
+                popupContainerRoot.render(<ViewListElements />);
             } else {
-                ReactDOM.render(<></>, popupContainer);
+                popupContainerRoot.render(<></>);
             }
         }
     }, [
@@ -145,6 +146,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                 onClick={() => setMenuOpen(true)}
             >
                 <div ref={viewCarouselRef} className="WebvizViewSelector__Icon">
+                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="view_carousel" />
                 </div>
                 <div
@@ -163,6 +165,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                         width: isCollapsed ? 0 : "auto",
                     }}
                 >
+                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="chevron_down" />
                 </div>
             </div>

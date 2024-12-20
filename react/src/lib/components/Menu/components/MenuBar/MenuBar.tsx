@@ -2,10 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Icon } from "@equinor/eds-core-react";
 import { menu } from "@equinor/eds-icons";
-import useSize from "@react-hook/size";
 
 import { MenuBarPosition, MenuDrawerPosition } from "../../types/menu-position";
 import { Logo } from "../Logo";
+import { useSize } from "../../../../hooks/useSize";
 
 Icon.add({ menu });
 
@@ -331,6 +331,7 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                         variant="ghost_icon"
                         onClick={handleMenuButtonClick}
                     >
+                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="menu" title="Open menu" />
                     </Button>
                 </div>

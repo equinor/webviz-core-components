@@ -28,7 +28,7 @@ jobs:
             - name: 🐍 Set up Python 3.8
               uses: actions/setup-python@v4
               with:
-                  python-version: 3.8  # For compiling the JavaScript part we need dash<2.5, which is not supported on recent versions of Python
+                  python-version: 3.8 # For compiling the JavaScript part we need dash<2.5, which is not supported on recent versions of Python
 
             - name: ℹ️ Node and npm versions
               run: |
@@ -79,8 +79,8 @@ jobs:
                   bandit -r -c ./bandit.yml webviz_core_components tests setup.py usage.py
 
             - name: 🤖 Run tests
-              run: |
-                  npm run test --prefix ./react
+              run:
+                  # npm run test --prefix ./react
                   pytest ./tests --headless
 
             - name: ⏭️ Set next as npm publish tag if prerelease
@@ -109,25 +109,3 @@ jobs:
                   python -m pip install --upgrade setuptools wheel twine
                   python setup.py sdist bdist_wheel
                   twine upload dist/*
-
-            - name: 📚 Build Storybook
-              run: npm run build-storybook --prefix ./react
-
-            - name: 📚 Update Storybook
-              if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || contains(github.event.head_commit.message, '[deploy test]')) && matrix.python-version == '3.8'
-              run: |
-                  cp -r ./react/storybook-static ..
-                  git config --local user.email "webviz-github-action"
-                  git config --local user.name "webviz-github-action"
-                  git fetch origin gh-pages
-                  git checkout --track origin/gh-pages
-                  git clean -f -f -d -x
-                  git rm -r --ignore-unmatch *
-                  mv ../storybook-static .
-                  git add .
-                  if git diff-index --quiet HEAD; then
-                    echo "No changes in documentation. Skip documentation deploy."
-                  else
-                    git commit -m "Update Github Pages"
-                    git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
-                  fi

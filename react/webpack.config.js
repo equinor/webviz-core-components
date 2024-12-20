@@ -5,7 +5,7 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const packagejson = require("./package.json");
 
 const dashLibraryName = packagejson.name
-    .replace(/[-\/]/g, "_")
+    .replace(/[-/]/g, "_")
     .replace(/@/g, "");
 
 module.exports = (env, argv) => {
@@ -24,13 +24,14 @@ module.exports = (env, argv) => {
 
     // Entry
 
-    const entry = {
-        main: argv && argv.entry ? argv.entry : "./dist/index.js",
-    };
+    const entry =
+        argv && argv.entry
+            ? argv.entry[0]
+            : path.join(__dirname, "src/demo/index.tsx");
 
     // Output
 
-    const demo = entry.main != "./dist/index.js";
+    const demo = entry !== "./dist/index.js";
 
     const filenameJs = demo
         ? "output.js"
@@ -41,7 +42,8 @@ module.exports = (env, argv) => {
     // Devtool
 
     const devtool =
-        argv.devtool || (mode === "development" ? "eval-source-map" : false);
+        argv.devtool ||
+        (mode === "development" ? "eval-source-map" : "source-map");
 
     // Externals
 
@@ -57,34 +59,30 @@ module.exports = (env, argv) => {
     // See: https://webpack.js.org/configuration/
 
     return {
-        mode: mode,
+        mode,
         entry,
+        target: "web",
         output: {
             path: demo
                 ? __dirname
                 : path.resolve(__dirname, "..", dashLibraryName),
             filename: filenameJs,
-            library: {
-                type: "window",
-                name: dashLibraryName,
-            },
-        },
-        devServer: {
-            static: {
-                directory: path.resolve(__dirname),
-            },
+            library: dashLibraryName,
+            libraryTarget: "umd",
         },
         module: {
             rules: [
                 {
-                    test: /\.jsx?$/,
+                    test: /\.(t|j)sx?$/,
+                    use: [
+                        {
+                            loader: "ts-loader",
+                            options: {
+                                transpileOnly: true,
+                            },
+                        },
+                    ],
                     exclude: /node_modules/,
-                    use: "babel-loader",
-                },
-                {
-                    test: /\.tsx?$/,
-                    exclude: /node_modules/,
-                    use: ["babel-loader", "ts-loader"],
                 },
                 {
                     test: /\.css$/,

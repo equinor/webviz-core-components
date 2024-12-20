@@ -1,2 +1,2 @@
 export { WebvizPluginLayoutColumn } from "./WebvizPluginLayoutColumn";
-export { WebvizPluginLayoutColumnProps } from "./WebvizPluginLayoutColumn";
+export type { WebvizPluginLayoutColumnProps } from "./WebvizPluginLayoutColumn";

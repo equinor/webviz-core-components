@@ -1,2 +1,2 @@
 export { WebvizSettings } from "./WebvizSettings";
-export { WebvizSettingsProps } from "./WebvizSettings";
+export type { WebvizSettingsProps } from "./WebvizSettings";

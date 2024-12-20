@@ -25,4 +25,6 @@ def test_plugin_placeholder(dash_duo):
 
     dash_duo.start_server(app)
 
-    assert dash_duo.get_logs() is None, "browser console should contain no error"
+    assert (
+        dash_duo.get_logs() is None or dash_duo.get_logs() == []
+    ), f"browser console should contain no error: {dash_duo.get_logs()}"

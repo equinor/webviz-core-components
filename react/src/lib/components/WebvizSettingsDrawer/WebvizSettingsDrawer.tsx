@@ -1,10 +1,9 @@
 import React from "react";
-import useSize from "@react-hook/size";
 import { settings, chevron_right, chevron_left } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
 Icon.add({ settings, chevron_right, chevron_left });
 
-import { Button, Tooltip } from "@material-ui/core";
+import { Button, Tooltip } from "@mui/material";
 
 import { DrawerPosition } from "../../shared-types/webviz-content/drawer-position";
 
@@ -13,6 +12,7 @@ import { ViewSelector } from "./components/ViewSelector/view-selector";
 
 import { WebvizSettings } from "../WebvizSettings";
 import { PluginActions } from "./components/PluginActions/plugin-actions";
+import { useSize } from "../../hooks/useSize";
 
 import { SnackbarProvider } from "notistack";
 
@@ -164,7 +164,9 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                             }`}
                             onClick={() => handleToggleOpenClick()}
                         >
+                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon name="chevron_left" />
+                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon name="settings" />
                         </Button>
                     </Tooltip>

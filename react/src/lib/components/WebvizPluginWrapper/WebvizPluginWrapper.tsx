@@ -54,7 +54,7 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
     React.useEffect(() => {
         store.dispatch({
             type: StoreActions.IncrementViewUpdates,
-            payload: null,
+            payload: null
         });
     }, [props.children]);
 

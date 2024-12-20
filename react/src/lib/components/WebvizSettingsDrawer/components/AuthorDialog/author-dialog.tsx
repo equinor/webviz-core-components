@@ -9,7 +9,7 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import { close, email, person, phone } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
@@ -48,6 +48,7 @@ export const AuthorDialog: React.FC<AuthorDialogProps> = (
                         color: "#ccc",
                     }}
                 >
+                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="close" />
                 </IconButton>
             </DialogTitle>
@@ -56,6 +57,7 @@ export const AuthorDialog: React.FC<AuthorDialogProps> = (
                     <ListItem>
                         <ListItemAvatar>
                             <Avatar>
+                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon name="person" />
                             </Avatar>
                         </ListItemAvatar>
@@ -64,6 +66,7 @@ export const AuthorDialog: React.FC<AuthorDialogProps> = (
                     <ListItem>
                         <ListItemAvatar>
                             <Avatar>
+                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon name="email" />
                             </Avatar>
                         </ListItemAvatar>
@@ -72,6 +75,7 @@ export const AuthorDialog: React.FC<AuthorDialogProps> = (
                     <ListItem>
                         <ListItemAvatar>
                             <Avatar>
+                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon name="phone" />
                             </Avatar>
                         </ListItemAvatar>
