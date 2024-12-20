@@ -42,4 +42,6 @@ def test_container_placeholder(dash_duo):
 
     dash_duo.start_server(app)
 
-    assert dash_duo.get_logs() is None, f"browser console should contain no error: {dash_duo.get_logs()}"
+    assert (
+        dash_duo.get_logs() is None
+    ), f"browser console should contain no error: {dash_duo.get_logs()}"
