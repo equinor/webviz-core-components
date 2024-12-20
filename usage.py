@@ -251,6 +251,7 @@ app.layout = html.Div(
     ]
 )
 
+
 @app.callback(
     Output("output", "children"),
     [
