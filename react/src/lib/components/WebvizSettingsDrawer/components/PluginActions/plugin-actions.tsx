@@ -351,13 +351,13 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                     (parseInt(
                                         initialFullScreenContainerPadding
                                     ) +
-                                        56),
+                                        64),
                                 width: window.innerWidth,
                                 backdropOpacity: 1,
                                 paddingTop:
                                     parseInt(
                                         initialFullScreenContainerPadding
-                                    ) + 56,
+                                    ) + 60,
                             },
                         },
                     ],
@@ -376,12 +376,12 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                                     height: `calc(100vh - ${
                                         parseInt(
                                             initialFullScreenContainerPadding
-                                        ) + 56
+                                        ) + 64
                                     }px)`,
                                     "padding-top": `${
                                         parseInt(
                                             initialFullScreenContainerPadding
-                                        ) + 56
+                                        ) + 60
                                     }px`,
                                 });
                                 return;
