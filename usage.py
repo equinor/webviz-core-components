@@ -1,4 +1,4 @@
-from dash import Dash, Input, Output, State, html
+from dash import Dash, Input, Output, html
 
 import webviz_core_components as wcc
 
