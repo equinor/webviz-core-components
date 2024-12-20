@@ -60,7 +60,6 @@ app.layout = html.Div(
         wcc.WebvizPluginPlaceholder(
             id="some-other-plugin",
             children=[
-                wcc.ColorScales(id="colorscale"),
                 wcc.Graph(
                     id="example-graph",
                     figure={
@@ -251,17 +250,6 @@ app.layout = html.Div(
         ),
     ]
 )
-
-
-@app.callback(
-    Output("example-graph", "figure"),
-    [Input("colorscale", "colorscale")],
-    [State("example-graph", "figure")],
-)
-def update_colors(colorscale, figure):
-    figure["layout"]["colorway"] = colorscale
-    return figure
-
 
 @app.callback(
     Output("output", "children"),
