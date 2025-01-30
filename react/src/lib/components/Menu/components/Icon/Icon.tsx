@@ -27,7 +27,6 @@ export const Icon: React.FC<IconProps> = (props) => {
                     `https://eds-storybook-react.azurewebsites.net/?path=/story/icons--preview.`
                 }
             >
-                { /* @ts-expect-error - this is a very weird bug */}
                 <EdsIcon
                     data={edsIcons.report}
                     color="hsla(0, 100%, 50%, 1)"
@@ -39,7 +38,6 @@ export const Icon: React.FC<IconProps> = (props) => {
 
     return (
         <>
-        { /* @ts-expect-error - this is a very weird bug */}
         <EdsIcon
             data={icon}
             color={props.active ? "#FF1243" : "#989898"}

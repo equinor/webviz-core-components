@@ -277,7 +277,6 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                     >
                         {pluginData && (
                             <div className="WebvizPluginTour__View">
-                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon name="view_carousel" />
                                 <span>
                                     {pluginData.views.find(
@@ -314,7 +313,6 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                                         }
                                     >
                                         Next
-                                        { /* @ts-expect-error - this is a very weird bug */}
                                         <Icon name="arrow_forward" />
                                     </Button>
                                 }
@@ -329,7 +327,6 @@ export const WebvizPluginTour: React.FC<WebvizPluginTourProps> = (
                                         }}
                                         disabled={currentTourStep === 0}
                                     >
-                                        { /* @ts-expect-error - this is a very weird bug */}
                                         <Icon name="arrow_back" />
                                         Back
                                     </Button>

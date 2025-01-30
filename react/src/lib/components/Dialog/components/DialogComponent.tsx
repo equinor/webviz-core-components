@@ -126,7 +126,6 @@ export const DialogComponent: React.FC<DialogProps> = (props) => {
                         color: "#ccc",
                     }}
                 >
-                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="close" />
                 </IconButton>
             </DialogTitle>

@@ -28,7 +28,6 @@ export const EdsIcon: React.FC<EdsIconProps> = (props) => {
                     `https://eds-storybook-react.azurewebsites.net/?path=/story/icons--preview.`
                 }
             >
-                { /* @ts-expect-error - this is a very weird bug */}
                 <Icon
                     id={props.id}
                     data={edsIcons.report}
@@ -42,7 +41,6 @@ export const EdsIcon: React.FC<EdsIconProps> = (props) => {
 
     return (
         <>
-        { /* @ts-expect-error - this is a very weird bug */}
         <Icon id={props.id} data={icon} size={props.size} color={props.color} />
         </>
     );

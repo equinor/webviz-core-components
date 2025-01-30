@@ -164,9 +164,7 @@ export const WebvizSettingsDrawer: React.FC<WebvizSettingsDrawerProps> = (
                             }`}
                             onClick={() => handleToggleOpenClick()}
                         >
-                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon name="chevron_left" />
-                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon name="settings" />
                         </Button>
                     </Tooltip>

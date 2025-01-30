@@ -148,7 +148,6 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                 >
                     {props.viewId === "" && (
                         <div className="WebvizSettingsGroup__GlobalIcon">
-                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon
                                 name="world"
                                 title="Global settings group"
@@ -162,7 +161,6 @@ export const WebvizSettingsGroup: React.FC<WebvizSettingsGroupProps> = (
                     {!props.alwaysOpen && (
                         <div>
                             <IconButton>
-                                { /* @ts-expect-error - this is a very weird bug */}
                                 <Icon
                                     name={
                                         props.open === true

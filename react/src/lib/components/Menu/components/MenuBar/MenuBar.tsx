@@ -331,7 +331,6 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
                         variant="ghost_icon"
                         onClick={handleMenuButtonClick}
                     >
-                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="menu" title="Open menu" />
                     </Button>
                 </div>

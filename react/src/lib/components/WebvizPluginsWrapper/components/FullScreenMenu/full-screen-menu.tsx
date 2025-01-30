@@ -38,7 +38,6 @@ export const FullScreenMenu: React.FC<FullScreenMenuProps> = (
                         }
                     >
                         <Tooltip title={action.tooltip}>
-                            { /* @ts-expect-error - this is a very weird bug */}
                             <>{icon && <Icon data={icon} />}</>
                         </Tooltip>
                     </IconButton>

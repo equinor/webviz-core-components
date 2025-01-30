@@ -115,7 +115,6 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                                     <div>
                                         {el.views[0].id ===
                                             props.activeViewId && (<>
-                                            { /* @ts-expect-error - this is a very weird bug */}
                                             <Icon name="check" />
                                             </>
                                         )}
@@ -153,7 +152,6 @@ export const ViewList: React.FC<ViewListProps> = (props: ViewListProps) => {
                                             <div>
                                                 {view.id ===
                                                     props.activeViewId && (<>
-                                                    { /* @ts-expect-error - this is a very weird bug */}
                                                     <Icon name="check" />
                                                     </>
                                                 )}
