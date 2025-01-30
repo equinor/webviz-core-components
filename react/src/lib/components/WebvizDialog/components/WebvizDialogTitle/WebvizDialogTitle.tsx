@@ -74,7 +74,6 @@ export const WebvizDialogTitle = React.forwardRef<
                         aria-label="close"
                         onClick={() => handleCloseClick()}
                     >
-                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="close" />
                     </IconButton>
                 </div>

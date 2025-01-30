@@ -563,7 +563,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                 onClick={() => handleFullScreenClick()}
             >
                 <Tooltip title="Open active plugin in fullscreen mode">
-                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="fullscreen" />
                 </Tooltip>
             </div>
@@ -572,7 +571,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                 onClick={() => handleScreenShotClick()}
             >
                 <Tooltip title="Take a screenshot from active plugin">
-                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="camera" />
                 </Tooltip>
             </div>
@@ -582,7 +580,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     onClick={handleDownloadClick}
                 >
                     <Tooltip title="Download data from active plugin">
-                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="download" />
                     </Tooltip>
                 </div>
@@ -599,7 +596,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                             badgeContent={numDeprecationWarnings}
                             color="primary"
                         >
-                            { /* @ts-expect-error - this is a very weird bug */}
                             <Icon name="warning_outlined" />
                         </Badge>
                     </Tooltip>
@@ -611,7 +607,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     onClick={() => setOpenAuthorDialog(true)}
                 >
                     <Tooltip title="View active plugin's author">
-                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="person" />
                     </Tooltip>
                 </div>
@@ -622,7 +617,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     onClick={() => setTourIsOpen(true)}
                 >
                     <Tooltip title="Start a tour through the active plugin">
-                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="help" />
                     </Tooltip>
                 </div>
@@ -633,7 +627,6 @@ export const PluginActions: React.FC<PluginActionsProps> = (
                     onClick={() => openInNewTab(feedbackUrl)}
                 >
                     <Tooltip title="Report issue/give feedback on the active plugin">
-                        { /* @ts-expect-error - this is a very weird bug */}
                         <Icon name="comment_solid" />
                     </Tooltip>
                 </div>

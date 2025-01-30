@@ -146,7 +146,6 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                 onClick={() => setMenuOpen(true)}
             >
                 <div ref={viewCarouselRef} className="WebvizViewSelector__Icon">
-                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="view_carousel" />
                 </div>
                 <div
@@ -165,7 +164,6 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                         width: isCollapsed ? 0 : "auto",
                     }}
                 >
-                    { /* @ts-expect-error - this is a very weird bug */}
                     <Icon name="chevron_down" />
                 </div>
             </div>

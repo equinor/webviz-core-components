@@ -24,7 +24,6 @@ const WebvizToolbarButton: React.FC<WebvizToolbarButtonProps> = ({
     target,
 }) => {
     const createIcon = (useOnClick: boolean) => (
-        // @ts-expect-error - this is a very weird bug
         <Icon
             data={icon}
             className={classNames({
