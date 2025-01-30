@@ -1,8 +1,8 @@
 import React from "react";
 
-import { view_carousel, chevron_down } from "@equinor/eds-icons";
+import { view_carousel, chevron_down, chevron_up } from "@equinor/eds-icons";
 import { Icon } from "@equinor/eds-core-react";
-Icon.add({ view_carousel, chevron_down });
+Icon.add({ view_carousel, chevron_down, chevron_up });
 
 import { StoreActions, useStore } from "../../../WebvizContentManager";
 
@@ -56,12 +56,12 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                 const ViewListElements = () => (
                     <>
                         <Overlay
-                            visible={menuOpen}
+                            visible={menuOpen && !props.open}
                             onClick={() => setMenuOpen(false)}
                             zIndex={1003}
                         />
                         <ViewList
-                            open={menuOpen}
+                            open={menuOpen && !props.open}
                             views={
                                 store.state.pluginsData.find(
                                     (plugin) =>
@@ -79,7 +79,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
                                     ? viewNameRef.current
                                     : viewCarouselRef.current
                             }
-                            location={props.open ? "below" : "aside"}
+                            location={"aside"}
                             onActiveViewChange={handleSelectViewClick}
                         />
                     </>
@@ -112,6 +112,7 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
             clearTimeout(transitionTimer.current);
         }
         if (!props.open) {
+            setMenuOpen(false);
             transitionTimer.current = setTimeout(
                 () => setIsCollapsed(true),
                 1000
@@ -124,49 +125,82 @@ export const ViewSelector: React.FC<ViewSelectorProps> = (
     const handleSelectViewClick = React.useCallback(
         (view: string) => {
             if (store && plugin?.activeViewId !== view) {
+                if (!props.open) {
+                    setMenuOpen(false);
+                }
                 store.dispatch({
                     type: StoreActions.SetActiveView,
                     payload: { viewId: view },
                 });
             }
         },
-        [store]
+        [store, props.open]
     );
 
     return (
-        <Tooltip title="Change view">
-            <div
-                className="WebvizViewSelector"
-                style={{
-                    width: isCollapsed ? "auto" : props.width - 36,
-                    minHeight:
-                        plugin?.views && plugin.views.length > 1 ? 56 : 0,
-                    opacity: plugin?.views && plugin.views.length > 1 ? 1 : 0,
-                }}
-                onClick={() => setMenuOpen(true)}
-            >
-                <div ref={viewCarouselRef} className="WebvizViewSelector__Icon">
-                    <Icon name="view_carousel" />
-                </div>
+        <>
+            <Tooltip title="Change view">
                 <div
-                    ref={viewNameRef}
-                    className="WebvizViewSelector__ViewName"
+                    className="WebvizViewSelector"
                     style={{
-                        opacity: props.open ? 1 : 0,
-                        width: isCollapsed ? 0 : "auto",
+                        width: isCollapsed ? "auto" : props.width - 36,
+                        minHeight:
+                            plugin?.views && plugin.views.length > 1 ? 56 : 0,
+                        opacity:
+                            plugin?.views && plugin.views.length > 1 ? 1 : 0,
                     }}
+                    onClick={() => setMenuOpen(!menuOpen)}
                 >
-                    {plugin?.views && plugin.views.length > 1 && activeViewName}
+                    <div
+                        ref={viewCarouselRef}
+                        className="WebvizViewSelector__Icon"
+                    >
+                        <Icon name="view_carousel" />
+                    </div>
+                    <div
+                        ref={viewNameRef}
+                        className="WebvizViewSelector__ViewName"
+                        style={{
+                            opacity: props.open ? 1 : 0,
+                            width: isCollapsed ? 0 : "auto",
+                        }}
+                    >
+                        {plugin?.views &&
+                            plugin.views.length > 1 &&
+                            activeViewName}
+                    </div>
+                    <div
+                        style={{
+                            opacity: props.open ? 1 : 0,
+                            width: isCollapsed ? 0 : "auto",
+                        }}
+                    >
+                        {menuOpen ? (
+                            <Icon name="chevron_up" />
+                        ) : (
+                            <Icon name="chevron_down" />
+                        )}
+                    </div>
                 </div>
-                <div
-                    style={{
-                        opacity: props.open ? 1 : 0,
-                        width: isCollapsed ? 0 : "auto",
-                    }}
-                >
-                    <Icon name="chevron_down" />
-                </div>
-            </div>
-        </Tooltip>
+            </Tooltip>
+            <ViewList
+                open={menuOpen && props.open}
+                views={
+                    store.state.pluginsData.find(
+                        (plugin) => plugin.id === store.state.activePluginId
+                    )?.views || []
+                }
+                activeViewId={
+                    store.state.pluginsData.find(
+                        (plugin) => plugin.id === store.state.activePluginId
+                    )?.activeViewId || ""
+                }
+                anchorElement={
+                    props.open ? viewNameRef.current : viewCarouselRef.current
+                }
+                location={"below"}
+                onActiveViewChange={handleSelectViewClick}
+            />
+        </>
     );
 };
