@@ -22,6 +22,7 @@ import { ScrollArea } from "./components/ScrollArea";
 import { Dialog } from "./components/Dialog";
 import { WebvizContentManager } from "./components/WebvizContentManager";
 import { WebvizDialog } from "./components/WebvizDialog";
+import { WebvizEmbedDash } from "./components/WebvizEmbedDash";
 import { WebvizPluginsWrapper } from "./components/WebvizPluginsWrapper";
 import { WebvizPluginWrapper } from "./components/WebvizPluginWrapper";
 import { WebvizSettingsDrawer } from "./components/WebvizSettingsDrawer";
@@ -40,6 +41,7 @@ import "./components/Layout";
 export {
     WebvizContentManager,
     WebvizDialog,
+    WebvizEmbedDash,
     WebvizPluginWrapper,
     WebvizPluginsWrapper,
     WebvizSettingsDrawer,
