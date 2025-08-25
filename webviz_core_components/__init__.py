@@ -4,7 +4,7 @@ import os as _os
 import sys as _sys
 import json
 
-from pkg_resources import get_distribution, DistributionNotFound
+from importlib.metadata import version
 
 import dash as _dash
 
@@ -20,11 +20,7 @@ from .WebvizPluginPlaceholderWrapper import (
 
 __all__ += wrapped_components
 
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    # package is not installed
-    pass
+__version__ = version(__name__)
 
 if not hasattr(_dash, "development"):
     print(
