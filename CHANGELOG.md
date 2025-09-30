@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED] - YYYY-MM-DD
 
 ### Changed
+-   [#306](https://github.com/equinor/webviz-core-components/pull/306) - Support Python 3.12.
+
+## [0.8.1] - 2025-01-30
+
+### Changed
+
 -   [#304](https://github.com/equinor/webviz-core-components/pull/304) - Pinned `React` to version `18.2` in `package-lock.json` in order to comply with supported versions in `Dash`.
 
 ## [0.7.0] - 2024-01-29
