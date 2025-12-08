@@ -40,6 +40,7 @@ jobs:
                   npm ci --ignore-scripts --prefix ./react
                   npm run copy-package-json --prefix ./react
                   # pip install "dash<2.5"  # Build issue upstream in dash==2.5
+
                   pip install .[dependencies]
                   pip install dash[dev]
 
