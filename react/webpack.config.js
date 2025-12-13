@@ -24,10 +24,13 @@ module.exports = (env, argv) => {
 
     // Entry
 
-    const entry =
-        argv && argv.entry
-            ? argv.entry[0]
-            : path.join(__dirname, "src/demo/index.tsx");
+    let entry;
+    if (argv && argv.entry) {
+        // webpack-cli 5.x passes entry as an array, take the first one
+        entry = Array.isArray(argv.entry) ? argv.entry[0] : argv.entry;
+    } else {
+        entry = path.join(__dirname, "src/demo/index.tsx");
+    }
 
     // Output
 
@@ -69,6 +72,12 @@ module.exports = (env, argv) => {
             filename: filenameJs,
             library: dashLibraryName,
             libraryTarget: "umd",
+        },
+        devServer: {
+            static: {
+                directory: __dirname,
+            },
+            hot: true,
         },
         module: {
             rules: [
