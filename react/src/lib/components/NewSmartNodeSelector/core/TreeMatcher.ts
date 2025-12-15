@@ -298,11 +298,13 @@ export class TreeMatcher {
                     continue;
                 }
 
-                // Try to match remaining pattern starting from this descendant's parent
-                // We need to check if there's a path from descendant going down that matches
-                if (this.matchesRemainingPattern(descendant, remainingSegments)) {
-                    seenIds.add(descendant.id);
-                    results.push(descendant);
+                // Get nodes that match the remaining pattern starting from this descendant
+                const matched = this.matchRemainingPatternNodes(descendant, remainingSegments);
+                for (const node of matched) {
+                    if (!seenIds.has(node.id)) {
+                        seenIds.add(node.id);
+                        results.push(node);
+                    }
                 }
             }
         }
@@ -311,12 +313,12 @@ export class TreeMatcher {
     }
 
     /**
-     * Check if remaining pattern matches starting from a node
+     * Match remaining pattern starting from a node, returning matched nodes
      */
-    private matchesRemainingPattern(
+    private matchRemainingPatternNodes(
         startNode: IndexedNode,
         segments: PathSegment[]
-    ): boolean {
+    ): IndexedNode[] {
         let currentNodes = [startNode];
         let segmentIndex = 0;
 
@@ -325,12 +327,11 @@ export class TreeMatcher {
 
             if (segment.type === "DEEP_WILDCARD") {
                 // Nested deep wildcard - use recursive matching
-                const matched = this.matchDeepWildcard(
+                return this.matchDeepWildcard(
                     currentNodes,
                     segments,
                     segmentIndex
                 );
-                return matched.length > 0;
             }
 
             // For first segment, check if current node matches
@@ -343,13 +344,13 @@ export class TreeMatcher {
             }
 
             if (currentNodes.length === 0) {
-                return false;
+                return [];
             }
 
             segmentIndex++;
         }
 
-        return currentNodes.length > 0;
+        return currentNodes;
     }
 
     /**
