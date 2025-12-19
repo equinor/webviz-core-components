@@ -89,22 +89,27 @@ export class TagSuggestionEngine {
      * - Input: "Metadata 1:Sub" -> suggests "Metadata 1:Submetadata 1"
      * - Input: "Metadata 1:Submetadata 1:" -> suggests all children
      */
-    getSuggestions(partialTag: string, maxSuggestions: number = 10): Suggestion[] {
+    getSuggestions(
+        partialTag: string,
+        maxSuggestions: number = 10
+    ): Suggestion[] {
         if (!this._buildResult) {
             return [];
         }
 
         // Handle empty input - suggest root nodes
         if (!partialTag || partialTag.trim() === "") {
-            return this._buildResult.roots.slice(0, maxSuggestions).map((node) => ({
-                displayText: node.name,
-                completedTag: node.name,
-                type: "node" as const,
-                metadata: {
-                    description: node.description,
-                    path: node.pathString,
-                },
-            }));
+            return this._buildResult.roots
+                .slice(0, maxSuggestions)
+                .map((node) => ({
+                    displayText: node.name,
+                    completedTag: node.name,
+                    type: "node" as const,
+                    metadata: {
+                        description: node.description,
+                        path: node.pathString,
+                    },
+                }));
         }
 
         // Split by delimiter to find completed segments and partial last segment
@@ -144,15 +149,17 @@ export class TagSuggestionEngine {
 
         // If no completed segments, suggest roots (shouldn't happen but handle it)
         if (completedSegments.length === 0) {
-            return this._buildResult.roots.slice(0, maxSuggestions).map((node) => ({
-                displayText: node.name,
-                completedTag: node.name,
-                type: "node" as const,
-                metadata: {
-                    description: node.description,
-                    path: node.pathString,
-                },
-            }));
+            return this._buildResult.roots
+                .slice(0, maxSuggestions)
+                .map((node) => ({
+                    displayText: node.name,
+                    completedTag: node.name,
+                    type: "node" as const,
+                    metadata: {
+                        description: node.description,
+                        path: node.pathString,
+                    },
+                }));
         }
 
         // Build the completed path and try to match it
@@ -256,15 +263,17 @@ export class TagSuggestionEngine {
                 ? completedSegments.join(this._delimiter) + this._delimiter
                 : "";
 
-        const suggestions: Suggestion[] = matches.slice(0, maxSuggestions).map((node) => ({
-            displayText: node.name,
-            completedTag: prefix + node.name,
-            type: "node" as const,
-            metadata: {
-                description: node.description,
-                path: node.pathString,
-            },
-        }));
+        const suggestions: Suggestion[] = matches
+            .slice(0, maxSuggestions)
+            .map((node) => ({
+                displayText: node.name,
+                completedTag: prefix + node.name,
+                type: "node" as const,
+                metadata: {
+                    description: node.description,
+                    path: node.pathString,
+                },
+            }));
 
         // Add wildcard suggestions if we have room and partial contains special chars
         if (
@@ -311,7 +320,8 @@ export class TagSuggestionEngine {
                 completedTag: "{",
                 type: "wildcard" as const,
                 metadata: {
-                    description: "Match multiple specific values (intersection)",
+                    description:
+                        "Match multiple specific values (intersection)",
                 },
             },
             {
