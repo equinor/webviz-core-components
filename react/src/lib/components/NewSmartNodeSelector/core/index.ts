@@ -6,8 +6,9 @@
  */
 
 // Public API - only export the main engine
-export { TagSuggestionEngine, type Suggestion } from "./TagSuggestionEngine";
+export { TagSuggestionEngine } from "./TagSuggestionEngine";
 
 // Export types that users need
 export type { TreeDataNode, IndexedNode } from "./types/TreeNode";
 export type { ValidationResult } from "./TagValidator";
+export type { Suggestion } from "./types/Suggestion";

@@ -10,27 +10,7 @@ import { TagValidator } from "./TagValidator";
 import { TagParser } from "./TagParser";
 import { TreeMatcher } from "./TreeMatcher";
 import type { TreeDataNode, IndexedNode } from "./types/TreeNode";
-
-/**
- * Suggestion result for autocomplete
- */
-export interface Suggestion {
-    /** Display text for the suggestion */
-    displayText: string;
-
-    /** Full completed tag if user accepts this suggestion */
-    completedTag: string;
-
-    /** Type of suggestion */
-    type: "node" | "partial" | "wildcard";
-
-    /** Optional metadata for rendering */
-    metadata?: {
-        description?: string;
-        nodeCount?: number;
-        path?: string;
-    };
-}
+import type { Suggestion } from "./types/Suggestion";
 
 /**
  * Main engine for smart node selection
@@ -84,56 +64,82 @@ export class TagSuggestionEngine {
     /**
      * Get suggestions for partial input as user types
      *
+     * @param partialTag - The current tag value with all segments
+     * @param segmentIndex - The index of the segment being edited (0-based)
+     * @param maxSuggestions - Maximum number of suggestions to return
+     *
      * Examples:
-     * - Input: "Meta" -> suggests "Metadata 1", "Metadata 2"
-     * - Input: "Metadata 1:Sub" -> suggests "Metadata 1:Submetadata 1"
-     * - Input: "Metadata 1:Submetadata 1:" -> suggests all children
+     * - Input: "Meta", segmentIndex: 0 -> suggests "Metadata 1", "Metadata 2"
+     * - Input: "Metadata 1:Sub:Child", segmentIndex: 1 -> suggests completions for segment 1
      */
     getSuggestions(
         partialTag: string,
+        segmentIndex: number = 0,
         maxSuggestions: number = 10
     ): Suggestion[] {
         if (!this._buildResult) {
             return [];
         }
 
-        // Handle empty input - suggest root nodes
-        if (!partialTag || partialTag.trim() === "") {
+        // Split the tag into segments
+        const segments = partialTag.split(this._delimiter);
+
+        // Get segments before the one being edited
+        const beforeSegments = segments.slice(0, segmentIndex);
+        // Get the segment being edited
+        const currentSegment = segments[segmentIndex] || "";
+        // Get segments after the one being edited
+        const afterSegments = segments.slice(segmentIndex + 1);
+
+        // Handle empty input at first segment - suggest root nodes
+        if (segmentIndex === 0 && (!partialTag || partialTag.trim() === "")) {
             return this._buildResult.roots
                 .slice(0, maxSuggestions)
                 .map((node) => ({
-                    displayText: node.name,
+                    name: node.name,
                     completedTag: node.name,
                     type: "node" as const,
-                    metadata: {
-                        description: node.description,
-                        path: node.pathString,
-                    },
+                    description: node.description ?? "",
+                    node: node,
                 }));
         }
 
-        // Split by delimiter to find completed segments and partial last segment
-        const segments = partialTag.split(this._delimiter);
-        const completedSegments = segments.slice(0, -1);
-        const partialSegment = segments[segments.length - 1];
+        // Build suggestions based on which segment is being edited
+        let suggestionResults: Suggestion[];
 
-        // If tag ends with delimiter, we're starting a new segment
-        const isNewSegment = partialTag.endsWith(this._delimiter);
-
-        if (isNewSegment) {
-            // Get children of the completed path
-            return this.getSuggestionsForNewSegment(
-                completedSegments,
+        if (currentSegment === "" && segmentIndex > 0) {
+            // Empty segment (not first) - suggest children of previous segment
+            suggestionResults = this.getSuggestionsForNewSegment(
+                beforeSegments,
+                maxSuggestions
+            );
+        } else if (segmentIndex === 0) {
+            // Editing first segment
+            suggestionResults = this.getSuggestionsForPartialSegment(
+                [],
+                currentSegment,
                 maxSuggestions
             );
         } else {
-            // Get suggestions for completing current partial segment
-            return this.getSuggestionsForPartialSegment(
-                completedSegments,
-                partialSegment,
+            // Editing a middle or last segment
+            suggestionResults = this.getSuggestionsForPartialSegment(
+                beforeSegments,
+                currentSegment,
                 maxSuggestions
             );
         }
+
+        // Rebuild the full tag path with the suggestion
+        // Format: beforeSegments + suggestion + afterSegments
+        if (afterSegments.length > 0) {
+            const afterPath = this._delimiter + afterSegments.join(this._delimiter);
+            suggestionResults = suggestionResults.map((suggestion) => ({
+                ...suggestion,
+                completedTag: suggestion.completedTag + afterPath,
+            }));
+        }
+
+        return suggestionResults;
     }
 
     /**
@@ -152,13 +158,11 @@ export class TagSuggestionEngine {
             return this._buildResult.roots
                 .slice(0, maxSuggestions)
                 .map((node) => ({
-                    displayText: node.name,
+                    name: node.name,
                     completedTag: node.name,
                     type: "node" as const,
-                    metadata: {
-                        description: node.description,
-                        path: node.pathString,
-                    },
+                    description: node.description ?? "",
+                    node: node,
                 }));
         }
 
@@ -194,13 +198,12 @@ export class TagSuggestionEngine {
         const children = Array.from(childrenMap.values());
 
         return children.slice(0, maxSuggestions).map((child) => ({
-            displayText: child.name,
+            name: child.name,
             completedTag: prefix + child.name,
             type: "node" as const,
-            metadata: {
-                description: child.description,
-                nodeCount: matchedNodes.length,
-            },
+            description: child.description ?? "",
+            nodeCount: matchedNodes.length,
+            node: child,
         }));
     }
 
@@ -265,15 +268,22 @@ export class TagSuggestionEngine {
 
         const suggestions: Suggestion[] = matches
             .slice(0, maxSuggestions)
-            .map((node) => ({
-                displayText: node.name,
-                completedTag: prefix + node.name,
-                type: "node" as const,
-                metadata: {
-                    description: node.description,
-                    path: node.pathString,
-                },
-            }));
+            .map((node) => {
+                // Calculate highlights for matched prefix
+                const highlights =
+                    partialSegment.length > 0
+                        ? [{ start: 0, end: partialSegment.length }]
+                        : undefined;
+
+                return {
+                    name: node.name,
+                    completedTag: prefix + node.name,
+                    type: "node" as const,
+                    description: node.description ?? "",
+                    node: node,
+                    highlights,
+                };
+            });
 
         // Add wildcard suggestions if we have room and partial contains special chars
         if (
@@ -292,45 +302,34 @@ export class TagSuggestionEngine {
     private getWildcardSuggestions(): Suggestion[] {
         return [
             {
-                displayText: "* (any single level)",
+                name: "* (any single level)",
                 completedTag: "*",
                 type: "wildcard" as const,
-                metadata: {
-                    description: "Matches any node at this level",
-                },
+                description: "Matches any node at this level",
             },
             {
-                displayText: "** (any depth)",
+                name: "** (any depth)",
                 completedTag: "**",
                 type: "wildcard" as const,
-                metadata: {
-                    description: "Matches nodes at any depth below",
-                },
+                description: "Matches nodes at any depth below",
             },
             {
-                displayText: "? (single character)",
+                name: "? (single character)",
                 completedTag: "?",
                 type: "wildcard" as const,
-                metadata: {
-                    description: "Matches any single character (e.g., Node-?)",
-                },
+                description: "Matches any single character (e.g., Node-?)",
             },
             {
-                displayText: "{A,B} (set notation)",
+                name: "{A,B} (set notation)",
                 completedTag: "{",
                 type: "wildcard" as const,
-                metadata: {
-                    description:
-                        "Match multiple specific values (intersection)",
-                },
+                description: "Match multiple specific values (intersection)",
             },
             {
-                displayText: "A|B (union)",
+                name: "A|B (union)",
                 completedTag: "|",
                 type: "wildcard" as const,
-                metadata: {
-                    description: "Match either value (union of children)",
-                },
+                description: "Match either value (union of children)",
             },
         ];
     }

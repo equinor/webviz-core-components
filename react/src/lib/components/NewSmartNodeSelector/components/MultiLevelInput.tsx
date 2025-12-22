@@ -1,6 +1,6 @@
 import React from "react";
 import { Input } from "./Input";
-import { SmartNodeSelectorContext } from "../SmartNodeSelector";
+import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
 
 export type MultiLevelInputProps = {
     initialValue: string[];
@@ -12,7 +12,7 @@ export function MultiLevelInput(
 ): React.ReactElement {
     const [values, setValues] = React.useState<string[]>(props.initialValue);
 
-    const context = React.useContext(SmartNodeSelectorContext);
+    const context = React.useContext(SmartNodeSelectorDataContext);
 
     function handleChange(index: number, newValue: string) {
         const newValues = [...values];

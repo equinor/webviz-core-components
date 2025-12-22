@@ -1,8 +1,8 @@
 import React from "react";
-import { SmartNodeSelectorContext } from "../SmartNodeSelector";
+import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
 
 export function useSuggestions() {
-    const context = React.useContext(SmartNodeSelectorContext);
+    const context = React.useContext(SmartNodeSelectorDataContext);
 
     const suggestions = React.useMemo(
         function computeSuggestions() {
@@ -18,7 +18,11 @@ export function useSuggestions() {
                 return [];
             }
 
-            return context.suggestionEngine.getSuggestions(tag.value);
+            return context.suggestionEngine.getSuggestions(
+                tag.value,
+                context.state.focusedAddress.segmentIndex,
+                10
+            );
         },
         [
             context.state.focusedAddress,

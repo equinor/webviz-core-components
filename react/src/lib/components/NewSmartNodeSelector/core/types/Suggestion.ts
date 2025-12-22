@@ -1,20 +1,27 @@
 import type { IndexedNode } from "./TreeNode";
 
+/**
+ * Unified suggestion type for autocomplete
+ * Used by both TagSuggestionEngine and UI components
+ */
 export type Suggestion = {
     /** Display name for the suggestion */
     name: string;
 
-    /** Optional description to show alongside the name */
-    description?: string;
+    /** Full completed tag if user accepts this suggestion */
+    completedTag: string;
 
-    /** Filterable metadata (e.g., type, category, tags) */
-    filterableMetadata?: Record<string, string>;
+    /** Type of suggestion */
+    type: "node" | "partial" | "wildcard";
 
-    /** Display metadata (e.g., icons, colors, custom render data) */
-    displayMetadata?: Record<string, unknown>;
+    /** Description text to display */
+    description: string;
 
-    /** Reference to the underlying indexed node */
+    /** Reference to the underlying indexed node (contains metadata, path, etc.) */
     node?: IndexedNode;
+
+    /** Number of nodes matched (for partial/wildcard suggestions) */
+    nodeCount?: number;
 
     /** Optional: match score/relevance for sorting */
     score?: number;

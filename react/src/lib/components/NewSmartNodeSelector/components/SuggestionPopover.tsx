@@ -1,17 +1,20 @@
 import React from "react";
-import { SmartNodeSelectorContext } from "../SmartNodeSelector";
+import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
 import { useSuggestions } from "../hooks/useSuggestions";
 import { VirtualizedList } from "./VirtualizedList";
 import type { Suggestion } from "../core/types/Suggestion";
+import { ActionType } from "../state/actions";
 
 export type SuggestionPopoverProps = {
     renderSuggestionItem: (suggestion: Suggestion) => React.ReactNode;
+    suggestionItemHeight: number;
+    maxNumberSuggestions: number;
 };
 
 export function SuggestionPopover(
     props: SuggestionPopoverProps
 ): React.ReactElement {
-    const context = React.useContext(SmartNodeSelectorContext);
+    const context = React.useContext(SmartNodeSelectorDataContext);
 
     const popoverRef = React.useRef<HTMLDivElement>(null);
 
@@ -43,17 +46,29 @@ export function SuggestionPopover(
         [context.state.focusedAddress]
     );
 
+    const handleItemClick = React.useCallback(function handleItemClick(
+        suggestion: Suggestion
+    ) {
+        context.dispatch({
+            type: ActionType.APPLY_SUGGESTION,
+            payload: {
+                suggestion,
+            },
+        });
+    }, [context.dispatch]);
+
     return (
         <div
             ref={popoverRef}
-            popover="auto"
+            popover="manual"
+            data-suggestion-popover
             style={{
                 inset: "unset",
                 border: "1px solid #ccc",
                 borderRadius: 4,
                 backgroundColor: "white",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                padding: 8,
+                padding: 4,
                 ...(anchorElement && {
                     position: "absolute",
                     ...calculatePosition(anchorElement),
@@ -62,9 +77,10 @@ export function SuggestionPopover(
         >
             <VirtualizedList
                 items={suggestions}
-                itemHeight={30}
-                maxHeight={200}
+                itemHeight={props.suggestionItemHeight}
+                maxHeight={props.suggestionItemHeight * props.maxNumberSuggestions}
                 renderItem={props.renderSuggestionItem}
+                onItemClick={handleItemClick}
             />
         </div>
     );

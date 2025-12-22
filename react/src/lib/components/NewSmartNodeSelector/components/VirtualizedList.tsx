@@ -63,6 +63,7 @@ export function VirtualizedList<TItem>(
                     return (
                         <div
                             key={itemIndex}
+                            tabIndex={0}
                             style={{
                                 position: "absolute",
                                 top: itemIndex * defaultedProps.itemHeight,

@@ -46,7 +46,7 @@ module.exports = (env, argv) => {
 
     const devtool =
         argv.devtool ||
-        (mode === "development" ? "eval-source-map" : "source-map");
+        (mode === "development" ? "source-map" : "source-map");
 
     // Externals
 

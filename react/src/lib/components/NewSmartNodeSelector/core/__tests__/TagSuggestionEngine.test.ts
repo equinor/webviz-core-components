@@ -71,32 +71,32 @@ describe("TagSuggestionEngine", () => {
             const suggestions = engine.getSuggestions("");
 
             expect(suggestions).toHaveLength(2);
-            expect(suggestions[0].displayText).toBe("Metadata 1");
+            expect(suggestions[0].name).toBe("Metadata 1");
             expect(suggestions[0].completedTag).toBe("Metadata 1");
             expect(suggestions[0].type).toBe("node");
-            expect(suggestions[1].displayText).toBe("Metadata 2");
+            expect(suggestions[1].name).toBe("Metadata 2");
         });
 
         it("should suggest matching nodes for partial input", () => {
             const suggestions = engine.getSuggestions("Meta");
 
             expect(suggestions).toHaveLength(2);
-            expect(suggestions[0].displayText).toBe("Metadata 1");
-            expect(suggestions[1].displayText).toBe("Metadata 2");
+            expect(suggestions[0].name).toBe("Metadata 1");
+            expect(suggestions[1].name).toBe("Metadata 2");
         });
 
         it("should filter suggestions by prefix", () => {
             const suggestions = engine.getSuggestions("Metadata 1");
 
             expect(suggestions).toHaveLength(1);
-            expect(suggestions[0].displayText).toBe("Metadata 1");
+            expect(suggestions[0].name).toBe("Metadata 1");
         });
 
         it("should suggest children when tag ends with delimiter", () => {
             const suggestions = engine.getSuggestions("Metadata 1:");
 
             expect(suggestions).toHaveLength(1);
-            expect(suggestions[0].displayText).toBe("Submetadata 1");
+            expect(suggestions[0].name).toBe("Submetadata 1");
             expect(suggestions[0].completedTag).toBe(
                 "Metadata 1:Submetadata 1"
             );
@@ -109,7 +109,7 @@ describe("TagSuggestionEngine", () => {
 
             expect(suggestions.length).toBeGreaterThan(0);
             expect(
-                suggestions.map((s) => s.displayText).sort()
+                suggestions.map((s) => s.name).sort()
             ).toEqual(["Node 2", "Node-1"]);
         });
 
@@ -120,7 +120,7 @@ describe("TagSuggestionEngine", () => {
 
             expect(suggestions.length).toBe(2);
             expect(
-                suggestions.map((s) => s.displayText).sort()
+                suggestions.map((s) => s.name).sort()
             ).toEqual(["Node 2", "Node-1"]);
         });
 
@@ -128,7 +128,7 @@ describe("TagSuggestionEngine", () => {
             const suggestions = engine.getSuggestions("meta");
 
             expect(suggestions).toHaveLength(2);
-            expect(suggestions[0].displayText).toBe("Metadata 1");
+            expect(suggestions[0].name).toBe("Metadata 1");
         });
 
         it("should limit suggestions to maxSuggestions", () => {
@@ -266,7 +266,7 @@ describe("TagSuggestionEngine", () => {
         it("should handle complete workflow: empty -> partial -> complete", () => {
             // Start with empty input
             let suggestions = engine.getSuggestions("");
-            expect(suggestions[0].displayText).toBe("Metadata 1");
+            expect(suggestions[0].name).toBe("Metadata 1");
 
             // User types "Meta"
             suggestions = engine.getSuggestions("Meta");
@@ -274,7 +274,7 @@ describe("TagSuggestionEngine", () => {
 
             // User selects "Metadata 1" and adds ":"
             suggestions = engine.getSuggestions("Metadata 1:");
-            expect(suggestions[0].displayText).toBe("Submetadata 1");
+            expect(suggestions[0].name).toBe("Submetadata 1");
 
             // User completes to full path
             const matches = engine.getMatches(

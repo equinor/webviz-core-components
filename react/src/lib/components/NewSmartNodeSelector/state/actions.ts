@@ -1,8 +1,11 @@
+import type { Suggestion } from "../core";
+
 export enum ActionType {
     ADD_TAG = "ADD_TAG",
     UPDATE_TAG_VALUE = "UPDATE_TAG_VALUE",
     CHANGE_FOCUSED_ADDRESS = "CHANGE_FOCUSED_ADDRESS",
     CLEAR_FOCUSED_ADDRESS = "CLEAR_FOCUSED_ADDRESS",
+    APPLY_SUGGESTION = "APPLY_SUGGESTION",
 }
 
 export type Payloads = {
@@ -16,6 +19,9 @@ export type Payloads = {
         segmentIndex: number;
     };
     [ActionType.CLEAR_FOCUSED_ADDRESS]: undefined;
+    [ActionType.APPLY_SUGGESTION]: {
+        suggestion: Suggestion;
+    };
 };
 
 type ActionMap<

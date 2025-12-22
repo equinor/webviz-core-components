@@ -1,8 +1,8 @@
 import React from "react";
-import { SmartNodeSelectorContext } from "../SmartNodeSelector";
+import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
 
 export function DebugInfo(): React.ReactElement {
-    const context = React.useContext(SmartNodeSelectorContext);
+    const context = React.useContext(SmartNodeSelectorDataContext);
 
     return (
         <div
