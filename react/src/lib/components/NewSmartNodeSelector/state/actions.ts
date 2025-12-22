@@ -2,6 +2,7 @@ import type { Suggestion } from "../core";
 
 export enum ActionType {
     ADD_TAG = "ADD_TAG",
+    REMOVE_TAG = "REMOVE_TAG",
     UPDATE_TAG_VALUE = "UPDATE_TAG_VALUE",
     CHANGE_FOCUSED_ADDRESS = "CHANGE_FOCUSED_ADDRESS",
     CLEAR_FOCUSED_ADDRESS = "CLEAR_FOCUSED_ADDRESS",
@@ -10,6 +11,9 @@ export enum ActionType {
 
 export type Payloads = {
     [ActionType.ADD_TAG]: undefined;
+    [ActionType.REMOVE_TAG]: {
+        tagId: string;
+    };
     [ActionType.UPDATE_TAG_VALUE]: {
         tagId: string;
         newValue: string;

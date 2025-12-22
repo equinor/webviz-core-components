@@ -68,6 +68,8 @@ export function VirtualizedList<TItem>(
                                 position: "absolute",
                                 top: itemIndex * defaultedProps.itemHeight,
                                 height: defaultedProps.itemHeight,
+                                maxHeight: defaultedProps.itemHeight,
+                                overflowY: "hidden",
                                 width: "100%",
                                 boxSizing: "border-box",
                             }}

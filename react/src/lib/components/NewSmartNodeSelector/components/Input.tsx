@@ -47,15 +47,18 @@ export function Input(props: InputProps): React.ReactElement {
     );
 
     // Measure the text width whenever value or placeholder changes
-    React.useEffect(function onValueOrPlaceholderChange() {
-        if (measureRef.current) {
-            const textToMeasure = props.value || props.placeholder || "";
-            measureRef.current.textContent = textToMeasure;
-            const measuredWidth = measureRef.current.offsetWidth;
-            // Add some padding (minimum 20px, or measured width + 8px)
-            setWidth(Math.max(20, measuredWidth));
-        }
-    }, [props.value, props.placeholder]);
+    React.useEffect(
+        function onValueOrPlaceholderChange() {
+            if (measureRef.current) {
+                const textToMeasure = props.value || props.placeholder || "";
+                measureRef.current.textContent = textToMeasure;
+                const measuredWidth = measureRef.current.offsetWidth;
+                // Add some padding (minimum 20px, or measured width + 8px)
+                setWidth(Math.max(20, measuredWidth));
+            }
+        },
+        [props.value, props.placeholder]
+    );
 
     return (
         <>

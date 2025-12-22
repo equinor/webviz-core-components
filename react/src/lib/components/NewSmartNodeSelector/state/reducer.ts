@@ -26,16 +26,36 @@ export function makeReducer(options: MakeReducerOptions) {
                     ...state,
                     tags: [
                         ...state.tags.map((tag) => ({
-                        ...tag,
-                        isLast: false,
-                    })),
+                            ...tag,
+                            isLast: false,
+                        })),
                         {
                             id: v4(),
                             value: "",
                             isLast: true,
                         },
-                    ]
+                    ],
+                };
+            }
+            case ActionType.REMOVE_TAG: {
+                const { tagId } = action.payload;
+                const tag = state.tags.find((t) => t.id === tagId);
+                const newTags = state.tags.filter((tag) => tag.id !== tagId);
+                if (newTags.length === 0 || tag?.isLast) {
+                    const id = v4();
+                    newTags.push({
+                        id,
+                        value: "",
+                        isLast: true,
+                    });
+                } else {
+                    newTags[newTags.length - 1].isLast = true;
                 }
+                return {
+                    ...state,
+                    tags: newTags,
+                    focusedAddress: null,
+                };
             }
             case ActionType.UPDATE_TAG_VALUE: {
                 const { tagId, newValue } = action.payload;
@@ -54,9 +74,9 @@ export function makeReducer(options: MakeReducerOptions) {
                         tagId === null
                             ? null
                             : {
-                                tagId,
-                                segmentIndex: segmentIndex,
-                            },
+                                  tagId,
+                                  segmentIndex: segmentIndex,
+                              },
                 };
             }
             case ActionType.CLEAR_FOCUSED_ADDRESS: {
@@ -78,8 +98,7 @@ export function makeReducer(options: MakeReducerOptions) {
                         tagId: state.focusedAddress.tagId,
                         segmentIndex: state.focusedAddress.segmentIndex + 1,
                     };
-                }
-                else {
+                } else {
                     state.tags = state.tags.map((tag) => ({
                         ...tag,
                         isLast: false,
@@ -104,7 +123,9 @@ export function makeReducer(options: MakeReducerOptions) {
                         }
                         return {
                             ...tag,
-                            value: suggestion.completedTag + (isLeaf ? "" : options.delimiter),
+                            value:
+                                suggestion.completedTag +
+                                (isLeaf ? "" : options.delimiter),
                         };
                     }),
                     focusedAddress: newAddress,
@@ -113,7 +134,7 @@ export function makeReducer(options: MakeReducerOptions) {
             default:
                 return assertNever(action);
         }
-    }
+    };
 }
 
 function assertNever(value: never): never {
