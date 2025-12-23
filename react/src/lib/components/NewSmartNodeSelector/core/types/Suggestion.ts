@@ -28,4 +28,17 @@ export type Suggestion = {
 
     /** Optional: highlighted parts of the name (for search highlighting) */
     highlights?: Array<{ start: number; end: number }>;
+
+    /**
+     * Optional: Context prefix to display (grayed out) before the main suggestion
+     * Example: for "Data Source (A|B", contextPrefix would be "Data Source (A|"
+     */
+    contextPrefix?: string;
+
+    /**
+     * Optional: The actual text that will be inserted when this suggestion is applied
+     * If not specified, uses the 'name' field
+     * Example: for "Data Source (A|B", insertText would be "B"
+     */
+    insertText?: string;
 };

@@ -15,6 +15,7 @@ export type State = {
     focusedAddress: {
         tagId: string;
         segmentIndex: number;
+        nodeAddress: number[];
     } | null;
 
     selection: {

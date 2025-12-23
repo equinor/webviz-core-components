@@ -4,6 +4,7 @@
 import React from "react";
 import { SmartNodeSelector } from "../lib";
 import { SmartNodeSelector as NewSmartNodeSelector } from "../lib/components/NewSmartNodeSelector/SmartNodeSelector";
+import { TagEditor } from "../lib/components/NewSmartNodeSelector/components/TagEditor/tagEditor";
 
 type SmartNodeSelectorState = {
     selectedTags: string[];

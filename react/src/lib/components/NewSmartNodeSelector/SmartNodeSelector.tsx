@@ -80,7 +80,14 @@ const DEFAULT_PROPS = {
     renderSuggestionItem: (suggestion: Suggestion) => {
         return (
             <li style={{ padding: "8px 12px", cursor: "pointer" }}>
-                <div style={{ fontWeight: 500 }}>{suggestion.name}</div>
+                <div style={{ fontWeight: 500 }}>
+                    {suggestion.contextPrefix && (
+                        <span style={{ color: "#999", fontWeight: 400 }}>
+                            {suggestion.contextPrefix}
+                        </span>
+                    )}
+                    <span>{suggestion.name}</span>
+                </div>
                 {suggestion.description && (
                     <div style={{ fontSize: "0.85em", color: "#666" }}>
                         {suggestion.description}

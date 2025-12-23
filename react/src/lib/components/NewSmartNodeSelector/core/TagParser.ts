@@ -85,6 +85,9 @@ export class TagParser {
      * Parse individual segment
      */
     private parseSegment(segment: string): PathSegment {
+        // Expand parentheses shorthand: "Data Source (A|B)" -> "Data Source A|Data Source B"
+        segment = this.expandParentheses(segment);
+
         // Deep wildcard: **
         if (segment === "**") {
             return { type: "DEEP_WILDCARD" };
@@ -120,6 +123,51 @@ export class TagParser {
             type: "LITERAL",
             value: segment,
         };
+    }
+
+    /**
+     * Expand parentheses shorthand notation
+     *
+     * Examples:
+     * - "Data Source (A|B)" -> "Data Source A|Data Source B"
+     * - "Data Source (A|B|C)" -> "Data Source A|Data Source B|Data Source C"
+     * - "Prefix {A,B}" -> "Prefix A,Prefix B" (for brace notation)
+     */
+    private expandParentheses(segment: string): string {
+        // Match pattern: prefix + (content) or prefix + {content}
+        const parenMatch = segment.match(/^(.+?)\(([^)]+)\)$/);
+        if (parenMatch) {
+            const prefix = parenMatch[1];
+            const content = parenMatch[2];
+
+            // Determine the operator used inside
+            let operator: string;
+            if (content.includes("|")) {
+                operator = "|";
+            } else if (content.includes("&")) {
+                operator = "&";
+            } else if (content.includes(",")) {
+                operator = ",";
+            } else {
+                // No operator, just a single value
+                return prefix + content;
+            }
+
+            // Split by operator and prepend prefix to each part
+            const parts = content.split(operator).map(part => prefix + part.trim());
+            return parts.join(operator);
+        }
+
+        // Also handle brace notation: "Prefix {A,B}" -> "Prefix A,Prefix B"
+        const braceMatch = segment.match(/^(.+?)\{([^}]+)\}$/);
+        if (braceMatch) {
+            const prefix = braceMatch[1];
+            const content = braceMatch[2];
+            const parts = content.split(",").map(part => prefix + part.trim());
+            return "{" + parts.join(",") + "}";
+        }
+
+        return segment;
     }
 
     /**

@@ -5,10 +5,10 @@ import {
     SmartNodeSelectorSlotsContext,
 } from "../SmartNodeSelector";
 import type { Tag as TagType } from "../state/type";
-import { Input } from "./Input";
 import { ActionType } from "../state/actions";
 import { useMatches } from "../hooks/useMatches";
 import { MatchesCounter } from "./MatchesCounter";
+import { TagEditor } from "./TagEditor/tagEditor";
 
 export type TagProps = {
     tag: TagType;
@@ -26,11 +26,9 @@ export function Tag(props: TagProps): React.ReactElement {
         [props.tag.value, dataContext.delimiter]
     );
 
-    const handleInputChange = React.useCallback(
-        function handleInputChange(segmentIndex: number, newValue: string) {
-            const newSegments = [...segments];
-            newSegments[segmentIndex] = newValue;
-            const newTagValue = newSegments.join(dataContext.delimiter);
+    const handleValueChange = React.useCallback(
+        function handleValueChange(newValue: string) {
+            const newTagValue = newValue;
             dataContext.dispatch({
                 type: ActionType.UPDATE_TAG_VALUE,
                 payload: {
@@ -40,6 +38,19 @@ export function Tag(props: TagProps): React.ReactElement {
             });
         },
         [dataContext.dispatch, dataContext.delimiter, props.tag.id, segments]
+    );
+
+    const handleFocusedSegmentChange = React.useCallback(
+        function handleFocusedSegmentChange(segmentIndex: number) {
+            dataContext.dispatch({
+                type: ActionType.CHANGE_FOCUSED_ADDRESS,
+                payload: {
+                    tagId: props.tag.id,
+                    segmentIndex,
+                },
+            });
+        },
+        [dataContext.dispatch, props.tag.id]
     );
 
     const handleRemoveTagClick = React.useCallback(
@@ -57,6 +68,10 @@ export function Tag(props: TagProps): React.ReactElement {
     const TagComponent = slotsContext.slots.tagChip;
     const tagProps = slotsContext.slotProps.tagChip ?? {};
 
+    const focusedAddress = dataContext.state.focusedAddress;
+    const isFocused =
+        focusedAddress !== null && focusedAddress.tagId === props.tag.id;
+
     return (
         <TagComponent
             {...tagProps}
@@ -64,29 +79,7 @@ export function Tag(props: TagProps): React.ReactElement {
             style={makeStyle(props.tag.isLast && segments.length === 1)}
         >
             <MatchesCounter matches={matches} />
-            {segments.map((value, index) => {
-                const isFirstSegment = index === 0;
-                let placeholder = dataContext.placeholders.incompleteTag;
-                if (isFirstSegment && props.tag.isLast) {
-                    placeholder = dataContext.placeholders.newTag;
-                }
-                return (
-                    <div key={index} style={{ padding: "4px 2px" }}>
-                        {!isFirstSegment && (
-                            <span>{dataContext.delimiter}</span>
-                        )}
-                        <Input
-                            tagId={props.tag.id}
-                            segmentIndex={index}
-                            value={value}
-                            onChange={(newValue) => {
-                                handleInputChange(index, newValue);
-                            }}
-                            placeholder={placeholder}
-                        />
-                    </div>
-                );
-            })}
+            <TagEditor tag={props.tag} delimiter={dataContext.delimiter} focusedSegmentIndex={isFocused ? focusedAddress.segmentIndex : undefined} onChange={handleValueChange} onFocusedSegmentChange={handleFocusedSegmentChange} />
             {segments.length > 1 && (
                 <button
                     data-smartnodeselector-remove-segment-button

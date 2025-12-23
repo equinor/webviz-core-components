@@ -28,7 +28,8 @@ export type PathSegment =
     | DeepWildcardSegment
     | CharWildcardSegment
     | GlobSegment
-    | SetSegment;
+    | SetSegment
+    | GroupSegment;
 
 /**
  * Exact match: "A"
@@ -86,4 +87,9 @@ export interface SetSegment {
     type: "SET";
     values: string[];
     operation: "UNION" | "INTERSECTION";
+}
+
+export interface GroupSegment {
+    type: "GROUP";
+    segments: PathSegment[];
 }

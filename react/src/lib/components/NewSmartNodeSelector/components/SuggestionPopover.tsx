@@ -32,8 +32,7 @@ export function SuggestionPopover(
             }
 
             const inputElement = document.querySelector(
-                `[data-tag-id="${context.state.focusedAddress.tagId}"]` +
-                    `[data-segment-index="${context.state.focusedAddress.segmentIndex}"]`
+                `[data-tag-id="${context.state.focusedAddress.tagId}"]`
             ) as HTMLElement | null;
             if (inputElement) {
                 setAnchorElement(inputElement);

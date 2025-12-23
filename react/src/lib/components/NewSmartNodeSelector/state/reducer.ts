@@ -91,24 +91,40 @@ export function makeReducer(options: MakeReducerOptions) {
                     return state;
                 }
 
+                const isPartial = suggestion.type === "partial";
+                const isWildcard = suggestion.type === "wildcard";
                 const isLeaf = suggestion.node?.isLeaf ?? false;
-                let newAddress = null;
-                if (!isLeaf) {
+
+                // Determine the new focus address after applying suggestion
+                let newAddress;
+                let newTags = state.tags;
+
+                if (isPartial || isWildcard) {
+                    // Partial/wildcard suggestions stay in the current segment
+                    newAddress = {
+                        tagId: state.focusedAddress.tagId,
+                        segmentIndex: state.focusedAddress.segmentIndex,
+                    };
+                } else if (!isLeaf) {
+                    // Complete node suggestions move to next segment
                     newAddress = {
                         tagId: state.focusedAddress.tagId,
                         segmentIndex: state.focusedAddress.segmentIndex + 1,
                     };
                 } else {
-                    state.tags = state.tags.map((tag) => ({
-                        ...tag,
-                        isLast: false,
-                    }));
+                    // Leaf nodes create a new tag
                     const newId = v4();
-                    state.tags.push({
-                        id: newId,
-                        value: "",
-                        isLast: true,
-                    });
+                    newTags = [
+                        ...state.tags.map((tag) => ({
+                            ...tag,
+                            isLast: false,
+                        })),
+                        {
+                            id: newId,
+                            value: "",
+                            isLast: true,
+                        },
+                    ];
                     newAddress = {
                         tagId: newId,
                         segmentIndex: 0,
@@ -117,15 +133,18 @@ export function makeReducer(options: MakeReducerOptions) {
 
                 return {
                     ...state,
-                    tags: state.tags.map((tag) => {
+                    tags: newTags.map((tag) => {
                         if (tag.id !== state.focusedAddress!.tagId) {
                             return tag;
                         }
+
+                        // Always use completedTag, which includes the full tag value
+                        // The suggestion engine already handles operators and context
+                        const newValue = suggestion.completedTag;
+
                         return {
                             ...tag,
-                            value:
-                                suggestion.completedTag +
-                                (isLeaf ? "" : options.delimiter),
+                            value: newValue + (isLeaf ? "" : options.delimiter),
                         };
                     }),
                     focusedAddress: newAddress,

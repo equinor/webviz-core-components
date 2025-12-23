@@ -219,14 +219,22 @@ export class TagSuggestionEngine {
             return [];
         }
 
-        // Determine which nodes to search for matches
+        // Parse the partial segment to extract the actual search term
+        // Handle cases like "{A", "A|B", "A&", etc.
+        const searchTerm = this.extractSearchTerm(partialSegment);
+
+        // Extract base path before operators (e.g., "Data Source " from "Data Source (")
+        const basePath = this.extractBasePath(partialSegment);
+
+        // Determine which nodes to search for matches at the current level
         let candidateNodes: IndexedNode[];
 
+        // Get the nodes at the current level
         if (completedSegments.length === 0) {
-            // Searching at root level
+            // We're at the root level
             candidateNodes = this._buildResult.roots;
         } else {
-            // Get parent nodes from completed path
+            // Get parent nodes from completed segments
             const completedPath = completedSegments.join(this._delimiter);
             const validationResult = this._validator.validate(completedPath);
 
@@ -235,15 +243,15 @@ export class TagSuggestionEngine {
             }
 
             const query = this._parser.parse(completedPath);
-            const matchedNodes = this._matcher.match(query);
+            const parentNodes = this._matcher.match(query);
 
-            if (matchedNodes.length === 0) {
+            if (parentNodes.length === 0) {
                 return [];
             }
 
-            // Collect all children
+            // Collect all children from matched parent nodes
             const childrenMap = new Map<string, IndexedNode>();
-            for (const node of matchedNodes) {
+            for (const node of parentNodes) {
                 for (const child of node.children) {
                     if (!childrenMap.has(child.name)) {
                         childrenMap.set(child.name, child);
@@ -254,10 +262,13 @@ export class TagSuggestionEngine {
             candidateNodes = Array.from(childrenMap.values());
         }
 
-        // Filter candidates by partial segment (case-insensitive prefix match)
-        const lowerPartial = partialSegment.toLowerCase();
+        // Build the full search prefix: basePath + searchTerm
+        const fullSearchTerm = basePath + searchTerm;
+
+        // Filter candidates by full search term (case-insensitive prefix match)
+        const lowerFullSearchTerm = fullSearchTerm.toLowerCase();
         const matches = candidateNodes.filter((node) =>
-            node.name.toLowerCase().startsWith(lowerPartial)
+            node.name.toLowerCase().startsWith(lowerFullSearchTerm)
         );
 
         // Build suggestions
@@ -266,68 +277,124 @@ export class TagSuggestionEngine {
                 ? completedSegments.join(this._delimiter) + this._delimiter
                 : "";
 
+        // Calculate the operator context (everything in partial segment before search term, minus base path)
+        const segmentPrefix = partialSegment.substring(0, partialSegment.length - searchTerm.length);
+        const operatorContext = basePath ? segmentPrefix.substring(basePath.length) : segmentPrefix;
+
         const suggestions: Suggestion[] = matches
             .slice(0, maxSuggestions)
             .map((node) => {
-                // Calculate highlights for matched prefix
+                // The suggestion name is the part AFTER the base path
+                const suggestionName = node.name.substring(basePath.length);
+
+                // Calculate highlights for matched prefix within the suggestion
                 const highlights =
-                    partialSegment.length > 0
-                        ? [{ start: 0, end: partialSegment.length }]
+                    searchTerm.length > 0
+                        ? [{ start: 0, end: searchTerm.length }]
                         : undefined;
 
+                // Determine suggestion type:
+                // - "partial" if there's an operator context (e.g., "(A|") - inline completion
+                // - "node" otherwise - complete node suggestion
+                const suggestionType = operatorContext ? ("partial" as const) : ("node" as const);
+
                 return {
-                    name: node.name,
-                    completedTag: prefix + node.name,
-                    type: "node" as const,
+                    name: suggestionName,
+                    completedTag: prefix + basePath + operatorContext + suggestionName,
+                    type: suggestionType,
                     description: node.description ?? "",
                     node: node,
                     highlights,
+                    // Context prefix shows the base path + operator context
+                    contextPrefix: (basePath + operatorContext) || undefined,
+                    // Insert text is just the suggestion name (the part after base path)
+                    insertText: suggestionName,
                 };
             });
 
-        // Add wildcard suggestions if we have room and partial contains special chars
-        if (
-            suggestions.length < maxSuggestions &&
-            (partialSegment.includes("*") || partialSegment.includes("?"))
-        ) {
-            suggestions.push(...this.getWildcardSuggestions());
+        // Add wildcard suggestions if we have no matches
+        if (suggestions.length === 0) {
+            suggestions.push(...this.getWildcardSuggestions(prefix));
         }
 
         return suggestions;
     }
 
     /**
+     * Extract the base path from a partial segment (the node name before operators)
+     *
+     * Examples:
+     * - "Data Source (" -> "Data Source "
+     * - "Data Source {" -> "Data Source "
+     * - "(A|" -> ""
+     * - "Node-1 (A&" -> "Node-1 "
+     */
+    private extractBasePath(partialSegment: string): string {
+        // Find the first occurrence of an operator character
+        const operatorMatch = partialSegment.match(/[{(]/);
+
+        if (!operatorMatch || operatorMatch.index === undefined) {
+            // No operators found, return empty string
+            return "";
+        }
+
+        // Return everything before the first operator (including trailing space)
+        return partialSegment.substring(0, operatorMatch.index);
+    }
+
+    /**
+     * Extract the actual search term from a partial segment that may contain
+     * union/intersection operators
+     *
+     * Examples:
+     * - "{A" -> "A"
+     * - "A|B" -> "B"
+     * - "{A,B,C" -> "C"
+     * - "(A&B&C" -> "C"
+     * - "(A|B)" -> "" (empty after closing paren)
+     */
+    private extractSearchTerm(partialSegment: string): string {
+        // Find the last occurrence of special characters that mark the start of a new term
+        // Include closing parens/braces as they end a term
+        const separatorPattern = /[{(,|&)\}]/;
+        const parts = partialSegment.split(separatorPattern);
+
+        // Return the last part (the current search term)
+        return parts[parts.length - 1];
+    }
+
+    /**
      * Get wildcard pattern suggestions
      */
-    private getWildcardSuggestions(): Suggestion[] {
+    private getWildcardSuggestions(prefix: string = ""): Suggestion[] {
         return [
             {
                 name: "* (any single level)",
-                completedTag: "*",
+                completedTag: prefix + "*",
                 type: "wildcard" as const,
                 description: "Matches any node at this level",
             },
             {
                 name: "** (any depth)",
-                completedTag: "**",
+                completedTag: prefix + "**",
                 type: "wildcard" as const,
                 description: "Matches nodes at any depth below",
             },
             {
                 name: "? (single character)",
-                completedTag: "?",
+                completedTag: prefix + "?",
                 type: "wildcard" as const,
                 description: "Matches any single character (e.g., Node-?)",
             },
             {
                 name: "{A,B} (set notation)",
-                completedTag: "{",
+                completedTag: prefix + "{",
                 type: "wildcard" as const,
                 description: "Match multiple specific values (intersection)",
             },
             {
                 name: "A|B (union)",
-                completedTag: "|",
+                completedTag: prefix + "|",
                 type: "wildcard" as const,
                 description: "Match either value (union of children)",
             },

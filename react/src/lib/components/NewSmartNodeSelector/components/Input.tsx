@@ -60,6 +60,12 @@ export function Input(props: InputProps): React.ReactElement {
         [props.value, props.placeholder]
     );
 
+    const handleKeyDown = React.useCallback(function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        if (event.key === "") {
+
+        }
+    }, []);
+
     return (
         <>
             {/* Hidden span for measuring text width */}
@@ -86,6 +92,7 @@ export function Input(props: InputProps): React.ReactElement {
                 onChange={(e) => props.onChange?.(e.target.value)}
                 onFocus={props.onFocus}
                 onBlur={props.onBlur}
+                onKeyDown={handleKeyDown}
                 style={{
                     width: `${width}px`,
                     border: "none",
