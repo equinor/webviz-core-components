@@ -14,11 +14,12 @@ export function MatchesCounter(props: MatchesCounterProps) {
     }
 
     const MatchesCounterComponent = slotsContext.slots.matchesCounter;
-    const matchesCounterProps = slotsContext.slotProps.matchesCounter ?? {
+    const matchesCounterProps = {
         style: {
             padding: 2,
             backgroundColor: "#e0e0e0",
         },
+        ...slotsContext.slotProps.matchesCounter
     };
 
     return (

@@ -7,6 +7,8 @@ export enum ActionType {
     CHANGE_FOCUSED_ADDRESS = "CHANGE_FOCUSED_ADDRESS",
     CLEAR_FOCUSED_ADDRESS = "CLEAR_FOCUSED_ADDRESS",
     APPLY_SUGGESTION = "APPLY_SUGGESTION",
+    MOVE_FOCUS_TO_PREVIOUS_TAG = "MOVE_FOCUS_TO_PREVIOUS_TAG",
+    MOVE_FOCUS_TO_NEXT_TAG = "MOVE_FOCUS_TO_NEXT_TAG",
 }
 
 export type Payloads = {
@@ -25,6 +27,12 @@ export type Payloads = {
     [ActionType.CLEAR_FOCUSED_ADDRESS]: undefined;
     [ActionType.APPLY_SUGGESTION]: {
         suggestion: Suggestion;
+    };
+    [ActionType.MOVE_FOCUS_TO_PREVIOUS_TAG]: {
+        currentTagId: string;
+    };
+    [ActionType.MOVE_FOCUS_TO_NEXT_TAG]: {
+        currentTagId: string;
     };
 };
 

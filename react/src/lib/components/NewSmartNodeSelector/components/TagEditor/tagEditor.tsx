@@ -3,11 +3,19 @@ import { TagTokenizer } from "../../core/TagTokenizer";
 import type { Token } from "../../core/types/Token";
 import type { Tag } from "../../state/type";
 
+export enum TagEditorKeyDownAction {
+    LEAVE_LEFT,
+    LEAVE_RIGHT,
+    ARROW_UP,
+    ARROW_DOWN,
+};
+
 export type TagEditorProps = {
     tag: Tag;
     delimiter: string;
     onChange?: (newValue: string) => void;
     onFocusedSegmentChange?: (segmentIndex: number) => void;
+    onKeyDown?: (action: TagEditorKeyDownAction) => void;
     focusedSegmentIndex?: number;
     placeholder?: string;
 }
@@ -64,7 +72,7 @@ function findGroupOrSetAtPosition(
 }
 
 export function TagEditor(props: TagEditorProps) {
-    const { onChange, onFocusedSegmentChange } = props;
+    const { onChange, onFocusedSegmentChange, onKeyDown } = props;
     
     const editorRef = React.useRef<HTMLDivElement>(null);
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -118,8 +126,11 @@ export function TagEditor(props: TagEditorProps) {
     React.useEffect(
         function syncCaretToFocusedSegment() {
             if (props.focusedSegmentIndex === undefined) {
+                setIsFocused(false);
                 return;
             }
+
+            setIsFocused(true);
 
             const segments = value.split(props.delimiter);
             if (props.focusedSegmentIndex < 0 || props.focusedSegmentIndex >= segments.length) {
@@ -234,6 +245,7 @@ export function TagEditor(props: TagEditorProps) {
                 position: "relative" as const,
                 height: LINE_HEIGHT,
                 width: "100%",
+                cursor: "text" as const,
             },
             content: {
                 position: "relative" as const,
@@ -295,13 +307,25 @@ export function TagEditor(props: TagEditorProps) {
 
     const moveCursor = React.useCallback(function moveCursor(args: { dx?: number, x?: number, selecting: boolean }) {
         setCaret((prev) => {
+            if (!args.selecting && prev === anchor) {
+                if (prev === 0 && args.dx === -1) {
+                    onKeyDown?.(TagEditorKeyDownAction.LEAVE_LEFT);
+                    return prev;
+                }
+
+                if (prev === value.length && args.dx === 1) {
+                    onKeyDown?.(TagEditorKeyDownAction.LEAVE_RIGHT);
+                    return prev;
+                }
+            }
+
             const col = clamp(args.x ?? prev + (args.dx ?? 0), 0, value.length);
             if (!args.selecting) {
                 setAnchor(col);
             }
             return col;
         });
-    }, [value.length]);
+    }, [value.length, onKeyDown, anchor]);
 
     const deleteSelectionIfAny = React.useCallback(function deleteSelectionIfAny(value: string, caret: number, anchor: number): {
         newValue: string;
@@ -510,6 +534,12 @@ export function TagEditor(props: TagEditorProps) {
                 break;
             case "ArrowRight":
                 moveCursor({ dx: 1, selecting });
+                break;
+            case "ArrowUp":
+                onKeyDown?.(TagEditorKeyDownAction.ARROW_UP);
+                break;
+            case "ArrowDown":
+                onKeyDown?.(TagEditorKeyDownAction.ARROW_DOWN);
                 break;
             case "Home":
                 moveCursor({ x: 0, selecting });

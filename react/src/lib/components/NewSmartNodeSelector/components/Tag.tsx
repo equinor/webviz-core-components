@@ -8,7 +8,7 @@ import type { Tag as TagType } from "../state/type";
 import { ActionType } from "../state/actions";
 import { useMatches } from "../hooks/useMatches";
 import { MatchesCounter } from "./MatchesCounter";
-import { TagEditor } from "./TagEditor/tagEditor";
+import { TagEditor, TagEditorKeyDownAction } from "./TagEditor/tagEditor";
 
 export type TagProps = {
     tag: TagType;
@@ -53,6 +53,35 @@ export function Tag(props: TagProps): React.ReactElement {
         [dataContext.dispatch, props.tag.id]
     );
 
+    const handleKeyDown = React.useCallback(
+        function handleKeyDown(action: TagEditorKeyDownAction) {
+            const focusedAddress = dataContext.state.focusedAddress;
+            if (focusedAddress === null || focusedAddress.tagId !== props.tag.id) {
+                return;
+            }
+            if (action === TagEditorKeyDownAction.LEAVE_LEFT) {
+                if (focusedAddress.segmentIndex === 0) {
+                    dataContext.dispatch({
+                        type: ActionType.MOVE_FOCUS_TO_PREVIOUS_TAG,
+                        payload: {
+                            currentTagId: props.tag.id,
+                        },
+                    });
+                }
+            } else if (action === TagEditorKeyDownAction.LEAVE_RIGHT) {
+                if (focusedAddress.segmentIndex === segments.length - 1) {
+                    dataContext.dispatch({
+                        type: ActionType.MOVE_FOCUS_TO_NEXT_TAG,
+                        payload: {
+                            currentTagId: props.tag.id,
+                        },
+                    });
+                }
+            }
+        },
+        [dataContext.dispatch, dataContext.state.focusedAddress, props.tag.id, segments.length]
+    );
+
     const handleRemoveTagClick = React.useCallback(
         function handleRemoveTagClick() {
             dataContext.dispatch({
@@ -76,15 +105,16 @@ export function Tag(props: TagProps): React.ReactElement {
         <TagComponent
             {...tagProps}
             data-smartnodeselector-tag
-            style={makeStyle(props.tag.isLast && segments.length === 1)}
+            style={makeStyle(props.tag.isLast && segments.length === 1, matches.length > 0 || isFocused)}
         >
             <MatchesCounter matches={matches} />
-            <TagEditor tag={props.tag} delimiter={dataContext.delimiter} focusedSegmentIndex={isFocused ? focusedAddress.segmentIndex : undefined} onChange={handleValueChange} onFocusedSegmentChange={handleFocusedSegmentChange} />
+            <TagEditor tag={props.tag} delimiter={dataContext.delimiter} focusedSegmentIndex={isFocused ? focusedAddress.segmentIndex : undefined} onChange={handleValueChange} onFocusedSegmentChange={handleFocusedSegmentChange} onKeyDown={handleKeyDown}/>
             {segments.length > 1 && (
                 <button
                     data-smartnodeselector-remove-segment-button
                     onClick={handleRemoveTagClick}
                     aria-label="Remove Tag"
+                    style={{ border: "none", background: "transparent", cursor: "pointer"}}
                 >
                     ×
                 </button>
@@ -93,7 +123,7 @@ export function Tag(props: TagProps): React.ReactElement {
     );
 }
 
-function makeStyle(isLast: boolean): React.CSSProperties {
+function makeStyle(isLast: boolean, isValid: boolean): React.CSSProperties {
     if (isLast) {
         return {
             display: "flex",
@@ -106,8 +136,8 @@ function makeStyle(isLast: boolean): React.CSSProperties {
         display: "flex",
         alignItems: "center",
         gap: "1px",
-        border: "1px solid #ccc",
+        border: isValid ? "1px solid #ccc" : "1px solid #f4bdbdff",
         borderRadius: "4px",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: isValid ? "#f5f5f5" : "#f4bdbdff",
     };
 }

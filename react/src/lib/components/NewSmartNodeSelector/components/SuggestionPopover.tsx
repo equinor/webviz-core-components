@@ -62,6 +62,7 @@ export function SuggestionPopover(
             popover="manual"
             data-suggestion-popover
             style={{
+                boxSizing: "border-box" as const,
                 inset: "unset",
                 border: "1px solid #ccc",
                 borderRadius: 4,

@@ -43,7 +43,7 @@ export class TagSuggestionEngine {
 
     /**
      * Get matching nodes for a completed tag
-     * Returns empty array if tag is invalid or no matches found
+     * Returns only leaf nodes (complete paths) - empty array if tag is invalid or no leaf matches found
      */
     getMatches(tag: string): IndexedNode[] {
         if (!this._matcher || !this._buildResult) {
@@ -58,7 +58,10 @@ export class TagSuggestionEngine {
 
         // Parse and match
         const query = this._parser.parse(tag);
-        return this._matcher.match(query);
+        const allMatches = this._matcher.match(query);
+
+        // Filter to only return leaf nodes (complete paths)
+        return allMatches.filter(node => node.isLeaf);
     }
 
     /**

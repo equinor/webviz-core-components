@@ -75,7 +75,7 @@ export function makeReducer(options: MakeReducerOptions) {
                             ? null
                             : {
                                   tagId,
-                                  segmentIndex: segmentIndex,
+                                segmentIndex: segmentIndex,
                               },
                 };
             }
@@ -149,6 +149,36 @@ export function makeReducer(options: MakeReducerOptions) {
                     }),
                     focusedAddress: newAddress,
                 };
+            }
+                case ActionType.MOVE_FOCUS_TO_PREVIOUS_TAG: {
+                const { currentTagId } = action.payload;
+                const currentIndex = state.tags.findIndex((tag) => tag.id === currentTagId);
+                if (currentIndex > 0) {
+                    const previousTag = state.tags[currentIndex - 1];
+                    return {
+                        ...state,
+                        focusedAddress: {
+                            tagId: previousTag.id,
+                            segmentIndex: previousTag.value.split(options.delimiter).length - 1,
+                        },
+                    };
+                }
+                return state;
+            }
+            case ActionType.MOVE_FOCUS_TO_NEXT_TAG: {
+                const { currentTagId } = action.payload;
+                const currentIndex = state.tags.findIndex((tag) => tag.id === currentTagId);
+                if (currentIndex >= 0 && currentIndex < state.tags.length - 1) {
+                    const nextTag = state.tags[currentIndex + 1];
+                    return {
+                        ...state,
+                        focusedAddress: {
+                            tagId: nextTag.id,
+                            segmentIndex: 0,
+                        },
+                    };
+                }
+                return state;
             }
             default:
                 return assertNever(action);
