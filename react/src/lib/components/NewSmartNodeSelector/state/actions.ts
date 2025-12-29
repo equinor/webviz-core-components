@@ -1,4 +1,5 @@
 import type { Suggestion } from "../core";
+import type { Address } from "./type";
 
 export enum ActionType {
     ADD_TAG = "ADD_TAG",
@@ -20,10 +21,7 @@ export type Payloads = {
         tagId: string;
         newValue: string;
     };
-    [ActionType.CHANGE_FOCUSED_ADDRESS]: {
-        tagId: string | null;
-        segmentIndex: number;
-    };
+    [ActionType.CHANGE_FOCUSED_ADDRESS]: Address;
     [ActionType.CLEAR_FOCUSED_ADDRESS]: undefined;
     [ActionType.APPLY_SUGGESTION]: {
         suggestion: Suggestion;

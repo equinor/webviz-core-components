@@ -47,6 +47,7 @@ export function Tag(props: TagProps): React.ReactElement {
                 payload: {
                     tagId: props.tag.id,
                     segmentIndex,
+                    caretIndex: 0,
                 },
             });
         },

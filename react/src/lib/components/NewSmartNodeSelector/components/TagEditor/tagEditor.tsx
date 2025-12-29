@@ -2,6 +2,8 @@ import React from "react";
 import { TagTokenizer } from "../../core/TagTokenizer";
 import type { Token } from "../../core/types/Token";
 import type { Tag } from "../../state/type";
+import { SmartNodeSelectorDataContext } from "../../SmartNodeSelector";
+import { ActionType } from "../../state/actions";
 
 export enum TagEditorKeyDownAction {
     LEAVE_LEFT,
@@ -73,6 +75,8 @@ function findGroupOrSetAtPosition(
 
 export function TagEditor(props: TagEditorProps) {
     const { onChange, onFocusedSegmentChange, onKeyDown } = props;
+
+    const context = React.useContext(SmartNodeSelectorDataContext);
     
     const editorRef = React.useRef<HTMLDivElement>(null);
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -112,6 +116,21 @@ export function TagEditor(props: TagEditorProps) {
     }, [value, caret, anchor, props.delimiter]);
 
     React.useEffect(
+        function notifyAddressChange() {
+            if (isFocused && segmentIndex !== -1) {
+                context.dispatch({
+                    type: ActionType.CHANGE_FOCUSED_ADDRESS,
+                    payload: {
+                        tagId: props.tag.id,
+                        segmentIndex,
+                        caretIndex: caret,
+                    },
+                });
+            }
+        }, [isFocused, segmentIndex, caret, context.dispatch, props.tag.id]);
+
+
+    React.useEffect(
         function notifyFocusedSegmentChange() {
             // Don't notify if this change was triggered by an external prop update
             if (isFocused && !isExternalUpdateRef.current) {
@@ -122,6 +141,20 @@ export function TagEditor(props: TagEditorProps) {
         },
         [isFocused, segmentIndex, onFocusedSegmentChange]
     );
+
+    React.useEffect(
+        function focusedAddressChangeEffect() {
+            if (props.tag.id !== context.state.focusedAddress?.tagId) {
+                setIsFocused(false);
+                return;
+            }
+
+            setCaret(context.state.focusedAddress.caretIndex);
+            setAnchor(context.state.focusedAddress.caretIndex);
+        },
+        [context.state.focusedAddress, props.tag.id]
+    );
+
 
     React.useEffect(
         function syncCaretToFocusedSegment() {

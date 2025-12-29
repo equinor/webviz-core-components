@@ -9,13 +9,16 @@ export type SelectionRange = {
     endTagId: string;
 };
 
+export type Address = {
+    tagId: string;
+    segmentIndex: number;
+    caretIndex: number;
+};
+
 export type State = {
     tags: Tag[];
 
-    focusedAddress: {
-        tagId: string;
-        segmentIndex: number;
-    } | null;
+    focusedAddress: Address | null;
 
     selection: {
         ranges: SelectionRange[];

@@ -248,7 +248,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
             }
             dispatch({
                 type: ActionType.CHANGE_FOCUSED_ADDRESS,
-                payload: { tagId, segmentIndex: parseInt(segmentIndex) },
+                payload: { tagId, segmentIndex: parseInt(segmentIndex), caretIndex: 0 },
             });
         }
     }

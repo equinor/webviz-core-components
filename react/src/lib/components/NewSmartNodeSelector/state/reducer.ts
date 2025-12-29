@@ -76,6 +76,7 @@ export function makeReducer(options: MakeReducerOptions) {
                             : {
                                   tagId,
                                 segmentIndex: segmentIndex,
+                                    caretIndex: 0,  
                               },
                 };
             }
@@ -104,12 +105,14 @@ export function makeReducer(options: MakeReducerOptions) {
                     newAddress = {
                         tagId: state.focusedAddress.tagId,
                         segmentIndex: state.focusedAddress.segmentIndex,
+                        caretIndex: suggestion.completedTag.length,
                     };
                 } else if (!isLeaf) {
                     // Complete node suggestions move to next segment
                     newAddress = {
                         tagId: state.focusedAddress.tagId,
                         segmentIndex: state.focusedAddress.segmentIndex + 1,
+                        caretIndex: 0,
                     };
                 } else {
                     // Leaf nodes create a new tag
@@ -128,6 +131,7 @@ export function makeReducer(options: MakeReducerOptions) {
                     newAddress = {
                         tagId: newId,
                         segmentIndex: 0,
+                        caretIndex: 0,
                     };
                 }
 
@@ -160,6 +164,7 @@ export function makeReducer(options: MakeReducerOptions) {
                         focusedAddress: {
                             tagId: previousTag.id,
                             segmentIndex: previousTag.value.split(options.delimiter).length - 1,
+                            caretIndex: previousTag.value.length,
                         },
                     };
                 }
@@ -175,6 +180,7 @@ export function makeReducer(options: MakeReducerOptions) {
                         focusedAddress: {
                             tagId: nextTag.id,
                             segmentIndex: 0,
+                            caretIndex: 0,
                         },
                     };
                 }
