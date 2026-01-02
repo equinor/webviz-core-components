@@ -1,9 +1,15 @@
 import React from "react";
-import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
+
+import {
+    SmartNodeSelectorDataContext,
+    type SmartNodeSelectorDataContextType,
+} from "../SmartNodeSelector";
 import { useSuggestions } from "../hooks/useSuggestions";
 import { VirtualizedList } from "./VirtualizedList";
 import type { Suggestion } from "../core/types/Suggestion";
 import { ActionType } from "../state/actions";
+import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import { Topic } from "../core/StateManager";
 
 export type SuggestionPopoverProps = {
     renderSuggestionItem: (suggestion: Suggestion) => React.ReactNode;
@@ -14,25 +20,32 @@ export type SuggestionPopoverProps = {
 export function SuggestionPopover(
     props: SuggestionPopoverProps
 ): React.ReactElement {
-    const context = React.useContext(SmartNodeSelectorDataContext);
+    const { stateManager }: SmartNodeSelectorDataContextType = React.useContext(
+        SmartNodeSelectorDataContext
+    );
 
     const popoverRef = React.useRef<HTMLDivElement>(null);
-
-    const suggestions = useSuggestions();
 
     const [anchorElement, setAnchorElement] =
         React.useState<HTMLElement | null>(null);
 
+    const focusedSegment = useSubscribeToTopic(
+        stateManager,
+        Topic.FOCUSED_SEGMENT
+    );
+
+    const suggestions = useSuggestions(focusedSegment);
+
     React.useEffect(
         function onFocusedAddressChange() {
-            if (context.state.focusedAddress === null) {
+            if (focusedSegment === null) {
                 popoverRef.current?.hidePopover();
                 setAnchorElement(null);
                 return;
             }
 
             const inputElement = document.querySelector(
-                `[data-tag-id="${context.state.focusedAddress.tagId}"]`
+                `[data-querychip-id="${focusedSegment.queryId}"]`
             ) as HTMLElement | null;
             if (inputElement) {
                 setAnchorElement(inputElement);
@@ -42,19 +55,12 @@ export function SuggestionPopover(
                 setAnchorElement(null);
             }
         },
-        [context.state.focusedAddress]
+        [focusedSegment]
     );
 
     const handleItemClick = React.useCallback(function handleItemClick(
         suggestion: Suggestion
-    ) {
-        context.dispatch({
-            type: ActionType.APPLY_SUGGESTION,
-            payload: {
-                suggestion,
-            },
-        });
-    }, [context.dispatch]);
+    ) {}, []);
 
     return (
         <div
@@ -78,7 +84,9 @@ export function SuggestionPopover(
             <VirtualizedList
                 items={suggestions}
                 itemHeight={props.suggestionItemHeight}
-                maxHeight={props.suggestionItemHeight * props.maxNumberSuggestions}
+                maxHeight={
+                    props.suggestionItemHeight * props.maxNumberSuggestions
+                }
                 renderItem={props.renderSuggestionItem}
                 onItemClick={handleItemClick}
             />

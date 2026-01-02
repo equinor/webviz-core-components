@@ -1,4 +1,5 @@
-import { useSyncExternalStore } from "react";
+import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
+import { QueryStore } from "./QueryStore";
 
 export type QueryItem = {
     id: string;
@@ -8,6 +9,11 @@ export type QueryItem = {
 export type CaretPosition = {
     queryId: string;
     offset: number;
+};
+
+export type QuerySegment = {
+    queryId: string;
+    segmentIndex: number;
 };
 
 export enum Topic {
@@ -23,61 +29,36 @@ export type TopicPayloads = {
     [Topic.QUERY_ITEMS]: QueryItem[];
     [Topic.CARET_POSITIONS]: CaretPosition[];
     [Topic.SUGGESTIONS_INDEX]: number | null;
-    [Topic.FOCUSED_SEGMENT]: string | null;
+    [Topic.FOCUSED_SEGMENT]: QuerySegment | null;
 };
 
 export type StateManagerOptions = {
     delimiter: string;
 };
 
-export class StateManager {
-    // Internal
-    private _subscribers: Map<Topic, Set<() => void>> = new Map();
-    private _queryItemCounter: number = 0;
+export class StateManager implements PubSub<TopicPayloads> {
+    private _pubSubDelegate = new PubSubDelegate<TopicPayloads>();
 
     // Settings
     private _delimiter: string;
 
     // State
-    private _queryItems: QueryItem[] = [];
+    private _queryStore: QueryStore;
     private _caretPositions: CaretPosition[] = [];
     private _suggestionsIndex: number | null = null;
+    private _focusedSegment: QuerySegment | null = null;
 
     constructor(options: StateManagerOptions) {
         this._delimiter = options.delimiter;
+        this._queryStore = new QueryStore();
     }
 
-    getQueryItems(): QueryItem[] {
-        return this._queryItems;
+    getPubSubDelegate(): PubSubDelegate<TopicPayloads> {
+        return this._pubSubDelegate;
     }
 
     getQueryItemById(id: string): QueryItem | null {
-        return this._queryItems.find((item) => item.id === id) ?? null;
-    }
-
-    subscribe(topic: Topic, callback: () => void): () => void {
-        const subscribers = this._subscribers.get(topic) ?? new Set();
-        subscribers.add(callback);
-        this._subscribers.set(topic, subscribers);
-
-        return () => {
-            subscribers.delete(callback);
-        };
-    }
-
-    makeSubscriberFunction(
-        topic: Topic
-    ): (onStoreChangeCallback: () => void) => () => void {
-        return (onStoreChangeCallback: () => void) => {
-            return this.subscribe(topic, onStoreChangeCallback);
-        };
-    }
-
-    notifySubscribers(topic: Topic): void {
-        const subscribers = this._subscribers.get(topic);
-        if (subscribers) {
-            subscribers.forEach((callback) => callback());
-        }
+        return this._queryStore.getItemById(id);
     }
 
     makeSnapshotGetter<T extends keyof TopicPayloads>(
@@ -85,13 +66,13 @@ export class StateManager {
     ): () => TopicPayloads[T] {
         switch (topic) {
             case Topic.QUERY_ITEMS:
-                return () => this._queryItems as TopicPayloads[T];
+                return () => this._queryStore.getItems() as TopicPayloads[T];
             case Topic.CARET_POSITIONS:
                 return () => this._caretPositions as TopicPayloads[T];
             case Topic.SUGGESTIONS_INDEX:
                 return () => this._suggestionsIndex as TopicPayloads[T];
             case Topic.FOCUSED_SEGMENT:
-                return () => null as TopicPayloads[T];
+                return () => this._focusedSegment as TopicPayloads[T];
             case Topic.HAS_FOCUS:
                 return () =>
                     (this._caretPositions.length > 0) as TopicPayloads[T];
@@ -126,10 +107,52 @@ export class StateManager {
         }
     }
 
+    private computeSegmentIndex(query: string, offset: number): number {
+        const segments = query.split(this._delimiter);
+        let accumulatedLength = 0;
+
+        for (let i = 0; i < segments.length; i++) {
+            accumulatedLength += segments[i].length;
+            if (offset <= accumulatedLength) {
+                return i;
+            }
+            // Account for delimiter length
+            accumulatedLength += this._delimiter.length;
+        }
+
+        return segments.length - 1;
+    }
+
+    updateCaretPositions(positions: CaretPosition[]): void {
+        this._caretPositions = positions;
+        if (positions.length === 1) {
+            const queryItem = this._queryStore.getItemById(
+                positions[0].queryId
+            );
+            if (!queryItem) {
+                throw new Error("Invalid query ID in caret position");
+            }
+            this._focusedSegment = {
+                queryId: positions[0].queryId,
+                segmentIndex: this.computeSegmentIndex(
+                    queryItem.query,
+                    positions[0].offset
+                ),
+            };
+        } else {
+            this._focusedSegment = null;
+        }
+        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
+        this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
+    }
+
     moveCaretRelative(dx: number, selecting: boolean): void {
         const newCaretPositions: CaretPosition[] = [];
         for (const caretPosition of this._caretPositions) {
-            const queryItem = this.getQueryItemById(caretPosition.queryId);
+            const queryItem = this._queryStore.getItemById(
+                caretPosition.queryId
+            );
             if (!queryItem) {
                 newCaretPositions.push(caretPosition);
                 continue;
@@ -147,16 +170,16 @@ export class StateManager {
             });
         }
 
-        this._caretPositions = newCaretPositions;
-        this.notifySubscribers(Topic.CARET_POSITIONS);
-        this.notifySubscribers(Topic.HAS_FOCUS);
+        this.updateCaretPositions(newCaretPositions);
+        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
     }
 
     backspaceAtCaret(): void {
         const newQueryItems: QueryItem[] = [];
         const newCaretPositions: CaretPosition[] = [];
 
-        for (const item of this._queryItems) {
+        for (const item of this._queryStore.getItems()) {
             const caretPosition = this._caretPositions.find(
                 (cp) => cp.queryId === item.id
             );
@@ -176,13 +199,8 @@ export class StateManager {
             const after = item.query.slice(caretPosition.offset);
             const newQuery = before + after;
 
-            newQueryItems.push({
-                id: item.id,
-                query: newQuery,
-            });
-        }
+            this._queryStore.updateItem(item.id, newQuery);
 
-        for (const caretPosition of this._caretPositions) {
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
                 offset: caretPosition.offset - 1,
@@ -190,60 +208,49 @@ export class StateManager {
             newCaretPositions.push(newCaretPosition);
         }
 
-        this._queryItems = newQueryItems;
-        this._caretPositions = newCaretPositions;
+        this.updateCaretPositions(newCaretPositions);
 
-        this.notifySubscribers(Topic.QUERY_ITEMS);
-        this.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
     }
 
     addQueryItem(query: string): void {
-        const newQueryItem: QueryItem = {
-            id: this.generateQueryItemId(),
-            query: query,
-        };
-        this._queryItems = [...this._queryItems, newQueryItem];
-        this.notifySubscribers(Topic.QUERY_ITEMS);
+        this._queryStore.addItem(query);
+        this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
     setCaretPosition(position: CaretPosition): void {
         this._caretPositions = [position];
-        this.notifySubscribers(Topic.CARET_POSITIONS);
-        this.notifySubscribers(Topic.HAS_FOCUS);
+        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
     }
 
-    private generateQueryItemId(): string {
-        this._queryItemCounter += 1;
-        return `queryItem-${this._queryItemCounter}`;
+    private updateCaretPosition(position: CaretPosition, index: number): void {
+        if (index < 0 || index >= this._caretPositions.length) {
+            return;
+        }
+
+        this._caretPositions = this._caretPositions.map((cp, i) =>
+            i === index ? position : cp
+        );
     }
 
     private insertTextAtCaret(text: string): void {
-        const newQueryItems: QueryItem[] = [];
         const newCaretPositions: CaretPosition[] = [];
 
-        for (const item of this._queryItems) {
-            const caretPosition = this._caretPositions.find(
-                (cp) => cp.queryId === item.id
+        for (const caretPosition of this._caretPositions) {
+            const queryItem = this._queryStore.getItemById(
+                caretPosition.queryId
             );
-
-            if (!caretPosition) {
-                newQueryItems.push(item);
+            if (!queryItem) {
                 continue;
             }
 
-            const before = item.query.slice(0, caretPosition.offset);
-            const after = item.query.slice(caretPosition.offset);
+            const before = queryItem.query.slice(0, caretPosition.offset);
+            const after = queryItem.query.slice(caretPosition.offset);
             const newQuery = before + text + after;
 
-            newQueryItems.push({
-                id: item.id,
-                query: newQuery,
-            });
-        }
-
-        this._queryItems = newQueryItems;
-
-        for (const caretPosition of this._caretPositions) {
+            this._queryStore.updateItem(queryItem.id, newQuery);
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
                 offset: caretPosition.offset + text.length,
@@ -251,14 +258,14 @@ export class StateManager {
             newCaretPositions.push(newCaretPosition);
         }
 
-        this._caretPositions = newCaretPositions;
+        this.updateCaretPositions(newCaretPositions);
 
-        this.notifySubscribers(Topic.QUERY_ITEMS);
-        this.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
     }
 
     private setCaretPositionToEnd() {
-        const lastItem = this._queryItems[this._queryItems.length - 1];
+        const lastItem = this._queryStore.getLastItem();
         if (!lastItem) {
             return;
         }
@@ -268,26 +275,17 @@ export class StateManager {
             queryId: lastItem.id,
             offset: offset,
         };
-        this._caretPositions = [caretPosition];
-        this.notifySubscribers(Topic.CARET_POSITIONS);
-        this.notifySubscribers(Topic.HAS_FOCUS);
+        this.updateCaretPositions([caretPosition]);
+
+        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         console.log("Caret position set to end:", caretPosition);
         console.log("Current caret positions:", this._caretPositions);
     }
 
     private clearCaretPositions() {
         this._caretPositions = [];
-        this.notifySubscribers(Topic.CARET_POSITIONS);
-        this.notifySubscribers(Topic.HAS_FOCUS);
+        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
     }
-}
-
-export function useSubscribeToStateManagerTopicValue<T extends Topic>(
-    stateManager: StateManager,
-    topic: T
-): TopicPayloads[T] {
-    return useSyncExternalStore(
-        stateManager.makeSubscriberFunction(topic),
-        stateManager.makeSnapshotGetter(topic)
-    );
 }

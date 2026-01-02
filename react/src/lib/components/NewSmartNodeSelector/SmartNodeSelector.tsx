@@ -20,13 +20,10 @@ import { DebugInfo } from "./components/DebugInfo";
 import type { Suggestion } from "./core/types/Suggestion";
 import { SuggestionPopover } from "./components/SuggestionPopover";
 import { HiddenTextarea } from "./components/HiddenTextarea";
-import {
-    StateManager,
-    Topic,
-    useSubscribeToStateManagerTopicValue,
-} from "./core/StateManager";
+import { StateManager, Topic } from "./core/StateManager";
 import { CaretRenderer } from "./components/CaretRenderer";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
+import { useSubscribeToTopic } from "./core/PubSubDelegate";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -142,7 +139,7 @@ type SmartNodeSelectorSlotProps<
     >;
 };
 
-type SmartNodeSelectorDataContext = {
+export type SmartNodeSelectorDataContextType = {
     suggestionEngine: TagSuggestionEngine;
     stateManager: StateManager;
     placeholders: {
@@ -153,8 +150,8 @@ type SmartNodeSelectorDataContext = {
 };
 
 export const SmartNodeSelectorDataContext =
-    React.createContext<SmartNodeSelectorDataContext>(
-        {} as SmartNodeSelectorDataContext
+    React.createContext<SmartNodeSelectorDataContextType>(
+        {} as SmartNodeSelectorDataContextType
     );
 
 // Complete slots definition with defaults
@@ -215,18 +212,12 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         });
         stateManager.addQueryItem("Test:Test2");
         return stateManager;
-    }, []);
+    }, []) as StateManager;
 
     useMouseEventHandler(ref, stateManager);
 
-    const queryItems = useSubscribeToStateManagerTopicValue(
-        stateManager,
-        Topic.QUERY_ITEMS
-    );
-    const hasFocus = useSubscribeToStateManagerTopicValue(
-        stateManager,
-        Topic.HAS_FOCUS
-    );
+    const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
+    const hasFocus = useSubscribeToTopic(stateManager, Topic.HAS_FOCUS);
 
     React.useEffect(
         function onDataChange() {
@@ -292,7 +283,6 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         <CaretRenderer mainRef={ref} />
                     </RootComponent>
                     <DebugInfo />
-                    {/*
                     <SuggestionPopover
                         renderSuggestionItem={
                             defaultedProps.renderSuggestionItem
@@ -302,7 +292,6 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         }
                         maxNumberSuggestions={defaultedProps.maxSuggestions}
                     />
-                    */}
                 </div>
             </SmartNodeSelectorSlotsContext.Provider>
         </SmartNodeSelectorDataContext.Provider>

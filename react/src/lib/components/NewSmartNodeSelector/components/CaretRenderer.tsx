@@ -1,10 +1,8 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import {
-    Topic,
-    useSubscribeToStateManagerTopicValue,
-} from "../core/StateManager";
+import { Topic } from "../core/StateManager";
 import { computeTextWidth } from "../utils/caretToCoordinateMapping";
+import { useSubscribeToTopic } from "../core/PubSubDelegate";
 
 export type CaretRendererProps = {
     mainRef: React.RefObject<HTMLDivElement>;
@@ -13,7 +11,7 @@ export type CaretRendererProps = {
 export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
     const { stateManager } = React.useContext(SmartNodeSelectorDataContext);
 
-    const caretPositions = useSubscribeToStateManagerTopicValue(
+    const caretPositions = useSubscribeToTopic(
         stateManager,
         Topic.CARET_POSITIONS
     );
