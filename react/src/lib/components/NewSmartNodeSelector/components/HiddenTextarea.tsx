@@ -33,8 +33,18 @@ export function HiddenTextarea(): React.ReactElement {
         [stateManager]
     );
 
+    const handleKeyDown = React.useCallback(
+        function handleKeyDown(
+            event: React.KeyboardEvent<HTMLTextAreaElement>
+        ) {
+            stateManager.processKeyDown(event);
+        },
+        [stateManager]
+    );
+
     const handleFocus = React.useCallback(
         function handleFocus() {
+            // Set focus in state manager when textarea is focused
             stateManager.processFocusChange(true);
         },
         [stateManager]
@@ -42,16 +52,8 @@ export function HiddenTextarea(): React.ReactElement {
 
     const handleBlur = React.useCallback(
         function handleBlur() {
+            // Clear caret positions when textarea loses focus
             stateManager.processFocusChange(false);
-        },
-        [stateManager]
-    );
-
-    const handleKeyDown = React.useCallback(
-        function handleKeyDown(
-            event: React.KeyboardEvent<HTMLTextAreaElement>
-        ) {
-            stateManager.processKeyDown(event);
         },
         [stateManager]
     );

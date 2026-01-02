@@ -267,6 +267,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                             borderRadius: "4px",
                             padding: "8px",
                             display: "flex",
+                            position: "relative",
                             flexWrap: "wrap",
                             gap: "8px",
                             alignItems: "center",
@@ -274,10 +275,11 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                             ...(rootProps as any).style,
                         }}
                     >
-                        {queryItems?.map((queryItem) => (
+                        {queryItems?.map((queryItem, index) => (
                             <QueryChip
                                 key={queryItem.id}
                                 queryItem={queryItem}
+                                isLast={index === queryItems.length - 1}
                             />
                         ))}
                         <CaretRenderer mainRef={ref} />

@@ -73,12 +73,13 @@ export function SuggestionPopover(
                 border: "1px solid #ccc",
                 borderRadius: 4,
                 backgroundColor: "white",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+                boxShadow: "0 2px 8px rgba(42, 42, 42, 0.15)",
                 padding: 4,
-                ...(anchorElement && {
-                    position: "absolute",
-                    ...calculatePosition(anchorElement),
-                }),
+                ...(anchorElement &&
+                    suggestions.length && {
+                        position: "absolute",
+                        ...calculatePosition(anchorElement),
+                    }),
             }}
         >
             <VirtualizedList

@@ -84,10 +84,18 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     processFocusChange(hasFocus: boolean): void {
+        const currentlyHasFocus = this._caretPositions.length > 0;
+
         if (hasFocus) {
-            this.setCaretPositionToEnd();
+            // Only set caret position if we don't already have focus
+            if (!currentlyHasFocus) {
+                this.setCaretPositionToEnd();
+            }
         } else {
-            this.clearCaretPositions();
+            // Only clear if we currently have focus
+            if (currentlyHasFocus) {
+                this.clearCaretPositions();
+            }
         }
     }
 
@@ -103,6 +111,12 @@ export class StateManager implements PubSub<TopicPayloads> {
                 break;
             case "Backspace":
                 this.backspaceAtCaret();
+                break;
+            case "Enter":
+                this._queryStore.addItem("");
+                this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+                this.setCaretPositionToEnd();
+                event.preventDefault();
                 break;
         }
     }
@@ -125,6 +139,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
     updateCaretPositions(positions: CaretPosition[]): void {
         this._caretPositions = positions;
+
         if (positions.length === 1) {
             const queryItem = this._queryStore.getItemById(
                 positions[0].queryId
@@ -142,6 +157,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         } else {
             this._focusedSegment = null;
         }
+
         this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
@@ -171,8 +187,6 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
 
         this.updateCaretPositions(newCaretPositions);
-        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
-        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
     }
 
     backspaceAtCaret(): void {
@@ -209,9 +223,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
 
         this.updateCaretPositions(newCaretPositions);
-
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
-        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
     }
 
     addQueryItem(query: string): void {
@@ -220,9 +232,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     setCaretPosition(position: CaretPosition): void {
-        this._caretPositions = [position];
-        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
-        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
+        this.updateCaretPositions([position]);
     }
 
     private updateCaretPosition(position: CaretPosition, index: number): void {
@@ -259,12 +269,10 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
 
         this.updateCaretPositions(newCaretPositions);
-
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
-        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
     }
 
-    private setCaretPositionToEnd() {
+    setCaretPositionToEnd() {
         const lastItem = this._queryStore.getLastItem();
         if (!lastItem) {
             return;
@@ -275,17 +283,15 @@ export class StateManager implements PubSub<TopicPayloads> {
             queryId: lastItem.id,
             offset: offset,
         };
-        this.updateCaretPositions([caretPosition]);
 
-        this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
-        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
-        console.log("Caret position set to end:", caretPosition);
-        console.log("Current caret positions:", this._caretPositions);
+        this.updateCaretPositions([caretPosition]);
     }
 
     private clearCaretPositions() {
         this._caretPositions = [];
+        this._focusedSegment = null;
         this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
+        this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
     }
 }

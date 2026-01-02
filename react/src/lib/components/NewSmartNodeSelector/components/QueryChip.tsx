@@ -5,12 +5,14 @@ import {
 } from "../SmartNodeSelector";
 import { useMatches } from "../hooks/useMatches";
 import { MatchesCounter } from "./MatchesCounter";
-import type { QueryItem } from "../core/StateManager";
+import { Topic, type QueryItem } from "../core/StateManager";
 import { TokenRenderer } from "./TokenRenderer";
 import { TagTokenizer } from "../core/TagTokenizer";
+import { useSubscribeToTopic } from "../core/PubSubDelegate";
 
 export type QueryChipProps = {
     queryItem: QueryItem;
+    isLast: boolean;
 };
 
 export function QueryChip(props: QueryChipProps): React.ReactElement {
@@ -18,6 +20,11 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const slotsContext = React.useContext(SmartNodeSelectorSlotsContext);
 
     const matches = useMatches(props.queryItem);
+
+    const caretPositions = useSubscribeToTopic(
+        dataContext.stateManager,
+        Topic.CARET_POSITIONS
+    );
 
     const handleRemoveTagClick = React.useCallback(
         function handleRemoveTagClick() {},
@@ -47,14 +54,26 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
         }
     }, [tokenizer, props.queryItem.query]);
 
+    const isValid = matches.length > 0;
+    const isEditing =
+        caretPositions.find((pos) => pos.queryId === props.queryItem.id) !==
+        undefined;
+    const hasMoreThanOneSegment = props.queryItem.query.includes(
+        dataContext.delimiter
+    );
+
     return (
         <QueryChipComponent
             {...queryChipProps}
             data-querychip-id={props.queryItem.id}
             tabIndex={0}
+            style={makeStyle(
+                props.isLast && !hasMoreThanOneSegment,
+                isValid || isEditing
+            )}
         >
-            <div data-query-chip-content>
-                <MatchesCounter matches={matches} />
+            <MatchesCounter matches={matches} />
+            <div data-query-chip-content style={{ display: "flex", alignItems: "center", alignSelf: "stretch", flex: 1 }}>
                 <TokenRenderer token={tokens} />
             </div>
         </QueryChipComponent>
@@ -68,6 +87,7 @@ function makeStyle(isLast: boolean, isValid: boolean): React.CSSProperties {
             alignItems: "center",
             gap: "1px",
             flexGrow: 1,
+            minHeight: 20,
         };
     }
     return {

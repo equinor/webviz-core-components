@@ -16,22 +16,37 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
         Topic.CARET_POSITIONS
     );
 
-    const mappedCaretPositions = React.useMemo(
-        function mapCaretPositions() {
-            const mappedCaretPositions = [];
+    const queryItems = useSubscribeToTopic(
+        stateManager,
+        Topic.QUERY_ITEMS
+    );
+
+    const [mappedCaretPositions, setMappedCaretPositions] = React.useState<
+        Array<{ left: number; top: number }>
+    >([]);
+
+    React.useLayoutEffect(
+        function updateCaretPositions() {
+            const newMappedCaretPositions = [];
             for (const position of caretPositions) {
                 const chip = props.mainRef.current?.querySelector(
-                    `[data-querychip-id="${position.queryId}"] > div`
+                    `[data-querychip-id="${position.queryId}"] [data-query-chip-content]`
                 ) as HTMLElement | null;
                 if (!chip) {
                     continue;
                 }
 
-                const bcr = chip.getBoundingClientRect();
+                const chipBoundingRect = chip.getBoundingClientRect();
                 const queryItem = stateManager.getQueryItemById(
                     position.queryId
                 );
                 if (!queryItem) {
+                    continue;
+                }
+
+                const mainBoundingRect =
+                    props.mainRef.current?.getBoundingClientRect();
+                if (!mainBoundingRect) {
                     continue;
                 }
 
@@ -42,41 +57,42 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
 
                 const textWidth = computeTextWidth(textBeforeCaret, chip);
 
-                mappedCaretPositions.push({
-                    left: bcr.left + textWidth,
-                    top: bcr.top,
+                newMappedCaretPositions.push({
+                    left:
+                        chipBoundingRect.left +
+                        textWidth -
+                        mainBoundingRect.left,
+                    top: chipBoundingRect.top - mainBoundingRect.top,
                 });
             }
 
-            return mappedCaretPositions;
+            setMappedCaretPositions(newMappedCaretPositions);
         },
-        [caretPositions]
+        [caretPositions, queryItems, stateManager, props.mainRef]
     );
 
     return (
         <>
-            {mappedCaretPositions.map((position, index) => (
-                <>
-                    <style>
-                        {`
+            <style>
+                {`
         @keyframes blink { 50% { opacity: 0; } }
       `}
-                    </style>
-                    <div
-                        key={index}
-                        data-caret-index={index}
-                        style={{
-                            width: 1,
-                            height: 20,
-                            backgroundColor: "black",
-                            position: "absolute",
-                            left: position.left,
-                            top: position.top,
-                            pointerEvents: "none" as const,
-                            animation: "blink 1s step-end infinite",
-                        }}
-                    />
-                </>
+            </style>
+            {mappedCaretPositions.map((position, index) => (
+                <div
+                    key={index}
+                    data-caret-index={index}
+                    style={{
+                        width: 1,
+                        height: 20,
+                        backgroundColor: "black",
+                        position: "absolute",
+                        left: position.left,
+                        top: position.top,
+                        pointerEvents: "none" as const,
+                        animation: "blink 1s step-end infinite",
+                    }}
+                />
             ))}
         </>
     );

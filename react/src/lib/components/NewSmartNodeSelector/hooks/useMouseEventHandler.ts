@@ -17,10 +17,20 @@ export function useMouseEventHandler(
                 const chipElement = target.closest(
                     "[data-querychip-id]"
                 ) as HTMLElement;
-                if (!chipElement) return;
+                if (!chipElement) {
+                    // Clicking outside a chip should set caret to end
+                    // This will trigger hasFocus=true, which will make HiddenTextarea focus
+                    event.preventDefault();
+                    stateManager.setCaretPositionToEnd();
+                    return;
+                }
 
                 const queryId = chipElement.getAttribute("data-querychip-id");
-                if (!queryId) return;
+                if (!queryId) {
+                    event.preventDefault();
+                    stateManager.setCaretPositionToEnd();
+                    return;
+                }
 
                 // Find the content element
                 const contentElement = chipElement.querySelector(
@@ -43,7 +53,8 @@ export function useMouseEventHandler(
                     contentElement
                 );
 
-                // Update state (HiddenTextarea will auto-focus)
+                // Update caret position - this will trigger hasFocus change
+                // which will cause HiddenTextarea to focus
                 stateManager.setCaretPosition({
                     queryId: queryId,
                     offset: offset,

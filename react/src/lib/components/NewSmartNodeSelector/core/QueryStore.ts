@@ -38,7 +38,7 @@ export class QueryStore {
             id: `query-item-${this._queryItemCounter++}`,
             query,
         };
-        this._queryItems.push(newItem);
+        this._queryItems = [...this._queryItems, newItem];
         return newItem;
     }
 
