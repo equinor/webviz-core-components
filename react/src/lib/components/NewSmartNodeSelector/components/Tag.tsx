@@ -11,8 +11,8 @@ import { MatchesCounter } from "./MatchesCounter";
 import { TagEditor, TagEditorKeyDownAction } from "./TagEditor/tagEditor";
 
 export type TagProps = {
-    tag: TagType;
-    index: number;
+    id: string;
+    tag: 
 };
 
 export function Tag(props: TagProps): React.ReactElement {
@@ -21,78 +21,11 @@ export function Tag(props: TagProps): React.ReactElement {
 
     const matches = useMatches(props.tag.id);
 
-    const segments = React.useMemo(
-        () => makeInputValues(props.tag.value, dataContext.delimiter),
-        [props.tag.value, dataContext.delimiter]
-    );
-
-    const handleValueChange = React.useCallback(
-        function handleValueChange(newValue: string) {
-            const newTagValue = newValue;
-            dataContext.dispatch({
-                type: ActionType.UPDATE_TAG_VALUE,
-                payload: {
-                    tagId: props.tag.id,
-                    newValue: newTagValue,
-                },
-            });
-        },
-        [dataContext.dispatch, dataContext.delimiter, props.tag.id, segments]
-    );
-
-    const handleFocusedSegmentChange = React.useCallback(
-        function handleFocusedSegmentChange(segmentIndex: number) {
-            dataContext.dispatch({
-                type: ActionType.CHANGE_FOCUSED_ADDRESS,
-                payload: {
-                    tagId: props.tag.id,
-                    segmentIndex,
-                    caretIndex: 0,
-                },
-            });
-        },
-        [dataContext.dispatch, props.tag.id]
-    );
-
-    const handleKeyDown = React.useCallback(
-        function handleKeyDown(action: TagEditorKeyDownAction) {
-            const focusedAddress = dataContext.state.focusedAddress;
-            if (focusedAddress === null || focusedAddress.tagId !== props.tag.id) {
-                return;
-            }
-            if (action === TagEditorKeyDownAction.LEAVE_LEFT) {
-                if (focusedAddress.segmentIndex === 0) {
-                    dataContext.dispatch({
-                        type: ActionType.MOVE_FOCUS_TO_PREVIOUS_TAG,
-                        payload: {
-                            currentTagId: props.tag.id,
-                        },
-                    });
-                }
-            } else if (action === TagEditorKeyDownAction.LEAVE_RIGHT) {
-                if (focusedAddress.segmentIndex === segments.length - 1) {
-                    dataContext.dispatch({
-                        type: ActionType.MOVE_FOCUS_TO_NEXT_TAG,
-                        payload: {
-                            currentTagId: props.tag.id,
-                        },
-                    });
-                }
-            }
-        },
-        [dataContext.dispatch, dataContext.state.focusedAddress, props.tag.id, segments.length]
-    );
-
     const handleRemoveTagClick = React.useCallback(
         function handleRemoveTagClick() {
-            dataContext.dispatch({
-                type: ActionType.REMOVE_TAG,
-                payload: {
-                    tagId: props.tag.id,
-                },
-            });
+            
         },
-        [dataContext.dispatch, props.tag.id]
+        [props.tag.id]
     );
 
     const TagComponent = slotsContext.slots.tagChip;

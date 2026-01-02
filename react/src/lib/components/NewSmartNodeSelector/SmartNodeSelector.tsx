@@ -19,6 +19,8 @@ import { ActionType, type Action } from "./state/actions";
 import { DebugInfo } from "./components/DebugInfo";
 import type { Suggestion } from "./core/types/Suggestion";
 import { SuggestionPopover } from "./components/SuggestionPopover";
+import { HiddenTextarea } from "./components/HiddenTextarea";
+import { StateManager } from "./core/StateManager";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -136,13 +138,11 @@ type SmartNodeSelectorSlotProps<
 
 type SmartNodeSelectorDataContext = {
     suggestionEngine: TagSuggestionEngine;
-    delimiter: string;
+    stateManager: StateManager;
     placeholders: {
         newTag: string;
         incompleteTag: string;
     };
-    state: State;
-    dispatch: React.Dispatch<Action>;
 };
 
 export const SmartNodeSelectorDataContext =
@@ -206,6 +206,10 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         return new TagSuggestionEngine(defaultedProps.delimiter);
     }, [defaultedProps.delimiter]);
 
+    const stateManager = React.useMemo(() => {
+        return new StateManager({ delimiter: defaultedProps.delimiter });
+    }, []);
+
     React.useEffect(
         function onDataChange() {
             suggestionEngine.setData(defaultedProps.data);
@@ -216,12 +220,10 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
     const dataContext = React.useMemo(
         () => ({
             suggestionEngine,
-            delimiter: defaultedProps.delimiter,
+            stateManager,
             placeholders: defaultedProps.placeholders,
-            state,
-            dispatch,
         }),
-        [suggestionEngine, defaultedProps.delimiter, state, dispatch]
+        [suggestionEngine, stateManager, defaultedProps.placeholders]
     );
 
     const slotsContext = React.useMemo(
@@ -238,46 +240,17 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         [props.slots, props.slotProps]
     );
 
-    function handleFocusIn(e: React.FocusEvent) {
-        const target = e.target;
-        if (target.hasAttribute("data-tag-id")) {
-            const tagId = target.getAttribute("data-tag-id");
-            const segmentIndex = target.getAttribute("data-segment-index");
-            if (tagId === null || segmentIndex === null) {
-                throw new Error("Missing data attributes on focused element");
-            }
-            dispatch({
-                type: ActionType.CHANGE_FOCUSED_ADDRESS,
-                payload: { tagId, segmentIndex: parseInt(segmentIndex), caretIndex: 0 },
-            });
-        }
-    }
-
-    function handleFocusOut(e: React.FocusEvent) {
-        const relatedTarget = e.relatedTarget as Node | null;
-
-        // Check if focus is moving to the popover or one of its children
-        const popover = document.querySelector("[data-suggestion-popover]");
-        const isMovingToPopover =
-            relatedTarget && popover?.contains(relatedTarget);
-
-        // Only clear if focus left the container entirely AND is not moving to the popover
-        if (!e.currentTarget.contains(relatedTarget) && !isMovingToPopover) {
-            dispatch({ type: ActionType.CLEAR_FOCUSED_ADDRESS });
-        }
-    }
-
     const RootComponent = slotsContext.slots.root;
     const rootProps = slotsContext.slotProps.root ?? {};
 
     return (
         <SmartNodeSelectorDataContext.Provider value={dataContext}>
             <SmartNodeSelectorSlotsContext.Provider value={slotsContext}>
-                <div onBlurCapture={handleFocusOut}>
+                <div>
+                    <HiddenTextarea />
                     <RootComponent
                         {...rootProps}
                         data-smart-node-selector-root
-                        onFocusCapture={handleFocusIn}
                         style={{
                             border: "1px solid #ccc",
                             borderRadius: "4px",
@@ -289,11 +262,14 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                             ...(rootProps as any).style,
                         }}
                     >
+                        {/*
                         {state.tags.map((tag, index) => (
                             <Tag key={tag.id} index={index} tag={tag} />
                         ))}
+                        */}
                     </RootComponent>
                     <DebugInfo />
+                    {/*
                     <SuggestionPopover
                         renderSuggestionItem={
                             defaultedProps.renderSuggestionItem
@@ -303,6 +279,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         }
                         maxNumberSuggestions={defaultedProps.maxSuggestions}
                     />
+                    */}
                 </div>
             </SmartNodeSelectorSlotsContext.Provider>
         </SmartNodeSelectorDataContext.Provider>

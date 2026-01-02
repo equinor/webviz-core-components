@@ -20,7 +20,7 @@ export function DebugInfo(): React.ReactElement {
                     fontSize: 12,
                 }}
             >
-                {JSON.stringify(context.state, null, 2)}
+                {JSON.stringify(context.stateManager, null, 2)}
             </pre>
         </div>
     );
