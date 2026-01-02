@@ -1,8 +1,23 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
+import { Topic, useSubscribeToStateManagerTopicValue } from "../core/StateManager";
 
 export function DebugInfo(): React.ReactElement {
     const context = React.useContext(SmartNodeSelectorDataContext);
+
+    const queryItems = useSubscribeToStateManagerTopicValue(
+        context.stateManager,
+        Topic.QUERY_ITEMS
+    );
+    const caretPositions = useSubscribeToStateManagerTopicValue(
+        context.stateManager,
+        Topic.CARET_POSITIONS
+    );
+    const hasFocus = useSubscribeToStateManagerTopicValue(
+        context.stateManager,
+        Topic.HAS_FOCUS
+    );
+
 
     return (
         <div
@@ -20,7 +35,7 @@ export function DebugInfo(): React.ReactElement {
                     fontSize: 12,
                 }}
             >
-                {JSON.stringify(context.stateManager, null, 2)}
+                {JSON.stringify({ queryItems, caretPositions, hasFocus }, null, 2)}
             </pre>
         </div>
     );

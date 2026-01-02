@@ -11,7 +11,7 @@ import {
     type TreeDataNode,
     type IndexedNode,
 } from "./core";
-import { Tag } from "./components/Tag";
+import { QueryChip } from "./components/QueryChip";
 import { makeTags as makeInitialTags } from "./utils/makeTags";
 import { initializer, makeReducer } from "./state/reducer";
 import type { State } from "./state/type";
@@ -20,7 +20,13 @@ import { DebugInfo } from "./components/DebugInfo";
 import type { Suggestion } from "./core/types/Suggestion";
 import { SuggestionPopover } from "./components/SuggestionPopover";
 import { HiddenTextarea } from "./components/HiddenTextarea";
-import { StateManager } from "./core/StateManager";
+import {
+    StateManager,
+    Topic,
+    useSubscribeToStateManagerTopicValue,
+} from "./core/StateManager";
+import { CaretRenderer } from "./components/CaretRenderer";
+import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -122,7 +128,7 @@ const DEFAULT_PROPS = {
 
 type SmartNodeSelectorSlots = {
     root?: React.ElementType;
-    tagChip?: React.ElementType;
+    queryChip?: React.ElementType;
     matchesCounter?: React.ElementType;
     suggestionsPopover?: React.ElementType;
     suggestionItem?: React.ElementType;
@@ -143,6 +149,7 @@ type SmartNodeSelectorDataContext = {
         newTag: string;
         incompleteTag: string;
     };
+    delimiter: string;
 };
 
 export const SmartNodeSelectorDataContext =
@@ -162,7 +169,7 @@ type SmartNodeSelectorSlotsContextValue = {
 // Default slot components
 const DEFAULT_SLOTS: CompleteSlots = {
     root: "ul",
-    tagChip: "li",
+    queryChip: "li",
     matchesCounter: "span",
     suggestionsPopover: "div",
     suggestionItem: "div",
@@ -171,7 +178,7 @@ const DEFAULT_SLOTS: CompleteSlots = {
 // Default slot props
 const DEFAULT_SLOT_PROPS: CompleteSlotProps = {
     root: {},
-    tagChip: {},
+    queryChip: {},
     matchesCounter: {},
     suggestionsPopover: {},
     suggestionItem: {},
@@ -196,19 +203,30 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         [props]
     );
 
-    const [state, dispatch] = React.useReducer(
-        makeReducer({ delimiter: defaultedProps.delimiter }),
-        { initialTags: makeInitialTags(props.value ?? []) },
-        initializer
-    );
+    const ref = React.useRef<HTMLDivElement>(null);
 
     const suggestionEngine = React.useMemo(() => {
         return new TagSuggestionEngine(defaultedProps.delimiter);
     }, [defaultedProps.delimiter]);
 
     const stateManager = React.useMemo(() => {
-        return new StateManager({ delimiter: defaultedProps.delimiter });
+        const stateManager = new StateManager({
+            delimiter: defaultedProps.delimiter,
+        });
+        stateManager.addQueryItem("Test:Test2");
+        return stateManager;
     }, []);
+
+    useMouseEventHandler(ref, stateManager);
+
+    const queryItems = useSubscribeToStateManagerTopicValue(
+        stateManager,
+        Topic.QUERY_ITEMS
+    );
+    const hasFocus = useSubscribeToStateManagerTopicValue(
+        stateManager,
+        Topic.HAS_FOCUS
+    );
 
     React.useEffect(
         function onDataChange() {
@@ -222,6 +240,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
             suggestionEngine,
             stateManager,
             placeholders: defaultedProps.placeholders,
+            delimiter: defaultedProps.delimiter,
         }),
         [suggestionEngine, stateManager, defaultedProps.placeholders]
     );
@@ -250,6 +269,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                     <HiddenTextarea />
                     <RootComponent
                         {...rootProps}
+                        ref={ref}
                         data-smart-node-selector-root
                         style={{
                             border: "1px solid #ccc",
@@ -259,14 +279,17 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                             flexWrap: "wrap",
                             gap: "8px",
                             alignItems: "center",
+                            outline: hasFocus ? "2px solid #007aff" : "none",
                             ...(rootProps as any).style,
                         }}
                     >
-                        {/*
-                        {state.tags.map((tag, index) => (
-                            <Tag key={tag.id} index={index} tag={tag} />
+                        {queryItems?.map((queryItem) => (
+                            <QueryChip
+                                key={queryItem.id}
+                                queryItem={queryItem}
+                            />
                         ))}
-                        */}
+                        <CaretRenderer mainRef={ref} />
                     </RootComponent>
                     <DebugInfo />
                     {/*
