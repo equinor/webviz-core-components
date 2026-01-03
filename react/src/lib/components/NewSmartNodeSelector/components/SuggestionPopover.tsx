@@ -10,9 +10,13 @@ import type { Suggestion } from "../core/types/Suggestion";
 import { ActionType } from "../state/actions";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { Topic } from "../core/StateManager";
+import { SuggestionsTopic } from "../core/SuggestionsState";
 
 export type SuggestionPopoverProps = {
-    renderSuggestionItem: (suggestion: Suggestion) => React.ReactNode;
+    renderSuggestionItem: (
+        suggestion: Suggestion,
+        isSelected: boolean
+    ) => React.ReactNode;
     suggestionItemHeight: number;
     maxNumberSuggestions: number;
 };
@@ -20,9 +24,8 @@ export type SuggestionPopoverProps = {
 export function SuggestionPopover(
     props: SuggestionPopoverProps
 ): React.ReactElement {
-    const { stateManager }: SmartNodeSelectorDataContextType = React.useContext(
-        SmartNodeSelectorDataContext
-    );
+    const { stateManager, suggestionsState }: SmartNodeSelectorDataContextType =
+        React.useContext(SmartNodeSelectorDataContext);
 
     const popoverRef = React.useRef<HTMLDivElement>(null);
 
@@ -34,7 +37,15 @@ export function SuggestionPopover(
         Topic.FOCUSED_SEGMENT
     );
 
-    const suggestions = useSuggestions(focusedSegment);
+    const suggestions = useSubscribeToTopic(
+        suggestionsState,
+        SuggestionsTopic.SUGGESTIONS
+    );
+
+    const selectedIndex = useSubscribeToTopic(
+        suggestionsState,
+        SuggestionsTopic.SELECTED_INDEX
+    );
 
     React.useEffect(
         function onFocusedAddressChange() {
@@ -90,6 +101,7 @@ export function SuggestionPopover(
                 }
                 renderItem={props.renderSuggestionItem}
                 onItemClick={handleItemClick}
+                selectedIndex={selectedIndex}
             />
         </div>
     );

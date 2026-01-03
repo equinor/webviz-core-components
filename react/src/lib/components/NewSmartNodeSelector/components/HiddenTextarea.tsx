@@ -2,11 +2,28 @@ import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
 import { Topic } from "../core/StateManager";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import { KeyboardHandler } from "../core/KeyboardHandler";
 
 export function HiddenTextarea(): React.ReactElement {
-    const { stateManager } = React.useContext(SmartNodeSelectorDataContext);
+    const { stateManager, suggestionsState } = React.useContext(
+        SmartNodeSelectorDataContext
+    );
 
     const ref = React.useRef<HTMLTextAreaElement | null>(null);
+
+    const keyboardHandler = React.useMemo(() => {
+        return new KeyboardHandler({
+            stateManager,
+            suggestionsState,
+        });
+    }, [stateManager, suggestionsState]);
+
+    // Clean up keyboard handler on unmount
+    React.useEffect(() => {
+        return () => {
+            keyboardHandler.destroy();
+        };
+    }, [keyboardHandler]);
 
     const hasFocus = useSubscribeToTopic(stateManager, Topic.HAS_FOCUS);
 
@@ -27,19 +44,19 @@ export function HiddenTextarea(): React.ReactElement {
     const handleInput = React.useCallback(
         function handleInput(event: React.FormEvent<HTMLTextAreaElement>) {
             const target = event.currentTarget;
-            stateManager.processInput(target.value);
+            keyboardHandler.handleInput(target.value);
             target.value = "";
         },
-        [stateManager]
+        [keyboardHandler]
     );
 
     const handleKeyDown = React.useCallback(
         function handleKeyDown(
             event: React.KeyboardEvent<HTMLTextAreaElement>
         ) {
-            stateManager.processKeyDown(event);
+            keyboardHandler.handleKeyDown(event);
         },
-        [stateManager]
+        [keyboardHandler]
     );
 
     const handleFocus = React.useCallback(

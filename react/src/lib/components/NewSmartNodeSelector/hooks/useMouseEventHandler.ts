@@ -21,14 +21,14 @@ export function useMouseEventHandler(
                     // Clicking outside a chip should set caret to end
                     // This will trigger hasFocus=true, which will make HiddenTextarea focus
                     event.preventDefault();
-                    stateManager.setCaretPositionToEnd();
+                    stateManager.setCaretPositionToEndOfLastItem();
                     return;
                 }
 
                 const queryId = chipElement.getAttribute("data-querychip-id");
                 if (!queryId) {
                     event.preventDefault();
-                    stateManager.setCaretPositionToEnd();
+                    stateManager.setCaretPositionToEndOfLastItem();
                     return;
                 }
 

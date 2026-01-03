@@ -33,6 +33,22 @@ export class QueryStore {
         return this._queryItems.find((item) => item.id === id) ?? null;
     }
 
+    getNextItem(id: string): QueryItem | null {
+        const index = this._queryItems.findIndex((item) => item.id === id);
+        if (index === -1 || index === this._queryItems.length - 1) {
+            return null;
+        }
+        return this._queryItems[index + 1] ?? null;
+    }
+
+    getPreviousItem(id: string): QueryItem | null {
+        const index = this._queryItems.findIndex((item) => item.id === id);
+        if (index <= 0) {
+            return null;
+        }
+        return this._queryItems[index - 1] ?? null;
+    }
+
     addItem(query: string): QueryItem {
         const newItem: QueryItem = {
             id: `query-item-${this._queryItemCounter++}`,

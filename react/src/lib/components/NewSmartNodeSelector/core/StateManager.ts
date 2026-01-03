@@ -61,6 +61,10 @@ export class StateManager implements PubSub<TopicPayloads> {
         return this._queryStore.getItemById(id);
     }
 
+    getFocusedSegment(): QuerySegment | null {
+        return this._focusedSegment;
+    }
+
     makeSnapshotGetter<T extends keyof TopicPayloads>(
         topic: T
     ): () => TopicPayloads[T] {
@@ -79,45 +83,19 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
     }
 
-    processInput(value: string): void {
-        this.insertTextAtCaret(value);
-    }
-
     processFocusChange(hasFocus: boolean): void {
         const currentlyHasFocus = this._caretPositions.length > 0;
 
         if (hasFocus) {
             // Only set caret position if we don't already have focus
             if (!currentlyHasFocus) {
-                this.setCaretPositionToEnd();
+                this.setCaretPositionToEndOfLastItem();
             }
         } else {
             // Only clear if we currently have focus
             if (currentlyHasFocus) {
                 this.clearCaretPositions();
             }
-        }
-    }
-
-    processKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>): void {
-        const { key, shiftKey: selecting } = event;
-
-        switch (key) {
-            case "ArrowRight":
-                this.moveCaretRelative(1, selecting);
-                break;
-            case "ArrowLeft":
-                this.moveCaretRelative(-1, selecting);
-                break;
-            case "Backspace":
-                this.backspaceAtCaret();
-                break;
-            case "Enter":
-                this._queryStore.addItem("");
-                this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
-                this.setCaretPositionToEnd();
-                event.preventDefault();
-                break;
         }
     }
 
@@ -175,13 +153,31 @@ export class StateManager implements PubSub<TopicPayloads> {
             }
 
             let newOffset = caretPosition.offset + dx;
-            newOffset = Math.max(
-                0,
-                Math.min(newOffset, queryItem.query.length)
-            );
+            let newQueryId = caretPosition.queryId;
+
+            if (newOffset > queryItem.query.length) {
+                const nextItem = this._queryStore.getNextItem(queryItem.id);
+                if (nextItem) {
+                    newOffset = 0;
+                    newQueryId = nextItem.id;
+                } else {
+                    newOffset = queryItem.query.length;
+                }
+            }
+            if (newOffset < 0) {
+                const previousItem = this._queryStore.getPreviousItem(
+                    queryItem.id
+                );
+                if (previousItem) {
+                    newOffset = previousItem.query.length;
+                    newQueryId = previousItem.id;
+                } else {
+                    newOffset = 0;
+                }
+            }
 
             newCaretPositions.push({
-                queryId: caretPosition.queryId,
+                queryId: newQueryId,
                 offset: newOffset,
             });
         }
@@ -231,6 +227,26 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
+    updateQueryItem(id: string, newQuery: string): void {
+        this._queryStore.updateItem(id, newQuery);
+        this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+    }
+
+    setCaretPositionToEndOfQueryItem(id: string): void {
+        const queryItem = this._queryStore.getItemById(id);
+        if (!queryItem) {
+            return;
+        }
+
+        const offset = queryItem.query.length;
+        const caretPosition: CaretPosition = {
+            queryId: id,
+            offset: offset,
+        };
+
+        this.updateCaretPositions([caretPosition]);
+    }
+
     setCaretPosition(position: CaretPosition): void {
         this.updateCaretPositions([position]);
     }
@@ -245,7 +261,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         );
     }
 
-    private insertTextAtCaret(text: string): void {
+    insertTextAtCaret(text: string): void {
         const newCaretPositions: CaretPosition[] = [];
 
         for (const caretPosition of this._caretPositions) {
@@ -272,7 +288,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
-    setCaretPositionToEnd() {
+    setCaretPositionToEndOfLastItem() {
         const lastItem = this._queryStore.getLastItem();
         if (!lastItem) {
             return;

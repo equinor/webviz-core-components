@@ -24,6 +24,7 @@ import { StateManager, Topic } from "./core/StateManager";
 import { CaretRenderer } from "./components/CaretRenderer";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 import { useSubscribeToTopic } from "./core/PubSubDelegate";
+import { SuggestionsState } from "./core/SuggestionsState";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -70,7 +71,10 @@ export type SmartNodeSelectorProps<
     /** CSS class name for root element */
     slotProps?: SmartNodeSelectorSlotProps<TSlots>;
 
-    renderSuggestionItem?: (suggestion: Suggestion) => React.ReactNode;
+    renderSuggestionItem?: (
+        suggestion: Suggestion,
+        isSelected: boolean
+    ) => React.ReactNode;
 
     suggestionItemHeight?: number;
 };
@@ -82,9 +86,15 @@ const DEFAULT_PROPS = {
         newTag: "New tag...",
         incompleteTag: "Incomplete tag...",
     },
-    renderSuggestionItem: (suggestion: Suggestion) => {
+    renderSuggestionItem: (suggestion: Suggestion, isSelected: boolean) => {
         return (
-            <li style={{ padding: "8px 12px", cursor: "pointer" }}>
+            <li
+                style={{
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    backgroundColor: isSelected ? "#e6f0ff" : "transparent",
+                }}
+            >
                 <div style={{ fontWeight: 500 }}>
                     {suggestion.contextPrefix && (
                         <span style={{ color: "#999", fontWeight: 400 }}>
@@ -142,6 +152,7 @@ type SmartNodeSelectorSlotProps<
 export type SmartNodeSelectorDataContextType = {
     suggestionEngine: TagSuggestionEngine;
     stateManager: StateManager;
+    suggestionsState: SuggestionsState;
     placeholders: {
         newTag: string;
         incompleteTag: string;
@@ -214,6 +225,13 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         return stateManager;
     }, []) as StateManager;
 
+    const suggestionsState = React.useMemo(() => {
+        return new SuggestionsState({
+            suggestionEngine,
+            maxSuggestions: defaultedProps.maxSuggestions,
+        });
+    }, [suggestionEngine, defaultedProps.maxSuggestions]);
+
     useMouseEventHandler(ref, stateManager);
 
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
@@ -230,10 +248,17 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         () => ({
             suggestionEngine,
             stateManager,
+            suggestionsState,
             placeholders: defaultedProps.placeholders,
             delimiter: defaultedProps.delimiter,
         }),
-        [suggestionEngine, stateManager, defaultedProps.placeholders]
+        [
+            suggestionEngine,
+            stateManager,
+            suggestionsState,
+            defaultedProps.placeholders,
+            defaultedProps.delimiter,
+        ]
     );
 
     const slotsContext = React.useMemo(

@@ -41,4 +41,6 @@ export type Suggestion = {
      * Example: for "Data Source (A|B", insertText would be "B"
      */
     insertText?: string;
+
+    isFocused?: boolean;
 };
