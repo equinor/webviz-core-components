@@ -38,6 +38,11 @@ export type StateManagerOptions = {
     delimiter: string;
 };
 
+const BRACKET_PAIRS = [
+    { open: "(", close: ")" },
+    { open: "{", close: "}" },
+] as const;
+
 export class StateManager implements PubSub<TopicPayloads> {
     private _pubSubDelegate = new PubSubDelegate<TopicPayloads>();
 
@@ -149,8 +154,23 @@ export class StateManager implements PubSub<TopicPayloads> {
             const queryItem = this._queryStore.getItemById(
                 caretPosition.queryId
             );
+
             if (!queryItem) {
                 newCaretPositions.push(caretPosition);
+                continue;
+            }
+
+            if (
+                caretPosition.offset !== caretPosition.anchorOffset &&
+                !selecting
+            ) {
+                // Collapse selection to the end we're moving towards
+                const newCaretPosition: CaretPosition = {
+                    queryId: caretPosition.queryId,
+                    offset: caretPosition.offset,
+                    anchorOffset: caretPosition.offset,
+                };
+                newCaretPositions.push(newCaretPosition);
                 continue;
             }
 
@@ -198,38 +218,209 @@ export class StateManager implements PubSub<TopicPayloads> {
         this.updateCaretPositions(newCaretPositions);
     }
 
+    private maybeDeleteSelection(
+        value: string,
+        caretOffset: number,
+        anchorOffset: number
+    ): {
+        newValue: string;
+        newCaretOffset: number;
+        newAnchorOffset: number;
+        deleted: boolean;
+    } {
+        if (caretOffset === anchorOffset) {
+            return {
+                newValue: value,
+                newCaretOffset: caretOffset,
+                newAnchorOffset: anchorOffset,
+                deleted: false,
+            };
+        }
+
+        const start = Math.min(caretOffset, anchorOffset);
+        const end = Math.max(caretOffset, anchorOffset);
+
+        const newValue = value.slice(0, start) + value.slice(end);
+        return {
+            newValue,
+            newCaretOffset: start,
+            newAnchorOffset: start,
+            deleted: true,
+        };
+    }
+
+    private findNextCharacterIndex(
+        value: string,
+        startIndex: number,
+        char: string,
+        reverse: boolean
+    ): number {
+        for (
+            let i = startIndex;
+            reverse ? i >= 0 : i < value.length;
+            reverse ? i-- : i++
+        ) {
+            if (value.charAt(i) === char) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private maybeUnwrapGrouping(
+        value: string,
+        caretOffset: number
+    ): {
+        newValue: string;
+        newCaretOffset: number;
+        newAnchorOffset: number;
+        unwrapped: boolean;
+    } {
+        if (caretOffset === 0) {
+            return {
+                newValue: value,
+                newCaretOffset: caretOffset,
+                newAnchorOffset: caretOffset,
+                unwrapped: false,
+            };
+        }
+
+        const charBefore = value.charAt(caretOffset - 1);
+
+        for (const pair of BRACKET_PAIRS) {
+            if (charBefore === pair.close) {
+                // Find matching opening bracket
+                const openIndex = this.findNextCharacterIndex(
+                    value,
+                    caretOffset - 2,
+                    pair.open,
+                    true
+                );
+                if (openIndex === -1) {
+                    return {
+                        newValue: value,
+                        newCaretOffset: caretOffset,
+                        newAnchorOffset: caretOffset,
+                        unwrapped: false,
+                    };
+                }
+
+                return {
+                    newValue: value,
+                    newCaretOffset: openIndex,
+                    newAnchorOffset: caretOffset,
+                    unwrapped: true,
+                };
+            }
+
+            if (charBefore === pair.open) {
+                const closeIndex = this.findNextCharacterIndex(
+                    value,
+                    caretOffset,
+                    pair.close,
+                    false
+                );
+                if (closeIndex === -1) {
+                    return {
+                        newValue: value,
+                        newCaretOffset: caretOffset,
+                        newAnchorOffset: caretOffset,
+                        unwrapped: false,
+                    };
+                }
+
+                const before = value.slice(0, caretOffset - 1);
+                const middle = value.slice(caretOffset, closeIndex);
+                const after = value.slice(closeIndex + 1);
+                const newValue = before + middle + after;
+
+                return {
+                    newValue,
+                    newCaretOffset: caretOffset - 1,
+                    newAnchorOffset: caretOffset - 1,
+                    unwrapped: true,
+                };
+            }
+        }
+
+        return {
+            newValue: value,
+            newCaretOffset: caretOffset,
+            newAnchorOffset: caretOffset,
+            unwrapped: false,
+        };
+    }
+
     backspaceAtCaret(): void {
-        const newQueryItems: QueryItem[] = [];
         const newCaretPositions: CaretPosition[] = [];
 
-        for (const item of this._caretPositions) {
-            const queryItem = this._queryStore.getItemById(item.queryId);
+        for (const caretPosition of this._caretPositions) {
+            const queryItem = this._queryStore.getItemById(
+                caretPosition.queryId
+            );
             if (!queryItem) {
                 continue;
             }
 
-            if (item.offset === 0 && item.anchorOffset === 0) {
-                newCaretPositions.push(item);
+            if (
+                caretPosition.offset === 0 &&
+                caretPosition.anchorOffset === 0
+            ) {
+                newCaretPositions.push(caretPosition);
                 continue;
             }
 
-            let start = Math.min(item.offset, item.anchorOffset);
-            const end = Math.max(item.offset, item.anchorOffset);
+            const deleteSelectionResult = this.maybeDeleteSelection(
+                queryItem.query,
+                caretPosition.offset,
+                caretPosition.anchorOffset
+            );
 
-            if (start === end) {
-                start = start - 1;
+            if (deleteSelectionResult.deleted) {
+                this._queryStore.updateItem(
+                    queryItem.id,
+                    deleteSelectionResult.newValue
+                );
+
+                const newCaretPosition: CaretPosition = {
+                    queryId: caretPosition.queryId,
+                    offset: deleteSelectionResult.newCaretOffset,
+                    anchorOffset: deleteSelectionResult.newAnchorOffset,
+                };
+                newCaretPositions.push(newCaretPosition);
+                continue;
             }
 
-            const before = queryItem.query.slice(0, start);
-            const after = queryItem.query.slice(end);
+            const unwrapResult = this.maybeUnwrapGrouping(
+                queryItem.query,
+                caretPosition.offset
+            );
+
+            if (unwrapResult.unwrapped) {
+                this._queryStore.updateItem(
+                    queryItem.id,
+                    unwrapResult.newValue
+                );
+
+                const newCaretPosition: CaretPosition = {
+                    queryId: caretPosition.queryId,
+                    offset: unwrapResult.newCaretOffset,
+                    anchorOffset: unwrapResult.newAnchorOffset,
+                };
+                newCaretPositions.push(newCaretPosition);
+                continue;
+            }
+
+            const before = queryItem.query.slice(0, caretPosition.offset - 1);
+            const after = queryItem.query.slice(caretPosition.offset);
             const newQuery = before + after;
 
             this._queryStore.updateItem(queryItem.id, newQuery);
 
             const newCaretPosition: CaretPosition = {
-                queryId: item.queryId,
-                offset: start,
-                anchorOffset: start,
+                queryId: caretPosition.queryId,
+                offset: caretPosition.offset - 1,
+                anchorOffset: caretPosition.offset - 1,
             };
             newCaretPositions.push(newCaretPosition);
         }
@@ -290,7 +481,7 @@ export class StateManager implements PubSub<TopicPayloads> {
                 continue;
             }
 
-            const start = Math.min(
+            let start = Math.min(
                 caretPosition.offset,
                 caretPosition.anchorOffset
             );
@@ -301,6 +492,16 @@ export class StateManager implements PubSub<TopicPayloads> {
 
             const before = queryItem.query.slice(0, start);
             const after = queryItem.query.slice(end);
+
+            if (text === "(") {
+                text = "()";
+                start -= 1;
+            }
+            if (text === "{") {
+                text = "{}";
+                start -= 1;
+            }
+
             const newQuery = before + text + after;
 
             this._queryStore.updateItem(queryItem.id, newQuery);

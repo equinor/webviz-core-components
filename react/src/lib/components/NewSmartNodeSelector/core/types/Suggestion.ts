@@ -12,7 +12,7 @@ export type Suggestion = {
     completedQuery: string;
 
     /** Type of suggestion */
-    type: "node" | "partial" | "wildcard";
+    type: "node" | "partial" | "wildcard" | "operator";
 
     /** Description text to display */
     description: string;

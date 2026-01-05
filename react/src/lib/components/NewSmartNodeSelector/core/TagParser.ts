@@ -86,7 +86,7 @@ export class TagParser {
      */
     private parseSegment(segment: string): PathSegment {
         // Expand parentheses shorthand: "Data Source (A|B)" -> "Data Source A|Data Source B"
-        segment = this.expandParentheses(segment);
+        segment = this.expandParentheses(segment, 0);
 
         // Deep wildcard: **
         if (segment === "**") {
@@ -133,7 +133,15 @@ export class TagParser {
      * - "Data Source (A|B|C)" -> "Data Source A|Data Source B|Data Source C"
      * - "Prefix {A,B}" -> "Prefix A,Prefix B" (for brace notation)
      */
-    private expandParentheses(segment: string): string {
+    private expandParentheses(segment: string, depth: number): string {
+        const MAX_DEPTH = 10;
+
+        // Prevent infinite recursion with nested groups
+        if (depth >= MAX_DEPTH) {
+            console.warn(`Max expansion depth (${MAX_DEPTH}) reached for segment: ${segment}`);
+            return segment;
+        }
+
         // Match pattern: prefix + (content) or prefix + {content}
         const parenMatch = segment.match(/^(.+?)\(([^)]+)\)$/);
         if (parenMatch) {

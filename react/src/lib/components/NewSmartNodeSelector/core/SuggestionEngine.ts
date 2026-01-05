@@ -326,6 +326,26 @@ export class SuggestionEngine {
         // Build the full search prefix: basePath + searchTerm
         const fullSearchTerm = basePath + searchTerm;
 
+        // Check if we should suppress suggestions in certain contexts
+        const lastChar = partialSegment[partialSegment.length - 1] || "";
+
+        // After closing bracket with complete query, don't suggest anything
+        const openParens = (partialSegment.match(/\(/g) || []).length;
+        const closeParens = (partialSegment.match(/\)/g) || []).length;
+        const openBraces = (partialSegment.match(/\{/g) || []).length;
+        const closeBraces = (partialSegment.match(/\}/g) || []).length;
+        const isInsideBracket = openParens > closeParens || openBraces > closeBraces;
+
+        if ((lastChar === ")" || lastChar === "}") && !isInsideBracket) {
+            return [];
+        }
+
+        // After just opening brackets with no text, don't show all nodes (prevent memory issue)
+        if (fullSearchTerm === "" && partialSegment.match(/^[{(]+$/)) {
+            return [];
+        }
+
+        // Otherwise, show node suggestions
         // Filter candidates by full search term (case-insensitive prefix match)
         // Exclude exact matches (if user typed "Data Source A", don't suggest "Data Source A")
         const lowerFullSearchTerm = fullSearchTerm.toLowerCase();

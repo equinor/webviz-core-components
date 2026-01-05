@@ -1,7 +1,7 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
 import { Topic } from "../core/StateManager";
-import { computeTextWidth } from "../utils/caretToCoordinateMapping";
+import { computeTextWidthAndHeight } from "../utils/caretToCoordinateMapping";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
 
@@ -30,6 +30,8 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
         React.useState<
             Array<{ left: number; top: number; width: number; height: number }>
         >([]);
+
+    const [fontSize, setFontSize] = React.useState<number>(16);
 
     React.useLayoutEffect(
         function updateCaretPositions() {
@@ -60,7 +62,13 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                     position.offset
                 );
 
-                const textWidth = computeTextWidth(textBeforeCaret, chip);
+                const { width: textWidth } = computeTextWidthAndHeight(
+                    textBeforeCaret,
+                    chip
+                );
+
+                // Get height from chip element itself to handle empty strings
+                const caretHeight = chipBoundingRect.height;
 
                 newMappedCaretPositions.push({
                     left:
@@ -69,6 +77,8 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                         mainBoundingRect.left,
                     top: chipBoundingRect.top - mainBoundingRect.top,
                 });
+
+                setFontSize(caretHeight);
 
                 if (position.anchorOffset !== position.offset) {
                     const startOffset = Math.min(
@@ -80,23 +90,21 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                         position.anchorOffset
                     );
 
-                    const textBeforeSelectionStart = queryItem.query.slice(
-                        0,
-                        startOffset
+                    // Calculate selection bounds from start of text
+                    const { width: startWidth } = computeTextWidthAndHeight(
+                        queryItem.query.slice(0, startOffset),
+                        chip
                     );
-                    const textInSelection = queryItem.query.slice(
-                        startOffset,
-                        endOffset
+                    const { width: endWidth } = computeTextWidthAndHeight(
+                        queryItem.query.slice(0, endOffset),
+                        chip
                     );
 
                     const selectionStartX =
                         chipBoundingRect.left +
-                        computeTextWidth(textBeforeSelectionStart, chip) -
+                        startWidth -
                         mainBoundingRect.left;
-                    const selectionWidth = computeTextWidth(
-                        textInSelection,
-                        chip
-                    );
+                    const selectionWidth = endWidth - startWidth;
 
                     newMappedSelectionPositions.push({
                         left: selectionStartX,
@@ -110,7 +118,13 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
             setMappedCaretPositions(newMappedCaretPositions);
             setMappedSelectionPositions(newMappedSelectionPositions);
         },
-        [caretPositions, queryItems, stateManager, props.mainRef, mainBoundingRect]
+        [
+            caretPositions,
+            queryItems,
+            stateManager,
+            props.mainRef,
+            mainBoundingRect,
+        ]
     );
 
     return (
@@ -126,11 +140,12 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                     data-caret-index={index}
                     style={{
                         width: 1,
-                        height: 20,
+                        height: fontSize,
                         backgroundColor: "black",
                         position: "absolute",
                         left: position.left,
                         top: position.top,
+                        transform: "translateX(-1px)",
                         pointerEvents: "none" as const,
                         animation: "blink 1s step-end infinite",
                     }}

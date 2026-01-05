@@ -85,6 +85,13 @@ export function SuggestionPopover(
         [stateManager, suggestionsState]
     );
 
+    const handleOperatorClick = React.useCallback(
+        function handleOperatorClick(operator: string) {
+            stateManager.insertTextAtCaret(operator);
+        },
+        [stateManager]
+    );
+
     return (
         <div
             ref={popoverRef}
@@ -102,11 +109,10 @@ export function SuggestionPopover(
                 backgroundColor: "white",
                 boxShadow: "0 2px 8px rgba(42, 42, 42, 0.15)",
                 padding: 4,
-                ...(anchorElement &&
-                    suggestions.length && {
-                        position: "absolute",
-                        ...calculatePosition(anchorElement),
-                    }),
+                ...(anchorElement && {
+                    position: "absolute",
+                    ...calculatePosition(anchorElement),
+                }),
             }}
         >
             <VirtualizedList
@@ -119,7 +125,61 @@ export function SuggestionPopover(
                 onItemClick={handleItemClick}
                 selectedIndex={selectedIndex}
             />
+            <div
+                style={{
+                    padding: 4,
+                    backgroundColor: "#eee",
+                    display: "flex",
+                    gap: 8,
+                    justifyItems: "center",
+                }}
+            >
+                <OperatorButton
+                    operator="("
+                    label="()"
+                    onClick={handleOperatorClick}
+                />
+                <OperatorButton
+                    operator="{"
+                    label="{}"
+                    onClick={handleOperatorClick}
+                />
+                <OperatorButton
+                    operator="&"
+                    label="&"
+                    onClick={handleOperatorClick}
+                />
+                <OperatorButton
+                    operator="|"
+                    label="|"
+                    onClick={handleOperatorClick}
+                />
+            </div>
         </div>
+    );
+}
+
+type OperatorButtonProps = {
+    operator: string;
+    label: string;
+    onClick: (operator: string) => void;
+};
+
+function OperatorButton(props: OperatorButtonProps) {
+    return (
+        <button
+            type="button"
+            onClick={() => props.onClick(props.operator)}
+            style={{
+                padding: "4px 8px",
+                borderRadius: 4,
+                border: "1px solid #999",
+                backgroundColor: "white",
+                cursor: "pointer",
+            }}
+        >
+            {props.label}
+        </button>
     );
 }
 
