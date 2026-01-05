@@ -8,8 +8,8 @@ export type Suggestion = {
     /** Display name for the suggestion */
     name: string;
 
-    /** Full completed tag if user accepts this suggestion */
-    completedTag: string;
+    /** Full completed query if user accepts this suggestion */
+    completedQuery: string;
 
     /** Type of suggestion */
     type: "node" | "partial" | "wildcard";

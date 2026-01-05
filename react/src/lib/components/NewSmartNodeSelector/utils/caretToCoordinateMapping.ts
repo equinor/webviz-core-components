@@ -8,7 +8,7 @@ export function computeTextWidth(text: string, element: HTMLElement): number {
     span.textContent = text;
 
     document.body.appendChild(span);
-    const width = span.offsetWidth;
+    const width = span.getBoundingClientRect().width;
     document.body.removeChild(span);
 
     return width;
@@ -34,7 +34,7 @@ export function getCaretOffsetFromX(
     // Linear search for simplicity (can optimize with binary search later)
     for (let i = 0; i <= text.length; i++) {
         span.textContent = text.slice(0, i);
-        const width = span.offsetWidth;
+        const width = span.getBoundingClientRect().width;
         const distance = Math.abs(x - width);
 
         if (distance < closestDistance) {

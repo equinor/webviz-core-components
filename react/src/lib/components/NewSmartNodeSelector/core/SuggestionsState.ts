@@ -1,6 +1,6 @@
 import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
 import type { Suggestion } from "./types/Suggestion";
-import type { TagSuggestionEngine } from "./TagSuggestionEngine";
+import type { SuggestionEngine } from "./SuggestionEngine";
 
 export enum SuggestionsTopic {
     SUGGESTIONS = "suggestions",
@@ -13,13 +13,13 @@ export type SuggestionsTopicPayloads = {
 };
 
 export type SuggestionsStateOptions = {
-    suggestionEngine: TagSuggestionEngine;
+    suggestionEngine: SuggestionEngine;
     maxSuggestions: number;
 };
 
 export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
     private _pubSubDelegate = new PubSubDelegate<SuggestionsTopicPayloads>();
-    private _suggestionEngine: TagSuggestionEngine;
+    private _suggestionEngine: SuggestionEngine;
     private _maxSuggestions: number;
 
     private _suggestions: Suggestion[] = [];

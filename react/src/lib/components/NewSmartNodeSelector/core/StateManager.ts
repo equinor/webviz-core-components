@@ -1,3 +1,4 @@
+import { clamp } from "lodash";
 import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
 import { QueryStore } from "./QueryStore";
 
@@ -9,6 +10,7 @@ export type QueryItem = {
 export type CaretPosition = {
     queryId: string;
     offset: number;
+    anchorOffset: number;
 };
 
 export type QuerySegment = {
@@ -156,21 +158,29 @@ export class StateManager implements PubSub<TopicPayloads> {
             let newQueryId = caretPosition.queryId;
 
             if (newOffset > queryItem.query.length) {
-                const nextItem = this._queryStore.getNextItem(queryItem.id);
-                if (nextItem) {
-                    newOffset = 0;
-                    newQueryId = nextItem.id;
+                if (caretPosition.anchorOffset === caretPosition.offset) {
+                    const nextItem = this._queryStore.getNextItem(queryItem.id);
+                    if (nextItem) {
+                        newOffset = 0;
+                        newQueryId = nextItem.id;
+                    } else {
+                        newOffset = queryItem.query.length;
+                    }
                 } else {
                     newOffset = queryItem.query.length;
                 }
             }
             if (newOffset < 0) {
-                const previousItem = this._queryStore.getPreviousItem(
-                    queryItem.id
-                );
-                if (previousItem) {
-                    newOffset = previousItem.query.length;
-                    newQueryId = previousItem.id;
+                if (caretPosition.anchorOffset === caretPosition.offset) {
+                    const previousItem = this._queryStore.getPreviousItem(
+                        queryItem.id
+                    );
+                    if (previousItem) {
+                        newOffset = previousItem.query.length;
+                        newQueryId = previousItem.id;
+                    } else {
+                        newOffset = 0;
+                    }
                 } else {
                     newOffset = 0;
                 }
@@ -179,6 +189,9 @@ export class StateManager implements PubSub<TopicPayloads> {
             newCaretPositions.push({
                 queryId: newQueryId,
                 offset: newOffset,
+                anchorOffset: selecting
+                    ? caretPosition.anchorOffset
+                    : newOffset,
             });
         }
 
@@ -189,31 +202,34 @@ export class StateManager implements PubSub<TopicPayloads> {
         const newQueryItems: QueryItem[] = [];
         const newCaretPositions: CaretPosition[] = [];
 
-        for (const item of this._queryStore.getItems()) {
-            const caretPosition = this._caretPositions.find(
-                (cp) => cp.queryId === item.id
-            );
-
-            if (!caretPosition) {
-                newQueryItems.push(item);
+        for (const item of this._caretPositions) {
+            const queryItem = this._queryStore.getItemById(item.queryId);
+            if (!queryItem) {
                 continue;
             }
 
-            if (caretPosition.offset === 0) {
-                newQueryItems.push(item);
-                newCaretPositions.push(caretPosition);
+            if (item.offset === 0 && item.anchorOffset === 0) {
+                newCaretPositions.push(item);
                 continue;
             }
 
-            const before = item.query.slice(0, caretPosition.offset - 1);
-            const after = item.query.slice(caretPosition.offset);
+            let start = Math.min(item.offset, item.anchorOffset);
+            const end = Math.max(item.offset, item.anchorOffset);
+
+            if (start === end) {
+                start = start - 1;
+            }
+
+            const before = queryItem.query.slice(0, start);
+            const after = queryItem.query.slice(end);
             const newQuery = before + after;
 
-            this._queryStore.updateItem(item.id, newQuery);
+            this._queryStore.updateItem(queryItem.id, newQuery);
 
             const newCaretPosition: CaretPosition = {
-                queryId: caretPosition.queryId,
-                offset: caretPosition.offset - 1,
+                queryId: item.queryId,
+                offset: start,
+                anchorOffset: start,
             };
             newCaretPositions.push(newCaretPosition);
         }
@@ -242,6 +258,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         const caretPosition: CaretPosition = {
             queryId: id,
             offset: offset,
+            anchorOffset: offset,
         };
 
         this.updateCaretPositions([caretPosition]);
@@ -268,18 +285,30 @@ export class StateManager implements PubSub<TopicPayloads> {
             const queryItem = this._queryStore.getItemById(
                 caretPosition.queryId
             );
+
             if (!queryItem) {
                 continue;
             }
 
-            const before = queryItem.query.slice(0, caretPosition.offset);
-            const after = queryItem.query.slice(caretPosition.offset);
+            const start = Math.min(
+                caretPosition.offset,
+                caretPosition.anchorOffset
+            );
+            const end = Math.max(
+                caretPosition.offset,
+                caretPosition.anchorOffset
+            );
+
+            const before = queryItem.query.slice(0, start);
+            const after = queryItem.query.slice(end);
             const newQuery = before + text + after;
 
             this._queryStore.updateItem(queryItem.id, newQuery);
+
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
-                offset: caretPosition.offset + text.length,
+                offset: start + text.length,
+                anchorOffset: start + text.length,
             };
             newCaretPositions.push(newCaretPosition);
         }
@@ -298,6 +327,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         const caretPosition: CaretPosition = {
             queryId: lastItem.id,
             offset: offset,
+            anchorOffset: offset,
         };
 
         this.updateCaretPositions([caretPosition]);

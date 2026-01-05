@@ -4,10 +4,8 @@ import {
     SmartNodeSelectorDataContext,
     type SmartNodeSelectorDataContextType,
 } from "../SmartNodeSelector";
-import { useSuggestions } from "../hooks/useSuggestions";
 import { VirtualizedList } from "./VirtualizedList";
 import type { Suggestion } from "../core/types/Suggestion";
-import { ActionType } from "../state/actions";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { Topic } from "../core/StateManager";
 import { SuggestionsTopic } from "../core/SuggestionsState";
@@ -69,15 +67,33 @@ export function SuggestionPopover(
         [focusedSegment]
     );
 
-    const handleItemClick = React.useCallback(function handleItemClick(
-        suggestion: Suggestion
-    ) {}, []);
+    const handleItemClick = React.useCallback(
+        function handleItemClick(suggestion: Suggestion) {
+            const focusedSegment = stateManager.getFocusedSegment();
+            if (focusedSegment === null) {
+                return;
+            }
+            stateManager.updateQueryItem(
+                focusedSegment.queryId,
+                suggestion.completedQuery
+            );
+            stateManager.setCaretPositionToEndOfQueryItem(
+                focusedSegment.queryId
+            );
+            suggestionsState.clearSuggestions();
+        },
+        [stateManager, suggestionsState]
+    );
 
     return (
         <div
             ref={popoverRef}
             popover="manual"
             data-suggestion-popover
+            onMouseDown={(e) => {
+                // Prevent mousedown from causing textarea to lose focus
+                e.preventDefault();
+            }}
             style={{
                 boxSizing: "border-box" as const,
                 inset: "unset",

@@ -80,7 +80,7 @@ export class KeyboardHandler {
                         }
                         this._stateManager.updateQueryItem(
                             focusedSegment.queryId,
-                            selected.completedTag
+                            selected.completedQuery
                         );
                         this._stateManager.setCaretPositionToEndOfQueryItem(
                             focusedSegment.queryId

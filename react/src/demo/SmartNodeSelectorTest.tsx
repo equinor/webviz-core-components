@@ -73,18 +73,18 @@ const DATA = [
                 children: [
                     {
                         id: "2.1.1",
-                        name: "Item C1",
-                        description: "First item in category 3",
+                        name: "Item A1",
+                        description: "First item in category 1",
                     },
                     {
                         id: "2.1.2",
-                        name: "Item C2",
-                        description: "Second item in category 3",
+                        name: "Item A2",
+                        description: "Second item in category 1",
                     },
                     {
                         id: "2.1.3",
-                        name: "Item C3",
-                        description: "Third item in category 3",
+                        name: "Item A3",
+                        description: "Third item in category 1",
                     },
                 ],
             },

@@ -5,7 +5,7 @@
 import { TreeIndexBuilder } from "../TreeIndexBuilder";
 import { TreeMatcher } from "../TreeMatcher";
 import { TagParser } from "../TagParser";
-import { TagSuggestionEngine } from "../TagSuggestionEngine";
+import { SuggestionEngine } from "../SuggestionEngine";
 import type { TreeDataNode } from "../types/TreeNode";
 
 describe("Large Dataset Tests - Depth 4", () => {
@@ -62,7 +62,7 @@ describe("Large Dataset Tests - Depth 4", () => {
         let buildResult: ReturnType<typeof builder.build>;
         let matcher: TreeMatcher;
         let parser: TagParser;
-        let engine: TagSuggestionEngine;
+        let engine: SuggestionEngine;
 
         // 5^4 = 625 leaf nodes, plus intermediate nodes = 781 total nodes
         const DEPTH = 4;
@@ -74,7 +74,7 @@ describe("Large Dataset Tests - Depth 4", () => {
             buildResult = builder.build(largeTree);
             matcher = new TreeMatcher(buildResult);
             parser = new TagParser(DELIMITER);
-            engine = new TagSuggestionEngine(DELIMITER);
+            engine = new SuggestionEngine(DELIMITER);
             engine.setData(largeTree);
         });
 
@@ -82,9 +82,9 @@ describe("Large Dataset Tests - Depth 4", () => {
             expect(largeTree).toHaveLength(BRANCHING); // 5 root nodes
             expect(largeTree[0].children).toHaveLength(BRANCHING); // 5 children each
             expect(largeTree[0].children![0].children).toHaveLength(BRANCHING);
-            expect(largeTree[0].children![0].children![0].children).toHaveLength(
-                BRANCHING
-            );
+            expect(
+                largeTree[0].children![0].children![0].children
+            ).toHaveLength(BRANCHING);
             // Depth 4 - leaf nodes should not have children
             expect(
                 largeTree[0].children![0].children![0].children![0].children
@@ -151,7 +151,9 @@ describe("Large Dataset Tests - Depth 4", () => {
             expect(matches2.length).toBe(5); // All 5 children start with Node3
 
             // Prefix at third level
-            const matches3 = matcher.match(parser.parse("Node4_1:Node3_1:Node2*"));
+            const matches3 = matcher.match(
+                parser.parse("Node4_1:Node3_1:Node2*")
+            );
             expect(matches3.length).toBe(5); // All 5 children start with Node2
         });
 
@@ -162,7 +164,7 @@ describe("Large Dataset Tests - Depth 4", () => {
             suggestions.forEach((s) => {
                 expect(s.type).toBe("node");
                 // Root nodes with children end with delimiter
-                expect(s.completedTag).toContain("Node4_");
+                expect(s.completedQuery).toContain("Node4_");
             });
         });
 
@@ -171,19 +173,16 @@ describe("Large Dataset Tests - Depth 4", () => {
 
             expect(suggestions.length).toBeGreaterThanOrEqual(5);
             suggestions.forEach((s) => {
-                expect(s.completedTag).toMatch(/^Node4_1:Node3_\d/);
+                expect(s.completedQuery).toMatch(/^Node4_1:Node3_\d/);
             });
         });
 
         test("suggestions for partial path at depth 3", () => {
-            const suggestions = engine.getSuggestions(
-                "Node4_1:Node3_1:",
-                10
-            );
+            const suggestions = engine.getSuggestions("Node4_1:Node3_1:", 10);
 
             expect(suggestions.length).toBeGreaterThanOrEqual(5);
             suggestions.forEach((s) => {
-                expect(s.completedTag).toMatch(/^Node4_1:Node3_1:Node2_\d/);
+                expect(s.completedQuery).toMatch(/^Node4_1:Node3_1:Node2_\d/);
             });
         });
 
@@ -197,8 +196,8 @@ describe("Large Dataset Tests - Depth 4", () => {
             suggestions.forEach((s) => {
                 expect(s.type).toBe("node");
                 // Leaf nodes should NOT end with delimiter
-                expect(s.completedTag.endsWith(DELIMITER)).toBe(false);
-                expect(s.completedTag).toMatch(
+                expect(s.completedQuery.endsWith(DELIMITER)).toBe(false);
+                expect(s.completedQuery).toMatch(
                     /^Node4_1:Node3_1:Node2_1:Node1_\d$/
                 );
             });
@@ -231,16 +230,24 @@ describe("Large Dataset Tests - Depth 4", () => {
             expect(matches.length).toBe(0); // No match - case doesn't match
 
             // But with correct case it works
-            const matchesCorrectCase = matcher.match(parser.parse("Node4_1:Node3_1:*"));
+            const matchesCorrectCase = matcher.match(
+                parser.parse("Node4_1:Node3_1:*")
+            );
             expect(matchesCorrectCase.length).toBe(5);
 
             // Suggestions are case-insensitive for PREFIX matching of the LAST segment only
             // But the completed path must still match exactly (case-sensitive)
-            const suggestionsWrongCase = engine.getSuggestions("node4_1:node3_1:", 10);
+            const suggestionsWrongCase = engine.getSuggestions(
+                "node4_1:node3_1:",
+                10
+            );
             expect(suggestionsWrongCase.length).toBe(0); // No suggestions - path doesn't exist
 
             // With correct case for completed path, can use lowercase prefix for last segment
-            const suggestionsCorrectPath = engine.getSuggestions("Node4_1:Node3_1:node", 10);
+            const suggestionsCorrectPath = engine.getSuggestions(
+                "Node4_1:Node3_1:node",
+                10
+            );
             expect(suggestionsCorrectPath.length).toBe(5); // Finds Node2_* nodes (case-insensitive prefix)
         });
 
@@ -290,7 +297,9 @@ describe("Large Dataset Tests - Depth 4", () => {
             expect(result.valid).toBe(true); // Syntactically valid
 
             // But it won't match any nodes
-            const matches = engine.getMatches("Node4_1:InvalidNode:Node2_1:Node1_1");
+            const matches = engine.getMatches(
+                "Node4_1:InvalidNode:Node2_1:Node1_1"
+            );
             expect(matches.length).toBe(0);
         });
 
@@ -334,11 +343,11 @@ describe("Large Dataset Tests - Depth 4", () => {
         const BRANCHING = 10;
 
         let veryLargeTree: TreeDataNode[];
-        let engine: TagSuggestionEngine;
+        let engine: SuggestionEngine;
 
         beforeAll(() => {
             veryLargeTree = generateLargeTree(DEPTH, BRANCHING);
-            engine = new TagSuggestionEngine(DELIMITER);
+            engine = new SuggestionEngine(DELIMITER);
             engine.setData(veryLargeTree);
         });
 
@@ -420,7 +429,7 @@ describe("Large Dataset Tests - Depth 4", () => {
                 },
             ];
 
-            const engine = new TagSuggestionEngine(DELIMITER);
+            const engine = new SuggestionEngine(DELIMITER);
             engine.setData(unevenTree);
 
             // Should handle both depths correctly
@@ -457,7 +466,7 @@ describe("Large Dataset Tests - Depth 4", () => {
                 },
             ];
 
-            const engine = new TagSuggestionEngine(DELIMITER);
+            const engine = new SuggestionEngine(DELIMITER);
             engine.setData(tree);
 
             // Should match the full path

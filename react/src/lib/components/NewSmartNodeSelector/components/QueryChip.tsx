@@ -73,7 +73,16 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
             )}
         >
             <MatchesCounter matches={matches} />
-            <div data-query-chip-content style={{ display: "flex", alignItems: "center", alignSelf: "stretch", flex: 1 }}>
+            <div
+                data-query-chip-content
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    alignSelf: "stretch",
+                    flex: 1,
+                    whiteSpace: "pre",
+                }}
+            >
                 <TokenRenderer token={tokens} />
             </div>
         </QueryChipComponent>
@@ -97,5 +106,6 @@ function makeStyle(isLast: boolean, isValid: boolean): React.CSSProperties {
         border: isValid ? "1px solid #ccc" : "1px solid #f4bdbdff",
         borderRadius: "4px",
         backgroundColor: isValid ? "#f5f5f5" : "#f4bdbdff",
+        padding: "2px 4px",
     };
 }

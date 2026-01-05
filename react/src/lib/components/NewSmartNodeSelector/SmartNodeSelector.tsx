@@ -21,7 +21,7 @@ import type { Suggestion } from "./core/types/Suggestion";
 import { SuggestionPopover } from "./components/SuggestionPopover";
 import { HiddenTextarea } from "./components/HiddenTextarea";
 import { StateManager, Topic } from "./core/StateManager";
-import { CaretRenderer } from "./components/CaretRenderer";
+import { CaretRenderer } from "./components/CaretAndSelectionRenderer";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 import { useSubscribeToTopic } from "./core/PubSubDelegate";
 import { SuggestionsState } from "./core/SuggestionsState";
@@ -89,6 +89,7 @@ const DEFAULT_PROPS = {
     renderSuggestionItem: (suggestion: Suggestion, isSelected: boolean) => {
         return (
             <li
+                className="suggestion-item"
                 style={{
                     padding: "8px 12px",
                     cursor: "pointer",

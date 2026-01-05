@@ -5,15 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { TagSuggestionEngine } from "../TagSuggestionEngine";
+import { SuggestionEngine } from "../SuggestionEngine";
 import type { TreeDataNode } from "../types/TreeNode";
 
 describe("TagSuggestionEngine", () => {
-    let engine: TagSuggestionEngine;
+    let engine: SuggestionEngine;
     let tree: TreeDataNode[];
 
     beforeEach(() => {
-        engine = new TagSuggestionEngine(":");
+        engine = new SuggestionEngine(":");
 
         tree = [
             {
@@ -72,7 +72,7 @@ describe("TagSuggestionEngine", () => {
 
             expect(suggestions).toHaveLength(2);
             expect(suggestions[0].name).toBe("Metadata 1");
-            expect(suggestions[0].completedTag).toBe("Metadata 1");
+            expect(suggestions[0].completedQuery).toBe("Metadata 1");
             expect(suggestions[0].type).toBe("node");
             expect(suggestions[1].name).toBe("Metadata 2");
         });
@@ -97,7 +97,7 @@ describe("TagSuggestionEngine", () => {
 
             expect(suggestions).toHaveLength(1);
             expect(suggestions[0].name).toBe("Submetadata 1");
-            expect(suggestions[0].completedTag).toBe(
+            expect(suggestions[0].completedQuery).toBe(
                 "Metadata 1:Submetadata 1"
             );
         });
@@ -108,9 +108,10 @@ describe("TagSuggestionEngine", () => {
             );
 
             expect(suggestions.length).toBeGreaterThan(0);
-            expect(
-                suggestions.map((s) => s.name).sort()
-            ).toEqual(["Node 2", "Node-1"]);
+            expect(suggestions.map((s) => s.name).sort()).toEqual([
+                "Node 2",
+                "Node-1",
+            ]);
         });
 
         it("should suggest for partial segment in nested path", () => {
@@ -119,9 +120,10 @@ describe("TagSuggestionEngine", () => {
             );
 
             expect(suggestions.length).toBe(2);
-            expect(
-                suggestions.map((s) => s.name).sort()
-            ).toEqual(["Node 2", "Node-1"]);
+            expect(suggestions.map((s) => s.name).sort()).toEqual([
+                "Node 2",
+                "Node-1",
+            ]);
         });
 
         it("should handle case-insensitive matching", () => {
@@ -153,7 +155,9 @@ describe("TagSuggestionEngine", () => {
 
     describe("getMatches()", () => {
         it("should return matches for valid complete tag", () => {
-            const matches = engine.getMatches("Metadata 1:Submetadata 1:Node-1");
+            const matches = engine.getMatches(
+                "Metadata 1:Submetadata 1:Node-1"
+            );
 
             expect(matches).toHaveLength(1);
             expect(matches[0].name).toBe("Node-1");
@@ -248,7 +252,9 @@ describe("TagSuggestionEngine", () => {
 
     describe("getNodeByPath()", () => {
         it("should return node by path", () => {
-            const node = engine.getNodeByPath("Metadata 1:Submetadata 1:Node-1");
+            const node = engine.getNodeByPath(
+                "Metadata 1:Submetadata 1:Node-1"
+            );
 
             expect(node).toBeDefined();
             expect(node?.name).toBe("Node-1");

@@ -75,8 +75,8 @@ export function makeReducer(options: MakeReducerOptions) {
                             ? null
                             : {
                                   tagId,
-                                segmentIndex: segmentIndex,
-                                    caretIndex: 0,  
+                                  segmentIndex: segmentIndex,
+                                  caretIndex: 0,
                               },
                 };
             }
@@ -105,7 +105,7 @@ export function makeReducer(options: MakeReducerOptions) {
                     newAddress = {
                         tagId: state.focusedAddress.tagId,
                         segmentIndex: state.focusedAddress.segmentIndex,
-                        caretIndex: suggestion.completedTag.length,
+                        caretIndex: suggestion.completedQuery.length,
                     };
                 } else if (!isLeaf) {
                     // Complete node suggestions move to next segment
@@ -144,7 +144,7 @@ export function makeReducer(options: MakeReducerOptions) {
 
                         // Always use completedTag, which includes the full tag value
                         // The suggestion engine already handles operators and context
-                        const newValue = suggestion.completedTag;
+                        const newValue = suggestion.completedQuery;
 
                         return {
                             ...tag,
@@ -154,16 +154,20 @@ export function makeReducer(options: MakeReducerOptions) {
                     focusedAddress: newAddress,
                 };
             }
-                case ActionType.MOVE_FOCUS_TO_PREVIOUS_TAG: {
+            case ActionType.MOVE_FOCUS_TO_PREVIOUS_TAG: {
                 const { currentTagId } = action.payload;
-                const currentIndex = state.tags.findIndex((tag) => tag.id === currentTagId);
+                const currentIndex = state.tags.findIndex(
+                    (tag) => tag.id === currentTagId
+                );
                 if (currentIndex > 0) {
                     const previousTag = state.tags[currentIndex - 1];
                     return {
                         ...state,
                         focusedAddress: {
                             tagId: previousTag.id,
-                            segmentIndex: previousTag.value.split(options.delimiter).length - 1,
+                            segmentIndex:
+                                previousTag.value.split(options.delimiter)
+                                    .length - 1,
                             caretIndex: previousTag.value.length,
                         },
                     };
@@ -172,7 +176,9 @@ export function makeReducer(options: MakeReducerOptions) {
             }
             case ActionType.MOVE_FOCUS_TO_NEXT_TAG: {
                 const { currentTagId } = action.payload;
-                const currentIndex = state.tags.findIndex((tag) => tag.id === currentTagId);
+                const currentIndex = state.tags.findIndex(
+                    (tag) => tag.id === currentTagId
+                );
                 if (currentIndex >= 0 && currentIndex < state.tags.length - 1) {
                     const nextTag = state.tags[currentIndex + 1];
                     return {

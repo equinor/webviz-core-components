@@ -16,7 +16,7 @@ import type { Suggestion } from "./types/Suggestion";
  * Main engine for smart node selection
  * Integrates validation, parsing, indexing, and matching
  */
-export class TagSuggestionEngine {
+export class SuggestionEngine {
     private _delimiter: string;
     private _buildResult: BuildResult | null;
     private _validator: TagValidator;
@@ -61,7 +61,7 @@ export class TagSuggestionEngine {
         const allMatches = this._matcher.match(query);
 
         // Filter to only return leaf nodes (complete paths)
-        return allMatches.filter(node => node.isLeaf);
+        return allMatches.filter((node) => node.isLeaf);
     }
 
     /**
@@ -100,7 +100,7 @@ export class TagSuggestionEngine {
                 .slice(0, maxSuggestions)
                 .map((node) => ({
                     name: node.name,
-                    completedTag: node.name,
+                    completedQuery: node.name,
                     type: "node" as const,
                     description: node.description ?? "",
                     node: node,
@@ -135,10 +135,11 @@ export class TagSuggestionEngine {
         // Rebuild the full tag path with the suggestion
         // Format: beforeSegments + suggestion + afterSegments
         if (afterSegments.length > 0) {
-            const afterPath = this._delimiter + afterSegments.join(this._delimiter);
+            const afterPath =
+                this._delimiter + afterSegments.join(this._delimiter);
             suggestionResults = suggestionResults.map((suggestion) => ({
                 ...suggestion,
-                completedTag: suggestion.completedTag + afterPath,
+                completedTag: suggestion.completedQuery + afterPath,
             }));
         }
 
@@ -162,7 +163,7 @@ export class TagSuggestionEngine {
                 .slice(0, maxSuggestions)
                 .map((node) => ({
                     name: node.name,
-                    completedTag: node.name,
+                    completedQuery: node.name,
                     type: "node" as const,
                     description: node.description ?? "",
                     node: node,
@@ -175,8 +176,8 @@ export class TagSuggestionEngine {
         // Validate and parse the completed path
         const validationResult = this._validator.validate(completedPath);
         if (!validationResult.valid) {
-            // Path is invalid, return wildcard suggestions
-            return this.getWildcardSuggestions();
+            // Path is invalid, return empty suggestions
+            return [];
         }
 
         const query = this._parser.parse(completedPath);
@@ -186,23 +187,53 @@ export class TagSuggestionEngine {
             return [];
         }
 
-        // Collect all unique children from matched nodes
-        const childrenMap = new Map<string, IndexedNode>();
+        // Determine the operation type from the last segment
+        const lastSegment = query.segments[query.segments.length - 1];
+        const isIntersection =
+            lastSegment.type === "SET" && lastSegment.operation === "INTERSECTION";
 
-        for (const node of matchedNodes) {
-            for (const child of node.children) {
-                if (!childrenMap.has(child.name)) {
-                    childrenMap.set(child.name, child);
+        // Collect children based on operation type
+        let children: IndexedNode[];
+
+        if (isIntersection) {
+            // INTERSECTION: only include children that exist in ALL matched nodes
+            const childrenByName = new Map<string, number>();
+            const childrenMap = new Map<string, IndexedNode>();
+
+            for (const node of matchedNodes) {
+                for (const child of node.children) {
+                    const count = childrenByName.get(child.name) || 0;
+                    childrenByName.set(child.name, count + 1);
+                    if (!childrenMap.has(child.name)) {
+                        childrenMap.set(child.name, child);
+                    }
                 }
             }
+
+            // Only include children that appear under ALL matched nodes
+            children = Array.from(childrenMap.values()).filter(
+                (child) => childrenByName.get(child.name) === matchedNodes.length
+            );
+        } else {
+            // UNION: collect all unique children from matched nodes
+            const childrenMap = new Map<string, IndexedNode>();
+
+            for (const node of matchedNodes) {
+                for (const child of node.children) {
+                    if (!childrenMap.has(child.name)) {
+                        childrenMap.set(child.name, child);
+                    }
+                }
+            }
+
+            children = Array.from(childrenMap.values());
         }
 
         const prefix = completedPath + this._delimiter;
-        const children = Array.from(childrenMap.values());
 
         return children.slice(0, maxSuggestions).map((child) => ({
             name: child.name,
-            completedTag: prefix + child.name,
+            completedQuery: prefix + child.name,
             type: "node" as const,
             description: child.description ?? "",
             nodeCount: matchedNodes.length,
@@ -242,7 +273,7 @@ export class TagSuggestionEngine {
             const validationResult = this._validator.validate(completedPath);
 
             if (!validationResult.valid) {
-                return this.getWildcardSuggestions();
+                return [];
             }
 
             const query = this._parser.parse(completedPath);
@@ -252,27 +283,59 @@ export class TagSuggestionEngine {
                 return [];
             }
 
-            // Collect all children from matched parent nodes
-            const childrenMap = new Map<string, IndexedNode>();
-            for (const node of parentNodes) {
-                for (const child of node.children) {
-                    if (!childrenMap.has(child.name)) {
-                        childrenMap.set(child.name, child);
+            // Determine the operation type from the last segment
+            const lastSegment = query.segments[query.segments.length - 1];
+            const isIntersection =
+                lastSegment.type === "SET" && lastSegment.operation === "INTERSECTION";
+
+            // Collect children based on operation type
+            if (isIntersection) {
+                // INTERSECTION: only include children that exist in ALL matched nodes
+                const childrenByName = new Map<string, number>();
+                const childrenMap = new Map<string, IndexedNode>();
+
+                for (const node of parentNodes) {
+                    for (const child of node.children) {
+                        const count = childrenByName.get(child.name) || 0;
+                        childrenByName.set(child.name, count + 1);
+                        if (!childrenMap.has(child.name)) {
+                            childrenMap.set(child.name, child);
+                        }
                     }
                 }
-            }
 
-            candidateNodes = Array.from(childrenMap.values());
+                // Only include children that appear under ALL matched nodes
+                candidateNodes = Array.from(childrenMap.values()).filter(
+                    (child) => childrenByName.get(child.name) === parentNodes.length
+                );
+            } else {
+                // UNION: collect all unique children from matched parent nodes
+                const childrenMap = new Map<string, IndexedNode>();
+                for (const node of parentNodes) {
+                    for (const child of node.children) {
+                        if (!childrenMap.has(child.name)) {
+                            childrenMap.set(child.name, child);
+                        }
+                    }
+                }
+
+                candidateNodes = Array.from(childrenMap.values());
+            }
         }
 
         // Build the full search prefix: basePath + searchTerm
         const fullSearchTerm = basePath + searchTerm;
 
         // Filter candidates by full search term (case-insensitive prefix match)
+        // Exclude exact matches (if user typed "Data Source A", don't suggest "Data Source A")
         const lowerFullSearchTerm = fullSearchTerm.toLowerCase();
-        const matches = candidateNodes.filter((node) =>
-            node.name.toLowerCase().startsWith(lowerFullSearchTerm)
-        );
+        const matches = candidateNodes.filter((node) => {
+            const lowerNodeName = node.name.toLowerCase();
+            return (
+                lowerNodeName.startsWith(lowerFullSearchTerm) &&
+                lowerNodeName !== lowerFullSearchTerm
+            );
+        });
 
         // Build suggestions
         const prefix =
@@ -281,8 +344,13 @@ export class TagSuggestionEngine {
                 : "";
 
         // Calculate the operator context (everything in partial segment before search term, minus base path)
-        const segmentPrefix = partialSegment.substring(0, partialSegment.length - searchTerm.length);
-        const operatorContext = basePath ? segmentPrefix.substring(basePath.length) : segmentPrefix;
+        const segmentPrefix = partialSegment.substring(
+            0,
+            partialSegment.length - searchTerm.length
+        );
+        const operatorContext = basePath
+            ? segmentPrefix.substring(basePath.length)
+            : segmentPrefix;
 
         const suggestions: Suggestion[] = matches
             .slice(0, maxSuggestions)
@@ -299,26 +367,24 @@ export class TagSuggestionEngine {
                 // Determine suggestion type:
                 // - "partial" if there's an operator context (e.g., "(A|") - inline completion
                 // - "node" otherwise - complete node suggestion
-                const suggestionType = operatorContext ? ("partial" as const) : ("node" as const);
+                const suggestionType = operatorContext
+                    ? ("partial" as const)
+                    : ("node" as const);
 
                 return {
                     name: suggestionName,
-                    completedTag: prefix + basePath + operatorContext + suggestionName,
+                    completedQuery:
+                        prefix + basePath + operatorContext + suggestionName,
                     type: suggestionType,
                     description: node.description ?? "",
                     node: node,
                     highlights,
                     // Context prefix shows the base path + operator context
-                    contextPrefix: (basePath + operatorContext) || undefined,
+                    contextPrefix: basePath + operatorContext || undefined,
                     // Insert text is just the suggestion name (the part after base path)
                     insertText: suggestionName,
                 };
             });
-
-        // Add wildcard suggestions if we have no matches
-        if (suggestions.length === 0) {
-            suggestions.push(...this.getWildcardSuggestions(prefix));
-        }
 
         return suggestions;
     }
@@ -368,36 +434,37 @@ export class TagSuggestionEngine {
 
     /**
      * Get wildcard pattern suggestions
+     * Can be called by UI components to show wildcard syntax help separately from node suggestions
      */
-    private getWildcardSuggestions(prefix: string = ""): Suggestion[] {
+    getWildcardSuggestions(prefix: string = ""): Suggestion[] {
         return [
             {
                 name: "* (any single level)",
-                completedTag: prefix + "*",
+                completedQuery: prefix + "*",
                 type: "wildcard" as const,
                 description: "Matches any node at this level",
             },
             {
                 name: "** (any depth)",
-                completedTag: prefix + "**",
+                completedQuery: prefix + "**",
                 type: "wildcard" as const,
                 description: "Matches nodes at any depth below",
             },
             {
                 name: "? (single character)",
-                completedTag: prefix + "?",
+                completedQuery: prefix + "?",
                 type: "wildcard" as const,
                 description: "Matches any single character (e.g., Node-?)",
             },
             {
                 name: "{A,B} (set notation)",
-                completedTag: prefix + "{",
+                completedQuery: prefix + "{",
                 type: "wildcard" as const,
                 description: "Match multiple specific values (intersection)",
             },
             {
                 name: "A|B (union)",
-                completedTag: prefix + "|",
+                completedQuery: prefix + "|",
                 type: "wildcard" as const,
                 description: "Match either value (union of children)",
             },
