@@ -84,8 +84,41 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                 }}
             >
                 <TokenRenderer token={tokens} />
+                <Placeholder
+                    isVisible={props.queryItem.query === ""}
+                    isLast={props.isLast}
+                />
             </div>
         </QueryChipComponent>
+    );
+}
+
+type PlaceholderProps = {
+    isVisible?: boolean;
+    isLast?: boolean;
+};
+
+function Placeholder(props: PlaceholderProps) {
+    const context = React.useContext(SmartNodeSelectorDataContext);
+
+    if (!props.isVisible) {
+        return null;
+    }
+
+    const placeholderText = props.isLast
+        ? context.placeholders.newTag
+        : context.placeholders.incompleteTag;
+
+    return (
+        <div
+            style={{
+                color: "black",
+                opacity: 0.3,
+                marginLeft: 2,
+            }}
+        >
+            {placeholderText}
+        </div>
     );
 }
 

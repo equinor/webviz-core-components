@@ -1,9 +1,6 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import {
-    Topic,
-    useSubscribeToStateManagerTopicValue,
-} from "../core/StateManager";
+import { Topic } from "../core/StateManager";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 
 export function DebugInfo(): React.ReactElement {
@@ -18,6 +15,10 @@ export function DebugInfo(): React.ReactElement {
         Topic.CARET_POSITIONS
     );
     const hasFocus = useSubscribeToTopic(context.stateManager, Topic.HAS_FOCUS);
+    const focusedSegment = useSubscribeToTopic(
+        context.stateManager,
+        Topic.FOCUSED_SEGMENT
+    );
 
     return (
         <div
@@ -36,7 +37,7 @@ export function DebugInfo(): React.ReactElement {
                 }}
             >
                 {JSON.stringify(
-                    { queryItems, caretPositions, hasFocus },
+                    { queryItems, caretPositions, hasFocus, focusedSegment },
                     null,
                     2
                 )}

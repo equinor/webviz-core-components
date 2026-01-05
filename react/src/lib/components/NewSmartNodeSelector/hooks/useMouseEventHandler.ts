@@ -12,6 +12,9 @@ export function useMouseEventHandler(
 
             function handleMouseDown(event: MouseEvent) {
                 const target = event.target as HTMLElement;
+                const selection = event.shiftKey;
+
+                const currentCaretPositions = stateManager.getCaretPositions();
 
                 // Find the closest query chip element
                 const chipElement = target.closest(
@@ -47,17 +50,29 @@ export function useMouseEventHandler(
                 if (!queryItem) return;
 
                 // Map X to character offset
-                const offset = getCaretOffsetFromX(
+                let offset = getCaretOffsetFromX(
                     localX,
                     queryItem.query,
                     contentElement
                 );
+
+                let anchorOffset = offset;
+
+                if (
+                    selection &&
+                    currentCaretPositions.length === 1 &&
+                    currentCaretPositions[0].queryId === queryId
+                ) {
+                    // If there is an existing caret position in this chip, use its offset as anchor
+                    anchorOffset = currentCaretPositions[0].anchorOffset;
+                }
 
                 // Update caret position - this will trigger hasFocus change
                 // which will cause HiddenTextarea to focus
                 stateManager.setCaretPosition({
                     queryId: queryId,
                     offset: offset,
+                    anchorOffset: anchorOffset,
                 });
 
                 event.preventDefault();

@@ -1,4 +1,3 @@
-import { clamp } from "lodash";
 import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
 import { QueryStore } from "./QueryStore";
 
@@ -70,6 +69,10 @@ export class StateManager implements PubSub<TopicPayloads> {
 
     getFocusedSegment(): QuerySegment | null {
         return this._focusedSegment;
+    }
+
+    getCaretPositions(): CaretPosition[] {
+        return this._caretPositions;
     }
 
     makeSnapshotGetter<T extends keyof TopicPayloads>(
