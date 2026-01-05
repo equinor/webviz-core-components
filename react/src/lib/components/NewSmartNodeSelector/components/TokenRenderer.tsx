@@ -3,18 +3,39 @@ import type { Token } from "../core/types/Token";
 
 export type TokenRendererProps = {
     token: Token;
+    queryId?: string;
 };
 
 export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
     const { token } = props;
-    
+
     switch (token.type) {
         case "TAG":
+            // Track segment index for wrapping
+            let segmentIndex = 0;
             return (
                 <>
-                    {token.children.map((child, index) => (
-                        <TokenRenderer key={index} token={child} />
-                    ))}
+                    {token.children.map((child, index) => {
+                        if (child.type === "DELIMITER") {
+                            return <TokenRenderer key={index} token={child} />;
+                        } else {
+                            // This is a segment token - wrap it in a div
+                            const currentSegmentIndex = segmentIndex;
+                            segmentIndex++;
+                            return (
+                                <div
+                                    key={index}
+                                    data-segment-index={currentSegmentIndex}
+                                    data-segment-query-id={props.queryId}
+                                    style={{
+                                        display: "inline-block",
+                                    }}
+                                >
+                                    <TokenRenderer token={child} />
+                                </div>
+                            );
+                        }
+                    })}
                 </>
             );
 

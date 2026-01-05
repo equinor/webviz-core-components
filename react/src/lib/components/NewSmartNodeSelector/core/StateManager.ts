@@ -12,6 +12,13 @@ export type CaretPosition = {
     anchorOffset: number;
 };
 
+export type SegmentCaretPosition = {
+    queryId: string;
+    segmentIndex: number;
+    offset: number; // Relative to segment start
+    anchorOffset: number; // Relative to segment start
+};
+
 export type QuerySegment = {
     queryId: string;
     segmentIndex: number;
@@ -21,6 +28,7 @@ export enum Topic {
     HAS_FOCUS = "hasFocus",
     QUERY_ITEMS = "queryItems",
     CARET_POSITIONS = "caretPositions",
+    SEGMENT_CARET_POSITIONS = "segmentCaretPositions",
     SUGGESTIONS_INDEX = "suggestionsIndex",
     FOCUSED_SEGMENT = "focusedSegment",
 }
@@ -29,6 +37,7 @@ export type TopicPayloads = {
     [Topic.HAS_FOCUS]: boolean;
     [Topic.QUERY_ITEMS]: QueryItem[];
     [Topic.CARET_POSITIONS]: CaretPosition[];
+    [Topic.SEGMENT_CARET_POSITIONS]: SegmentCaretPosition[];
     [Topic.SUGGESTIONS_INDEX]: number | null;
     [Topic.FOCUSED_SEGMENT]: QuerySegment | null;
 };
@@ -51,6 +60,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     // State
     private _queryStore: QueryStore;
     private _caretPositions: CaretPosition[] = [];
+    private _segmentCaretPositions: SegmentCaretPosition[] = [];
     private _suggestionsIndex: number | null = null;
     private _focusedSegment: QuerySegment | null = null;
 
@@ -83,6 +93,8 @@ export class StateManager implements PubSub<TopicPayloads> {
                 return () => this._queryStore.getItems() as TopicPayloads[T];
             case Topic.CARET_POSITIONS:
                 return () => this._caretPositions as TopicPayloads[T];
+            case Topic.SEGMENT_CARET_POSITIONS:
+                return () => this._segmentCaretPositions as TopicPayloads[T];
             case Topic.SUGGESTIONS_INDEX:
                 return () => this._suggestionsIndex as TopicPayloads[T];
             case Topic.FOCUSED_SEGMENT:
@@ -125,8 +137,66 @@ export class StateManager implements PubSub<TopicPayloads> {
         return segments.length - 1;
     }
 
+    private convertToSegmentCaretPosition(position: CaretPosition, query: string): SegmentCaretPosition {
+        const segments = query.split(this._delimiter);
+        let accumulatedLength = 0;
+        let segmentIndex = 0;
+        let segmentOffset = position.offset;
+        let anchorSegmentOffset = position.anchorOffset;
+
+        // Find segment for caret offset
+        for (let i = 0; i < segments.length; i++) {
+            const segmentEnd = accumulatedLength + segments[i].length;
+            if (position.offset <= segmentEnd) {
+                segmentIndex = i;
+                segmentOffset = position.offset - accumulatedLength;
+                break;
+            }
+            accumulatedLength = segmentEnd + this._delimiter.length;
+        }
+
+        // Find anchor offset relative to the same segment
+        accumulatedLength = 0;
+        for (let i = 0; i < segments.length; i++) {
+            const segmentEnd = accumulatedLength + segments[i].length;
+            if (position.anchorOffset <= segmentEnd) {
+                if (i === segmentIndex) {
+                    // Anchor is in the same segment
+                    anchorSegmentOffset = position.anchorOffset - accumulatedLength;
+                } else {
+                    // Anchor is in a different segment - collapse to caret position
+                    anchorSegmentOffset = segmentOffset;
+                }
+                break;
+            }
+            accumulatedLength = segmentEnd + this._delimiter.length;
+        }
+
+        return {
+            queryId: position.queryId,
+            segmentIndex,
+            offset: segmentOffset,
+            anchorOffset: anchorSegmentOffset,
+        };
+    }
+
     updateCaretPositions(positions: CaretPosition[]): void {
         this._caretPositions = positions;
+
+        // Compute segment-relative positions
+        this._segmentCaretPositions = positions.map(position => {
+            const queryItem = this._queryStore.getItemById(position.queryId);
+            if (!queryItem) {
+                // Fallback for invalid query ID
+                return {
+                    queryId: position.queryId,
+                    segmentIndex: 0,
+                    offset: position.offset,
+                    anchorOffset: position.anchorOffset,
+                };
+            }
+            return this.convertToSegmentCaretPosition(position, queryItem.query);
+        });
 
         if (positions.length === 1) {
             const queryItem = this._queryStore.getItemById(
@@ -147,6 +217,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
 
         this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_CARET_POSITIONS);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
     }

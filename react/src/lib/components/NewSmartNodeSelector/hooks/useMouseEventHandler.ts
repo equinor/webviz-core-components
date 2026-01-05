@@ -1,10 +1,11 @@
 import React from "react";
-import type { StateManager } from "../core/StateManager";
 import { getCaretOffsetFromX } from "../utils/caretToCoordinateMapping";
+import type { StateManager } from "../core/StateManager";
 
 export function useMouseEventHandler(
     ref: React.RefObject<HTMLElement>,
-    stateManager: StateManager
+    stateManager: StateManager,
+    delimiter: string
 ): void {
     React.useEffect(
         function setupMouseEventHandler() {
@@ -16,44 +17,49 @@ export function useMouseEventHandler(
 
                 const currentCaretPositions = stateManager.getCaretPositions();
 
-                // Find the closest query chip element
-                const chipElement = target.closest(
-                    "[data-querychip-id]"
+                // Find the closest segment element
+                const segmentElement = target.closest(
+                    "[data-segment-index]"
                 ) as HTMLElement;
-                if (!chipElement) {
-                    // Clicking outside a chip should set caret to end
+
+                if (!segmentElement) {
+                    // Clicking outside a segment should set caret to end
                     // This will trigger hasFocus=true, which will make HiddenTextarea focus
                     event.preventDefault();
                     stateManager.setCaretPositionToEndOfLastItem();
                     return;
                 }
 
-                const queryId = chipElement.getAttribute("data-querychip-id");
-                if (!queryId) {
+                const queryId = segmentElement.getAttribute(
+                    "data-segment-query-id"
+                );
+                const segmentIndexStr =
+                    segmentElement.getAttribute("data-segment-index");
+
+                if (!queryId || segmentIndexStr === null) {
                     event.preventDefault();
                     stateManager.setCaretPositionToEndOfLastItem();
                     return;
                 }
 
-                // Find the content element
-                const contentElement = chipElement.querySelector(
-                    "[data-query-chip-content]"
-                ) as HTMLElement;
-                if (!contentElement) return;
+                const segmentIndex = parseInt(segmentIndexStr, 10);
 
-                // Calculate local X position
-                const rect = contentElement.getBoundingClientRect();
-                const localX = event.clientX - rect.left;
-
-                // Get query text
+                // Get query item and segment text
                 const queryItem = stateManager.getQueryItemById(queryId);
                 if (!queryItem) return;
 
-                // Map X to character offset
+                const segments = queryItem.query.split(delimiter);
+                const segmentText = segments[segmentIndex] ?? "";
+
+                // Calculate local X position relative to segment
+                const rect = segmentElement.getBoundingClientRect();
+                const localX = event.clientX - rect.left;
+
+                // Map X to character offset within the segment
                 let offset = getCaretOffsetFromX(
                     localX,
-                    queryItem.query,
-                    contentElement
+                    segmentText,
+                    segmentElement
                 );
 
                 let anchorOffset = offset;
@@ -63,7 +69,7 @@ export function useMouseEventHandler(
                     currentCaretPositions.length === 1 &&
                     currentCaretPositions[0].queryId === queryId
                 ) {
-                    // If there is an existing caret position in this chip, use its offset as anchor
+                    // If there is an existing caret position in this segment, use its offset as anchor
                     anchorOffset = currentCaretPositions[0].anchorOffset;
                 }
 
@@ -86,6 +92,6 @@ export function useMouseEventHandler(
                 abortController.abort();
             };
         },
-        [ref, stateManager]
+        [ref, stateManager, delimiter]
     );
 }

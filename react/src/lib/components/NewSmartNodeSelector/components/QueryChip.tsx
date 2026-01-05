@@ -83,7 +83,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                     whiteSpace: "pre",
                 }}
             >
-                <TokenRenderer token={tokens} />
+                <TokenRenderer token={tokens} queryId={props.queryItem.id} />
                 <Placeholder
                     isVisible={props.queryItem.query === ""}
                     isLast={props.isLast}

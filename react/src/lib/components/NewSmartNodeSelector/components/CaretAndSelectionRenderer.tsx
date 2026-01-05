@@ -10,11 +10,11 @@ export type CaretRendererProps = {
 };
 
 export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
-    const { stateManager } = React.useContext(SmartNodeSelectorDataContext);
+    const { stateManager, delimiter } = React.useContext(SmartNodeSelectorDataContext);
 
-    const caretPositions = useSubscribeToTopic(
+    const segmentCaretPositions = useSubscribeToTopic(
         stateManager,
-        Topic.CARET_POSITIONS
+        Topic.SEGMENT_CARET_POSITIONS
     );
 
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
@@ -37,15 +37,16 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
         function updateCaretPositions() {
             const newMappedCaretPositions = [];
             const newMappedSelectionPositions = [];
-            for (const position of caretPositions) {
-                const chip = props.mainRef.current?.querySelector(
-                    `[data-querychip-id="${position.queryId}"] [data-query-chip-content]`
+            for (const position of segmentCaretPositions) {
+                // Find the segment element instead of the chip content
+                const segmentElement = props.mainRef.current?.querySelector(
+                    `[data-segment-query-id="${position.queryId}"][data-segment-index="${position.segmentIndex}"]`
                 ) as HTMLElement | null;
-                if (!chip) {
+                if (!segmentElement) {
                     continue;
                 }
 
-                const chipBoundingRect = chip.getBoundingClientRect();
+                const segmentBoundingRect = segmentElement.getBoundingClientRect();
                 const queryItem = stateManager.getQueryItemById(
                     position.queryId
                 );
@@ -57,25 +58,38 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                     continue;
                 }
 
-                const textBeforeCaret = queryItem.query.slice(
+                // Get the query chip element to determine the correct height
+                const chipElement = props.mainRef.current?.querySelector(
+                    `[data-querychip-id="${position.queryId}"]`
+                ) as HTMLElement | null;
+                const chipBoundingRect = chipElement?.getBoundingClientRect();
+
+                // Get the segment text
+                const segments = queryItem.query.split(delimiter);
+                const segmentText = segments[position.segmentIndex] ?? "";
+
+                const textBeforeCaret = segmentText.slice(
                     0,
                     position.offset
                 );
 
                 const { width: textWidth } = computeTextWidthAndHeight(
                     textBeforeCaret,
-                    chip
+                    segmentElement
                 );
 
-                // Get height from chip element itself to handle empty strings
-                const caretHeight = chipBoundingRect.height;
+                // Get height from chip element to handle empty segments correctly
+                const caretHeight = chipBoundingRect?.height ?? segmentBoundingRect.height;
+
+                // Use chip's top position for empty segments to ensure correct alignment
+                const caretTop = chipBoundingRect?.top ?? segmentBoundingRect.top;
 
                 newMappedCaretPositions.push({
                     left:
-                        chipBoundingRect.left +
+                        segmentBoundingRect.left +
                         textWidth -
                         mainBoundingRect.left,
-                    top: chipBoundingRect.top - mainBoundingRect.top,
+                    top: caretTop - mainBoundingRect.top,
                 });
 
                 setFontSize(caretHeight);
@@ -90,27 +104,27 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                         position.anchorOffset
                     );
 
-                    // Calculate selection bounds from start of text
+                    // Calculate selection bounds within the segment
                     const { width: startWidth } = computeTextWidthAndHeight(
-                        queryItem.query.slice(0, startOffset),
-                        chip
+                        segmentText.slice(0, startOffset),
+                        segmentElement
                     );
                     const { width: endWidth } = computeTextWidthAndHeight(
-                        queryItem.query.slice(0, endOffset),
-                        chip
+                        segmentText.slice(0, endOffset),
+                        segmentElement
                     );
 
                     const selectionStartX =
-                        chipBoundingRect.left +
+                        segmentBoundingRect.left +
                         startWidth -
                         mainBoundingRect.left;
                     const selectionWidth = endWidth - startWidth;
 
                     newMappedSelectionPositions.push({
                         left: selectionStartX,
-                        top: chipBoundingRect.top - mainBoundingRect.top,
+                        top: caretTop - mainBoundingRect.top,
                         width: selectionWidth,
-                        height: chipBoundingRect.height,
+                        height: caretHeight,
                     });
                 }
             }
@@ -119,11 +133,12 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
             setMappedSelectionPositions(newMappedSelectionPositions);
         },
         [
-            caretPositions,
+            segmentCaretPositions,
             queryItems,
             stateManager,
             props.mainRef,
             mainBoundingRect,
+            delimiter,
         ]
     );
 

@@ -49,16 +49,39 @@ export class TagTokenizer {
         const children: (SegmentToken | DelimiterToken)[] = [];
         const start = 0;
 
-        while (this._position < tag.length) {
-            // Parse all segments until we hit a delimiter or end
-            // This allows for multiple segment tokens between delimiters (e.g., "Data Source (A|B)")
-            while (this._position < tag.length && tag[this._position] !== this._delimiter) {
-                const segment = this.parseSegment(tag);
-                children.push(segment);
-            }
+        // Special case: empty string should have one empty segment
+        if (tag.length === 0) {
+            children.push({
+                type: "LITERAL",
+                value: "",
+                start: 0,
+                end: 0,
+            });
+            return {
+                type: "TAG",
+                children,
+                start,
+                end: 0,
+            };
+        }
 
-            // Check for delimiter after segment(s)
-            if (this._position < tag.length && tag[this._position] === this._delimiter) {
+        // Track if we need to add an empty segment at the current position
+        let needsSegment = true;
+
+        while (this._position < tag.length) {
+            // Check if we're at a delimiter
+            if (tag[this._position] === this._delimiter) {
+                // If we need a segment (because we're at start or just after a delimiter), add empty literal
+                if (needsSegment) {
+                    children.push({
+                        type: "LITERAL",
+                        value: "",
+                        start: this._position,
+                        end: this._position,
+                    });
+                }
+
+                // Add the delimiter
                 const delimiterStart = this._position;
                 this._position++;
                 children.push({
@@ -67,7 +90,27 @@ export class TagTokenizer {
                     start: delimiterStart,
                     end: this._position,
                 });
+
+                // After a delimiter, we need a segment
+                needsSegment = true;
+            } else {
+                // Parse segment(s) until we hit a delimiter or end
+                while (this._position < tag.length && tag[this._position] !== this._delimiter) {
+                    const segment = this.parseSegment(tag);
+                    children.push(segment);
+                }
+                needsSegment = false;
             }
+        }
+
+        // If we ended with a delimiter, add an empty segment
+        if (needsSegment) {
+            children.push({
+                type: "LITERAL",
+                value: "",
+                start: tag.length,
+                end: tag.length,
+            });
         }
 
         return {

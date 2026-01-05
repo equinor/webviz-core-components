@@ -233,7 +233,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         });
     }, [suggestionEngine, defaultedProps.maxSuggestions]);
 
-    useMouseEventHandler(ref, stateManager);
+    useMouseEventHandler(ref, stateManager, defaultedProps.delimiter);
 
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
     const hasFocus = useSubscribeToTopic(stateManager, Topic.HAS_FOCUS);
