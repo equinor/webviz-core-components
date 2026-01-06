@@ -1,5 +1,5 @@
 import React from "react";
-import { TagTokenizer } from "../../core/TagTokenizer";
+import { QueryTokenizer } from "../../core/TagTokenizer";
 import type { Token } from "../../core/types/Token";
 import type { Tag } from "../../state/type";
 import { SmartNodeSelectorDataContext } from "../../SmartNodeSelector";
@@ -10,7 +10,7 @@ export enum TagEditorKeyDownAction {
     LEAVE_RIGHT,
     ARROW_UP,
     ARROW_DOWN,
-};
+}
 
 export type TagEditorProps = {
     tag: Tag;
@@ -20,7 +20,7 @@ export type TagEditorProps = {
     onKeyDown?: (action: TagEditorKeyDownAction) => void;
     focusedSegmentIndex?: number;
     placeholder?: string;
-}
+};
 
 const LINE_HEIGHT = 20;
 
@@ -53,19 +53,31 @@ function findGroupOrSetAtPosition(
 
     // Check special nested structures in GROUP/SET tokens
     if (token.type === "GROUP") {
-        if (token.openParen.start <= position && position < token.openParen.end) {
+        if (
+            token.openParen.start <= position &&
+            position < token.openParen.end
+        ) {
             return token as Token & { type: "GROUP" };
         }
-        if (token.closeParen.start <= position && position < token.closeParen.end) {
+        if (
+            token.closeParen.start <= position &&
+            position < token.closeParen.end
+        ) {
             return token as Token & { type: "GROUP" };
         }
     }
 
     if (token.type === "SET") {
-        if (token.openBrace.start <= position && position < token.openBrace.end) {
+        if (
+            token.openBrace.start <= position &&
+            position < token.openBrace.end
+        ) {
             return token as Token & { type: "SET" };
         }
-        if (token.closeBrace.start <= position && position < token.closeBrace.end) {
+        if (
+            token.closeBrace.start <= position &&
+            position < token.closeBrace.end
+        ) {
             return token as Token & { type: "SET" };
         }
     }
@@ -77,7 +89,7 @@ export function TagEditor(props: TagEditorProps) {
     const { onChange, onFocusedSegmentChange, onKeyDown } = props;
 
     const context = React.useContext(SmartNodeSelectorDataContext);
-    
+
     const editorRef = React.useRef<HTMLDivElement>(null);
     const contentRef = React.useRef<HTMLDivElement>(null);
     const caretRef = React.useRef<HTMLDivElement>(null);
@@ -91,9 +103,12 @@ export function TagEditor(props: TagEditorProps) {
     const [isMouseDown, setIsMouseDown] = React.useState<boolean>(false);
 
     const [segmentIndex, setSegmentIndex] = React.useState<number>(-1);
-    const [prevFocusedSegmentIndex, setPrevFocusedSegmentIndex] = React.useState<number | undefined>(undefined);
+    const [prevFocusedSegmentIndex, setPrevFocusedSegmentIndex] =
+        React.useState<number | undefined>(undefined);
     const isExternalUpdateRef = React.useRef<boolean>(false);
-    const prevPropsSegmentIndexRef = React.useRef<number | undefined>(undefined);
+    const prevPropsSegmentIndexRef = React.useRef<number | undefined>(
+        undefined
+    );
 
     if (prevValue !== props.tag.value) {
         setValue(props.tag.value);
@@ -104,16 +119,19 @@ export function TagEditor(props: TagEditorProps) {
         setPrevFocusedSegmentIndex(props.focusedSegmentIndex);
     }
 
-    React.useEffect(function updateSegmentIndex() {
-        if (anchor !== caret) {
-            setSegmentIndex(-1);
-            return;
-        }
+    React.useEffect(
+        function updateSegmentIndex() {
+            if (anchor !== caret) {
+                setSegmentIndex(-1);
+                return;
+            }
 
-        const beforeText = value.slice(0, caret);
-        const segments = beforeText.split(props.delimiter);
-        setSegmentIndex(segments.length - 1);
-    }, [value, caret, anchor, props.delimiter]);
+            const beforeText = value.slice(0, caret);
+            const segments = beforeText.split(props.delimiter);
+            setSegmentIndex(segments.length - 1);
+        },
+        [value, caret, anchor, props.delimiter]
+    );
 
     React.useEffect(
         function notifyAddressChange() {
@@ -127,8 +145,9 @@ export function TagEditor(props: TagEditorProps) {
                     },
                 });
             }
-        }, [isFocused, segmentIndex, caret, context.dispatch, props.tag.id]);
-
+        },
+        [isFocused, segmentIndex, caret, context.dispatch, props.tag.id]
+    );
 
     React.useEffect(
         function notifyFocusedSegmentChange() {
@@ -155,7 +174,6 @@ export function TagEditor(props: TagEditorProps) {
         [context.state.focusedAddress, props.tag.id]
     );
 
-
     React.useEffect(
         function syncCaretToFocusedSegment() {
             if (props.focusedSegmentIndex === undefined) {
@@ -166,12 +184,17 @@ export function TagEditor(props: TagEditorProps) {
             setIsFocused(true);
 
             const segments = value.split(props.delimiter);
-            if (props.focusedSegmentIndex < 0 || props.focusedSegmentIndex >= segments.length) {
+            if (
+                props.focusedSegmentIndex < 0 ||
+                props.focusedSegmentIndex >= segments.length
+            ) {
                 return;
             }
 
             // Only sync if the prop actually changed (not just re-running due to other deps)
-            if (prevPropsSegmentIndexRef.current === props.focusedSegmentIndex) {
+            if (
+                prevPropsSegmentIndexRef.current === props.focusedSegmentIndex
+            ) {
                 return;
             }
             prevPropsSegmentIndexRef.current = props.focusedSegmentIndex;
@@ -179,54 +202,64 @@ export function TagEditor(props: TagEditorProps) {
             // Calculate what segment we're currently in
             const beforeText = value.slice(0, caret);
             const currentSegments = beforeText.split(props.delimiter);
-            const currentSegmentIndex = caret === anchor ? currentSegments.length - 1 : -1;
+            const currentSegmentIndex =
+                caret === anchor ? currentSegments.length - 1 : -1;
 
             // If focused and already at the requested segment, don't sync
             // This prevents fighting with user's caret movements
-            if (isFocused && props.focusedSegmentIndex === currentSegmentIndex) {
+            if (
+                isFocused &&
+                props.focusedSegmentIndex === currentSegmentIndex
+            ) {
                 return;
             }
 
             // Mark this as an external update to prevent notifying parent
             isExternalUpdateRef.current = true;
 
-            const newCaret = segments
-                .slice(0, props.focusedSegmentIndex);
+            const newCaret = segments.slice(0, props.focusedSegmentIndex);
 
-            const caretPos = newCaret.length > 0 ? newCaret.join(props.delimiter).length + props.delimiter.length : 0;
+            const caretPos =
+                newCaret.length > 0
+                    ? newCaret.join(props.delimiter).length +
+                      props.delimiter.length
+                    : 0;
             if (!isFocused) {
                 inputRef.current?.focus();
             }
             setCaret(caretPos);
             setAnchor(caretPos);
         },
-        [props.focusedSegmentIndex, value, props.delimiter, isFocused, caret, anchor]
+        [
+            props.focusedSegmentIndex,
+            value,
+            props.delimiter,
+            isFocused,
+            caret,
+            anchor,
+        ]
     );
-            
 
     // Tokenizer instance
     const tokenizer = React.useMemo(
-        () => new TagTokenizer(props.delimiter ?? ":"),
+        () => new QueryTokenizer(props.delimiter ?? ":"),
         [props.delimiter]
     );
 
     // Tokenize the current value
-    const tokens = React.useMemo(
-        () => {
-            try {
-                return tokenizer.tokenize(value);
-            } catch (error) {
-                // If tokenization fails, return a basic token structure
-                return {
-                    type: "TAG" as const,
-                    children: [],
-                    start: 0,
-                    end: value.length,
-                };
-            }
-        },
-        [tokenizer, value]
-    );
+    const tokens = React.useMemo(() => {
+        try {
+            return tokenizer.tokenize(value);
+        } catch (error) {
+            // If tokenization fails, return a basic token structure
+            return {
+                type: "QUERY" as const,
+                children: [],
+                start: 0,
+                end: value.length,
+            };
+        }
+    }, [tokenizer, value]);
 
     // Compute display value with compressed segments
     const displayValue = React.useMemo(() => {
@@ -246,7 +279,11 @@ export function TagEditor(props: TagEditorProps) {
                     // E.g., "Data Source A" becomes "Dat...A" (8 chars total)
                     const prefixLength = 3;
                     const suffixLength = 2;
-                    return segment.slice(0, prefixLength) + "..." + segment.slice(-suffixLength);
+                    return (
+                        segment.slice(0, prefixLength) +
+                        "..." +
+                        segment.slice(-suffixLength)
+                    );
                 }
 
                 return segment;
@@ -255,22 +292,19 @@ export function TagEditor(props: TagEditorProps) {
     }, [value, props.delimiter, props.focusedSegmentIndex]);
 
     // Tokenize the display value for rendering
-    const displayTokens = React.useMemo(
-        () => {
-            try {
-                return tokenizer.tokenize(displayValue);
-            } catch (error) {
-                // If tokenization fails, return a basic token structure
-                return {
-                    type: "TAG" as const,
-                    children: [],
-                    start: 0,
-                    end: displayValue.length,
-                };
-            }
-        },
-        [tokenizer, displayValue]
-    );
+    const displayTokens = React.useMemo(() => {
+        try {
+            return tokenizer.tokenize(displayValue);
+        } catch (error) {
+            // If tokenization fails, return a basic token structure
+            return {
+                type: "QUERY" as const,
+                children: [],
+                start: 0,
+                end: displayValue.length,
+            };
+        }
+    }, [tokenizer, displayValue]);
 
     const styles = React.useMemo(
         () => ({
@@ -328,62 +362,83 @@ export function TagEditor(props: TagEditorProps) {
         [isFocused]
     );
 
-    const insertTextAtCaret = React.useCallback(function insertTextAtCaret(text: string) {
-        const start = Math.min(caret, anchor);
-        const end = Math.max(caret, anchor);
-        const newValue = value.slice(0, start) + text + value.slice(end);
-        const newCaret = start + text.length;
-        setValue(newValue);
-        setCaret(newCaret);
-        setAnchor(newCaret);
-    }, [value, caret, anchor]);
+    const insertTextAtCaret = React.useCallback(
+        function insertTextAtCaret(text: string) {
+            const start = Math.min(caret, anchor);
+            const end = Math.max(caret, anchor);
+            const newValue = value.slice(0, start) + text + value.slice(end);
+            const newCaret = start + text.length;
+            setValue(newValue);
+            setCaret(newCaret);
+            setAnchor(newCaret);
+        },
+        [value, caret, anchor]
+    );
 
-    const moveCursor = React.useCallback(function moveCursor(args: { dx?: number, x?: number, selecting: boolean }) {
-        setCaret((prev) => {
-            if (!args.selecting && prev === anchor) {
-                if (prev === 0 && args.dx === -1) {
-                    onKeyDown?.(TagEditorKeyDownAction.LEAVE_LEFT);
-                    return prev;
+    const moveCursor = React.useCallback(
+        function moveCursor(args: {
+            dx?: number;
+            x?: number;
+            selecting: boolean;
+        }) {
+            setCaret((prev) => {
+                if (!args.selecting && prev === anchor) {
+                    if (prev === 0 && args.dx === -1) {
+                        onKeyDown?.(TagEditorKeyDownAction.LEAVE_LEFT);
+                        return prev;
+                    }
+
+                    if (prev === value.length && args.dx === 1) {
+                        onKeyDown?.(TagEditorKeyDownAction.LEAVE_RIGHT);
+                        return prev;
+                    }
                 }
 
-                if (prev === value.length && args.dx === 1) {
-                    onKeyDown?.(TagEditorKeyDownAction.LEAVE_RIGHT);
-                    return prev;
+                const col = clamp(
+                    args.x ?? prev + (args.dx ?? 0),
+                    0,
+                    value.length
+                );
+                if (!args.selecting) {
+                    setAnchor(col);
                 }
-            }
+                return col;
+            });
+        },
+        [value.length, onKeyDown, anchor]
+    );
 
-            const col = clamp(args.x ?? prev + (args.dx ?? 0), 0, value.length);
-            if (!args.selecting) {
-                setAnchor(col);
-            }
-            return col;
-        });
-    }, [value.length, onKeyDown, anchor]);
-
-    const deleteSelectionIfAny = React.useCallback(function deleteSelectionIfAny(value: string, caret: number, anchor: number): {
-        newValue: string;
-        newCaret: number;
+    const deleteSelectionIfAny = React.useCallback(
+        function deleteSelectionIfAny(
+            value: string,
+            caret: number,
+            anchor: number
+        ): {
+            newValue: string;
+            newCaret: number;
             newAnchor: number;
-        deleted: boolean;
-    } {
-        if (caret === anchor) {
+            deleted: boolean;
+        } {
+            if (caret === anchor) {
+                return {
+                    newValue: value,
+                    newCaret: caret,
+                    newAnchor: anchor,
+                    deleted: false,
+                };
+            }
+            const start = Math.min(caret, anchor);
+            const end = Math.max(caret, anchor);
+            const newValue = value.slice(0, start) + value.slice(end);
             return {
-                newValue: value,
-                newCaret: caret,
-                newAnchor: anchor,
-                deleted: false,
+                newValue,
+                newCaret: start,
+                newAnchor: start,
+                deleted: true,
             };
-        }
-        const start = Math.min(caret, anchor);
-        const end = Math.max(caret, anchor);
-        const newValue = value.slice(0, start) + value.slice(end);
-        return {
-            newValue,
-            newCaret: start,
-            newAnchor: start,
-            deleted: true,
-        };
-    }, []);  
+        },
+        []
+    );
 
     const backspace = React.useCallback(
         function backspace() {
@@ -462,7 +517,16 @@ export function TagEditor(props: TagEditorProps) {
             setCaret(caret - 1);
             setAnchor(caret - 1);
         },
-        [value, caret, anchor, tokens, deleteSelectionIfAny, setValue, setCaret, setAnchor]
+        [
+            value,
+            caret,
+            anchor,
+            tokens,
+            deleteSelectionIfAny,
+            setValue,
+            setCaret,
+            setAnchor,
+        ]
     );
 
     const del = React.useCallback(
@@ -555,48 +619,61 @@ export function TagEditor(props: TagEditorProps) {
             setCaret(caret);
             setAnchor(caret);
         },
-        [value, caret, anchor, tokens, deleteSelectionIfAny, setValue, setCaret, setAnchor]
+        [
+            value,
+            caret,
+            anchor,
+            tokens,
+            deleteSelectionIfAny,
+            setValue,
+            setCaret,
+            setAnchor,
+        ]
     );
 
-    const handleKeyDown = React.useCallback(function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
-        const selecting = event.shiftKey;
+    const handleKeyDown = React.useCallback(
+        function handleKeyDown(
+            event: React.KeyboardEvent<HTMLTextAreaElement>
+        ) {
+            const selecting = event.shiftKey;
 
-        switch (event.key) {
-            case "ArrowLeft":
-                moveCursor({ dx: -1, selecting });
-                break;
-            case "ArrowRight":
-                moveCursor({ dx: 1, selecting });
-                break;
-            case "ArrowUp":
-                onKeyDown?.(TagEditorKeyDownAction.ARROW_UP);
-                break;
-            case "ArrowDown":
-                onKeyDown?.(TagEditorKeyDownAction.ARROW_DOWN);
-                break;
-            case "Home":
-                moveCursor({ x: 0, selecting });
-                break;
-            case "End":
-                moveCursor({ x: value.length, selecting });
-                break;
-            case "Backspace":
-                backspace();
-                break;
-            case "Delete":
-                del();
-                break;
-            case "a":
-            case "A":
-                if (event.ctrlKey || event.metaKey) {
-                    setCaret(0);
-                    setAnchor(value.length);
-                    event.preventDefault();
-                }
-                break;
-        }
-
-    }, [moveCursor, value, backspace, del, setCaret, setAnchor]);
+            switch (event.key) {
+                case "ArrowLeft":
+                    moveCursor({ dx: -1, selecting });
+                    break;
+                case "ArrowRight":
+                    moveCursor({ dx: 1, selecting });
+                    break;
+                case "ArrowUp":
+                    onKeyDown?.(TagEditorKeyDownAction.ARROW_UP);
+                    break;
+                case "ArrowDown":
+                    onKeyDown?.(TagEditorKeyDownAction.ARROW_DOWN);
+                    break;
+                case "Home":
+                    moveCursor({ x: 0, selecting });
+                    break;
+                case "End":
+                    moveCursor({ x: value.length, selecting });
+                    break;
+                case "Backspace":
+                    backspace();
+                    break;
+                case "Delete":
+                    del();
+                    break;
+                case "a":
+                case "A":
+                    if (event.ctrlKey || event.metaKey) {
+                        setCaret(0);
+                        setAnchor(value.length);
+                        event.preventDefault();
+                    }
+                    break;
+            }
+        },
+        [moveCursor, value, backspace, del, setCaret, setAnchor]
+    );
 
     const handleInput = React.useCallback(
         function handleInput(event: React.FormEvent<HTMLTextAreaElement>) {
@@ -604,7 +681,9 @@ export function TagEditor(props: TagEditorProps) {
             const val = target.value;
             if (val.length > 0) {
                 // Check if the input is an opening bracket
-                const bracketPair = BRACKET_PAIRS.find(pair => pair.open === val);
+                const bracketPair = BRACKET_PAIRS.find(
+                    (pair) => pair.open === val
+                );
 
                 if (bracketPair) {
                     // Auto-close behavior for opening brackets/braces
@@ -615,8 +694,12 @@ export function TagEditor(props: TagEditorProps) {
                         const start = Math.min(caret, anchor);
                         const end = Math.max(caret, anchor);
                         const selectedText = value.slice(start, end);
-                        const wrappedText = bracketPair.open + selectedText + bracketPair.close;
-                        const newValue = value.slice(0, start) + wrappedText + value.slice(end);
+                        const wrappedText =
+                            bracketPair.open + selectedText + bracketPair.close;
+                        const newValue =
+                            value.slice(0, start) +
+                            wrappedText +
+                            value.slice(end);
                         setValue(newValue);
                         setCaret(start + 1);
                         setAnchor(start + 1 + selectedText.length);
@@ -629,7 +712,9 @@ export function TagEditor(props: TagEditorProps) {
                     }
                 } else {
                     // Check if the input is a closing bracket
-                    const closingBracket = BRACKET_PAIRS.find(pair => pair.close === val);
+                    const closingBracket = BRACKET_PAIRS.find(
+                        (pair) => pair.close === val
+                    );
 
                     if (closingBracket) {
                         // Check if we're before a closing bracket/brace of the same type
@@ -673,11 +758,11 @@ export function TagEditor(props: TagEditorProps) {
             const textBeforeCaret = displayValue.slice(0, displayCaret);
 
             // Create a temporary span to measure the width
-            const span = document.createElement('span');
-            span.style.fontFamily = 'monospace';
-            span.style.fontSize = '14px';
-            span.style.whiteSpace = 'pre';
-            span.textContent = textBeforeCaret || ''; // Empty string for position 0
+            const span = document.createElement("span");
+            span.style.fontFamily = "monospace";
+            span.style.fontSize = "14px";
+            span.style.whiteSpace = "pre";
+            span.textContent = textBeforeCaret || ""; // Empty string for position 0
 
             contentRef.current.appendChild(span);
             const left = span.offsetWidth;
@@ -706,7 +791,8 @@ export function TagEditor(props: TagEditorProps) {
             let displayCharCount = 0;
 
             for (let i = 0; i < segments.length; i++) {
-                const displaySegmentEnd = displayCharCount + displaySegments[i].length;
+                const displaySegmentEnd =
+                    displayCharCount + displaySegments[i].length;
 
                 // Check if position is within this segment
                 if (displayPos <= displaySegmentEnd) {
@@ -715,9 +801,13 @@ export function TagEditor(props: TagEditorProps) {
                     // If segment was compressed, map position proportionally
                     if (segments[i].length > displaySegments[i].length) {
                         // Compressed segment - map proportionally
-                        const ratio = segments[i].length / displaySegments[i].length;
+                        const ratio =
+                            segments[i].length / displaySegments[i].length;
                         const actualOffset = Math.round(displayOffset * ratio);
-                        return actualCharCount + Math.min(actualOffset, segments[i].length);
+                        return (
+                            actualCharCount +
+                            Math.min(actualOffset, segments[i].length)
+                        );
                     } else {
                         // Not compressed - direct mapping
                         return actualCharCount + displayOffset;
@@ -753,10 +843,10 @@ export function TagEditor(props: TagEditorProps) {
             let closestDistance = Math.abs(clickX);
 
             // Create a temporary span to measure widths
-            const span = document.createElement('span');
-            span.style.fontFamily = 'monospace';
-            span.style.fontSize = '14px';
-            span.style.whiteSpace = 'pre';
+            const span = document.createElement("span");
+            span.style.fontFamily = "monospace";
+            span.style.fontSize = "14px";
+            span.style.whiteSpace = "pre";
             contentRef.current.appendChild(span);
 
             for (let i = 0; i <= displayValue.length; i++) {
@@ -808,12 +898,9 @@ export function TagEditor(props: TagEditorProps) {
     );
 
     // Handle mouse up to end drag selection
-    const handleMouseUp = React.useCallback(
-        function handleMouseUp() {
-            setIsMouseDown(false);
-        },
-        []
-    );
+    const handleMouseUp = React.useCallback(function handleMouseUp() {
+        setIsMouseDown(false);
+    }, []);
 
     React.useEffect(
         function notifyChange() {
@@ -822,40 +909,34 @@ export function TagEditor(props: TagEditorProps) {
         [value, onChange]
     );
 
-    React.useEffect(
-        function setupMouseListeners() {
-            const abortController = new AbortController();
-            window.addEventListener("mousemove", handleMouseMove, { signal: abortController.signal });
-            window.addEventListener("mouseup", handleMouseUp, { signal: abortController.signal });
+    (React.useEffect(function setupMouseListeners() {
+        const abortController = new AbortController();
+        window.addEventListener("mousemove", handleMouseMove, {
+            signal: abortController.signal,
+        });
+        window.addEventListener("mouseup", handleMouseUp, {
+            signal: abortController.signal,
+        });
 
-            return function cleanup() {
-                abortController.abort();
-            }
-        }
-    ), [handleMouseMove, handleMouseUp];
+        return function cleanup() {
+            abortController.abort();
+        };
+    }),
+        [handleMouseMove, handleMouseUp]);
 
     // Auto-focus the textarea when component mounts
-    React.useEffect(
-        function autoFocus() {
-            inputRef.current?.focus();
-        },
-        []
-    );
+    React.useEffect(function autoFocus() {
+        inputRef.current?.focus();
+    }, []);
 
     // Handle focus events
-    const handleFocus = React.useCallback(
-        function handleFocus() {
-            setIsFocused(true);
-        },
-        []
-    );
+    const handleFocus = React.useCallback(function handleFocus() {
+        setIsFocused(true);
+    }, []);
 
-    const handleBlur = React.useCallback(
-        function handleBlur() {
-            setIsFocused(false);
-        },
-        []
-    );
+    const handleBlur = React.useCallback(function handleBlur() {
+        setIsFocused(false);
+    }, []);
 
     // Map anchor position to display value
     const displayAnchor = React.useMemo(() => {
@@ -870,16 +951,17 @@ export function TagEditor(props: TagEditorProps) {
 
     // Render selection by measuring actual text width
     const selectionStyle = React.useMemo(() => {
-        if (displayCaret === displayAnchor || !contentRef.current) return { display: "none" };
+        if (displayCaret === displayAnchor || !contentRef.current)
+            return { display: "none" };
 
         const start = Math.min(displayCaret, displayAnchor);
         const end = Math.max(displayCaret, displayAnchor);
 
         // Measure actual text widths using display value
-        const span = document.createElement('span');
-        span.style.fontFamily = 'monospace';
-        span.style.fontSize = '14px';
-        span.style.whiteSpace = 'pre';
+        const span = document.createElement("span");
+        span.style.fontFamily = "monospace";
+        span.style.fontSize = "14px";
+        span.style.whiteSpace = "pre";
 
         // Measure text up to selection start
         span.textContent = displayValue.slice(0, start);
@@ -919,8 +1001,10 @@ export function TagEditor(props: TagEditorProps) {
                 <TokenRenderer token={displayTokens} />
             </div>
             {value.length === 0 && !isFocused && (
-                    <div style={styles.placeholder}>{props.placeholder ?? "Enter tag..."}</div>
-                )}
+                <div style={styles.placeholder}>
+                    {props.placeholder ?? "Enter tag..."}
+                </div>
+            )}
             <div ref={caretRef} style={styles.caret} />
             <textarea
                 ref={inputRef}
@@ -958,16 +1042,28 @@ function TokenRenderer({ token }: TokenRendererProps): React.ReactElement {
             );
 
         case "DELIMITER":
-            return <span style={{ color: "#0996e8ff", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#0996e8ff", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "LITERAL":
             return <span style={{ color: "#000" }}>{token.value}</span>;
 
         case "WILDCARD":
-            return <span style={{ color: "#0066CC", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#0066CC", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "DEEP_WILDCARD":
-            return <span style={{ color: "#0066CC", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#0066CC", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "CHAR_WILDCARD":
             return (
@@ -982,7 +1078,11 @@ function TokenRenderer({ token }: TokenRendererProps): React.ReactElement {
             return <span style={{ color: "#000" }}>{token.value}</span>;
 
         case "CHAR_WILDCARD_CHAR":
-            return <span style={{ color: "#0066CC", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#0066CC", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "GLOB":
             return (
@@ -997,7 +1097,11 @@ function TokenRenderer({ token }: TokenRendererProps): React.ReactElement {
             return <span style={{ color: "#000" }}>{token.value}</span>;
 
         case "GLOB_WILDCARD":
-            return <span style={{ color: "#0066CC", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#0066CC", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "GROUP":
             return (
@@ -1011,10 +1115,18 @@ function TokenRenderer({ token }: TokenRendererProps): React.ReactElement {
             );
 
         case "OPEN_PAREN":
-            return <span style={{ color: "#999", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#999", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "CLOSE_PAREN":
-            return <span style={{ color: "#999", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#999", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "SET":
             return (
@@ -1028,16 +1140,32 @@ function TokenRenderer({ token }: TokenRendererProps): React.ReactElement {
             );
 
         case "OPEN_BRACE":
-            return <span style={{ color: "#999", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#999", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "CLOSE_BRACE":
-            return <span style={{ color: "#999", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#999", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "UNION_OPERATOR":
-            return <span style={{ color: "#CC6600", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#CC6600", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "INTERSECTION_OPERATOR":
-            return <span style={{ color: "#CC6600", fontWeight: "bold" }}>{token.value}</span>;
+            return (
+                <span style={{ color: "#CC6600", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
 
         case "COMMA_OPERATOR":
             return <span style={{ color: "#CC6600" }}>{token.value}</span>;

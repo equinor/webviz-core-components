@@ -6,34 +6,29 @@
  */
 
 import type {
-    TagToken,
+    QueryToken,
     DelimiterToken,
-    SegmentToken,
-    LiteralSegmentToken,
-    WildcardSegmentToken,
-    DeepWildcardSegmentToken,
+    SegmentChildToken,
+    CharWildcardToken,
     CharWildcardSegmentToken,
     GlobSegmentToken,
     GroupToken,
     SetToken,
     OperatorToken,
-    UnionOperatorToken,
-    IntersectionOperatorToken,
-    CommaOperatorToken,
     OpenParenToken,
     CloseParenToken,
     OpenBraceToken,
     CloseBraceToken,
     CharWildcardLiteralToken,
-    CharWildcardToken,
     GlobLiteralToken,
     GlobWildcardToken,
+    SegmentToken,
 } from "./types/Token";
 
 /**
  * Tokenizes tag strings into Token AST for GUI/editor features
  */
-export class TagTokenizer {
+export class QueryTokenizer {
     private _delimiter: string;
     private _position: number = 0;
 
@@ -44,21 +39,28 @@ export class TagTokenizer {
     /**
      * Tokenize a tag string into Token AST
      */
-    tokenize(tag: string): TagToken {
+    tokenize(query: string): QueryToken {
         this._position = 0;
         const children: (SegmentToken | DelimiterToken)[] = [];
         const start = 0;
 
         // Special case: empty string should have one empty segment
-        if (tag.length === 0) {
+        if (query.length === 0) {
             children.push({
-                type: "LITERAL",
-                value: "",
+                type: "SEGMENT",
+                children: [
+                    {
+                        type: "LITERAL",
+                        value: "",
+                        start: 0,
+                        end: 0,
+                    },
+                ],
                 start: 0,
                 end: 0,
             });
             return {
-                type: "TAG",
+                type: "QUERY",
                 children,
                 start,
                 end: 0,
@@ -68,14 +70,21 @@ export class TagTokenizer {
         // Track if we need to add an empty segment at the current position
         let needsSegment = true;
 
-        while (this._position < tag.length) {
+        while (this._position < query.length) {
             // Check if we're at a delimiter
-            if (tag[this._position] === this._delimiter) {
-                // If we need a segment (because we're at start or just after a delimiter), add empty literal
+            if (query[this._position] === this._delimiter) {
+                // If we need a segment (because we're at start or just after a delimiter), add empty segment
                 if (needsSegment) {
                     children.push({
-                        type: "LITERAL",
-                        value: "",
+                        type: "SEGMENT",
+                        children: [
+                            {
+                                type: "LITERAL",
+                                value: "",
+                                start: this._position,
+                                end: this._position,
+                            },
+                        ],
                         start: this._position,
                         end: this._position,
                     });
@@ -94,11 +103,24 @@ export class TagTokenizer {
                 // After a delimiter, we need a segment
                 needsSegment = true;
             } else {
-                // Parse segment(s) until we hit a delimiter or end
-                while (this._position < tag.length && tag[this._position] !== this._delimiter) {
-                    const segment = this.parseSegment(tag);
-                    children.push(segment);
+                // Parse entire segment (collect all tokens until delimiter or end)
+                const segmentStart = this._position;
+                const segmentChildren: SegmentChildToken[] = [];
+
+                while (
+                    this._position < query.length &&
+                    query[this._position] !== this._delimiter
+                ) {
+                    const token = this.parseSegmentChild(query);
+                    segmentChildren.push(token);
                 }
+
+                children.push({
+                    type: "SEGMENT",
+                    children: segmentChildren,
+                    start: segmentStart,
+                    end: this._position,
+                });
                 needsSegment = false;
             }
         }
@@ -106,25 +128,32 @@ export class TagTokenizer {
         // If we ended with a delimiter, add an empty segment
         if (needsSegment) {
             children.push({
-                type: "LITERAL",
-                value: "",
-                start: tag.length,
-                end: tag.length,
+                type: "SEGMENT",
+                children: [
+                    {
+                        type: "LITERAL",
+                        value: "",
+                        start: query.length,
+                        end: query.length,
+                    },
+                ],
+                start: query.length,
+                end: query.length,
             });
         }
 
         return {
-            type: "TAG",
+            type: "QUERY",
             children,
             start,
-            end: tag.length,
+            end: query.length,
         };
     }
 
     /**
-     * Parse a single segment (everything between delimiters or until end)
+     * Parse a single segment child token (called within a segment, stops at delimiters)
      */
-    private parseSegment(tag: string): SegmentToken {
+    private parseSegmentChild(tag: string): SegmentChildToken {
         const start = this._position;
 
         // Check for deep wildcard: **
@@ -204,7 +233,7 @@ export class TagTokenizer {
                 }
             }
 
-            // Parse member (stop at operators or closing paren)
+            // Parse member segment (stop at operators or closing paren)
             const memberStart = this._position;
             let memberText = "";
 
@@ -219,7 +248,16 @@ export class TagTokenizer {
             }
 
             if (memberText) {
-                children.push(this.parseMemberSegment(memberText, memberStart));
+                const segmentChild = this.parseMemberSegmentChild(
+                    memberText,
+                    memberStart
+                );
+                children.push({
+                    type: "SEGMENT",
+                    children: [segmentChild],
+                    start: memberStart,
+                    end: this._position,
+                });
             }
         }
 
@@ -275,7 +313,7 @@ export class TagTokenizer {
                 });
             }
 
-            // Parse member (stop at comma or closing brace)
+            // Parse member segment (stop at comma or closing brace)
             const memberStart = this._position;
             let memberText = "";
 
@@ -289,7 +327,16 @@ export class TagTokenizer {
             }
 
             if (memberText) {
-                children.push(this.parseMemberSegment(memberText, memberStart));
+                const segmentChild = this.parseMemberSegmentChild(
+                    memberText,
+                    memberStart
+                );
+                children.push({
+                    type: "SEGMENT",
+                    children: [segmentChild],
+                    start: memberStart,
+                    end: this._position,
+                });
             }
         }
 
@@ -318,7 +365,10 @@ export class TagTokenizer {
     /**
      * Parse a member within a group or set (can be literal or wildcard pattern)
      */
-    private parseMemberSegment(text: string, start: number): SegmentToken {
+    private parseMemberSegmentChild(
+        text: string,
+        start: number
+    ): SegmentChildToken {
         // Check for wildcards in the text
         if (text.includes("*")) {
             return this.parseGlobPattern(text, start);
@@ -340,7 +390,10 @@ export class TagTokenizer {
     /**
      * Parse literal or wildcard pattern segment (until delimiter, group/set boundary, or end)
      */
-    private parseLiteralOrWildcardSegment(tag: string, start: number): SegmentToken {
+    private parseLiteralOrWildcardSegment(
+        tag: string,
+        start: number
+    ): SegmentChildToken {
         let text = "";
 
         // Read until delimiter, group/set boundary, or end
@@ -429,7 +482,10 @@ export class TagTokenizer {
     /**
      * Parse char wildcard pattern: "Node-?"
      */
-    private parseCharWildcardPattern(text: string, start: number): CharWildcardSegmentToken {
+    private parseCharWildcardPattern(
+        text: string,
+        start: number
+    ): CharWildcardSegmentToken {
         const children: (CharWildcardLiteralToken | CharWildcardToken)[] = [];
         let currentLiteral = "";
         let pos = 0;

@@ -34,8 +34,8 @@ export interface BaseToken {
  * Root token representing the entire tag
  * Contains interleaved segments and delimiters
  */
-export interface TagToken extends BaseToken {
-    type: "TAG";
+export interface QueryToken extends BaseToken {
+    type: "QUERY";
     /** Interleaved segments and delimiters (e.g., [Segment, Delimiter, Segment, Delimiter, Segment]) */
     children: (SegmentToken | DelimiterToken)[];
 }
@@ -48,10 +48,15 @@ export interface DelimiterToken extends BaseToken {
     value: string;
 }
 
+export interface SegmentToken extends BaseToken {
+    type: "SEGMENT";
+    children: SegmentChildToken[];
+}
+
 /**
  * Segment token types
  */
-export type SegmentToken =
+export type SegmentChildToken =
     | LiteralSegmentToken
     | WildcardSegmentToken
     | DeepWildcardSegmentToken
@@ -175,7 +180,10 @@ export interface CloseBraceToken extends BaseToken {
 /**
  * Operator tokens for combining members
  */
-export type OperatorToken = UnionOperatorToken | IntersectionOperatorToken | CommaOperatorToken;
+export type OperatorToken =
+    | UnionOperatorToken
+    | IntersectionOperatorToken
+    | CommaOperatorToken;
 
 /**
  * Union operator: "|"
@@ -208,9 +216,10 @@ export interface CommaOperatorToken extends BaseToken {
  * Helper type for all token types
  */
 export type Token =
-    | TagToken
+    | QueryToken
     | DelimiterToken
     | SegmentToken
+    | SegmentChildToken
     | CharWildcardLiteralToken
     | CharWildcardToken
     | GlobLiteralToken

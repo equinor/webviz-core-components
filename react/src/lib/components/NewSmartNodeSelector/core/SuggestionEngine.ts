@@ -190,7 +190,8 @@ export class SuggestionEngine {
         // Determine the operation type from the last segment
         const lastSegment = query.segments[query.segments.length - 1];
         const isIntersection =
-            lastSegment.type === "SET" && lastSegment.operation === "INTERSECTION";
+            lastSegment.type === "SET" &&
+            lastSegment.operation === "INTERSECTION";
 
         // Collect children based on operation type
         let children: IndexedNode[];
@@ -212,7 +213,8 @@ export class SuggestionEngine {
 
             // Only include children that appear under ALL matched nodes
             children = Array.from(childrenMap.values()).filter(
-                (child) => childrenByName.get(child.name) === matchedNodes.length
+                (child) =>
+                    childrenByName.get(child.name) === matchedNodes.length
             );
         } else {
             // UNION: collect all unique children from matched nodes
@@ -286,7 +288,8 @@ export class SuggestionEngine {
             // Determine the operation type from the last segment
             const lastSegment = query.segments[query.segments.length - 1];
             const isIntersection =
-                lastSegment.type === "SET" && lastSegment.operation === "INTERSECTION";
+                lastSegment.type === "SET" &&
+                lastSegment.operation === "INTERSECTION";
 
             // Collect children based on operation type
             if (isIntersection) {
@@ -306,7 +309,8 @@ export class SuggestionEngine {
 
                 // Only include children that appear under ALL matched nodes
                 candidateNodes = Array.from(childrenMap.values()).filter(
-                    (child) => childrenByName.get(child.name) === parentNodes.length
+                    (child) =>
+                        childrenByName.get(child.name) === parentNodes.length
                 );
             } else {
                 // UNION: collect all unique children from matched parent nodes
@@ -334,10 +338,53 @@ export class SuggestionEngine {
         const closeParens = (partialSegment.match(/\)/g) || []).length;
         const openBraces = (partialSegment.match(/\{/g) || []).length;
         const closeBraces = (partialSegment.match(/\}/g) || []).length;
-        const isInsideBracket = openParens > closeParens || openBraces > closeBraces;
+        const isInsideBracket =
+            openParens > closeParens || openBraces > closeBraces;
 
         if ((lastChar === ")" || lastChar === "}") && !isInsideBracket) {
             return [];
+        }
+
+        // When inside a group/set with a base path like "Data Source (" or "Data Source (A|"
+        // we want to suggest children of nodes matching the base path
+        const endsWithOperator = /[|&,]$/.test(partialSegment);
+        if (isInsideBracket && basePath && (searchTerm === "" || endsWithOperator)) {
+            // Get nodes matching the base path
+            const basePathMatches = candidateNodes.filter((node) =>
+                node.name.toLowerCase() === basePath.trim().toLowerCase()
+            );
+
+            if (basePathMatches.length > 0) {
+                // Collect all unique children from base path matches
+                const childrenMap = new Map<string, IndexedNode>();
+                for (const node of basePathMatches) {
+                    for (const child of node.children) {
+                        if (!childrenMap.has(child.name)) {
+                            childrenMap.set(child.name, child);
+                        }
+                    }
+                }
+
+                const prefix =
+                    completedSegments.length > 0
+                        ? completedSegments.join(this._delimiter) + this._delimiter
+                        : "";
+
+                const operatorContext = basePath
+                    ? partialSegment.substring(basePath.length)
+                    : partialSegment;
+
+                const children = Array.from(childrenMap.values());
+                return children.slice(0, maxSuggestions).map((child) => ({
+                    name: child.name,
+                    completedQuery: prefix + basePath + operatorContext + child.name,
+                    type: "partial" as const,
+                    description: child.description ?? "",
+                    node: child,
+                    contextPrefix: basePath + operatorContext,
+                    insertText: child.name,
+                }));
+            }
         }
 
         // After just opening brackets with no text, don't show all nodes (prevent memory issue)
@@ -445,7 +492,7 @@ export class SuggestionEngine {
     private extractSearchTerm(partialSegment: string): string {
         // Find the last occurrence of special characters that mark the start of a new term
         // Include closing parens/braces as they end a term
-        const separatorPattern = /[{(,|&)\}]/;
+        const separatorPattern = /[{(,|&)}]/;
         const parts = partialSegment.split(separatorPattern);
 
         // Return the last part (the current search term)

@@ -10,7 +10,7 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
     const { token } = props;
 
     switch (token.type) {
-        case "TAG":
+        case "QUERY":
             // Track segment index for wrapping
             let segmentIndex = 0;
             return (
@@ -36,6 +36,15 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
                             );
                         }
                     })}
+                </>
+            );
+
+        case "SEGMENT":
+            return (
+                <>
+                    {token.children.map((child, index) => (
+                        <TokenRenderer key={index} token={child} />
+                    ))}
                 </>
             );
 

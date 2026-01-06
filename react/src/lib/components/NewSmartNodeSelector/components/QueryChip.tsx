@@ -7,7 +7,7 @@ import { useMatches } from "../hooks/useMatches";
 import { MatchesCounter } from "./MatchesCounter";
 import { Topic, type QueryItem } from "../core/StateManager";
 import { TokenRenderer } from "./TokenRenderer";
-import { TagTokenizer } from "../core/TagTokenizer";
+import { QueryTokenizer } from "../core/TagTokenizer";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 
 export type QueryChipProps = {
@@ -35,7 +35,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const queryChipProps = slotsContext.slotProps.queryChip ?? {};
 
     const tokenizer = React.useMemo(
-        () => new TagTokenizer(dataContext.delimiter ?? ":"),
+        () => new QueryTokenizer(dataContext.delimiter ?? ":"),
         [dataContext.delimiter]
     );
 
@@ -46,7 +46,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
         } catch (error) {
             // If tokenization fails, return a basic token structure
             return {
-                type: "TAG" as const,
+                type: "QUERY" as const,
                 children: [],
                 start: 0,
                 end: props.queryItem.query.length,

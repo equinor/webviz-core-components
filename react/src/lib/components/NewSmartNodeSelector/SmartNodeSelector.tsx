@@ -12,10 +12,6 @@ import {
     type IndexedNode,
 } from "./core";
 import { QueryChip } from "./components/QueryChip";
-import { makeTags as makeInitialTags } from "./utils/makeTags";
-import { initializer, makeReducer } from "./state/reducer";
-import type { State } from "./state/type";
-import { ActionType, type Action } from "./state/actions";
 import { DebugInfo } from "./components/DebugInfo";
 import type { Suggestion } from "./core/types/Suggestion";
 import { SuggestionPopover } from "./components/SuggestionPopover";
@@ -87,6 +83,28 @@ const DEFAULT_PROPS = {
         incompleteTag: "Incomplete tag...",
     },
     renderSuggestionItem: (suggestion: Suggestion, isSelected: boolean) => {
+        const parts: { highlighted: boolean; text: string }[] = [];
+        for (let i = 0; i < suggestion.name.length; ) {
+            const highlight = suggestion.highlights?.find((h) => h.start === i);
+            if (highlight) {
+                parts.push({
+                    highlighted: true,
+                    text: suggestion.name.slice(highlight.start, highlight.end),
+                });
+                i = highlight.end;
+            } else {
+                const nextHighlightStart = suggestion.highlights
+                    ?.map((h) => h.start)
+                    .find((start) => start > i);
+                const end = nextHighlightStart ?? suggestion.name.length;
+                parts.push({
+                    highlighted: false,
+                    text: suggestion.name.slice(i, end),
+                });
+                i = end;
+            }
+        }
+
         return (
             <li
                 className="suggestion-item"
@@ -102,7 +120,19 @@ const DEFAULT_PROPS = {
                             {suggestion.contextPrefix}
                         </span>
                     )}
-                    <span>{suggestion.name}</span>
+                    {parts.map((part, index) => (
+                        <span
+                            key={index}
+                            style={{
+                                fontWeight: 400,
+                                backgroundColor: part.highlighted
+                                    ? "yellow"
+                                    : "transparent",
+                            }}
+                        >
+                            {part.text}
+                        </span>
+                    ))}
                 </div>
                 {suggestion.description && (
                     <div style={{ fontSize: "0.85em", color: "#666" }}>
@@ -294,6 +324,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                             padding: "8px",
                             display: "flex",
                             position: "relative",
+                            cursor: "text",
                             flexWrap: "wrap",
                             gap: "8px",
                             alignItems: "center",
