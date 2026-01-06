@@ -62,6 +62,16 @@ export function useMouseEventHandler(
                     segmentElement
                 );
 
+                const textBeforeSegment = segments
+                    .slice(0, segmentIndex)
+                    .join(delimiter);
+
+                offset += textBeforeSegment.length;
+                if (segmentIndex > 0) {
+                    // Account for delimiter length
+                    offset += delimiter.length;
+                }
+
                 let anchorOffset = offset;
 
                 if (

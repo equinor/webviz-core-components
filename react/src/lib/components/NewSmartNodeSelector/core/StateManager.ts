@@ -137,7 +137,10 @@ export class StateManager implements PubSub<TopicPayloads> {
         return segments.length - 1;
     }
 
-    private convertToSegmentCaretPosition(position: CaretPosition, query: string): SegmentCaretPosition {
+    private convertToSegmentCaretPosition(
+        position: CaretPosition,
+        query: string
+    ): SegmentCaretPosition {
         const segments = query.split(this._delimiter);
         let accumulatedLength = 0;
         let segmentIndex = 0;
@@ -162,7 +165,8 @@ export class StateManager implements PubSub<TopicPayloads> {
             if (position.anchorOffset <= segmentEnd) {
                 if (i === segmentIndex) {
                     // Anchor is in the same segment
-                    anchorSegmentOffset = position.anchorOffset - accumulatedLength;
+                    anchorSegmentOffset =
+                        position.anchorOffset - accumulatedLength;
                 } else {
                     // Anchor is in a different segment - collapse to caret position
                     anchorSegmentOffset = segmentOffset;
@@ -184,7 +188,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._caretPositions = positions;
 
         // Compute segment-relative positions
-        this._segmentCaretPositions = positions.map(position => {
+        this._segmentCaretPositions = positions.map((position) => {
             const queryItem = this._queryStore.getItemById(position.queryId);
             if (!queryItem) {
                 // Fallback for invalid query ID
@@ -195,7 +199,10 @@ export class StateManager implements PubSub<TopicPayloads> {
                     anchorOffset: position.anchorOffset,
                 };
             }
-            return this.convertToSegmentCaretPosition(position, queryItem.query);
+            return this.convertToSegmentCaretPosition(
+                position,
+                queryItem.query
+            );
         });
 
         if (positions.length === 1) {
@@ -610,6 +617,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
     private clearCaretPositions() {
         this._caretPositions = [];
+        this._segmentCaretPositions = [];
         this._focusedSegment = null;
         this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
