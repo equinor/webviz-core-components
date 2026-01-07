@@ -1,6 +1,14 @@
 import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
-import type { Suggestion } from "./types/Suggestion";
-import type { SuggestionEngine } from "./SuggestionEngine";
+import {
+    getCompletions,
+    type CompletionItem,
+} from "./query-language/types/completion";
+import type { QueryItem } from "./StateManager/types";
+import { makeIndexedNodeAccessor, type BuildResult } from "./TreeIndexBuilder";
+import type { TreeAccessor } from "./query-language/types/tree";
+import type { IndexedNode } from "./types";
+import { matchName } from "./query-language/matcher";
+import { evaluateExpression } from "./query-language/evaluator/evaluateExpression";
 
 export enum SuggestionsTopic {
     SUGGESTIONS = "suggestions",
@@ -8,25 +16,25 @@ export enum SuggestionsTopic {
 }
 
 export type SuggestionsTopicPayloads = {
-    [SuggestionsTopic.SUGGESTIONS]: Suggestion[];
+    [SuggestionsTopic.SUGGESTIONS]: CompletionItem[];
     [SuggestionsTopic.SELECTED_INDEX]: number | null;
 };
 
 export type SuggestionsStateOptions = {
-    suggestionEngine: SuggestionEngine;
+    buildResult: BuildResult;
     maxSuggestions: number;
 };
 
 export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
     private _pubSubDelegate = new PubSubDelegate<SuggestionsTopicPayloads>();
-    private _suggestionEngine: SuggestionEngine;
+    private _treeAccessor: TreeAccessor<IndexedNode>;
     private _maxSuggestions: number;
 
-    private _suggestions: Suggestion[] = [];
+    private _completions: CompletionItem[] = [];
     private _selectedIndex: number | null = null;
 
     constructor(options: SuggestionsStateOptions) {
-        this._suggestionEngine = options.suggestionEngine;
+        this._treeAccessor = makeIndexedNodeAccessor(options.buildResult);
         this._maxSuggestions = options.maxSuggestions;
     }
 
@@ -39,43 +47,45 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
     ): () => SuggestionsTopicPayloads[T] {
         switch (topic) {
             case SuggestionsTopic.SUGGESTIONS:
-                return () => this._suggestions as SuggestionsTopicPayloads[T];
+                return () => this._completions as SuggestionsTopicPayloads[T];
             case SuggestionsTopic.SELECTED_INDEX:
                 return () => this._selectedIndex as SuggestionsTopicPayloads[T];
         }
     }
 
-    getSuggestions(): Suggestion[] {
-        return this._suggestions;
+    getSuggestions(): CompletionItem[] {
+        return this._completions;
     }
 
     getSelectedIndex(): number | null {
         return this._selectedIndex;
     }
 
-    getSelectedSuggestion(): Suggestion | null {
+    getSelectedSuggestion(): CompletionItem | null {
         if (
             this._selectedIndex === null ||
-            this._selectedIndex >= this._suggestions.length
+            this._selectedIndex >= this._completions.length
         ) {
             return null;
         }
-        return this._suggestions[this._selectedIndex];
+        return this._completions[this._selectedIndex];
     }
 
     hasSuggestions(): boolean {
-        return this._suggestions.length > 0;
+        return this._completions.length > 0;
     }
 
     /**
      * Update suggestions for the given query and segment index.
      * Called by input handlers when the focused segment changes.
      */
-    updateSuggestions(query: string, segmentIndex: number): void {
-        this._suggestions = this._suggestionEngine.getSuggestions(
-            query,
-            segmentIndex,
-            this._maxSuggestions
+    updateSuggestions(queryItem: QueryItem, caretOffset: number): void {
+        this._completions = getCompletions(
+            queryItem.parsedQuery,
+            caretOffset,
+            this._treeAccessor,
+            matchName,
+            evaluateExpression
         );
 
         // Reset selected index when suggestions change
@@ -90,8 +100,8 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
      * Called by input handlers when focus is lost or no segment is focused.
      */
     clearSuggestions(): void {
-        if (this._suggestions.length > 0 || this._selectedIndex !== null) {
-            this._suggestions = [];
+        if (this._completions.length > 0 || this._selectedIndex !== null) {
+            this._completions = [];
             this._selectedIndex = null;
             this._pubSubDelegate.notifySubscribers(
                 SuggestionsTopic.SUGGESTIONS
@@ -103,7 +113,7 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
     }
 
     selectNext(): void {
-        if (this._suggestions.length === 0) {
+        if (this._completions.length === 0) {
             return;
         }
 
@@ -112,19 +122,19 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
         } else {
             this._selectedIndex = Math.min(
                 this._selectedIndex + 1,
-                this._suggestions.length - 1
+                this._completions.length - 1
             );
         }
         this._pubSubDelegate.notifySubscribers(SuggestionsTopic.SELECTED_INDEX);
     }
 
     selectPrevious(): void {
-        if (this._suggestions.length === 0) {
+        if (this._completions.length === 0) {
             return;
         }
 
         if (this._selectedIndex === null) {
-            this._selectedIndex = this._suggestions.length - 1;
+            this._selectedIndex = this._completions.length - 1;
         } else {
             this._selectedIndex = Math.max(this._selectedIndex - 1, 0);
         }

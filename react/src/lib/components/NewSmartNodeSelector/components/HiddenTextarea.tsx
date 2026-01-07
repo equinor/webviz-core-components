@@ -1,6 +1,6 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import { Topic } from "../core/StateManager";
+import { Topic } from "../core/StateManager/StateManager";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { KeyboardHandler } from "../core/KeyboardHandler";
 

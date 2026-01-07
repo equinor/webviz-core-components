@@ -1,6 +1,6 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import { Topic } from "../core/StateManager";
+import { Topic } from "../core/StateManager/StateManager";
 import { computeTextWidthAndHeight } from "../utils/caretToCoordinateMapping";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
@@ -10,7 +10,9 @@ export type CaretRendererProps = {
 };
 
 export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
-    const { stateManager, delimiter } = React.useContext(SmartNodeSelectorDataContext);
+    const { stateManager, delimiter } = React.useContext(
+        SmartNodeSelectorDataContext
+    );
 
     const segmentCaretPositions = useSubscribeToTopic(
         stateManager,
@@ -46,7 +48,8 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                     continue;
                 }
 
-                const segmentBoundingRect = segmentElement.getBoundingClientRect();
+                const segmentBoundingRect =
+                    segmentElement.getBoundingClientRect();
                 const queryItem = stateManager.getQueryItemById(
                     position.queryId
                 );
@@ -68,10 +71,7 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                 const segments = queryItem.query.split(delimiter);
                 const segmentText = segments[position.segmentIndex] ?? "";
 
-                const textBeforeCaret = segmentText.slice(
-                    0,
-                    position.offset
-                );
+                const textBeforeCaret = segmentText.slice(0, position.offset);
 
                 const { width: textWidth } = computeTextWidthAndHeight(
                     textBeforeCaret,
@@ -79,10 +79,12 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                 );
 
                 // Get height from chip element to handle empty segments correctly
-                const caretHeight = chipBoundingRect?.height ?? segmentBoundingRect.height;
+                const caretHeight =
+                    chipBoundingRect?.height ?? segmentBoundingRect.height;
 
                 // Use chip's top position for empty segments to ensure correct alignment
-                const caretTop = chipBoundingRect?.top ?? segmentBoundingRect.top;
+                const caretTop =
+                    chipBoundingRect?.top ?? segmentBoundingRect.top;
 
                 newMappedCaretPositions.push({
                     left:

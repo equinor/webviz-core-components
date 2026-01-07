@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import type { TreeAccessor } from "./query-language/types/tree";
 import type { TreeDataNode, IndexedNode, TrieNode } from "./types/TreeNode";
 
 /**
@@ -173,4 +174,32 @@ export interface BuildResult {
 
     /** Root indexed nodes */
     roots: IndexedNode[];
+}
+
+export function makeIndexedNodeAccessor(
+    index: BuildResult
+): TreeAccessor<IndexedNode> {
+    const rootNode: IndexedNode = {
+        id: "VIRTUAL_ROOT",
+        name: "",
+        children: index.roots,
+        depth: -1,
+        parent: null,
+        description: "",
+        path: [],
+        pathString: "",
+        isLeaf: false,
+        filterableMetadata: {},
+        displayMetadata: {},
+    };
+
+    return {
+        getRoot: () => rootNode,
+        getName: (node: IndexedNode) => {
+            return node.name;
+        },
+        getChildren: (node: IndexedNode) => {
+            return node.children;
+        },
+    };
 }

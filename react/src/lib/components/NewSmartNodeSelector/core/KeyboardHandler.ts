@@ -1,6 +1,6 @@
-import type { StateManager } from "./StateManager";
+import type { StateManager } from "./StateManager/StateManager";
 import type { SuggestionsState } from "./SuggestionsState";
-import { Topic } from "./StateManager";
+import { Topic } from "./StateManager/StateManager";
 
 export type KeyboardHandlerOptions = {
     stateManager: StateManager;
@@ -48,7 +48,7 @@ export class KeyboardHandler {
         }
 
         this._suggestionsState.updateSuggestions(
-            queryItem.query,
+            queryItem,
             focusedSegment.segmentIndex
         );
     }
@@ -80,7 +80,7 @@ export class KeyboardHandler {
                         }
                         this._stateManager.updateQueryItem(
                             focusedSegment.queryId,
-                            selected.completedQuery
+                            selected.insertText
                         );
                         this._stateManager.setCaretPositionToEndOfQueryItem(
                             focusedSegment.queryId

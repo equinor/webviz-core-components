@@ -1,6 +1,6 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import type { QuerySegment } from "../core/StateManager";
+import type { QuerySegment } from "../core/StateManager/StateManager";
 
 export function useSuggestions(segment: QuerySegment | null = null) {
     const context = React.useContext(SmartNodeSelectorDataContext);

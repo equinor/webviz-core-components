@@ -7,7 +7,7 @@ import {
 import { VirtualizedList } from "./VirtualizedList";
 import type { Suggestion } from "../core/types/Suggestion";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
-import { Topic } from "../core/StateManager";
+import { Topic } from "../core/StateManager/StateManager";
 import { SuggestionsTopic } from "../core/SuggestionsState";
 
 export type SuggestionPopoverProps = {

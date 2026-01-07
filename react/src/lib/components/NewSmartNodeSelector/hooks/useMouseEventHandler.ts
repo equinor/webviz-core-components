@@ -1,6 +1,6 @@
 import React from "react";
 import { getCaretOffsetFromX } from "../utils/caretToCoordinateMapping";
-import type { StateManager } from "../core/StateManager";
+import type { StateManager } from "../core/StateManager/StateManager";
 
 export function useMouseEventHandler(
     ref: React.RefObject<HTMLElement>,

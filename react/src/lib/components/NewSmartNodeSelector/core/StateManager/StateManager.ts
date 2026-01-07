@@ -1,10 +1,6 @@
-import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
-import { QueryStore } from "./QueryStore";
-
-export type QueryItem = {
-    id: string;
-    query: string;
-};
+import { PubSubDelegate, type PubSub } from "../PubSubDelegate";
+import { QueryStoreDelegate } from "./QueryStoreDelegate";
+import type { QueryItem } from "./types";
 
 export type CaretPosition = {
     queryId: string;
@@ -58,7 +54,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _delimiter: string;
 
     // State
-    private _queryStore: QueryStore;
+    private _queryStoreDelegate: QueryStoreDelegate;
     private _caretPositions: CaretPosition[] = [];
     private _segmentCaretPositions: SegmentCaretPosition[] = [];
     private _suggestionsIndex: number | null = null;
@@ -66,7 +62,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
     constructor(options: StateManagerOptions) {
         this._delimiter = options.delimiter;
-        this._queryStore = new QueryStore();
+        this._queryStoreDelegate = new QueryStoreDelegate(this._delimiter);
     }
 
     getPubSubDelegate(): PubSubDelegate<TopicPayloads> {
@@ -74,7 +70,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     getQueryItemById(id: string): QueryItem | null {
-        return this._queryStore.getItemById(id);
+        return this._queryStoreDelegate.getItemById(id);
     }
 
     getFocusedSegment(): QuerySegment | null {
@@ -90,7 +86,8 @@ export class StateManager implements PubSub<TopicPayloads> {
     ): () => TopicPayloads[T] {
         switch (topic) {
             case Topic.QUERY_ITEMS:
-                return () => this._queryStore.getItems() as TopicPayloads[T];
+                return () =>
+                    this._queryStoreDelegate.getItems() as TopicPayloads[T];
             case Topic.CARET_POSITIONS:
                 return () => this._caretPositions as TopicPayloads[T];
             case Topic.SEGMENT_CARET_POSITIONS:
@@ -189,7 +186,9 @@ export class StateManager implements PubSub<TopicPayloads> {
 
         // Compute segment-relative positions
         this._segmentCaretPositions = positions.map((position) => {
-            const queryItem = this._queryStore.getItemById(position.queryId);
+            const queryItem = this._queryStoreDelegate.getItemById(
+                position.queryId
+            );
             if (!queryItem) {
                 // Fallback for invalid query ID
                 return {
@@ -206,7 +205,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         });
 
         if (positions.length === 1) {
-            const queryItem = this._queryStore.getItemById(
+            const queryItem = this._queryStoreDelegate.getItemById(
                 positions[0].queryId
             );
             if (!queryItem) {
@@ -232,7 +231,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     moveCaretRelative(dx: number, selecting: boolean): void {
         const newCaretPositions: CaretPosition[] = [];
         for (const caretPosition of this._caretPositions) {
-            const queryItem = this._queryStore.getItemById(
+            const queryItem = this._queryStoreDelegate.getItemById(
                 caretPosition.queryId
             );
 
@@ -260,7 +259,9 @@ export class StateManager implements PubSub<TopicPayloads> {
 
             if (newOffset > queryItem.query.length) {
                 if (caretPosition.anchorOffset === caretPosition.offset) {
-                    const nextItem = this._queryStore.getNextItem(queryItem.id);
+                    const nextItem = this._queryStoreDelegate.getNextItem(
+                        queryItem.id
+                    );
                     if (nextItem) {
                         newOffset = 0;
                         newQueryId = nextItem.id;
@@ -273,9 +274,8 @@ export class StateManager implements PubSub<TopicPayloads> {
             }
             if (newOffset < 0) {
                 if (caretPosition.anchorOffset === caretPosition.offset) {
-                    const previousItem = this._queryStore.getPreviousItem(
-                        queryItem.id
-                    );
+                    const previousItem =
+                        this._queryStoreDelegate.getPreviousItem(queryItem.id);
                     if (previousItem) {
                         newOffset = previousItem.query.length;
                         newQueryId = previousItem.id;
@@ -436,7 +436,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         const newCaretPositions: CaretPosition[] = [];
 
         for (const caretPosition of this._caretPositions) {
-            const queryItem = this._queryStore.getItemById(
+            const queryItem = this._queryStoreDelegate.getItemById(
                 caretPosition.queryId
             );
             if (!queryItem) {
@@ -458,7 +458,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             );
 
             if (deleteSelectionResult.deleted) {
-                this._queryStore.updateItem(
+                this._queryStoreDelegate.updateItem(
                     queryItem.id,
                     deleteSelectionResult.newValue
                 );
@@ -478,7 +478,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             );
 
             if (unwrapResult.unwrapped) {
-                this._queryStore.updateItem(
+                this._queryStoreDelegate.updateItem(
                     queryItem.id,
                     unwrapResult.newValue
                 );
@@ -496,7 +496,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             const after = queryItem.query.slice(caretPosition.offset);
             const newQuery = before + after;
 
-            this._queryStore.updateItem(queryItem.id, newQuery);
+            this._queryStoreDelegate.updateItem(queryItem.id, newQuery);
 
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
@@ -511,17 +511,22 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     addQueryItem(query: string): void {
-        this._queryStore.addItem(query);
+        this._queryStoreDelegate.addItem(query);
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
     updateQueryItem(id: string, newQuery: string): void {
-        this._queryStore.updateItem(id, newQuery);
+        this._queryStoreDelegate.updateItem(id, newQuery);
+        this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+    }
+
+    removeQueryItemById(id: string): void {
+        this._queryStoreDelegate.removeItem(id);
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
     setCaretPositionToEndOfQueryItem(id: string): void {
-        const queryItem = this._queryStore.getItemById(id);
+        const queryItem = this._queryStoreDelegate.getItemById(id);
         if (!queryItem) {
             return;
         }
@@ -554,7 +559,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         const newCaretPositions: CaretPosition[] = [];
 
         for (const caretPosition of this._caretPositions) {
-            const queryItem = this._queryStore.getItemById(
+            const queryItem = this._queryStoreDelegate.getItemById(
                 caretPosition.queryId
             );
 
@@ -585,7 +590,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
             const newQuery = before + text + after;
 
-            this._queryStore.updateItem(queryItem.id, newQuery);
+            this._queryStoreDelegate.updateItem(queryItem.id, newQuery);
 
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
@@ -600,7 +605,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     setCaretPositionToEndOfLastItem() {
-        const lastItem = this._queryStore.getLastItem();
+        const lastItem = this._queryStoreDelegate.getLastItem();
         if (!lastItem) {
             return;
         }

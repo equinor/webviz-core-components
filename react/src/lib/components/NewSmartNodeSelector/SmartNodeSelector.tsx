@@ -6,21 +6,18 @@
  */
 
 import React from "react";
-import {
-    TagSuggestionEngine,
-    type TreeDataNode,
-    type IndexedNode,
-} from "./core";
+import { type TreeDataNode, type IndexedNode } from "./core";
 import { QueryChip } from "./components/QueryChip";
 import { DebugInfo } from "./components/DebugInfo";
 import type { Suggestion } from "./core/types/Suggestion";
 import { SuggestionPopover } from "./components/SuggestionPopover";
 import { HiddenTextarea } from "./components/HiddenTextarea";
-import { StateManager, Topic } from "./core/StateManager";
+import { StateManager, Topic } from "./core/StateManager/StateManager";
 import { CaretRenderer } from "./components/CaretAndSelectionRenderer";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 import { useSubscribeToTopic } from "./core/PubSubDelegate";
 import { SuggestionsState } from "./core/SuggestionsState";
+import { TreeIndexBuilder } from "./core/TreeIndexBuilder";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -181,7 +178,6 @@ type SmartNodeSelectorSlotProps<
 };
 
 export type SmartNodeSelectorDataContextType = {
-    suggestionEngine: TagSuggestionEngine;
     stateManager: StateManager;
     suggestionsState: SuggestionsState;
     placeholders: {
@@ -244,10 +240,6 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
 
     const ref = React.useRef<HTMLDivElement>(null);
 
-    const suggestionEngine = React.useMemo(() => {
-        return new TagSuggestionEngine(defaultedProps.delimiter);
-    }, [defaultedProps.delimiter]);
-
     const stateManager = React.useMemo(() => {
         const stateManager = new StateManager({
             delimiter: defaultedProps.delimiter,
@@ -256,35 +248,32 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         return stateManager;
     }, []) as StateManager;
 
+    const treeIndexBuildResult = React.useMemo(() => {
+        return new TreeIndexBuilder(defaultedProps.delimiter).build(
+            defaultedProps.data
+        );
+    }, [defaultedProps.data, defaultedProps.delimiter]);
+
     const suggestionsState = React.useMemo(() => {
         return new SuggestionsState({
-            suggestionEngine,
+            buildResult: treeIndexBuildResult,
             maxSuggestions: defaultedProps.maxSuggestions,
         });
-    }, [suggestionEngine, defaultedProps.maxSuggestions]);
+    }, [treeIndexBuildResult, defaultedProps.maxSuggestions]);
 
     useMouseEventHandler(ref, stateManager, defaultedProps.delimiter);
 
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
     const hasFocus = useSubscribeToTopic(stateManager, Topic.HAS_FOCUS);
 
-    React.useEffect(
-        function onDataChange() {
-            suggestionEngine.setData(defaultedProps.data);
-        },
-        [defaultedProps.data, suggestionEngine]
-    );
-
     const dataContext = React.useMemo(
         () => ({
-            suggestionEngine,
             stateManager,
             suggestionsState,
             placeholders: defaultedProps.placeholders,
             delimiter: defaultedProps.delimiter,
         }),
         [
-            suggestionEngine,
             stateManager,
             suggestionsState,
             defaultedProps.placeholders,
@@ -319,7 +308,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         ref={ref}
                         data-smart-node-selector-root
                         style={{
-                            border: "1px solid #ccc",
+                            border: "1px solid #433f3fff",
                             borderRadius: "4px",
                             padding: "8px",
                             display: "flex",
@@ -327,6 +316,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                             cursor: "text",
                             flexWrap: "wrap",
                             gap: "8px",
+                            minHeight: "40px",
                             alignItems: "center",
                             outline: hasFocus ? "2px solid #007aff" : "none",
                             ...(rootProps as any).style,

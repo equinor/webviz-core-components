@@ -1,4 +1,4 @@
-import type { Expr } from "../ast";
+import type { Expr } from "../ast/ast";
 import type { Token } from "../lexer";
 import type { Range } from "../types/range";
 

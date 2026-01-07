@@ -1,4 +1,4 @@
-import type { Atom, Expr } from "../ast";
+import type { Atom, Expr } from "../ast/ast";
 import type { Token } from "../lexer";
 import type { SegmentSpan } from "../segments";
 import type { Diagnostic } from "../types/diagnostics";

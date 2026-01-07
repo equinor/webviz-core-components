@@ -5,10 +5,13 @@ import {
 } from "../SmartNodeSelector";
 import { useMatches } from "../hooks/useMatches";
 import { MatchesCounter } from "./MatchesCounter";
-import { Topic, type QueryItem } from "../core/StateManager";
-import { TokenRenderer } from "./TokenRenderer";
-import { QueryTokenizer } from "../core/TagTokenizer";
+import { Topic } from "../core/StateManager/StateManager";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import { QuerySegment } from "./QuerySegment";
+import { TokenRenderer } from "./TokenRenderer";
+import type { QueryItem } from "../core/StateManager/types";
+import type { Token } from "../core/query-language/lexer";
+import type { SegmentSpan } from "../core/query-language/segments";
 
 export type QueryChipProps = {
     queryItem: QueryItem;
@@ -27,32 +30,14 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     );
 
     const handleRemoveTagClick = React.useCallback(
-        function handleRemoveTagClick() {},
+        function handleRemoveTagClick() {
+            dataContext.stateManager.removeQueryItemById(props.queryItem.id);
+        },
         [props.queryItem.id]
     );
 
     const QueryChipComponent = slotsContext.slots.queryChip;
     const queryChipProps = slotsContext.slotProps.queryChip ?? {};
-
-    const tokenizer = React.useMemo(
-        () => new QueryTokenizer(dataContext.delimiter ?? ":"),
-        [dataContext.delimiter]
-    );
-
-    // Tokenize the current value
-    const tokens = React.useMemo(() => {
-        try {
-            return tokenizer.tokenize(props.queryItem.query);
-        } catch (error) {
-            // If tokenization fails, return a basic token structure
-            return {
-                type: "QUERY" as const,
-                children: [],
-                start: 0,
-                end: props.queryItem.query.length,
-            };
-        }
-    }, [tokenizer, props.queryItem.query]);
 
     const isValid = matches.length > 0;
     const isEditing =
@@ -60,6 +45,75 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
         undefined;
     const hasMoreThanOneSegment = props.queryItem.query.includes(
         dataContext.delimiter
+    );
+
+    const content = React.useMemo(
+        function makeContent() {
+            const nodes: React.ReactNode[] = [];
+
+            let segmentTokens: Token[] = [];
+            let segment: SegmentSpan | null = null;
+            let segmentIndex = 0;
+
+            function flushSegmentTokens(forceFlush: boolean = false) {
+                if (segmentTokens.length > 0 || forceFlush) {
+                    nodes.push(
+                        <QuerySegment
+                            key={nodes.length}
+                            queryId={props.queryItem.id}
+                            segmentIndex={segmentIndex}
+                            tokens={[...segmentTokens]}
+                        />
+                    );
+                    segmentTokens = [];
+                }
+            }
+
+            for (
+                let i = 0;
+                i < props.queryItem.parsedQuery.tokens.length;
+                i++
+            ) {
+                const token = props.queryItem.parsedQuery.tokens[i];
+
+                const tokenSegment = props.queryItem.parsedQuery.segments.find(
+                    (seg) => seg.tokenStartIndex <= i && i < seg.tokenEndIndex
+                );
+
+                if (tokenSegment !== segment) {
+                    // Flush previous segment tokens
+                    flushSegmentTokens();
+
+                    if (tokenSegment) {
+                        if (segment !== null) {
+                            segmentIndex++;
+                        }
+                        // New segment started
+                        segment = tokenSegment;
+                    }
+                }
+
+                if (!tokenSegment) {
+                    // Token not part of any segment, must be a delimiter
+                    nodes.push(
+                        <TokenRenderer
+                            key={nodes.length}
+                            token={token}
+                            queryId={props.queryItem.id}
+                        />
+                    );
+                    continue;
+                }
+
+                segmentTokens.push(token);
+            }
+
+            // Flush remaining segment tokens
+            flushSegmentTokens(true);
+
+            return nodes;
+        },
+        [props.queryItem]
     );
 
     return (
@@ -83,12 +137,15 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                     whiteSpace: "pre",
                 }}
             >
-                <TokenRenderer token={tokens} queryId={props.queryItem.id} />
+                {content}
                 <Placeholder
                     isVisible={props.queryItem.query === ""}
                     isLast={props.isLast}
                 />
             </div>
+            <button onClick={handleRemoveTagClick} aria-label="Remove tag">
+                &#x2715;
+            </button>
         </QueryChipComponent>
     );
 }

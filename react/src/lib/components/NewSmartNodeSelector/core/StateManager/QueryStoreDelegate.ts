@@ -1,9 +1,5 @@
-import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
-
-export type QueryItem = {
-    id: string;
-    query: string;
-};
+import { parseQuery } from "../query-language/parse";
+import type { QueryItem } from "./types";
 
 export enum QueryStoreTopic {
     QUERY_ITEMS = "queryItems",
@@ -13,9 +9,14 @@ export type QueryStoreTopicPayloads = {
     [QueryStoreTopic.QUERY_ITEMS]: QueryItem[];
 };
 
-export class QueryStore {
+export class QueryStoreDelegate {
     private _queryItems: QueryItem[] = [];
     private _queryItemCounter: number = 0;
+    private _delimiter: string;
+
+    constructor(delimiter: string) {
+        this._delimiter = delimiter;
+    }
 
     getItems(): QueryItem[] {
         return this._queryItems;
@@ -53,6 +54,7 @@ export class QueryStore {
         const newItem: QueryItem = {
             id: `query-item-${this._queryItemCounter++}`,
             query,
+            parsedQuery: parseQuery(query, { delimiter: this._delimiter }),
         };
         this._queryItems = [...this._queryItems, newItem];
         return newItem;
@@ -64,7 +66,15 @@ export class QueryStore {
 
     updateItem(id: string, newQuery: string): void {
         this._queryItems = this._queryItems.map((item) =>
-            item.id === id ? { ...item, query: newQuery } : item
+            item.id === id
+                ? {
+                      ...item,
+                      query: newQuery,
+                      parsedQuery: parseQuery(newQuery, {
+                          delimiter: this._delimiter,
+                      }),
+                  }
+                : item
         );
     }
 }

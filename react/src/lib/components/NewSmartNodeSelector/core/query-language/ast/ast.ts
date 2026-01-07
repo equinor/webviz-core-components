@@ -1,4 +1,4 @@
-import type { Range } from "./types/range";
+import type { Range } from "../types/range";
 
 export type Expr = BinaryExpr | GroupExpr | SetExpr | PatternExpr | ErrorExpr;
 

@@ -1,4 +1,4 @@
-import type { QueryAST } from "./ast";
+import type { QueryAST } from "./ast/ast";
 import { tokenize, type Token } from "./lexer";
 import { parseSegment } from "./segment-parser/parseSegment";
 import { splitSegments, type SegmentSpan } from "./segments";
