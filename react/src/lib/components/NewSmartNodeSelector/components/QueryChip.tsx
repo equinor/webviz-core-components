@@ -10,8 +10,6 @@ import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { QuerySegment } from "./QuerySegment";
 import { TokenRenderer } from "./TokenRenderer";
 import type { QueryItem } from "../core/StateManager/types";
-import type { Token } from "../core/query-language/lexer";
-import type { SegmentSpan } from "../core/query-language/segments";
 
 export type QueryChipProps = {
     queryItem: QueryItem;
@@ -50,50 +48,12 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const content = React.useMemo(
         function makeContent() {
             const nodes: React.ReactNode[] = [];
-
-            let segmentTokens: Token[] = [];
-            let segment: SegmentSpan | null = null;
             let segmentIndex = 0;
+            let tokenIndex = 0;
 
-            function flushSegmentTokens(forceFlush: boolean = false) {
-                if (segmentTokens.length > 0 || forceFlush) {
-                    nodes.push(
-                        <QuerySegment
-                            key={nodes.length}
-                            queryId={props.queryItem.id}
-                            segmentIndex={segmentIndex}
-                            tokens={[...segmentTokens]}
-                        />
-                    );
-                    segmentTokens = [];
-                }
-            }
-
-            for (
-                let i = 0;
-                i < props.queryItem.parsedQuery.tokens.length;
-                i++
-            ) {
-                const token = props.queryItem.parsedQuery.tokens[i];
-
-                const tokenSegment = props.queryItem.parsedQuery.segments.find(
-                    (seg) => seg.tokenStartIndex <= i && i < seg.tokenEndIndex
-                );
-
-                if (tokenSegment !== segment) {
-                    // Flush previous segment tokens
-                    flushSegmentTokens();
-
-                    if (tokenSegment) {
-                        if (segment !== null) {
-                            segmentIndex++;
-                        }
-                        // New segment started
-                        segment = tokenSegment;
-                    }
-                }
-
-                if (!tokenSegment) {
+            for (const segment of props.queryItem.parsedQuery.segments) {
+                for (let i = tokenIndex; i < segment.tokenStartIndex; i++) {
+                    const token = props.queryItem.parsedQuery.tokens[i];
                     // Token not part of any segment, must be a delimiter
                     nodes.push(
                         <TokenRenderer
@@ -102,18 +62,45 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                             queryId={props.queryItem.id}
                         />
                     );
-                    continue;
                 }
 
-                segmentTokens.push(token);
+                const segmentTokens = props.queryItem.parsedQuery.tokens.slice(
+                    segment.tokenStartIndex,
+                    segment.tokenEndIndex
+                );
+
+                nodes.push(
+                    <QuerySegment
+                        key={nodes.length}
+                        queryId={props.queryItem.id}
+                        segmentIndex={segmentIndex}
+                        tokens={segmentTokens}
+                    />
+                );
+
+                segmentIndex++;
+                tokenIndex = segment.tokenEndIndex;
             }
 
-            // Flush remaining segment tokens
-            flushSegmentTokens(true);
+            for (
+                let i = tokenIndex;
+                i < props.queryItem.parsedQuery.tokens.length;
+                i++
+            ) {
+                const token = props.queryItem.parsedQuery.tokens[i];
+                // Token not part of any segment, must be a delimiter
+                nodes.push(
+                    <TokenRenderer
+                        key={nodes.length}
+                        token={token}
+                        queryId={props.queryItem.id}
+                    />
+                );
+            }
 
             return nodes;
         },
-        [props.queryItem]
+        [props.queryItem.parsedQuery]
     );
 
     return (
@@ -135,6 +122,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                     alignSelf: "stretch",
                     flex: 1,
                     whiteSpace: "pre",
+                    marginRight: 4,
                 }}
             >
                 {content}

@@ -579,6 +579,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             const before = queryItem.query.slice(0, start);
             const after = queryItem.query.slice(end);
 
+            /*
             if (text === "(") {
                 text = "()";
                 start -= 1;
@@ -587,6 +588,7 @@ export class StateManager implements PubSub<TopicPayloads> {
                 text = "{}";
                 start -= 1;
             }
+                */
 
             const newQuery = before + text + after;
 

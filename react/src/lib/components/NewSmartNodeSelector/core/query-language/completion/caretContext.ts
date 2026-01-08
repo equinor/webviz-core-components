@@ -1,5 +1,5 @@
 import { clamp } from "../../../utils/clamp";
-import type { Token } from "../lexer";
+import { isGroupToken, type Token } from "../lexer";
 import type { ParsedQuery } from "../parse";
 import type { SegmentSpan } from "../segments";
 import type { Range } from "../types/range";
@@ -17,7 +17,9 @@ export type CaretContext = {
     tokenAt?: Token;
     tokenAfter?: Token;
 
-    stack: ("LPAREN" | "LBRACE")[];
+    stack: Token[];
+    insideGroup: boolean;
+    insideSet: boolean;
 
     expectation: Expectation;
 
@@ -44,49 +46,47 @@ export function getCaretContext(
     let tokenBefore: Token | undefined;
     let tokenAfter: Token | undefined;
 
-    const stack: ("LPAREN" | "LBRACE")[] = [];
+    let stack: Token[] = [];
 
     for (let i = segment.tokenStartIndex; i < segment.tokenEndIndex; i++) {
         const token = parsed.tokens[i];
 
-        switch (token.type) {
-            case "LPAREN":
-                stack.push("LPAREN");
-                break;
-            case "LBRACE":
-                stack.push("LBRACE");
-                break;
-            case "RPAREN":
-                if (stack.at(stack.length - 1) === "LPAREN") {
-                    stack.pop();
+        if (!tokenAt) {
+            if (isGroupToken(token)) {
+                if (!token.refTokenId) {
+                    stack.push(token);
+                } else if (!stack.find((t) => t.id === token.refTokenId)) {
+                    stack.push(token);
+                } else {
+                    stack = stack.filter((t) => t.id !== token.refTokenId);
                 }
-                break;
-            case "RBRACE":
-                if (stack.at(stack.length - 1) === "LBRACE") {
-                    stack.pop();
-                }
-                break;
-            default:
-                break;
+            }
         }
 
-        if (token.charRange.end <= caret) {
+        if (token.charRange.end < caret) {
             tokenBefore = token;
         }
         // charRange.end is exclusive
-        if (token.charRange.start <= caret && caret < token.charRange.end) {
+        if (token.charRange.start < caret && caret <= token.charRange.end) {
             tokenAt = token;
         }
-        if (token.charRange.start > caret) {
+        if (token.charRange.start >= caret) {
             tokenAfter = token;
             break;
         }
     }
 
     const prevSignificantToken =
-        tokenBefore && isSignificantToken(tokenBefore) ? tokenBefore : null;
+        tokenAt && isSignificantToken(tokenAt) ? tokenAt : null;
 
-    const expectation = determineExpectation(prevSignificantToken, stack);
+    const insideGroup = stack.find((t) => t.type === "LPAREN") !== undefined;
+    const insideSet = stack.find((t) => t.type === "LBRACE") !== undefined;
+
+    const expectation = determineExpectation(
+        prevSignificantToken,
+        insideGroup,
+        insideSet
+    );
 
     const replaceRange = computeReplaceRange(tokenAt, caret);
 
@@ -99,6 +99,8 @@ export function getCaretContext(
         tokenAt,
         tokenAfter,
         stack,
+        insideGroup,
+        insideSet,
         expectation,
         replaceRange,
         isEmptySegment: segment.tokenStartIndex === segment.tokenEndIndex,
@@ -142,13 +144,21 @@ function isSignificantToken(token: Token): boolean {
 }
 
 function determineExpectation(
-    prevToken: Token | null,
-    stack: ("LPAREN" | "LBRACE")[]
+    token: Token | null,
+    insideGroup: boolean,
+    insideSet: boolean
 ): Expectation {
-    const insideGroup = stack.includes("LPAREN");
-    const insideSet = stack.includes("LBRACE");
+    if (!token) {
+        return "term";
+    }
 
-    if (!prevToken) {
+    if (token.type === "LITERAL") {
+        if (insideGroup) {
+            return "operator";
+        }
+        if (insideSet) {
+            return "comma";
+        }
         return "term";
     }
 
@@ -158,8 +168,9 @@ function determineExpectation(
         "OR",
         "AND",
         "COMMA",
+        "LITERAL",
     ];
-    if (tokensThatExpectTerm.includes(prevToken.type)) {
+    if (tokensThatExpectTerm.includes(token.type)) {
         return "term";
     }
 

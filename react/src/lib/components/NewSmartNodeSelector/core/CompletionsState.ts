@@ -1,59 +1,61 @@
 import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
-import {
-    getCompletions,
-    type CompletionItem,
-} from "./query-language/types/completion";
+import type { CompletionItem } from "./query-language/types/completion";
 import type { QueryItem } from "./StateManager/types";
-import { makeIndexedNodeAccessor, type BuildResult } from "./TreeIndexBuilder";
 import type { TreeAccessor } from "./query-language/types/tree";
 import type { IndexedNode } from "./types";
 import { matchName } from "./query-language/matcher";
 import { evaluateExpression } from "./query-language/evaluator/evaluateExpression";
+import { getCompletions } from "./query-language/completion/completion";
 
-export enum SuggestionsTopic {
-    SUGGESTIONS = "suggestions",
+export enum CompletionsTopic {
+    COMPLETIONS = "completions",
     SELECTED_INDEX = "selectedIndex",
 }
 
-export type SuggestionsTopicPayloads = {
-    [SuggestionsTopic.SUGGESTIONS]: CompletionItem[];
-    [SuggestionsTopic.SELECTED_INDEX]: number | null;
+export type CompletionsStateTopicPayloads = {
+    [CompletionsTopic.COMPLETIONS]: CompletionItem<IndexedNode>[];
+    [CompletionsTopic.SELECTED_INDEX]: number | null;
 };
 
-export type SuggestionsStateOptions = {
-    buildResult: BuildResult;
-    maxSuggestions: number;
+export type CompletionsStateOptions<TNode> = {
+    treeAccessor: TreeAccessor<TNode>;
+    maxNumCompletions: number;
 };
 
-export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
-    private _pubSubDelegate = new PubSubDelegate<SuggestionsTopicPayloads>();
-    private _treeAccessor: TreeAccessor<IndexedNode>;
-    private _maxSuggestions: number;
+export class CompletionsState<
+    TNode,
+> implements PubSub<CompletionsStateTopicPayloads> {
+    private _pubSubDelegate =
+        new PubSubDelegate<CompletionsStateTopicPayloads>();
+    private _treeAccessor: TreeAccessor<TNode>;
+    private _maxNumCompletions: number;
 
-    private _completions: CompletionItem[] = [];
+    private _completions: CompletionItem<TNode>[] = [];
     private _selectedIndex: number | null = null;
 
-    constructor(options: SuggestionsStateOptions) {
-        this._treeAccessor = makeIndexedNodeAccessor(options.buildResult);
-        this._maxSuggestions = options.maxSuggestions;
+    constructor(options: CompletionsStateOptions<TNode>) {
+        this._treeAccessor = options.treeAccessor;
+        this._maxNumCompletions = options.maxNumCompletions;
     }
 
-    getPubSubDelegate(): PubSubDelegate<SuggestionsTopicPayloads> {
+    getPubSubDelegate(): PubSubDelegate<CompletionsStateTopicPayloads> {
         return this._pubSubDelegate;
     }
 
-    makeSnapshotGetter<T extends keyof SuggestionsTopicPayloads>(
+    makeSnapshotGetter<T extends keyof CompletionsStateTopicPayloads>(
         topic: T
-    ): () => SuggestionsTopicPayloads[T] {
+    ): () => CompletionsStateTopicPayloads[T] {
         switch (topic) {
-            case SuggestionsTopic.SUGGESTIONS:
-                return () => this._completions as SuggestionsTopicPayloads[T];
-            case SuggestionsTopic.SELECTED_INDEX:
-                return () => this._selectedIndex as SuggestionsTopicPayloads[T];
+            case CompletionsTopic.COMPLETIONS:
+                return () =>
+                    this._completions as CompletionsStateTopicPayloads[T];
+            case CompletionsTopic.SELECTED_INDEX:
+                return () =>
+                    this._selectedIndex as CompletionsStateTopicPayloads[T];
         }
     }
 
-    getSuggestions(): CompletionItem[] {
+    getCompletions(): CompletionItem<TNode>[] {
         return this._completions;
     }
 
@@ -61,7 +63,7 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
         return this._selectedIndex;
     }
 
-    getSelectedSuggestion(): CompletionItem | null {
+    getSelectedCompletion(): CompletionItem<TNode> | null {
         if (
             this._selectedIndex === null ||
             this._selectedIndex >= this._completions.length
@@ -76,11 +78,11 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
     }
 
     /**
-     * Update suggestions for the given query and segment index.
+     * Update completions for the given query and segment index.
      * Called by input handlers when the focused segment changes.
      */
-    updateSuggestions(queryItem: QueryItem, caretOffset: number): void {
-        this._completions = getCompletions(
+    updateCompletions(queryItem: QueryItem, caretOffset: number): void {
+        this._completions = getCompletions<TNode>(
             queryItem.parsedQuery,
             caretOffset,
             this._treeAccessor,
@@ -88,26 +90,26 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
             evaluateExpression
         );
 
-        // Reset selected index when suggestions change
+        // Reset selected index when completions change
         this._selectedIndex = null;
 
-        this._pubSubDelegate.notifySubscribers(SuggestionsTopic.SUGGESTIONS);
-        this._pubSubDelegate.notifySubscribers(SuggestionsTopic.SELECTED_INDEX);
+        this._pubSubDelegate.notifySubscribers(CompletionsTopic.COMPLETIONS);
+        this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }
 
     /**
      * Clear all suggestions.
      * Called by input handlers when focus is lost or no segment is focused.
      */
-    clearSuggestions(): void {
+    clearCompletions(): void {
         if (this._completions.length > 0 || this._selectedIndex !== null) {
             this._completions = [];
             this._selectedIndex = null;
             this._pubSubDelegate.notifySubscribers(
-                SuggestionsTopic.SUGGESTIONS
+                CompletionsTopic.COMPLETIONS
             );
             this._pubSubDelegate.notifySubscribers(
-                SuggestionsTopic.SELECTED_INDEX
+                CompletionsTopic.SELECTED_INDEX
             );
         }
     }
@@ -125,7 +127,7 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
                 this._completions.length - 1
             );
         }
-        this._pubSubDelegate.notifySubscribers(SuggestionsTopic.SELECTED_INDEX);
+        this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }
 
     selectPrevious(): void {
@@ -138,14 +140,14 @@ export class SuggestionsState implements PubSub<SuggestionsTopicPayloads> {
         } else {
             this._selectedIndex = Math.max(this._selectedIndex - 1, 0);
         }
-        this._pubSubDelegate.notifySubscribers(SuggestionsTopic.SELECTED_INDEX);
+        this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }
 
     clearSelection(): void {
         if (this._selectedIndex !== null) {
             this._selectedIndex = null;
             this._pubSubDelegate.notifySubscribers(
-                SuggestionsTopic.SELECTED_INDEX
+                CompletionsTopic.SELECTED_INDEX
             );
         }
     }

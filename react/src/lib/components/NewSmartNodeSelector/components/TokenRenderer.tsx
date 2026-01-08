@@ -1,5 +1,5 @@
 import React from "react";
-import type { Token } from "../core/query-language/lexer";
+import type { GroupToken, Token } from "../core/query-language/lexer";
 
 export type TokenRendererProps = {
     token: Token;
@@ -34,34 +34,30 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
                 </span>
             );
 
-        case "LBRACE":
+        case "LBRACE": {
+            const color = makeColorForGroupToken(token);
             return (
-                <span style={{ color: "#999", fontWeight: "bold" }}>
-                    {token.value}
-                </span>
+                <span style={{ color, fontWeight: "bold" }}>{token.value}</span>
             );
-
-        case "RBRACE":
+        }
+        case "RBRACE": {
+            const color = makeColorForGroupToken(token);
             return (
-                <span style={{ color: "#999", fontWeight: "bold" }}>
-                    {token.value}
-                </span>
+                <span style={{ color, fontWeight: "bold" }}>{token.value}</span>
             );
-
-        case "LPAREN":
+        }
+        case "LPAREN": {
+            const color = makeColorForGroupToken(token);
             return (
-                <span style={{ color: "#999", fontWeight: "bold" }}>
-                    {token.value}
-                </span>
+                <span style={{ color, fontWeight: "bold" }}>{token.value}</span>
             );
-
-        case "RPAREN":
+        }
+        case "RPAREN": {
+            const color = makeColorForGroupToken(token);
             return (
-                <span style={{ color: "#999", fontWeight: "bold" }}>
-                    {token.value}
-                </span>
+                <span style={{ color, fontWeight: "bold" }}>{token.value}</span>
             );
-
+        }
         case "QMARK":
             return (
                 <span style={{ color: "#0066CC", fontWeight: "bold" }}>
@@ -89,4 +85,11 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
         default:
             return <span>{String(token)}</span>;
     }
+}
+
+function makeColorForGroupToken(token: GroupToken): string {
+    if (token.refTokenId === undefined) {
+        return "#d12525ff";
+    }
+    return "#999";
 }

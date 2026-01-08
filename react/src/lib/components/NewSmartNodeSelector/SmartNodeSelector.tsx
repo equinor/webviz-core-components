@@ -9,15 +9,18 @@ import React from "react";
 import { type TreeDataNode, type IndexedNode } from "./core";
 import { QueryChip } from "./components/QueryChip";
 import { DebugInfo } from "./components/DebugInfo";
-import type { Suggestion } from "./core/types/Suggestion";
-import { SuggestionPopover } from "./components/SuggestionPopover";
+import { CompletionPopover } from "./components/CompletionPopover";
 import { HiddenTextarea } from "./components/HiddenTextarea";
 import { StateManager, Topic } from "./core/StateManager/StateManager";
 import { CaretRenderer } from "./components/CaretAndSelectionRenderer";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 import { useSubscribeToTopic } from "./core/PubSubDelegate";
-import { SuggestionsState } from "./core/SuggestionsState";
-import { TreeIndexBuilder } from "./core/TreeIndexBuilder";
+import { CompletionsState } from "./core/CompletionsState";
+import {
+    makeIndexedNodeAccessor,
+    TreeIndexBuilder,
+} from "./core/TreeIndexBuilder";
+import type { CompletionItem } from "./core/query-language/types/completion";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -64,8 +67,8 @@ export type SmartNodeSelectorProps<
     /** CSS class name for root element */
     slotProps?: SmartNodeSelectorSlotProps<TSlots>;
 
-    renderSuggestionItem?: (
-        suggestion: Suggestion,
+    renderCompletionItem?: (
+        completion: CompletionItem<IndexedNode>,
         isSelected: boolean
     ) => React.ReactNode;
 
@@ -79,29 +82,10 @@ const DEFAULT_PROPS = {
         newTag: "New tag...",
         incompleteTag: "Incomplete tag...",
     },
-    renderSuggestionItem: (suggestion: Suggestion, isSelected: boolean) => {
-        const parts: { highlighted: boolean; text: string }[] = [];
-        for (let i = 0; i < suggestion.name.length; ) {
-            const highlight = suggestion.highlights?.find((h) => h.start === i);
-            if (highlight) {
-                parts.push({
-                    highlighted: true,
-                    text: suggestion.name.slice(highlight.start, highlight.end),
-                });
-                i = highlight.end;
-            } else {
-                const nextHighlightStart = suggestion.highlights
-                    ?.map((h) => h.start)
-                    .find((start) => start > i);
-                const end = nextHighlightStart ?? suggestion.name.length;
-                parts.push({
-                    highlighted: false,
-                    text: suggestion.name.slice(i, end),
-                });
-                i = end;
-            }
-        }
-
+    renderCompletionItem: (
+        completion: CompletionItem<IndexedNode>,
+        isSelected: boolean
+    ) => {
         return (
             <li
                 className="suggestion-item"
@@ -111,50 +95,7 @@ const DEFAULT_PROPS = {
                     backgroundColor: isSelected ? "#e6f0ff" : "transparent",
                 }}
             >
-                <div style={{ fontWeight: 500 }}>
-                    {suggestion.contextPrefix && (
-                        <span style={{ color: "#999", fontWeight: 400 }}>
-                            {suggestion.contextPrefix}
-                        </span>
-                    )}
-                    {parts.map((part, index) => (
-                        <span
-                            key={index}
-                            style={{
-                                fontWeight: 400,
-                                backgroundColor: part.highlighted
-                                    ? "yellow"
-                                    : "transparent",
-                            }}
-                        >
-                            {part.text}
-                        </span>
-                    ))}
-                </div>
-                {suggestion.description && (
-                    <div style={{ fontSize: "0.85em", color: "#666" }}>
-                        {suggestion.description}
-                    </div>
-                )}
-                {suggestion.node?.filterableMetadata &&
-                    Object.keys(suggestion.node.filterableMetadata).length >
-                        0 && (
-                        <div
-                            style={{
-                                fontSize: "0.75em",
-                                color: "#999",
-                                marginTop: "4px",
-                            }}
-                        >
-                            {Object.entries(
-                                suggestion.node.filterableMetadata
-                            ).map(([key, value]) => (
-                                <span key={key} style={{ marginRight: "8px" }}>
-                                    {key}: {value}
-                                </span>
-                            ))}
-                        </div>
-                    )}
+                <div style={{ fontWeight: 500 }}>{completion.insertText}</div>
             </li>
         );
     },
@@ -179,7 +120,7 @@ type SmartNodeSelectorSlotProps<
 
 export type SmartNodeSelectorDataContextType = {
     stateManager: StateManager;
-    suggestionsState: SuggestionsState;
+    suggestionsState: CompletionsState<IndexedNode>;
     placeholders: {
         newTag: string;
         incompleteTag: string;
@@ -254,10 +195,14 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         );
     }, [defaultedProps.data, defaultedProps.delimiter]);
 
+    const treeAccessor = React.useMemo(() => {
+        return makeIndexedNodeAccessor(treeIndexBuildResult);
+    }, [treeIndexBuildResult]);
+
     const suggestionsState = React.useMemo(() => {
-        return new SuggestionsState({
-            buildResult: treeIndexBuildResult,
-            maxSuggestions: defaultedProps.maxSuggestions,
+        return new CompletionsState({
+            treeAccessor,
+            maxNumCompletions: defaultedProps.maxSuggestions,
         });
     }, [treeIndexBuildResult, defaultedProps.maxSuggestions]);
 
@@ -332,9 +277,9 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         <CaretRenderer mainRef={ref} />
                     </RootComponent>
                     <DebugInfo />
-                    <SuggestionPopover
-                        renderSuggestionItem={
-                            defaultedProps.renderSuggestionItem
+                    <CompletionPopover
+                        renderCompletionItem={
+                            defaultedProps.renderCompletionItem
                         }
                         suggestionItemHeight={
                             defaultedProps.suggestionItemHeight

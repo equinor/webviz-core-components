@@ -1,10 +1,10 @@
 import type { StateManager } from "./StateManager/StateManager";
-import type { SuggestionsState } from "./SuggestionsState";
+import type { CompletionsState } from "./CompletionsState";
 import { Topic } from "./StateManager/StateManager";
 
 export type KeyboardHandlerOptions = {
     stateManager: StateManager;
-    suggestionsState: SuggestionsState;
+    suggestionsState: CompletionsState<any>;
 };
 
 /**
@@ -14,7 +14,7 @@ export type KeyboardHandlerOptions = {
  */
 export class KeyboardHandler {
     private _stateManager: StateManager;
-    private _suggestionsState: SuggestionsState;
+    private _suggestionsState: CompletionsState<any>;
     private _unsubscribeFocusedSegment: (() => void) | null = null;
 
     constructor(options: KeyboardHandlerOptions) {
@@ -25,31 +25,32 @@ export class KeyboardHandler {
         this._unsubscribeFocusedSegment = this._stateManager
             .getPubSubDelegate()
             .subscribe(Topic.FOCUSED_SEGMENT, () => {
-                this._updateSuggestions();
+                this._updateCompletions();
             });
     }
 
-    private _updateSuggestions(): void {
-        const focusedSegment = this._stateManager.makeSnapshotGetter(
-            Topic.FOCUSED_SEGMENT
-        )();
+    private _updateCompletions(): void {
+        const caretPositions = this._stateManager.getCaretPositions();
 
-        if (focusedSegment === null) {
-            this._suggestionsState.clearSuggestions();
+        if (
+            caretPositions.length !== 1 ||
+            caretPositions[0].offset !== caretPositions[0].anchorOffset
+        ) {
+            this._suggestionsState.clearCompletions();
             return;
         }
 
         const queryItem = this._stateManager.getQueryItemById(
-            focusedSegment.queryId
+            caretPositions[0].queryId
         );
         if (!queryItem) {
-            this._suggestionsState.clearSuggestions();
+            this._suggestionsState.clearCompletions();
             return;
         }
 
-        this._suggestionsState.updateSuggestions(
+        this._suggestionsState.updateCompletions(
             queryItem,
-            focusedSegment.segmentIndex
+            caretPositions[0].offset
         );
     }
 
@@ -69,7 +70,7 @@ export class KeyboardHandler {
                     return;
                 case "Enter": {
                     const selected =
-                        this._suggestionsState.getSelectedSuggestion();
+                        this._suggestionsState.getSelectedCompletion();
                     if (selected) {
                         // TODO: Accept suggestion - insert into query
                         const focusedSegment =
@@ -85,7 +86,7 @@ export class KeyboardHandler {
                         this._stateManager.setCaretPositionToEndOfQueryItem(
                             focusedSegment.queryId
                         );
-                        this._suggestionsState.clearSuggestions();
+                        this._suggestionsState.clearCompletions();
                         event.preventDefault();
                         return;
                     }

@@ -5,22 +5,23 @@ import {
     type SmartNodeSelectorDataContextType,
 } from "../SmartNodeSelector";
 import { VirtualizedList } from "./VirtualizedList";
-import type { Suggestion } from "../core/types/Suggestion";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { Topic } from "../core/StateManager/StateManager";
-import { SuggestionsTopic } from "../core/SuggestionsState";
+import { CompletionsTopic } from "../core/CompletionsState";
+import type { CompletionItem } from "../core/query-language/types/completion";
+import type { IndexedNode } from "../core";
 
-export type SuggestionPopoverProps = {
-    renderSuggestionItem: (
-        suggestion: Suggestion,
+export type CompletionPopoverProps = {
+    renderCompletionItem: (
+        completion: CompletionItem<IndexedNode>,
         isSelected: boolean
     ) => React.ReactNode;
     suggestionItemHeight: number;
     maxNumberSuggestions: number;
 };
 
-export function SuggestionPopover(
-    props: SuggestionPopoverProps
+export function CompletionPopover(
+    props: CompletionPopoverProps
 ): React.ReactElement {
     const { stateManager, suggestionsState }: SmartNodeSelectorDataContextType =
         React.useContext(SmartNodeSelectorDataContext);
@@ -37,12 +38,12 @@ export function SuggestionPopover(
 
     const suggestions = useSubscribeToTopic(
         suggestionsState,
-        SuggestionsTopic.SUGGESTIONS
+        CompletionsTopic.COMPLETIONS
     );
 
     const selectedIndex = useSubscribeToTopic(
         suggestionsState,
-        SuggestionsTopic.SELECTED_INDEX
+        CompletionsTopic.SELECTED_INDEX
     );
 
     React.useEffect(
@@ -68,14 +69,14 @@ export function SuggestionPopover(
     );
 
     const handleItemClick = React.useCallback(
-        function handleItemClick(suggestion: Suggestion) {
+        function handleItemClick(completion: CompletionItem<IndexedNode>) {
             const focusedSegment = stateManager.getFocusedSegment();
             if (focusedSegment === null) {
                 return;
             }
             stateManager.updateQueryItem(
                 focusedSegment.queryId,
-                suggestion.completedQuery
+                completion.insertText
             );
             stateManager.setCaretPositionToEndOfQueryItem(
                 focusedSegment.queryId
@@ -85,18 +86,11 @@ export function SuggestionPopover(
         [stateManager, suggestionsState]
     );
 
-    const handleOperatorClick = React.useCallback(
-        function handleOperatorClick(operator: string) {
-            stateManager.insertTextAtCaret(operator);
-        },
-        [stateManager]
-    );
-
     return (
         <div
             ref={popoverRef}
             popover="manual"
-            data-suggestion-popover
+            data-completion-popover
             onMouseDown={(e) => {
                 // Prevent mousedown from causing textarea to lose focus
                 e.preventDefault();
@@ -121,65 +115,11 @@ export function SuggestionPopover(
                 maxHeight={
                     props.suggestionItemHeight * props.maxNumberSuggestions
                 }
-                renderItem={props.renderSuggestionItem}
+                renderItem={props.renderCompletionItem}
                 onItemClick={handleItemClick}
                 selectedIndex={selectedIndex}
             />
-            <div
-                style={{
-                    padding: 4,
-                    backgroundColor: "#eee",
-                    display: "flex",
-                    gap: 8,
-                    justifyItems: "center",
-                }}
-            >
-                <OperatorButton
-                    operator="("
-                    label="()"
-                    onClick={handleOperatorClick}
-                />
-                <OperatorButton
-                    operator="{"
-                    label="{}"
-                    onClick={handleOperatorClick}
-                />
-                <OperatorButton
-                    operator="&"
-                    label="&"
-                    onClick={handleOperatorClick}
-                />
-                <OperatorButton
-                    operator="|"
-                    label="|"
-                    onClick={handleOperatorClick}
-                />
-            </div>
         </div>
-    );
-}
-
-type OperatorButtonProps = {
-    operator: string;
-    label: string;
-    onClick: (operator: string) => void;
-};
-
-function OperatorButton(props: OperatorButtonProps) {
-    return (
-        <button
-            type="button"
-            onClick={() => props.onClick(props.operator)}
-            style={{
-                padding: "4px 8px",
-                borderRadius: 4,
-                border: "1px solid #999",
-                backgroundColor: "white",
-                cursor: "pointer",
-            }}
-        >
-            {props.label}
-        </button>
     );
 }
 
