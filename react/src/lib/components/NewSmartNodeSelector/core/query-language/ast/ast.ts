@@ -43,7 +43,7 @@ export type Atom =
 
 export type Segment =
     | { kind: "deep"; charRange: Range }
-    | { kind: "expr"; expr: Expr; charRange: Range };
+    | { kind: "expr"; expr: Expr; charRange: Range; unionMode: boolean };
 
 export interface QueryAST {
     segments: Segment[];

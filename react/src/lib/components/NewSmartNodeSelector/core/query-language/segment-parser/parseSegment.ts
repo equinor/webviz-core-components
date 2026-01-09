@@ -34,6 +34,7 @@ export function parseSegment(
                 kind: "expr",
                 expr: errorExpr("Empty segment", span.charRange),
                 charRange: span.charRange,
+                unionMode: false,
             },
             diagnostics,
         };
@@ -69,12 +70,22 @@ export function parseSegment(
                     deepTokens[0].charRange
                 ),
                 charRange: span.charRange,
+                unionMode: false,
             },
             diagnostics,
         };
     }
 
-    const parser = new SegmentParser(segmentTokens, span);
+    // Check for union mode prefix (+)
+    let unionMode = false;
+    let tokensToParse = segmentTokens;
+
+    if (segmentTokens[0]?.type === "PLUS") {
+        unionMode = true;
+        tokensToParse = segmentTokens.slice(1); // Remove the + prefix
+    }
+
+    const parser = new SegmentParser(tokensToParse, span, unionMode);
     const expr = parser.parseExpression(0);
 
     diagnostics.push(...parser.getDiagnostics());
@@ -82,7 +93,7 @@ export function parseSegment(
     // If there are remaining tokens that weren't consumed and aren't just stop tokens,
     // report them (helps catch junk like "A ) B" etc).
     // (This is intentionally light; your parser will recover and continue.)
-    const remaining = segmentTokens.slice(parser.getIndex());
+    const remaining = tokensToParse.slice(parser.getIndex());
     if (remaining.length > 0) {
         // If remaining starts with a stop token, it's often "expected" (e.g. parser ended at ')')
         // But at top-level segment, stop tokens are generally unexpected.
@@ -105,6 +116,7 @@ export function parseSegment(
             kind: "expr",
             expr,
             charRange: span.charRange,
+            unionMode,
         },
         diagnostics,
     };

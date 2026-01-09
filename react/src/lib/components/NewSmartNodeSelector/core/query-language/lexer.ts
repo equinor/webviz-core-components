@@ -68,6 +68,11 @@ export interface QMARK extends BaseToken {
     value: "?";
 }
 
+export interface PLUS extends BaseToken {
+    type: "PLUS";
+    value: "+";
+}
+
 export interface LITERAL extends BaseToken {
     type: "LITERAL";
     value: string;
@@ -85,6 +90,7 @@ export type Token =
     | DEEP
     | STAR
     | QMARK
+    | PLUS
     | LITERAL;
 
 export function tokenize(text: string, delimiter: string): Token[] {
@@ -251,6 +257,19 @@ export function tokenize(text: string, delimiter: string): Token[] {
             pushToken({
                 type: "QMARK",
                 value: "?",
+                charRange: {
+                    start: position,
+                    end: position + 1,
+                },
+            });
+            position++;
+            continue;
+        }
+
+        if (char === "+") {
+            pushToken({
+                type: "PLUS",
+                value: "+",
                 charRange: {
                     start: position,
                     end: position + 1,

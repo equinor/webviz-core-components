@@ -2,6 +2,7 @@ import type { Atom, QueryAST } from "../ast/ast";
 import type { TreeAccessor } from "../types/tree";
 import {
     collectAllChildren,
+    collectCommonChildren,
     collectAllDescendants,
     convertToSet,
 } from "./_utils";
@@ -19,6 +20,9 @@ export function evaluateQueryAst<Node>(
     // Deep mode is used for '**' segments that can match any number of levels
     let deepMode = false;
 
+    // Track union mode from previous segment to apply when collecting children for next segment
+    let previousUnionMode = false;
+
     for (const segment of ast.segments) {
         if (segment.kind === "deep") {
             // Enable deep mode for the next segment
@@ -27,9 +31,14 @@ export function evaluateQueryAst<Node>(
         }
 
         // Otherwise, it's an expr segment
+        // Use unionMode flag from PREVIOUS segment to determine how to collect children:
+        // - unionMode true (+): collect ALL children from ANY matched parent (union)
+        // - unionMode false (default): collect children that appear in ALL matched parents (intersection)
         const pool = deepMode
             ? collectAllDescendants(frontier, tree)
-            : collectAllChildren(frontier, tree);
+            : previousUnionMode
+              ? collectAllChildren(frontier, tree)
+              : collectCommonChildren(frontier, tree);
 
         frontier = evaluateExpression(segment.expr, pool, tree, matchName);
 
@@ -37,6 +46,9 @@ export function evaluateQueryAst<Node>(
         if (frontier.size === 0) {
             return frontier;
         }
+
+        // Save this segment's union mode for the next iteration
+        previousUnionMode = segment.unionMode;
 
         // Reset deep mode
         deepMode = false;
