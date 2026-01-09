@@ -1,6 +1,18 @@
-import type { Range } from "../types/range";
+import type { Range } from "../../utils/range";
 
-export type Expr = BinaryExpr | GroupExpr | SetExpr | PatternExpr | ErrorExpr;
+export type Expr =
+    | ConcatExpr
+    | BinaryExpr
+    | GroupExpr
+    | SetExpr
+    | PatternExpr
+    | ErrorExpr;
+
+export interface ConcatExpr {
+    kind: "concat";
+    parts: Expr[];
+    charRange: Range;
+}
 
 export interface BinaryExpr {
     kind: "binary";

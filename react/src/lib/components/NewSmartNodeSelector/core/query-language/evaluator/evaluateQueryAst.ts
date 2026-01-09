@@ -1,4 +1,4 @@
-import type { Atom, QueryAST } from "../ast/ast";
+import type { QueryAST } from "../ast/ast";
 import type { TreeAccessor } from "../types/tree";
 import {
     collectAllChildren,
@@ -10,8 +10,7 @@ import { evaluateExpression } from "./evaluateExpression";
 
 export function evaluateQueryAst<Node>(
     ast: QueryAST,
-    tree: TreeAccessor<Node>,
-    matchName: (name: string, atoms: Atom[]) => boolean
+    tree: TreeAccessor<Node>
 ): Set<Node> {
     // Start from the root in the tree
     // Frontier is the set of nodes to evaluate the next segment on
@@ -40,7 +39,7 @@ export function evaluateQueryAst<Node>(
               ? collectAllChildren(frontier, tree)
               : collectCommonChildren(frontier, tree);
 
-        frontier = evaluateExpression(segment.expr, pool, tree, matchName);
+        frontier = evaluateExpression(segment.expr, pool, tree);
 
         // If frontier is empty, we can stop early
         if (frontier.size === 0) {

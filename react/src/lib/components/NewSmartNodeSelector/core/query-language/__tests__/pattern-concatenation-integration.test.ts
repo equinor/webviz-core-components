@@ -1,7 +1,7 @@
 import { parseQuery } from "../parse";
 import { evaluateQuery } from "../evaluator/evaluateQuery";
 import type { TreeAccessor } from "../types/tree";
-import { matchName } from "../matcher";
+import { matchName } from "../matcher/matchName";
 
 describe("Pattern concatenation - integration test", () => {
     interface TestNode {
@@ -56,14 +56,18 @@ describe("Pattern concatenation - integration test", () => {
 
         expect(result.status).toBe("ok");
         if (result.status === "ok") {
-            const resultNames = Array.from(result.matches).map((node) => node.name);
+            const resultNames = Array.from(result.matches).map(
+                (node) => node.name
+            );
             expect(resultNames).not.toContain("Data Source C");
             expect(resultNames).not.toContain("Other Node");
         }
     });
 
     it('should handle complex pattern "Data Source {A,B,C}"', () => {
-        const parsed = parseQuery("Root:Data Source {A,B,C}", { delimiter: ":" });
+        const parsed = parseQuery("Root:Data Source {A,B,C}", {
+            delimiter: ":",
+        });
 
         expect(parsed.diagnostics.length).toBe(0);
 

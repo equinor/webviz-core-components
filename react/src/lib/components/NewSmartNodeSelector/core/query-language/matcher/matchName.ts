@@ -1,4 +1,4 @@
-import type { Atom } from "./ast/ast";
+import type { Atom } from "../ast/ast";
 
 export type MatchNameOptions = {
     caseInsensitive?: boolean;

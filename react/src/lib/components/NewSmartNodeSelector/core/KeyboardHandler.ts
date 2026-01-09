@@ -1,5 +1,5 @@
-import type { StateManager } from "./StateManager/StateManager";
 import type { CompletionsState } from "./CompletionsState";
+import type { StateManager } from "./StateManager/StateManager";
 import { Topic } from "./StateManager/StateManager";
 
 export type KeyboardHandlerOptions = {
@@ -81,7 +81,8 @@ export class KeyboardHandler {
                         }
                         this._stateManager.updateQueryItem(
                             focusedSegment.queryId,
-                            selected.insertText
+                            selected.insertText,
+                            selected.replaceRange
                         );
                         this._stateManager.setCaretPositionToEndOfQueryItem(
                             focusedSegment.queryId

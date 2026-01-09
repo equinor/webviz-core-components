@@ -1,15 +1,15 @@
 import React from "react";
 
+import type { IndexedNode } from "../core";
+import { CompletionsTopic } from "../core/CompletionsState";
+import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import type { CompletionItem } from "../core/query-language/types/completion";
+import { Topic } from "../core/StateManager/StateManager";
 import {
     SmartNodeSelectorDataContext,
     type SmartNodeSelectorDataContextType,
 } from "../SmartNodeSelector";
 import { VirtualizedList } from "./VirtualizedList";
-import { useSubscribeToTopic } from "../core/PubSubDelegate";
-import { Topic } from "../core/StateManager/StateManager";
-import { CompletionsTopic } from "../core/CompletionsState";
-import type { CompletionItem } from "../core/query-language/types/completion";
-import type { IndexedNode } from "../core";
 
 export type CompletionPopoverProps = {
     renderCompletionItem: (
@@ -76,12 +76,13 @@ export function CompletionPopover(
             }
             stateManager.updateQueryItem(
                 focusedSegment.queryId,
-                completion.insertText
+                completion.insertText,
+                completion.replaceRange
             );
             stateManager.setCaretPositionToEndOfQueryItem(
                 focusedSegment.queryId
             );
-            suggestionsState.clearSuggestions();
+            suggestionsState.clearCompletions();
         },
         [stateManager, suggestionsState]
     );

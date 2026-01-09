@@ -1,4 +1,3 @@
-import type { Atom } from "../ast/ast";
 import { astHasErrors } from "../ast/utils";
 import type { ParsedQuery } from "../parse";
 import type { Diagnostic } from "../types/diagnostics";
@@ -14,7 +13,6 @@ export type EvaluationResult<Node> =
 export function evaluateQuery<Node>(
     parsedQuery: ParsedQuery,
     tree: TreeAccessor<Node>,
-    matchName: (name: string, atoms: Atom[]) => boolean,
     mode: EvaluationMode = "editor"
 ): EvaluationResult<Node> {
     let shouldBlock = false;
@@ -35,7 +33,7 @@ export function evaluateQuery<Node>(
         };
     }
 
-    const matches = evaluateQueryAst(parsedQuery.ast, tree, matchName);
+    const matches = evaluateQueryAst(parsedQuery.ast, tree);
 
     return { status: "ok", matches };
 }

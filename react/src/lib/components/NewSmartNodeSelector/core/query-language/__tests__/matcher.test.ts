@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { matchName } from "../matcher";
+import { matchName } from "../matcher/matchName";
 import type { Atom } from "../ast/ast";
 
 describe("matchName", () => {

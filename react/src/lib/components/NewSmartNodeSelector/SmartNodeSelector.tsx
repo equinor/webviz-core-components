@@ -6,21 +6,21 @@
  */
 
 import React from "react";
-import { type TreeDataNode, type IndexedNode } from "./core";
-import { QueryChip } from "./components/QueryChip";
-import { DebugInfo } from "./components/DebugInfo";
-import { CompletionPopover } from "./components/CompletionPopover";
-import { HiddenTextarea } from "./components/HiddenTextarea";
-import { StateManager, Topic } from "./core/StateManager/StateManager";
 import { CaretRenderer } from "./components/CaretAndSelectionRenderer";
-import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
-import { useSubscribeToTopic } from "./core/PubSubDelegate";
+import { CompletionPopover } from "./components/CompletionPopover";
+import { DebugInfo } from "./components/DebugInfo";
+import { HiddenTextarea } from "./components/HiddenTextarea";
+import { QueryChip } from "./components/QueryChip";
+import { type IndexedNode, type TreeDataNode } from "./core";
 import { CompletionsState } from "./core/CompletionsState";
+import { useSubscribeToTopic } from "./core/PubSubDelegate";
+import { StateManager, Topic } from "./core/StateManager/StateManager";
 import {
     makeIndexedNodeAccessor,
     TreeIndexBuilder,
 } from "./core/TreeIndexBuilder";
 import type { CompletionItem } from "./core/query-language/types/completion";
+import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -86,6 +86,60 @@ const DEFAULT_PROPS = {
         completion: CompletionItem<IndexedNode>,
         isSelected: boolean
     ) => {
+        let label: string | React.ReactNode = completion.insertText;
+        let detail: React.ReactNode = null;
+
+        if (completion.kind === "group") {
+            if (completion.insertText === "(") {
+                detail = "Open a new group";
+            } else if (completion.insertText === ")") {
+                detail = "Close the current group";
+            }
+        } else if (completion.kind === "set") {
+            if (completion.insertText === "{") {
+                detail = "Open a new set for unions";
+            } else if (completion.insertText === "}") {
+                detail = "Close the current set";
+            }
+        } else if (completion.kind === "unionFlag") {
+            if (completion.insertText === "+") {
+                detail =
+                    "Union flag: create a union of the children of all the matched nodes";
+            }
+        } else if (completion.kind === "wildcard") {
+            if (completion.insertText === "*") {
+                detail = "Wildcard: matches any single segment";
+            } else if (completion.insertText === "**") {
+                detail = "Deep wildcard: matches any number of segments";
+            } else if (completion.insertText === "?") {
+                detail = "Wildcard: matches any single character in a segment";
+            }
+        } else if (completion.kind === "operator") {
+            if (completion.insertText === "|") {
+                detail = "OR operator: matches either side";
+            } else if (completion.insertText === ",") {
+                detail = "Separator for set items";
+            }
+        } else if (completion.kind === "node") {
+            if (completion.origin.kind === "single") {
+                const name = completion.origin.node.name;
+                const range = completion.origin.nodeNameRange;
+                const left = name.slice(0, range.start);
+                const mid = name.slice(range.start, range.end);
+                const right = name.slice(range.end);
+                label = (
+                    <span style={{ color: "rgba(199, 199, 199, 1)" }}>
+                        {left}
+                        <span style={{ color: "black" }}>{mid}</span>
+                        {right}
+                    </span>
+                );
+                detail = completion.origin.node.description;
+            } else if (completion.origin.kind === "multi") {
+                detail = `${completion.origin.count} matching nodes`;
+            }
+        }
+
         return (
             <li
                 className="suggestion-item"
@@ -93,9 +147,17 @@ const DEFAULT_PROPS = {
                     padding: "8px 12px",
                     cursor: "pointer",
                     backgroundColor: isSelected ? "#e6f0ff" : "transparent",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1em",
                 }}
             >
-                <div style={{ fontWeight: 500 }}>{completion.insertText}</div>
+                <div style={{ fontWeight: 800 }}>{label}</div>
+                {detail && (
+                    <div style={{ fontSize: "smaller", color: "#666" }}>
+                        {detail}
+                    </div>
+                )}
             </li>
         );
     },
@@ -185,7 +247,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         const stateManager = new StateManager({
             delimiter: defaultedProps.delimiter,
         });
-        stateManager.addQueryItem("Test:Test2");
+        stateManager.addQueryItem("");
         return stateManager;
     }, []) as StateManager;
 

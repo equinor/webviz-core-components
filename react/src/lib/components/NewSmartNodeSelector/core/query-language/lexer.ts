@@ -1,4 +1,4 @@
-import type { Range } from "./types/range";
+import type { Range } from "../utils/range";
 
 export interface BaseToken {
     id: number;
@@ -36,11 +36,6 @@ export interface RBRACE extends GroupToken {
 export interface OR extends BaseToken {
     type: "OR";
     value: "|";
-}
-
-export interface AND extends BaseToken {
-    type: "AND";
-    value: "&";
 }
 
 export interface COMMA extends BaseToken {
@@ -84,7 +79,6 @@ export type Token =
     | LBRACE
     | RBRACE
     | OR
-    | AND
     | COMMA
     | DELIMITER
     | DEEP
@@ -218,19 +212,6 @@ export function tokenize(text: string, delimiter: string): Token[] {
             pushToken({
                 type: "OR",
                 value: "|",
-                charRange: {
-                    start: position,
-                    end: position + 1,
-                },
-            });
-            position++;
-            continue;
-        }
-
-        if (char === "&") {
-            pushToken({
-                type: "AND",
-                value: "&",
                 charRange: {
                     start: position,
                     end: position + 1,

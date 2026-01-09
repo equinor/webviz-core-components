@@ -1,10 +1,16 @@
 import { clamp } from "../../../utils/clamp";
+import type { Range } from "../../utils/range";
+import type { Segment } from "../ast/ast";
 import { isGroupToken, type Token } from "../lexer";
 import type { ParsedQuery } from "../parse";
 import type { SegmentSpan } from "../segments";
-import type { Range } from "../types/range";
 
-export type Expectation = "term" | "operator" | "comma" | "delimiterOrEnd";
+export type Expectation =
+    | "unionFlag"
+    | "term"
+    | "operator"
+    | "comma"
+    | "delimiterOrEnd";
 
 export type CaretContext = {
     caretOffset: number;
@@ -12,6 +18,7 @@ export type CaretContext = {
     segmentIndex: number;
     segment: SegmentSpan;
     segmentTokens: Token[];
+    segmentAst: Segment;
 
     tokenBefore?: Token;
     tokenAt?: Token;
@@ -88,12 +95,13 @@ export function getCaretContext(
         insideSet
     );
 
-    const replaceRange = computeReplaceRange(tokenAt, caret);
+    const replaceRange = { start: caret, end: caret }; // computeReplaceRange(tokenAt, caret);
 
     return {
         caretOffset: caret,
         segmentIndex,
         segment,
+        segmentAst: parsed.ast.segments[segmentIndex],
         segmentTokens,
         tokenBefore,
         tokenAt,
@@ -166,7 +174,6 @@ function determineExpectation(
         "LPAREN",
         "LBRACE",
         "OR",
-        "AND",
         "COMMA",
         "LITERAL",
     ];

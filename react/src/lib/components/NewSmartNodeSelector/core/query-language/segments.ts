@@ -1,6 +1,6 @@
+import type { Range } from "../utils/range";
 import type { Token } from "./lexer";
 import type { Diagnostic } from "./types/diagnostics";
-import type { Range } from "./types/range";
 
 export type SegmentSpan = {
     tokenStartIndex: number; // inclusive

@@ -6,7 +6,7 @@
  */
 
 import { evaluateQuery } from "../evaluator/evaluateQuery";
-import { matchName } from "../matcher";
+import { matchName } from "../matcher/matchName";
 import { parseQuery } from "../parse";
 import {
     TreeIndexBuilder,

@@ -10,13 +10,6 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
     const { token } = props;
 
     switch (token.type) {
-        case "AND":
-            return (
-                <span style={{ color: "#CC6600", fontWeight: "bold" }}>
-                    {token.value}
-                </span>
-            );
-
         case "OR":
             return (
                 <span style={{ color: "#cc4700ff", fontWeight: "bold" }}>
@@ -82,8 +75,17 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
         case "LITERAL":
             return <span style={{ color: "#000" }}>{token.value}</span>;
 
-        default:
-            return <span>{String(token)}</span>;
+        case "PLUS":
+            return (
+                <span style={{ color: "#7e00ccff", fontWeight: "bold" }}>
+                    {token.value}
+                </span>
+            );
+
+        default: {
+            const _exhaustiveCheck: never = token;
+            return _exhaustiveCheck;
+        }
     }
 }
 

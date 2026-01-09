@@ -3,7 +3,7 @@ import type { CompletionItem } from "./query-language/types/completion";
 import type { QueryItem } from "./StateManager/types";
 import type { TreeAccessor } from "./query-language/types/tree";
 import type { IndexedNode } from "./types";
-import { matchName } from "./query-language/matcher";
+import { matchName } from "./query-language/matcher/matchName";
 import { evaluateExpression } from "./query-language/evaluator/evaluateExpression";
 import { getCompletions } from "./query-language/completion/completion";
 

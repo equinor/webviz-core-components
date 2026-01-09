@@ -1,6 +1,6 @@
+import type { Range } from "../../utils/range";
 import type { Expr } from "../ast/ast";
 import type { Token } from "../lexer";
-import type { Range } from "../types/range";
 
 export function errorExpr(message: string, charRange: Range): Expr {
     return { kind: "error", message, charRange } as Expr;

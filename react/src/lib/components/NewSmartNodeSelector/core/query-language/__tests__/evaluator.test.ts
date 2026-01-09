@@ -6,7 +6,7 @@
  */
 
 import { evaluateExpression } from "../evaluator/evaluateExpression";
-import { matchName } from "../matcher";
+import { matchName } from "../matcher/matchName";
 import {
     TreeIndexBuilder,
     makeIndexedNodeAccessor,

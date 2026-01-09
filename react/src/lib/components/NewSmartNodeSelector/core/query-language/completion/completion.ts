@@ -1,10 +1,15 @@
 import type { Atom, Expr } from "../ast/ast";
-import { collectAllChildren, collectAllDescendants } from "../evaluator/_utils";
+import {
+    collectAllChildren,
+    collectAllDescendants,
+    collectCommonChildren,
+} from "../evaluator/_utils";
 import { evaluatePrefix } from "../evaluator/evaluatePrefix";
 import type { ParsedQuery } from "../parse";
 import type { CompletionItem } from "../types/completion";
 import type { TreeAccessor } from "../types/tree";
 import { getCaretContext, type CaretContext } from "./caretContext";
+import { rankCompletions } from "./ranking";
 import { getTreeCompletions } from "./treeCompletions";
 
 export function getCompletions<Node>(
@@ -21,7 +26,7 @@ export function getCompletions<Node>(
 ): CompletionItem<Node>[] {
     const context = getCaretContext(parsed, caretOffset);
 
-    const { frontier, deepMode } = evaluatePrefix(
+    const { frontier, deepMode, unionMode } = evaluatePrefix(
         parsed.ast,
         context.segmentIndex,
         tree,
@@ -31,18 +36,21 @@ export function getCompletions<Node>(
 
     const pool = deepMode
         ? collectAllDescendants(frontier, tree)
-        : collectAllChildren(frontier, tree);
+        : unionMode
+          ? collectAllChildren(frontier, tree)
+          : collectCommonChildren(frontier, tree);
 
-    const result: CompletionItem<Node>[] = [];
+    const all: CompletionItem<Node>[] = [];
 
     // Add syntax-based completions
-    result.push(...getSyntaxCompletions<Node>(context));
+    all.push(...getSyntaxCompletions<Node>(context));
 
     // Add tree-based completions
-    result.push(...getTreeCompletions<Node>(context, pool, tree));
+    all.push(...getTreeCompletions<Node>(context, pool, tree));
 
     // Deduplicate completions - we can later rank them as well
-    return deduplicateCompletions(result);
+    const deduped = dedupeCompletions(all);
+    return rankCompletions(deduped, context.expectation);
 }
 
 function getSyntaxCompletions<Node>(
@@ -62,12 +70,23 @@ function getSyntaxCompletions<Node>(
             label,
             insertText,
             replaceRange: context.replaceRange,
+            segmentReplaceRange: {
+                start:
+                    context.replaceRange.start -
+                    context.segmentAst.charRange.start,
+                end:
+                    context.replaceRange.end -
+                    context.segmentAst.charRange.start,
+            },
             kind,
         });
     }
 
     switch (context.expectation) {
         case "term":
+            if (context.isEmptySegment) {
+                add("+", "+", "unionFlag");
+            }
             add("(", "(", "group");
             if (!context.insideSet) {
                 add("{", "{", "set");
@@ -82,7 +101,6 @@ function getSyntaxCompletions<Node>(
 
         case "operator":
             add("|", "|", "operator");
-            add("&", "&", "operator");
             break;
 
         case "comma":
@@ -110,7 +128,7 @@ function getSyntaxCompletions<Node>(
     return completions;
 }
 
-function deduplicateCompletions<Node>(
+function dedupeCompletions<Node>(
     completions: CompletionItem<Node>[]
 ): CompletionItem<Node>[] {
     function makeKey(item: CompletionItem<Node>): string {

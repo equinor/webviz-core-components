@@ -9,12 +9,10 @@ export class SegmentParser {
     private _tokens: readonly Token[];
     private _span: SegmentSpan;
     private _diagnostics: Diagnostic[] = [];
-    private _unionMode: boolean;
 
-    constructor(tokens: readonly Token[], span: SegmentSpan, unionMode: boolean = false) {
+    constructor(tokens: readonly Token[], span: SegmentSpan) {
         this._tokens = tokens;
         this._span = span;
-        this._unionMode = unionMode;
     }
 
     getIndex(): number {
@@ -80,7 +78,7 @@ export class SegmentParser {
                 break;
             }
 
-            const binaryOperators: Token["type"][] = ["AND", "OR"];
+            const binaryOperators: Token["type"][] = ["OR"];
 
             if (!binaryOperators.includes(token.type)) {
                 break;
@@ -124,7 +122,7 @@ export class SegmentParser {
                 );
             }
 
-            if (this.isStopToken(token) || token?.type === "OR" || token?.type === "AND") {
+            if (this.isStopToken(token) || token?.type === "OR") {
                 // Stop parsing the term
                 break;
             }
@@ -153,8 +151,26 @@ export class SegmentParser {
             return parts[0];
         }
 
-        // Multiple parts - need to concatenate them
-        return this.concatenateParts(parts);
+        // Multiple parts - use a concatenation
+
+        // Flatten concatenations to avoid deep nesting
+        const flattenedParts: Expr[] = [];
+        for (const part of parts) {
+            if (part.kind === "concat") {
+                flattenedParts.push(...part.parts);
+            } else {
+                flattenedParts.push(part);
+            }
+        }
+
+        return {
+            kind: "concat",
+            parts: flattenedParts,
+            charRange: mergeRanges(
+                flattenedParts[0].charRange,
+                flattenedParts[flattenedParts.length - 1].charRange
+            ),
+        };
     }
 
     parsePrimary(): Expr {
@@ -231,110 +247,22 @@ export class SegmentParser {
                         severity: "error",
                     });
                 }
-
-                const endRange = closed
-                    ? this.previousToken()!.charRange
-                    : this._span.charRange;
-
-                return {
-                    kind: "set",
-                    items,
-                    closed,
-                    charRange: mergeRanges(open.charRange, endRange),
-                };
             }
+
+            const endRange = closed
+                ? this.previousToken()!.charRange
+                : this._span.charRange;
+
+            return {
+                kind: "set",
+                items,
+                closed,
+                charRange: mergeRanges(open.charRange, endRange),
+            };
         }
 
         // Otherwise, it should be a pattern
         return this.parsePattern();
-    }
-
-    private concatenateParts(parts: Expr[]): Expr {
-        // Take all parts and expand them into a union of patterns
-        // Example: ["A", (B|C), "D"] => (ABD | ACD)
-
-        // Start with a single empty alternative
-        let alternatives: Atom[][] = [[]];
-
-        for (const part of parts) {
-            const partAlternatives = this.flattenToAlternatives(part);
-
-            // Cartesian product: for each existing alternative, append each part alternative
-            const newAlternatives: Atom[][] = [];
-            for (const existingAlt of alternatives) {
-                for (const partAlt of partAlternatives) {
-                    newAlternatives.push([...existingAlt, ...partAlt]);
-                }
-            }
-            alternatives = newAlternatives;
-        }
-
-        // Convert alternatives back to expressions
-        const expandedPatterns = alternatives.map(atoms => {
-            if (atoms.length === 0) {
-                return errorExpr("Empty pattern from concatenation", this._span.charRange);
-            }
-            const first = atoms[0];
-            const last = atoms[atoms.length - 1];
-            return {
-                kind: "pattern" as const,
-                atoms,
-                charRange: mergeRanges(first.charRange, last.charRange),
-            };
-        });
-
-        if (expandedPatterns.length === 0) {
-            return errorExpr("Empty concatenation", this._span.charRange);
-        }
-        if (expandedPatterns.length === 1) {
-            return expandedPatterns[0];
-        }
-
-        // Build left-associative OR tree
-        let result: Expr = expandedPatterns[0];
-        for (let i = 1; i < expandedPatterns.length; i++) {
-            result = {
-                kind: "binary",
-                operator: "|",
-                left: result,
-                right: expandedPatterns[i],
-                charRange: mergeRanges(result.charRange, expandedPatterns[i].charRange),
-            };
-        }
-        return result;
-    }
-
-    private flattenToAlternatives(expr: Expr): Atom[][] {
-        if (expr.kind === "pattern") {
-            return [expr.atoms];
-        }
-
-        if (expr.kind === "group") {
-            return this.flattenToAlternatives(expr.expr);
-        }
-
-        if (expr.kind === "set") {
-            // Set is a union, so each item is an alternative
-            const result: Atom[][] = [];
-            for (const item of expr.items) {
-                result.push(...this.flattenToAlternatives(item));
-            }
-            return result;
-        }
-
-        if (expr.kind === "binary") {
-            // Both OR (|) and AND (&) expand to alternatives at the pattern matching level
-            // The difference between them only matters when evaluating children in the tree:
-            // - OR (|) = union of children (all children from either side)
-            // - AND (&) = intersection of children (only children that exist in both sides)
-            // But for pattern concatenation, both should expand the same way
-            return [
-                ...this.flattenToAlternatives(expr.left),
-                ...this.flattenToAlternatives(expr.right),
-            ];
-        }
-
-        return [];
     }
 
     parsePattern(): Expr {
@@ -359,7 +287,6 @@ export class SegmentParser {
             // Stop when we reach a token that cannot be part of a pattern
             const excludedTypes: Token["type"][] = [
                 "OR",
-                "AND",
                 "COMMA",
                 "LPAREN",
                 "RPAREN",

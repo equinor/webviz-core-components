@@ -1,7 +1,7 @@
 import { parseQuery } from "../parse";
 import { evaluateQuery } from "../evaluator/evaluateQuery";
 import type { TreeAccessor } from "../types/tree";
-import { matchName } from "../matcher";
+import { matchName } from "../matcher/matchName";
 
 describe("Union mode with + prefix", () => {
     interface TestNode {
@@ -54,7 +54,9 @@ describe("Union mode with + prefix", () => {
     it("should use intersection (default) - only common children", () => {
         // Query: Root:(ParentA|ParentB):*
         // This should match only children whose NAMES appear in BOTH ParentA and ParentB
-        const parsed = parseQuery("Root:(ParentA|ParentB):*", { delimiter: ":" });
+        const parsed = parseQuery("Root:(ParentA|ParentB):*", {
+            delimiter: ":",
+        });
 
         expect(parsed.diagnostics.length).toBe(0);
 
@@ -75,7 +77,9 @@ describe("Union mode with + prefix", () => {
         // Query: Root:+(ParentA|ParentB):*
         // The + prefix on segment 2 means: when collecting children for segment 3,
         // get ALL children from ANY matched parent (union)
-        const parsed = parseQuery("Root:+(ParentA|ParentB):*", { delimiter: ":" });
+        const parsed = parseQuery("Root:+(ParentA|ParentB):*", {
+            delimiter: ":",
+        });
 
         expect(parsed.diagnostics.length).toBe(0);
 

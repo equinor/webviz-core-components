@@ -1,4 +1,5 @@
 import { PubSubDelegate, type PubSub } from "../PubSubDelegate";
+import type { Range } from "../utils/range";
 import { QueryStoreDelegate } from "./QueryStoreDelegate";
 import type { QueryItem } from "./types";
 
@@ -515,7 +516,17 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
-    updateQueryItem(id: string, newQuery: string): void {
+    updateQueryItem(id: string, insertText: string, range?: Range): void {
+        let newQuery: string = insertText;
+        if (range) {
+            const queryItem = this._queryStoreDelegate.getItemById(id);
+            if (!queryItem) {
+                return;
+            }
+            const before = queryItem.query.slice(0, range.start);
+            const after = queryItem.query.slice(range.end);
+            newQuery = before + insertText + after;
+        }
         this._queryStoreDelegate.updateItem(id, newQuery);
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
