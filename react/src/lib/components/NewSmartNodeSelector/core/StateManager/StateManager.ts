@@ -1,6 +1,15 @@
 import { PubSubDelegate, type PubSub } from "../PubSubDelegate";
+import {
+    evaluateQuery,
+    type EvaluationResult,
+} from "../query-language/evaluator/evaluateQuery";
+import { parseQuery, type ParsedQuery } from "../query-language/parse";
+import type { TreeAccessor } from "../query-language/types/tree";
+import { makeIndexedNodeAccessor, type BuildResult } from "../TreeIndexBuilder";
+import type { IndexedNode } from "../types";
 import type { Range } from "../utils/range";
-import { QueryStoreDelegate } from "./QueryStoreDelegate";
+import { Cache } from "./Cache";
+import { QueriesStoreDelegate } from "./QueriesStoreDelegate";
 import type { QueryItem } from "./types";
 
 export type CaretPosition = {
@@ -21,13 +30,20 @@ export type QuerySegment = {
     segmentIndex: number;
 };
 
+export type CompletionContext = {
+    queryId: string;
+    queryItem: QueryItem;
+    caretPosition: CaretPosition;
+    segmentIndex: number;
+};
+
 export enum Topic {
     HAS_FOCUS = "hasFocus",
     QUERY_ITEMS = "queryItems",
     CARET_POSITIONS = "caretPositions",
     SEGMENT_CARET_POSITIONS = "segmentCaretPositions",
-    SUGGESTIONS_INDEX = "suggestionsIndex",
     FOCUSED_SEGMENT = "focusedSegment",
+    COMPLETION_CONTEXT = "completionContext",
 }
 
 export type TopicPayloads = {
@@ -35,8 +51,8 @@ export type TopicPayloads = {
     [Topic.QUERY_ITEMS]: QueryItem[];
     [Topic.CARET_POSITIONS]: CaretPosition[];
     [Topic.SEGMENT_CARET_POSITIONS]: SegmentCaretPosition[];
-    [Topic.SUGGESTIONS_INDEX]: number | null;
     [Topic.FOCUSED_SEGMENT]: QuerySegment | null;
+    [Topic.COMPLETION_CONTEXT]: CompletionContext | null;
 };
 
 export type StateManagerOptions = {
@@ -55,15 +71,28 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _delimiter: string;
 
     // State
-    private _queryStoreDelegate: QueryStoreDelegate;
+    private _queriesStoreDelegate: QueriesStoreDelegate;
     private _caretPositions: CaretPosition[] = [];
     private _segmentCaretPositions: SegmentCaretPosition[] = [];
-    private _suggestionsIndex: number | null = null;
     private _focusedSegment: QuerySegment | null = null;
+    private _treeAccessor: TreeAccessor<IndexedNode> | null = null;
+    private _parseCache = new Cache<ParsedQuery>();
+    private _treeMatchCache = new Cache<EvaluationResult<IndexedNode>>();
+    private _completionContext: CompletionContext | null = null;
 
     constructor(options: StateManagerOptions) {
         this._delimiter = options.delimiter;
-        this._queryStoreDelegate = new QueryStoreDelegate(this._delimiter);
+        this._queriesStoreDelegate = new QueriesStoreDelegate();
+    }
+
+    updateDelimiter(delimiter: string): void {
+        this._parseCache.clear();
+        this._delimiter = delimiter;
+    }
+
+    updateBuildResult(buildResult: BuildResult): void {
+        this._treeMatchCache.clear();
+        this._treeAccessor = makeIndexedNodeAccessor(buildResult);
     }
 
     getPubSubDelegate(): PubSubDelegate<TopicPayloads> {
@@ -71,7 +100,41 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     getQueryItemById(id: string): QueryItem | null {
-        return this._queryStoreDelegate.getItemById(id);
+        const queryBaseItem = this._queriesStoreDelegate.getItemById(id);
+        if (!queryBaseItem) {
+            return null;
+        }
+
+        return queryBaseItem;
+    }
+
+    getParsedQuery(query: string): ParsedQuery | null {
+        let parsedQuery = this._parseCache.getItem(query);
+        if (parsedQuery) {
+            return parsedQuery;
+        }
+
+        parsedQuery = parseQuery(query, { delimiter: this._delimiter });
+        this._parseCache.setItem(query, parsedQuery);
+        return parsedQuery;
+    }
+
+    getMatchedNodesForQuery(
+        query: string
+    ): EvaluationResult<IndexedNode> | null {
+        const parsedQuery = this.getParsedQuery(query);
+        if (!parsedQuery || !this._treeAccessor) {
+            return null;
+        }
+
+        let matchedNodes = this._treeMatchCache.getItem(query);
+        if (matchedNodes) {
+            return matchedNodes;
+        }
+
+        matchedNodes = evaluateQuery(parsedQuery, this._treeAccessor);
+        this._treeMatchCache.setItem(query, matchedNodes);
+        return matchedNodes;
     }
 
     getFocusedSegment(): QuerySegment | null {
@@ -82,24 +145,28 @@ export class StateManager implements PubSub<TopicPayloads> {
         return this._caretPositions;
     }
 
+    getCompletionContext(): CompletionContext | null {
+        return this._completionContext;
+    }
+
     makeSnapshotGetter<T extends keyof TopicPayloads>(
         topic: T
     ): () => TopicPayloads[T] {
         switch (topic) {
             case Topic.QUERY_ITEMS:
                 return () =>
-                    this._queryStoreDelegate.getItems() as TopicPayloads[T];
+                    this._queriesStoreDelegate.getItems() as TopicPayloads[T];
             case Topic.CARET_POSITIONS:
                 return () => this._caretPositions as TopicPayloads[T];
             case Topic.SEGMENT_CARET_POSITIONS:
                 return () => this._segmentCaretPositions as TopicPayloads[T];
-            case Topic.SUGGESTIONS_INDEX:
-                return () => this._suggestionsIndex as TopicPayloads[T];
             case Topic.FOCUSED_SEGMENT:
                 return () => this._focusedSegment as TopicPayloads[T];
             case Topic.HAS_FOCUS:
                 return () =>
                     (this._caretPositions.length > 0) as TopicPayloads[T];
+            case Topic.COMPLETION_CONTEXT:
+                return () => this._completionContext as TopicPayloads[T];
         }
     }
 
@@ -187,7 +254,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
         // Compute segment-relative positions
         this._segmentCaretPositions = positions.map((position) => {
-            const queryItem = this._queryStoreDelegate.getItemById(
+            const queryItem = this._queriesStoreDelegate.getItemById(
                 position.queryId
             );
             if (!queryItem) {
@@ -206,7 +273,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         });
 
         if (positions.length === 1) {
-            const queryItem = this._queryStoreDelegate.getItemById(
+            const queryItem = this._queriesStoreDelegate.getItemById(
                 positions[0].queryId
             );
             if (!queryItem) {
@@ -223,16 +290,46 @@ export class StateManager implements PubSub<TopicPayloads> {
             this._focusedSegment = null;
         }
 
+        this.updateCompletionsContext();
+
         this._pubSubDelegate.notifySubscribers(Topic.CARET_POSITIONS);
         this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_CARET_POSITIONS);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
     }
 
+    private updateCompletionsContext(): void {
+        if (this._caretPositions.length !== 1) {
+            this._completionContext = null;
+            return;
+        }
+
+        const queryItem = this._queriesStoreDelegate.getItemById(
+            this._caretPositions[0].queryId
+        );
+
+        if (!queryItem) {
+            this._completionContext = null;
+            return;
+        }
+
+        this._completionContext = {
+            queryId: queryItem.id,
+            queryItem,
+            caretPosition: this._caretPositions[0],
+            segmentIndex: this.computeSegmentIndex(
+                queryItem.query,
+                this._caretPositions[0].offset
+            ),
+        };
+
+        this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
+    }
+
     moveCaretRelative(dx: number, selecting: boolean): void {
         const newCaretPositions: CaretPosition[] = [];
         for (const caretPosition of this._caretPositions) {
-            const queryItem = this._queryStoreDelegate.getItemById(
+            const queryItem = this._queriesStoreDelegate.getItemById(
                 caretPosition.queryId
             );
 
@@ -260,7 +357,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
             if (newOffset > queryItem.query.length) {
                 if (caretPosition.anchorOffset === caretPosition.offset) {
-                    const nextItem = this._queryStoreDelegate.getNextItem(
+                    const nextItem = this._queriesStoreDelegate.getNextItem(
                         queryItem.id
                     );
                     if (nextItem) {
@@ -276,7 +373,9 @@ export class StateManager implements PubSub<TopicPayloads> {
             if (newOffset < 0) {
                 if (caretPosition.anchorOffset === caretPosition.offset) {
                     const previousItem =
-                        this._queryStoreDelegate.getPreviousItem(queryItem.id);
+                        this._queriesStoreDelegate.getPreviousItem(
+                            queryItem.id
+                        );
                     if (previousItem) {
                         newOffset = previousItem.query.length;
                         newQueryId = previousItem.id;
@@ -437,7 +536,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         const newCaretPositions: CaretPosition[] = [];
 
         for (const caretPosition of this._caretPositions) {
-            const queryItem = this._queryStoreDelegate.getItemById(
+            const queryItem = this._queriesStoreDelegate.getItemById(
                 caretPosition.queryId
             );
             if (!queryItem) {
@@ -459,7 +558,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             );
 
             if (deleteSelectionResult.deleted) {
-                this._queryStoreDelegate.updateItem(
+                this._queriesStoreDelegate.updateItem(
                     queryItem.id,
                     deleteSelectionResult.newValue
                 );
@@ -479,7 +578,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             );
 
             if (unwrapResult.unwrapped) {
-                this._queryStoreDelegate.updateItem(
+                this._queriesStoreDelegate.updateItem(
                     queryItem.id,
                     unwrapResult.newValue
                 );
@@ -497,7 +596,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             const after = queryItem.query.slice(caretPosition.offset);
             const newQuery = before + after;
 
-            this._queryStoreDelegate.updateItem(queryItem.id, newQuery);
+            this._queriesStoreDelegate.updateItem(queryItem.id, newQuery);
 
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
@@ -512,32 +611,89 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     addQueryItem(query: string): void {
-        this._queryStoreDelegate.addItem(query);
+        this._queriesStoreDelegate.addItem(query);
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
-    updateQueryItem(id: string, insertText: string, range?: Range): void {
+    getFocusedQueryItem(): QueryItem | null {
+        if (this._caretPositions.length !== 1) {
+            return null;
+        }
+
+        const queryItem = this._queriesStoreDelegate.getItemById(
+            this._caretPositions[0].queryId
+        );
+        if (!queryItem) {
+            return null;
+        }
+
+        return queryItem;
+    }
+
+    updateFocusedQueryItem(insertText: string, range?: Range): boolean {
+        if (this._caretPositions.length !== 1) {
+            return false;
+        }
+
+        const queryId = this._caretPositions[0].queryId;
+        const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+        if (!queryItem) {
+            return false;
+        }
+
+        if (!this.updateQueryItem(queryId, insertText, range)) {
+            return false;
+        }
+
+        const newOffset = range
+            ? range.start + insertText.length
+            : this._caretPositions[0].offset + insertText.length;
+        const newCaretPosition: CaretPosition = {
+            queryId: queryId,
+            offset: newOffset,
+            anchorOffset: newOffset,
+        };
+        this.updateCaretPositions([newCaretPosition]);
+        return true;
+    }
+
+    updateQueryItem(id: string, insertText: string, range?: Range): boolean {
+        const queryItem = this._queriesStoreDelegate.getItemById(id);
+        if (!queryItem) {
+            return false;
+        }
+
         let newQuery: string = insertText;
         if (range) {
-            const queryItem = this._queryStoreDelegate.getItemById(id);
-            if (!queryItem) {
-                return;
-            }
             const before = queryItem.query.slice(0, range.start);
             const after = queryItem.query.slice(range.end);
             newQuery = before + insertText + after;
         }
-        this._queryStoreDelegate.updateItem(id, newQuery);
+
+        this._queriesStoreDelegate.updateItem(id, newQuery);
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+        return true;
     }
 
     removeQueryItemById(id: string): void {
-        this._queryStoreDelegate.removeItem(id);
+        this._queriesStoreDelegate.removeItem(id);
+        if (this._queriesStoreDelegate.getItems().length === 0) {
+            this._parseCache.clear();
+            this._treeMatchCache.clear();
+
+            const firstItem = this._queriesStoreDelegate.addItem("");
+            const newCaretPosition: CaretPosition = {
+                queryId: firstItem.id,
+                offset: 0,
+                anchorOffset: 0,
+            };
+            this.updateCaretPositions([newCaretPosition]);
+        }
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
     setCaretPositionToEndOfQueryItem(id: string): void {
-        const queryItem = this._queryStoreDelegate.getItemById(id);
+        const queryItem = this._queriesStoreDelegate.getItemById(id);
         if (!queryItem) {
             return;
         }
@@ -556,21 +712,11 @@ export class StateManager implements PubSub<TopicPayloads> {
         this.updateCaretPositions([position]);
     }
 
-    private updateCaretPosition(position: CaretPosition, index: number): void {
-        if (index < 0 || index >= this._caretPositions.length) {
-            return;
-        }
-
-        this._caretPositions = this._caretPositions.map((cp, i) =>
-            i === index ? position : cp
-        );
-    }
-
     insertTextAtCaret(text: string): void {
         const newCaretPositions: CaretPosition[] = [];
 
         for (const caretPosition of this._caretPositions) {
-            const queryItem = this._queryStoreDelegate.getItemById(
+            const queryItem = this._queriesStoreDelegate.getItemById(
                 caretPosition.queryId
             );
 
@@ -603,7 +749,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
             const newQuery = before + text + after;
 
-            this._queryStoreDelegate.updateItem(queryItem.id, newQuery);
+            this._queriesStoreDelegate.updateItem(queryItem.id, newQuery);
 
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
@@ -618,7 +764,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     setCaretPositionToEndOfLastItem() {
-        const lastItem = this._queryStoreDelegate.getLastItem();
+        const lastItem = this._queriesStoreDelegate.getLastItem();
         if (!lastItem) {
             return;
         }

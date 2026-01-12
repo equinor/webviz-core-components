@@ -3,13 +3,13 @@ import {
     SmartNodeSelectorDataContext,
     SmartNodeSelectorSlotsContext,
 } from "../SmartNodeSelector";
-import { useMatches } from "../hooks/useMatches";
-import { MatchesCounter } from "./MatchesCounter";
-import { Topic } from "../core/StateManager/StateManager";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import { Topic } from "../core/StateManager/StateManager";
+import type { QueryItem } from "../core/StateManager/types";
+import { useLeafNodeMatches } from "../hooks/useLeafNodeMatches";
+import { MatchesCounter } from "./MatchesCounter";
 import { QuerySegment } from "./QuerySegment";
 import { TokenRenderer } from "./TokenRenderer";
-import type { QueryItem } from "../core/StateManager/types";
 
 export type QueryChipProps = {
     queryItem: QueryItem;
@@ -20,7 +20,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const dataContext = React.useContext(SmartNodeSelectorDataContext);
     const slotsContext = React.useContext(SmartNodeSelectorSlotsContext);
 
-    const matches = useMatches(props.queryItem);
+    const matchedLeafNodes = useLeafNodeMatches(props.queryItem);
 
     const caretPositions = useSubscribeToTopic(
         dataContext.stateManager,
@@ -37,7 +37,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const QueryChipComponent = slotsContext.slots.queryChip;
     const queryChipProps = slotsContext.slotProps.queryChip ?? {};
 
-    const isValid = matches.length > 0;
+    const isValid = matchedLeafNodes.length > 0;
     const isEditing =
         caretPositions.find((pos) => pos.queryId === props.queryItem.id) !==
         undefined;
@@ -47,13 +47,21 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
 
     const content = React.useMemo(
         function makeContent() {
+            const parsedQuery = dataContext.stateManager.getParsedQuery(
+                props.queryItem.query
+            );
             const nodes: React.ReactNode[] = [];
             let segmentIndex = 0;
             let tokenIndex = 0;
 
-            for (const segment of props.queryItem.parsedQuery.segments) {
+            if (!parsedQuery) {
+                // Fallback: render entire query as a single token
+                return null;
+            }
+
+            for (const segment of parsedQuery?.segments ?? []) {
                 for (let i = tokenIndex; i < segment.tokenStartIndex; i++) {
-                    const token = props.queryItem.parsedQuery.tokens[i];
+                    const token = parsedQuery.tokens[i];
                     // Token not part of any segment, must be a delimiter
                     nodes.push(
                         <TokenRenderer
@@ -64,7 +72,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                     );
                 }
 
-                const segmentTokens = props.queryItem.parsedQuery.tokens.slice(
+                const segmentTokens = parsedQuery.tokens.slice(
                     segment.tokenStartIndex,
                     segment.tokenEndIndex
                 );
@@ -82,12 +90,8 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                 tokenIndex = segment.tokenEndIndex;
             }
 
-            for (
-                let i = tokenIndex;
-                i < props.queryItem.parsedQuery.tokens.length;
-                i++
-            ) {
-                const token = props.queryItem.parsedQuery.tokens[i];
+            for (let i = tokenIndex; i < parsedQuery.tokens.length; i++) {
+                const token = parsedQuery.tokens[i];
                 // Token not part of any segment, must be a delimiter
                 nodes.push(
                     <TokenRenderer
@@ -100,7 +104,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
 
             return nodes;
         },
-        [props.queryItem.parsedQuery]
+        [props.queryItem, dataContext.stateManager]
     );
 
     return (
@@ -113,7 +117,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                 isValid || isEditing
             )}
         >
-            <MatchesCounter matches={matches} />
+            <MatchesCounter matches={matchedLeafNodes} />
             <div
                 data-query-chip-content
                 style={{

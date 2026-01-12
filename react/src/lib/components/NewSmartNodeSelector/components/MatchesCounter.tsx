@@ -19,11 +19,19 @@ export function MatchesCounter(props: MatchesCounterProps) {
             padding: 2,
             backgroundColor: "#e0e0e0",
         },
-        ...slotsContext.slotProps.matchesCounter
+        ...slotsContext.slotProps.matchesCounter,
     };
 
+    function makeTitle() {
+        let title = "";
+        for (const match of props.matches) {
+            title += `${match.path}\n`;
+        }
+        return title.trim();
+    }
+
     return (
-        <MatchesCounterComponent {...matchesCounterProps}>
+        <MatchesCounterComponent {...matchesCounterProps} title={makeTitle()}>
             {props.matches.length}
         </MatchesCounterComponent>
     );

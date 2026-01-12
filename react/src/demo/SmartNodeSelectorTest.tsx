@@ -4,7 +4,7 @@
 import React from "react";
 import { SmartNodeSelector } from "../lib";
 import { SmartNodeSelector as NewSmartNodeSelector } from "../lib/components/NewSmartNodeSelector/SmartNodeSelector";
-import { TagEditor } from "../lib/components/NewSmartNodeSelector/components/TagEditor/tagEditor";
+import { TEST_DATA } from "./testdata";
 
 type SmartNodeSelectorState = {
     selectedTags: string[];
@@ -100,7 +100,14 @@ const SmartNodeSelectorTest: React.FC = () => {
     });
 
     return (
-        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+        <div
+            style={{
+                padding: "20px",
+                maxWidth: "800px",
+                height: "200vh",
+                margin: "0 auto",
+            }}
+        >
             <h1>SmartNodeSelector Test Page</h1>
             <p>A simple test page for the SmartNodeSelector component</p>
 
@@ -125,6 +132,7 @@ const SmartNodeSelectorTest: React.FC = () => {
                     padding: "15px",
                     backgroundColor: "#f5f5f5",
                     borderRadius: "4px",
+                    height: "50vh",
                 }}
             >
                 <h3>Selection State:</h3>
@@ -193,7 +201,7 @@ const SmartNodeSelectorTest: React.FC = () => {
                 </div>
             </div>
             <h3>New SmartNodeSelector</h3>
-            <NewSmartNodeSelector data={DATA} />
+            <NewSmartNodeSelector data={TEST_DATA} />
         </div>
     );
 };

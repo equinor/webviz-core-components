@@ -12,5 +12,5 @@ export type CompletionItem<Node> = {
     detail?: string;
 } & (
     | { kind: "node"; origin: CompletionNodeOrigin<Node> }
-    | { kind: "unionFlag" | "operator" | "wildcard" | "group" | "set" }
+    | { kind: "unionFlag" | "operator" | "wildcard" | "group" | "set" | "delimiter" }
 );

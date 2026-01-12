@@ -1,11 +1,11 @@
 import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
+import { getCompletions } from "./query-language/completion/completion";
+import { evaluateExpression } from "./query-language/evaluator/evaluateExpression";
+import { matchName } from "./query-language/matcher/matchName";
+import type { ParsedQuery } from "./query-language/parse";
 import type { CompletionItem } from "./query-language/types/completion";
-import type { QueryItem } from "./StateManager/types";
 import type { TreeAccessor } from "./query-language/types/tree";
 import type { IndexedNode } from "./types";
-import { matchName } from "./query-language/matcher/matchName";
-import { evaluateExpression } from "./query-language/evaluator/evaluateExpression";
-import { getCompletions } from "./query-language/completion/completion";
 
 export enum CompletionsTopic {
     COMPLETIONS = "completions",
@@ -81,9 +81,9 @@ export class CompletionsState<
      * Update completions for the given query and segment index.
      * Called by input handlers when the focused segment changes.
      */
-    updateCompletions(queryItem: QueryItem, caretOffset: number): void {
+    updateCompletions(parsedQuery: ParsedQuery, caretOffset: number): void {
         this._completions = getCompletions<TNode>(
-            queryItem.parsedQuery,
+            parsedQuery,
             caretOffset,
             this._treeAccessor,
             matchName,

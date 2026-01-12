@@ -6,7 +6,7 @@
  */
 
 import type { TreeAccessor } from "./query-language/types/tree";
-import type { TreeDataNode, IndexedNode, TrieNode } from "./types/TreeNode";
+import type { IndexedNode, TreeDataNode, TrieNode } from "./types/TreeNode";
 
 /**
  * Builds indexed tree structures from user-provided data
@@ -163,10 +163,10 @@ export interface BuildResult {
     /** All nodes in flat array */
     nodes: IndexedNode[];
 
-    /** Map: node ID � node */
+    /** Map: node ID */
     byId: Map<string, IndexedNode>;
 
-    /** Map: path string � node */
+    /** Map: path string */
     byPath: Map<string, IndexedNode>;
 
     /** Root trie node */
@@ -200,6 +200,9 @@ export function makeIndexedNodeAccessor(
         },
         getChildren: (node: IndexedNode) => {
             return node.children;
+        },
+        isLeaf: (node: IndexedNode) => {
+            return node.isLeaf;
         },
     };
 }

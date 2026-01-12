@@ -1,13 +1,12 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import { Topic } from "../core/StateManager/StateManager";
-import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { KeyboardHandler } from "../core/KeyboardHandler";
+import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import { Topic } from "../core/StateManager/StateManager";
 
 export function HiddenTextarea(): React.ReactElement {
-    const { stateManager, suggestionsState } = React.useContext(
-        SmartNodeSelectorDataContext
-    );
+    const { stateManager, completionsState: suggestionsState } =
+        React.useContext(SmartNodeSelectorDataContext);
 
     const ref = React.useRef<HTMLTextAreaElement | null>(null);
 
@@ -33,7 +32,7 @@ export function HiddenTextarea(): React.ReactElement {
                 return;
             }
             if (hasFocus) {
-                ref.current.focus();
+                ref.current.focus({ preventScroll: true });
             } else {
                 ref.current.blur();
             }
@@ -80,7 +79,7 @@ export function HiddenTextarea(): React.ReactElement {
             spellCheck={false}
             ref={ref}
             style={{
-                position: "absolute",
+                position: "fixed",
                 opacity: 0,
                 left: 0,
                 top: 0,

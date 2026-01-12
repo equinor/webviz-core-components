@@ -7,7 +7,7 @@
 
 import React from "react";
 import { CaretRenderer } from "./components/CaretAndSelectionRenderer";
-import { CompletionPopover } from "./components/CompletionPopover";
+import { CompletionsPopover } from "./components/CompletionsPopover";
 import { DebugInfo } from "./components/DebugInfo";
 import { HiddenTextarea } from "./components/HiddenTextarea";
 import { QueryChip } from "./components/QueryChip";
@@ -114,6 +114,8 @@ const DEFAULT_PROPS = {
             } else if (completion.insertText === "?") {
                 detail = "Wildcard: matches any single character in a segment";
             }
+        } else if (completion.kind === "delimiter") {
+            detail = `Delimiter: use to start new segment`;
         } else if (completion.kind === "operator") {
             if (completion.insertText === "|") {
                 detail = "OR operator: matches either side";
@@ -182,7 +184,7 @@ type SmartNodeSelectorSlotProps<
 
 export type SmartNodeSelectorDataContextType = {
     stateManager: StateManager;
-    suggestionsState: CompletionsState<IndexedNode>;
+    completionsState: CompletionsState<IndexedNode>;
     placeholders: {
         newTag: string;
         incompleteTag: string;
@@ -261,12 +263,16 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         return makeIndexedNodeAccessor(treeIndexBuildResult);
     }, [treeIndexBuildResult]);
 
-    const suggestionsState = React.useMemo(() => {
+    const completionsState = React.useMemo(() => {
         return new CompletionsState({
             treeAccessor,
             maxNumCompletions: defaultedProps.maxSuggestions,
         });
     }, [treeIndexBuildResult, defaultedProps.maxSuggestions]);
+
+    React.useEffect(() => {
+        stateManager.updateBuildResult(treeIndexBuildResult);
+    }, [stateManager, treeIndexBuildResult]);
 
     useMouseEventHandler(ref, stateManager, defaultedProps.delimiter);
 
@@ -276,13 +282,13 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
     const dataContext = React.useMemo(
         () => ({
             stateManager,
-            suggestionsState,
+            completionsState,
             placeholders: defaultedProps.placeholders,
             delimiter: defaultedProps.delimiter,
         }),
         [
             stateManager,
-            suggestionsState,
+            completionsState,
             defaultedProps.placeholders,
             defaultedProps.delimiter,
         ]
@@ -339,7 +345,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         <CaretRenderer mainRef={ref} />
                     </RootComponent>
                     <DebugInfo />
-                    <CompletionPopover
+                    <CompletionsPopover
                         renderCompletionItem={
                             defaultedProps.renderCompletionItem
                         }

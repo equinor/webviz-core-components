@@ -51,8 +51,24 @@ export function rankCompletions<Node>(
     expectation: Expectation
 ): CompletionItem<Node>[] {
     const ranked: Ranked<CompletionItem<Node>>[] = items.map((it) => {
-        const base = kindBase(it.kind, expectation);
+        let base = kindBase(it.kind, expectation);
         const text = textPenalty(it.insertText);
+
+        // Boost priority for union flag when expectation is "term"
+        // This makes + appear first in the list when we have a full match
+        if (expectation === "term" && it.kind === "unionFlag") {
+            base = -10; // Very low score = highest priority
+        }
+
+        // Boost priority for delimiter when expectation is "term"
+        if (expectation === "term" && it.kind === "delimiter") {
+            base = -5; // High priority, but slightly lower than union flag
+        }
+
+        // Boost priority for pipe operator when expectation is "term"
+        if (expectation === "term" && it.kind === "operator" && it.insertText === "|") {
+            base = -3; // High priority, but lower than delimiter
+        }
 
         // stable tie-breaker: kind + label + insertText
         const tie = `${it.kind}|${it.label}|${it.insertText}`;

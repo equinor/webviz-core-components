@@ -14,43 +14,41 @@ export type KeyboardHandlerOptions = {
  */
 export class KeyboardHandler {
     private _stateManager: StateManager;
-    private _suggestionsState: CompletionsState<any>;
-    private _unsubscribeFocusedSegment: (() => void) | null = null;
+    private _completionsState: CompletionsState<any>;
+    private _unsubscribeFunctions: (() => void)[] = [];
 
     constructor(options: KeyboardHandlerOptions) {
         this._stateManager = options.stateManager;
-        this._suggestionsState = options.suggestionsState;
+        this._completionsState = options.suggestionsState;
 
         // Subscribe to focused segment changes to update suggestions
-        this._unsubscribeFocusedSegment = this._stateManager
-            .getPubSubDelegate()
-            .subscribe(Topic.FOCUSED_SEGMENT, () => {
-                this._updateCompletions();
-            });
+        const pubSub = this._stateManager.getPubSubDelegate();
+        this._unsubscribeFunctions = [
+            pubSub.subscribe(
+                Topic.COMPLETION_CONTEXT,
+                this.updateCompletions.bind(this)
+            ),
+        ];
     }
 
-    private _updateCompletions(): void {
-        const caretPositions = this._stateManager.getCaretPositions();
-
-        if (
-            caretPositions.length !== 1 ||
-            caretPositions[0].offset !== caretPositions[0].anchorOffset
-        ) {
-            this._suggestionsState.clearCompletions();
+    private updateCompletions(): void {
+        const completionContext = this._stateManager.getCompletionContext();
+        if (!completionContext) {
+            this._completionsState.clearCompletions();
             return;
         }
 
-        const queryItem = this._stateManager.getQueryItemById(
-            caretPositions[0].queryId
+        const parsedQuery = this._stateManager.getParsedQuery(
+            completionContext.queryItem.query
         );
-        if (!queryItem) {
-            this._suggestionsState.clearCompletions();
+        if (!parsedQuery) {
+            this._completionsState.clearCompletions();
             return;
         }
 
-        this._suggestionsState.updateCompletions(
-            queryItem,
-            caretPositions[0].offset
+        this._completionsState.updateCompletions(
+            parsedQuery,
+            completionContext.caretPosition.offset
         );
     }
 
@@ -58,36 +56,26 @@ export class KeyboardHandler {
         const { key, shiftKey: selecting } = event;
 
         // Try suggestions navigation first (if suggestions are visible)
-        if (this._suggestionsState.hasSuggestions()) {
+        if (this._completionsState.hasSuggestions()) {
             switch (key) {
                 case "ArrowDown":
-                    this._suggestionsState.selectNext();
+                    this._completionsState.selectNext();
                     event.preventDefault();
                     return;
                 case "ArrowUp":
-                    this._suggestionsState.selectPrevious();
+                    this._completionsState.selectPrevious();
                     event.preventDefault();
                     return;
                 case "Enter": {
                     const selected =
-                        this._suggestionsState.getSelectedCompletion();
-                    if (selected) {
+                        this._completionsState.getSelectedCompletion();
+                    const queryItem = this._stateManager.getFocusedQueryItem();
+                    if (selected && queryItem) {
                         // TODO: Accept suggestion - insert into query
-                        const focusedSegment =
-                            this._stateManager.getFocusedSegment();
-                        if (focusedSegment === null) {
-                            event.preventDefault();
-                            return;
-                        }
-                        this._stateManager.updateQueryItem(
-                            focusedSegment.queryId,
+                        this._stateManager.updateFocusedQueryItem(
                             selected.insertText,
                             selected.replaceRange
                         );
-                        this._stateManager.setCaretPositionToEndOfQueryItem(
-                            focusedSegment.queryId
-                        );
-                        this._suggestionsState.clearCompletions();
                         event.preventDefault();
                         return;
                     }
@@ -95,7 +83,7 @@ export class KeyboardHandler {
                     break;
                 }
                 case "Escape":
-                    this._suggestionsState.clearSelection();
+                    this._completionsState.clearCompletions();
                     event.preventDefault();
                     return;
             }
@@ -128,9 +116,7 @@ export class KeyboardHandler {
     }
 
     destroy(): void {
-        if (this._unsubscribeFocusedSegment) {
-            this._unsubscribeFocusedSegment();
-            this._unsubscribeFocusedSegment = null;
-        }
+        this._unsubscribeFunctions.forEach((unsubscribe) => unsubscribe());
+        this._unsubscribeFunctions = [];
     }
 }
