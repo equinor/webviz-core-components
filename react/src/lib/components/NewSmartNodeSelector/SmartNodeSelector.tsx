@@ -19,7 +19,11 @@ import {
     makeIndexedNodeAccessor,
     TreeIndexBuilder,
 } from "./core/TreeIndexBuilder";
-import type { CompletionItem } from "./core/query-language/types/completion";
+import type {
+    CompletionItem,
+    NodeCompletionItem,
+    SyntaxCompletionItem,
+} from "./core/query-language/types/completion";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 
 export type SmartNodeSelectorClassNames = {
@@ -67,7 +71,13 @@ export type SmartNodeSelectorProps<
     /** CSS class name for root element */
     slotProps?: SmartNodeSelectorSlotProps<TSlots>;
 
-    renderCompletionItem?: (
+    renderSyntaxCompletionItems?: (
+        completions: SyntaxCompletionItem[],
+        onClick: (completion: SyntaxCompletionItem) => void,
+        selectedIndex: number | null
+    ) => React.ReactNode;
+
+    renderNodeCompletionItem?: (
         completion: CompletionItem<IndexedNode>,
         isSelected: boolean
     ) => React.ReactNode;
@@ -77,69 +87,116 @@ export type SmartNodeSelectorProps<
 
 const DEFAULT_PROPS = {
     delimiter: ":",
-    maxSuggestions: 20,
+    maxSuggestions: 10,
     placeholders: {
         newTag: "New tag...",
         incompleteTag: "Incomplete tag...",
     },
-    renderCompletionItem: (
-        completion: CompletionItem<IndexedNode>,
+    renderSyntaxCompletionItems: (
+        completions: SyntaxCompletionItem[],
+        onClick: (completion: SyntaxCompletionItem) => void,
+        selectedIndex: number | null
+    ) => {
+        function makeTitle(completion: SyntaxCompletionItem): string {
+            if (completion.kind === "group") {
+                if (completion.insertText === "(") {
+                    return "Open a new group";
+                } else if (completion.insertText === ")") {
+                    return "Close the current group";
+                }
+            } else if (completion.kind === "set") {
+                if (completion.insertText === "{") {
+                    return "Open a new set for unions";
+                } else if (completion.insertText === "}") {
+                    return "Close the current set";
+                }
+            } else if (completion.kind === "unionFlag") {
+                if (completion.insertText === "+") {
+                    return "Union flag: create a union of the children of all the matched nodes";
+                }
+            } else if (completion.kind === "wildcard") {
+                if (completion.insertText === "*") {
+                    return "Wildcard: matches any single segment";
+                } else if (completion.insertText === "**") {
+                    return "Deep wildcard: matches any number of segments";
+                } else if (completion.insertText === "?") {
+                    return "Wildcard: matches any single character in a segment";
+                }
+            } else if (completion.kind === "delimiter") {
+                return "Delimiter: use to start new segment";
+            } else if (completion.kind === "operator") {
+                if (completion.insertText === "|") {
+                    return "OR operator: matches either side";
+                } else if (completion.insertText === ",") {
+                    return "Separator for set items";
+                }
+            }
+            return "";
+        }
+
+        return (
+            <ul
+                style={{
+                    listStyle: "none",
+                    margin: 0,
+                    padding: 4,
+                    display: "flex",
+                    gap: "8px",
+                    borderBottom: "1px solid #ccc",
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    alignItems: "center",
+                }}
+            >
+                {completions.map((completion, index) => (
+                    <li
+                        key={index}
+                        className="suggestion-item"
+                        style={{
+                            padding: "8px 12px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "1em",
+                            border: "1px solid #ccc",
+                            borderRadius: "8px",
+                            backgroundColor:
+                                selectedIndex === index
+                                    ? "#235de4ff"
+                                    : "#f5f5f5",
+                            color: selectedIndex === index ? "white" : "black",
+                        }}
+                        title={makeTitle(completion)}
+                        onClick={() => onClick(completion)}
+                    >
+                        {completion.insertText}
+                    </li>
+                ))}
+            </ul>
+        );
+    },
+    renderNodeCompletionItem: (
+        completion: NodeCompletionItem<IndexedNode>,
         isSelected: boolean
     ) => {
         let label: string | React.ReactNode = completion.insertText;
         let detail: React.ReactNode = null;
 
-        if (completion.kind === "group") {
-            if (completion.insertText === "(") {
-                detail = "Open a new group";
-            } else if (completion.insertText === ")") {
-                detail = "Close the current group";
-            }
-        } else if (completion.kind === "set") {
-            if (completion.insertText === "{") {
-                detail = "Open a new set for unions";
-            } else if (completion.insertText === "}") {
-                detail = "Close the current set";
-            }
-        } else if (completion.kind === "unionFlag") {
-            if (completion.insertText === "+") {
-                detail =
-                    "Union flag: create a union of the children of all the matched nodes";
-            }
-        } else if (completion.kind === "wildcard") {
-            if (completion.insertText === "*") {
-                detail = "Wildcard: matches any single segment";
-            } else if (completion.insertText === "**") {
-                detail = "Deep wildcard: matches any number of segments";
-            } else if (completion.insertText === "?") {
-                detail = "Wildcard: matches any single character in a segment";
-            }
-        } else if (completion.kind === "delimiter") {
-            detail = `Delimiter: use to start new segment`;
-        } else if (completion.kind === "operator") {
-            if (completion.insertText === "|") {
-                detail = "OR operator: matches either side";
-            } else if (completion.insertText === ",") {
-                detail = "Separator for set items";
-            }
-        } else if (completion.kind === "node") {
-            if (completion.origin.kind === "single") {
-                const name = completion.origin.node.name;
-                const range = completion.origin.nodeNameRange;
-                const left = name.slice(0, range.start);
-                const mid = name.slice(range.start, range.end);
-                const right = name.slice(range.end);
-                label = (
-                    <span style={{ color: "rgba(199, 199, 199, 1)" }}>
-                        {left}
-                        <span style={{ color: "black" }}>{mid}</span>
-                        {right}
-                    </span>
-                );
-                detail = completion.origin.node.description;
-            } else if (completion.origin.kind === "multi") {
-                detail = `${completion.origin.count} matching nodes`;
-            }
+        if (completion.origin.kind === "single") {
+            const name = completion.origin.node.name;
+            const range = completion.origin.nodeNameRange;
+            const left = name.slice(0, range.start);
+            const mid = name.slice(range.start, range.end);
+            const right = name.slice(range.end);
+            label = (
+                <span style={{ color: "rgba(199, 199, 199, 1)" }}>
+                    {left}
+                    <span style={{ color: "black" }}>{mid}</span>
+                    {right}
+                </span>
+            );
+            detail = completion.origin.node.description;
+        } else if (completion.origin.kind === "multi") {
+            detail = `${completion.origin.count} matching nodes`;
         }
 
         return (
@@ -346,13 +403,16 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                     </RootComponent>
                     <DebugInfo />
                     <CompletionsPopover
-                        renderCompletionItem={
-                            defaultedProps.renderCompletionItem
+                        renderNodeCompletionItem={
+                            defaultedProps.renderNodeCompletionItem
                         }
-                        suggestionItemHeight={
+                        renderSyntaxCompletionItems={
+                            defaultedProps.renderSyntaxCompletionItems
+                        }
+                        completionItemHeight={
                             defaultedProps.suggestionItemHeight
                         }
-                        maxNumberSuggestions={defaultedProps.maxSuggestions}
+                        maxNumberCompletions={defaultedProps.maxSuggestions}
                     />
                 </div>
             </SmartNodeSelectorSlotsContext.Provider>

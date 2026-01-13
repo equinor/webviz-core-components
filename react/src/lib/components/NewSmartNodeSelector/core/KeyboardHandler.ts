@@ -56,7 +56,7 @@ export class KeyboardHandler {
         const { key, shiftKey: selecting } = event;
 
         // Try suggestions navigation first (if suggestions are visible)
-        if (this._completionsState.hasSuggestions()) {
+        if (this._completionsState.hasCompletions()) {
             switch (key) {
                 case "ArrowDown":
                     this._completionsState.selectNext();

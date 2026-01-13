@@ -1,16 +1,26 @@
 import type { Range } from "../../utils/range";
 
-export type CompletionNodeOrigin<Node> =
-    | { kind: "single"; node: Node; nodeNameRange: Range }
-    | { kind: "multi"; nodes: Set<Node>; count: number };
-
-export type CompletionItem<Node> = {
+export type CompletionItemBase = {
     label: string;
     insertText: string;
     replaceRange: Range;
     segmentReplaceRange: Range;
     detail?: string;
-} & (
-    | { kind: "node"; origin: CompletionNodeOrigin<Node> }
-    | { kind: "unionFlag" | "operator" | "wildcard" | "group" | "set" | "delimiter" }
-);
+};
+
+export type CompletionNodeOrigin<Node> =
+    | { kind: "single"; node: Node; nodeNameRange: Range }
+    | { kind: "multi"; nodes: Set<Node>; count: number };
+
+export type NodeCompletionItem<Node> = CompletionItemBase & {
+    kind: "node";
+    origin: CompletionNodeOrigin<Node>;
+};
+
+export type SyntaxCompletionItem = CompletionItemBase & {
+    kind: "unionFlag" | "operator" | "wildcard" | "group" | "set" | "delimiter";
+};
+
+export type CompletionItem<Node> =
+    | NodeCompletionItem<Node>
+    | SyntaxCompletionItem;

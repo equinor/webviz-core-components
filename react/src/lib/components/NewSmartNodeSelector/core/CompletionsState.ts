@@ -8,12 +8,14 @@ import type { TreeAccessor } from "./query-language/types/tree";
 import type { IndexedNode } from "./types";
 
 export enum CompletionsTopic {
-    COMPLETIONS = "completions",
+    NODE_COMPLETIONS = "nodeCompletions",
+    SYNTAX_COMPLETIONS = "syntaxCompletions",
     SELECTED_INDEX = "selectedIndex",
 }
 
 export type CompletionsStateTopicPayloads = {
-    [CompletionsTopic.COMPLETIONS]: CompletionItem<IndexedNode>[];
+    [CompletionsTopic.NODE_COMPLETIONS]: CompletionItem<IndexedNode>[];
+    [CompletionsTopic.SYNTAX_COMPLETIONS]: CompletionItem<IndexedNode>[];
     [CompletionsTopic.SELECTED_INDEX]: number | null;
 };
 
@@ -28,14 +30,13 @@ export class CompletionsState<
     private _pubSubDelegate =
         new PubSubDelegate<CompletionsStateTopicPayloads>();
     private _treeAccessor: TreeAccessor<TNode>;
-    private _maxNumCompletions: number;
 
-    private _completions: CompletionItem<TNode>[] = [];
+    private _nodeCompletions: CompletionItem<TNode>[] = [];
+    private _syntaxCompletions: CompletionItem<TNode>[] = [];
     private _selectedIndex: number | null = null;
 
     constructor(options: CompletionsStateOptions<TNode>) {
         this._treeAccessor = options.treeAccessor;
-        this._maxNumCompletions = options.maxNumCompletions;
     }
 
     getPubSubDelegate(): PubSubDelegate<CompletionsStateTopicPayloads> {
@@ -46,9 +47,12 @@ export class CompletionsState<
         topic: T
     ): () => CompletionsStateTopicPayloads[T] {
         switch (topic) {
-            case CompletionsTopic.COMPLETIONS:
+            case CompletionsTopic.NODE_COMPLETIONS:
                 return () =>
-                    this._completions as CompletionsStateTopicPayloads[T];
+                    this._nodeCompletions as CompletionsStateTopicPayloads[T];
+            case CompletionsTopic.SYNTAX_COMPLETIONS:
+                return () =>
+                    this._syntaxCompletions as CompletionsStateTopicPayloads[T];
             case CompletionsTopic.SELECTED_INDEX:
                 return () =>
                     this._selectedIndex as CompletionsStateTopicPayloads[T];
@@ -56,7 +60,7 @@ export class CompletionsState<
     }
 
     getCompletions(): CompletionItem<TNode>[] {
-        return this._completions;
+        return this._nodeCompletions;
     }
 
     getSelectedIndex(): number | null {
@@ -66,15 +70,21 @@ export class CompletionsState<
     getSelectedCompletion(): CompletionItem<TNode> | null {
         if (
             this._selectedIndex === null ||
-            this._selectedIndex >= this._completions.length
+            this._selectedIndex >= this._nodeCompletions.length ||
+            this._selectedIndex < -this._syntaxCompletions.length
         ) {
             return null;
         }
-        return this._completions[this._selectedIndex];
+        if (this._selectedIndex < 0) {
+            return this._syntaxCompletions[Math.abs(this._selectedIndex) - 1];
+        }
+        return this._nodeCompletions[this._selectedIndex];
     }
 
-    hasSuggestions(): boolean {
-        return this._completions.length > 0;
+    hasCompletions(): boolean {
+        return (
+            this._nodeCompletions.length + this._syntaxCompletions.length > 0
+        );
     }
 
     /**
@@ -82,7 +92,7 @@ export class CompletionsState<
      * Called by input handlers when the focused segment changes.
      */
     updateCompletions(parsedQuery: ParsedQuery, caretOffset: number): void {
-        this._completions = getCompletions<TNode>(
+        const allCompletions = getCompletions<TNode>(
             parsedQuery,
             caretOffset,
             this._treeAccessor,
@@ -90,10 +100,22 @@ export class CompletionsState<
             evaluateExpression
         );
 
+        this._nodeCompletions = allCompletions.filter(
+            (comp) => comp.kind === "node"
+        );
+        this._syntaxCompletions = allCompletions.filter(
+            (comp) => comp.kind !== "node"
+        );
+
         // Reset selected index when completions change
         this._selectedIndex = null;
 
-        this._pubSubDelegate.notifySubscribers(CompletionsTopic.COMPLETIONS);
+        this._pubSubDelegate.notifySubscribers(
+            CompletionsTopic.NODE_COMPLETIONS
+        );
+        this._pubSubDelegate.notifySubscribers(
+            CompletionsTopic.SYNTAX_COMPLETIONS
+        );
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }
 
@@ -102,11 +124,14 @@ export class CompletionsState<
      * Called by input handlers when focus is lost or no segment is focused.
      */
     clearCompletions(): void {
-        if (this._completions.length > 0 || this._selectedIndex !== null) {
-            this._completions = [];
+        if (this._nodeCompletions.length > 0 || this._selectedIndex !== null) {
+            this._nodeCompletions = [];
             this._selectedIndex = null;
             this._pubSubDelegate.notifySubscribers(
-                CompletionsTopic.COMPLETIONS
+                CompletionsTopic.NODE_COMPLETIONS
+            );
+            this._pubSubDelegate.notifySubscribers(
+                CompletionsTopic.SYNTAX_COMPLETIONS
             );
             this._pubSubDelegate.notifySubscribers(
                 CompletionsTopic.SELECTED_INDEX
@@ -115,30 +140,43 @@ export class CompletionsState<
     }
 
     selectNext(): void {
-        if (this._completions.length === 0) {
+        if (
+            this._nodeCompletions.length + this._syntaxCompletions.length ===
+            0
+        ) {
             return;
         }
 
         if (this._selectedIndex === null) {
-            this._selectedIndex = 0;
+            if (this._nodeCompletions.length > 0) {
+                this._selectedIndex = 0;
+            } else {
+                this._selectedIndex = -1;
+            }
         } else {
             this._selectedIndex = Math.min(
                 this._selectedIndex + 1,
-                this._completions.length - 1
+                this._nodeCompletions.length - 1
             );
         }
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }
 
     selectPrevious(): void {
-        if (this._completions.length === 0) {
+        if (
+            this._nodeCompletions.length + this._syntaxCompletions.length ===
+            0
+        ) {
             return;
         }
 
         if (this._selectedIndex === null) {
-            this._selectedIndex = this._completions.length - 1;
+            this._selectedIndex = this._nodeCompletions.length - 1;
         } else {
-            this._selectedIndex = Math.max(this._selectedIndex - 1, 0);
+            this._selectedIndex = Math.max(
+                this._selectedIndex - 1,
+                -this._syntaxCompletions.length
+            );
         }
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }

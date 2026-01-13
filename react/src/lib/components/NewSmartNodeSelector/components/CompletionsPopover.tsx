@@ -3,7 +3,11 @@ import React from "react";
 import type { IndexedNode } from "../core";
 import { CompletionsTopic } from "../core/CompletionsState";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
-import type { CompletionItem } from "../core/query-language/types/completion";
+import type {
+    CompletionItem,
+    NodeCompletionItem,
+    SyntaxCompletionItem,
+} from "../core/query-language/types/completion";
 import { Topic } from "../core/StateManager/StateManager";
 import {
     SmartNodeSelectorDataContext,
@@ -12,12 +16,17 @@ import {
 import { VirtualizedList } from "./VirtualizedList";
 
 export type CompletionsPopoverProps = {
-    renderCompletionItem: (
-        completion: CompletionItem<IndexedNode>,
+    renderSyntaxCompletionItems: (
+        completions: SyntaxCompletionItem[],
+        onClick: (completion: SyntaxCompletionItem) => void,
+        selectedIndex: number | null
+    ) => React.ReactNode;
+    renderNodeCompletionItem: (
+        completion: NodeCompletionItem<IndexedNode>,
         isSelected: boolean
     ) => React.ReactNode;
-    suggestionItemHeight: number;
-    maxNumberSuggestions: number;
+    completionItemHeight: number;
+    maxNumberCompletions: number;
 };
 
 export function CompletionsPopover(
@@ -38,10 +47,15 @@ export function CompletionsPopover(
         Topic.FOCUSED_SEGMENT
     );
 
-    const completions = useSubscribeToTopic(
+    const nodeCompletions = useSubscribeToTopic(
         completionsState,
-        CompletionsTopic.COMPLETIONS
-    );
+        CompletionsTopic.NODE_COMPLETIONS
+    ) as NodeCompletionItem<IndexedNode>[];
+
+    const syntaxCompletions = useSubscribeToTopic(
+        completionsState,
+        CompletionsTopic.SYNTAX_COMPLETIONS
+    ) as SyntaxCompletionItem[];
 
     const selectedIndex = useSubscribeToTopic(
         completionsState,
@@ -173,17 +187,27 @@ export function CompletionsPopover(
                 inset: "unset",
             }}
         >
+            {props.renderSyntaxCompletionItems(
+                syntaxCompletions,
+                handleItemClick,
+                selectedIndex !== null && selectedIndex < 0
+                    ? Math.abs(selectedIndex) - 1
+                    : null
+            )}
             <div style={{ padding: 4, overflow: "auto" }}>
                 <VirtualizedList
-                    items={completions}
-                    itemHeight={props.suggestionItemHeight}
-                    maxHeight={maxHeight - 24}
-                    renderItem={props.renderCompletionItem}
+                    items={nodeCompletions}
+                    itemHeight={props.completionItemHeight}
+                    maxHeight={Math.min(
+                        maxHeight - 24,
+                        props.completionItemHeight * props.maxNumberCompletions
+                    )}
+                    renderItem={props.renderNodeCompletionItem}
                     onItemClick={handleItemClick}
                     selectedIndex={selectedIndex}
                 />
             </div>
-            {completions.length === 0 && (
+            {nodeCompletions.length === 0 && syntaxCompletions.length === 0 && (
                 <div
                     style={{
                         padding: "8px 12px",

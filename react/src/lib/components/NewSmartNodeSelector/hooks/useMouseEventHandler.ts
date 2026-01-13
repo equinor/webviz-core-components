@@ -12,6 +12,8 @@ export function useMouseEventHandler(
             const abortController = new AbortController();
 
             function handleMouseDown(event: MouseEvent) {
+                if (event.button !== 0) return; // Only proceed for left mouse button
+
                 const target = event.target as HTMLElement;
                 const selection = event.shiftKey;
 
@@ -94,7 +96,87 @@ export function useMouseEventHandler(
                 event.preventDefault();
             }
 
+            function handleMouseMove(event: MouseEvent) {
+                if (event.buttons !== 1) return; // Only proceed if mouse button is pressed
+
+                const target = event.target as HTMLElement;
+
+                const currentCaretPositions = stateManager.getCaretPositions();
+
+                // Find the closest segment element
+                const segmentElement = target.closest(
+                    "[data-segment-index]"
+                ) as HTMLElement;
+
+                if (!segmentElement) {
+                    return;
+                }
+                const queryId = segmentElement.getAttribute(
+                    "data-segment-query-id"
+                );
+                const segmentIndexStr =
+                    segmentElement.getAttribute("data-segment-index");
+
+                if (!queryId || segmentIndexStr === null) {
+                    return;
+                }
+
+                const segmentIndex = parseInt(segmentIndexStr, 10);
+
+                // Get query item and segment text
+                const queryItem = stateManager.getQueryItemById(queryId);
+                if (!queryItem) return;
+
+                const segments = queryItem.query.split(delimiter);
+                const segmentText = segments[segmentIndex] ?? "";
+
+                // Calculate local X position relative to segment
+                const rect = segmentElement.getBoundingClientRect();
+                const localX = event.clientX - rect.left;
+
+                // Map X to character offset within the segment
+                let offset = Math.max(
+                    0,
+                    Math.min(
+                        segmentText.length,
+                        getCaretOffsetFromX(localX, segmentText, segmentElement)
+                    )
+                );
+
+                const textBeforeSegment = segments
+                    .slice(0, segmentIndex)
+                    .join(delimiter);
+
+                offset += textBeforeSegment.length;
+                if (segmentIndex > 0) {
+                    // Account for delimiter length
+                    offset += delimiter.length;
+                }
+
+                let anchorOffset = offset;
+
+                if (
+                    currentCaretPositions.length === 1 &&
+                    currentCaretPositions[0].queryId === queryId
+                ) {
+                    // If there is an existing caret position in this segment, use its offset as anchor
+                    anchorOffset = currentCaretPositions[0].anchorOffset;
+                }
+
+                // Update caret position
+                stateManager.setCaretPosition({
+                    queryId: queryId,
+                    offset: offset,
+                    anchorOffset: anchorOffset,
+                });
+
+                event.preventDefault();
+            }
+
             ref.current?.addEventListener("mousedown", handleMouseDown, {
+                signal: abortController.signal,
+            });
+            ref.current?.addEventListener("mousemove", handleMouseMove, {
                 signal: abortController.signal,
             });
 
