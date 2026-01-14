@@ -5,8 +5,8 @@
 - [ ] Selecting query chips
 - [ ] Copy & Paste
 - [ ] Arrow buttons to browse through possible matches
-- [ ] Truncation
-- [ ] Coordinate to caret offset mapping (also for truncation)
+- [x] Truncation
+- [x] Coordinate to caret offset mapping (also for truncation)
 - [x] Text selection should stop at segment boundaries
 - [ ] Ctrl+A
 - [ ] Ctrl+C
@@ -26,3 +26,6 @@
 
 - [ ] Completions vs Matches? Old SNS was using matches at the respective node level, could forward to next segment. With completions, this is not working. How to handle completions vs matches?
 - [ ] Selection in caret context only working when anchor offset < caret offset
+
+Data Source A:Category 2:Item B1
+Data Source B:Category 1:Item A1

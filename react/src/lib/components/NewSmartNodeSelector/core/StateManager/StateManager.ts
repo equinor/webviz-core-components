@@ -758,6 +758,64 @@ export class StateManager implements PubSub<TopicPayloads> {
         return queryItem;
     }
 
+    private maybeParsePastingTextToNewQueries(text: string): boolean {
+        if (this._caretPositions.length !== 1) {
+            return false;
+        }
+
+        const caretPosition = this._caretPositions[0];
+        const queryItem = this._queriesStoreDelegate.getItemById(
+            caretPosition.queryId
+        );
+
+        if (!queryItem) {
+            return false;
+        }
+
+        if (queryItem.query.length > 0) {
+            return false;
+        }
+
+        if (this._queriesStoreDelegate.getLastItem()?.id !== queryItem.id) {
+            return false;
+        }
+
+        const queries = text.split("\n");
+        if (queries.length < 1) {
+            return false;
+        }
+
+        this._queriesStoreDelegate.removeItem(queryItem.id);
+
+        let newCaretPosition: CaretPosition = {
+            ...caretPosition,
+        };
+
+        for (let i = 0; i < queries.length; i++) {
+            const newItem = this._queriesStoreDelegate.addItem(
+                queries[i].trim()
+            );
+            const offset = queries[i].length;
+            newCaretPosition = {
+                queryId: newItem.id,
+                offset: offset,
+                anchorOffset: offset,
+            };
+        }
+
+        this.updateCaretPositions([newCaretPosition]);
+        this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+        return true;
+    }
+
+    pasteAtCaret(text: string): void {
+        if (this.maybeParsePastingTextToNewQueries(text)) {
+            return;
+        }
+
+        this.insertTextAtCaret(text);
+    }
+
     updateFocusedQueryItem(insertText: string, range?: Range): boolean {
         if (this._caretPositions.length !== 1) {
             return false;

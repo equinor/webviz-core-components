@@ -115,6 +115,27 @@ export class KeyboardHandler {
                 event.preventDefault();
                 break;
 
+            // Selection
+            case "a":
+                if (event.ctrlKey || event.metaKey) {
+                    // this._stateManager.selectAllInCurrentQueryItem();
+                    event.preventDefault();
+                }
+                break;
+
+            // Copy/Paste
+            case "v":
+                if (event.ctrlKey || event.metaKey) {
+                    const pasteData = navigator.clipboard.readText();
+                    pasteData.then((text) => {
+                        this._stateManager.pasteAtCaret(text);
+                    });
+                    // Paste is handled in handleInput
+                    // Do nothing here to allow default paste behavior
+                    event.preventDefault();
+                }
+                break;
+
             // Editing
             case "Backspace":
                 this._stateManager.removeFromQueryAtCaret("backward");
