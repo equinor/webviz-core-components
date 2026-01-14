@@ -59,6 +59,8 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                 return null;
             }
 
+            const diagnostics = parsedQuery.diagnostics;
+
             for (const segment of parsedQuery?.segments ?? []) {
                 for (let i = tokenIndex; i < segment.tokenStartIndex; i++) {
                     const token = parsedQuery.tokens[i];
@@ -68,6 +70,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                             key={nodes.length}
                             token={token}
                             queryId={props.queryItem.id}
+                            diagnostics={diagnostics}
                         />
                     );
                 }
@@ -83,6 +86,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                         queryId={props.queryItem.id}
                         segmentIndex={segmentIndex}
                         tokens={segmentTokens}
+                        diagnostics={diagnostics}
                     />
                 );
 
@@ -98,6 +102,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                         key={nodes.length}
                         token={token}
                         queryId={props.queryItem.id}
+                        diagnostics={diagnostics}
                     />
                 );
             }

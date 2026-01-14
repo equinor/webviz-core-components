@@ -14,6 +14,7 @@ import {
     type SmartNodeSelectorDataContextType,
 } from "../SmartNodeSelector";
 import { VirtualizedList } from "./VirtualizedList";
+import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
 
 export type CompletionsPopoverProps = {
     renderSyntaxCompletionItems: (
@@ -41,6 +42,61 @@ export function CompletionsPopover(
         React.useState<HTMLElement | null>(null);
     const [maxHeight, setMaxHeight] = React.useState<number>(0);
     const directionRef = React.useRef<"down" | "up">("down");
+
+    const updatePosition = React.useCallback(
+        function updatePosition() {
+            if (!anchorElement || !popoverRef.current) {
+                return;
+            }
+
+            const rect = anchorElement.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const margin = 4;
+
+            const spaceBelow = viewportHeight - (rect.bottom + margin);
+            const spaceAbove = rect.top - margin;
+
+            const direction =
+                spaceBelow >= 150 || spaceBelow >= spaceAbove ? "down" : "up";
+            const newMaxHeight = direction === "down" ? spaceBelow : spaceAbove;
+
+            directionRef.current = direction;
+
+            // Only update state if maxHeight changed or forced (for VirtualizedList re-render)
+            setMaxHeight((prev) => {
+                if (newMaxHeight !== prev) {
+                    return newMaxHeight;
+                }
+                return prev;
+            });
+
+            const containerElement = anchorElement.closest(
+                "[data-smart-node-selector-root]"
+            );
+            const containerRect = containerElement?.getBoundingClientRect();
+
+            // Directly update the popover's style for smooth positioning
+            const popoverElement = popoverRef.current;
+            popoverElement.style.position = "fixed";
+            popoverElement.style.left = `${containerRect ? containerRect.left : rect.left}px`;
+            popoverElement.style.width = containerRect?.width
+                ? `${containerRect.width}px`
+                : "";
+            popoverElement.style.maxHeight = `${newMaxHeight}px`;
+            popoverElement.style.right = "unset";
+
+            if (direction === "down") {
+                popoverElement.style.top = `${rect.bottom + margin}px`;
+                popoverElement.style.bottom = "unset";
+            } else {
+                popoverElement.style.bottom = `${viewportHeight - rect.top + margin}px`;
+                popoverElement.style.top = "unset";
+            }
+        },
+        [anchorElement]
+    );
+
+    useElementBoundingRect(anchorElement, updatePosition);
 
     const focusedSegment = useSubscribeToTopic(
         stateManager,
@@ -82,73 +138,6 @@ export function CompletionsPopover(
             }
         },
         [focusedSegment]
-    );
-
-    const updatePositionRef =
-        React.useRef<(forceStateUpdate?: boolean) => void>();
-
-    updatePositionRef.current = (forceStateUpdate = false) => {
-        if (!anchorElement || !popoverRef.current) {
-            return;
-        }
-
-        const rect = anchorElement.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const margin = 4;
-
-        const spaceBelow = viewportHeight - (rect.bottom + margin);
-        const spaceAbove = rect.top - margin;
-
-        const direction =
-            spaceBelow >= 150 || spaceBelow >= spaceAbove ? "down" : "up";
-        const newMaxHeight = direction === "down" ? spaceBelow : spaceAbove;
-
-        directionRef.current = direction;
-
-        // Only update state if maxHeight changed or forced (for VirtualizedList re-render)
-        if (forceStateUpdate || newMaxHeight !== maxHeight) {
-            setMaxHeight(newMaxHeight);
-        }
-
-        const containerElement = anchorElement.closest(
-            "[data-smart-node-selector-root]"
-        );
-        const containerRect = containerElement?.getBoundingClientRect();
-
-        // Directly update the popover's style for smooth positioning
-        const popoverElement = popoverRef.current;
-        popoverElement.style.position = "fixed";
-        popoverElement.style.left = `${containerRect ? containerRect.left : rect.left}px`;
-        popoverElement.style.width = containerRect?.width
-            ? `${containerRect.width}px`
-            : "";
-        popoverElement.style.maxHeight = `${newMaxHeight}px`;
-        popoverElement.style.right = "unset";
-
-        if (direction === "down") {
-            popoverElement.style.top = `${rect.bottom + margin}px`;
-            popoverElement.style.bottom = "unset";
-        } else {
-            popoverElement.style.bottom = `${viewportHeight - rect.top + margin}px`;
-            popoverElement.style.top = "unset";
-        }
-    };
-
-    React.useLayoutEffect(
-        function onResizeAndScroll() {
-            const handleUpdate = () => updatePositionRef.current?.();
-
-            window.addEventListener("resize", handleUpdate);
-            window.addEventListener("scroll", handleUpdate, true);
-
-            updatePositionRef.current?.(true);
-
-            return () => {
-                window.removeEventListener("resize", handleUpdate);
-                window.removeEventListener("scroll", handleUpdate, true);
-            };
-        },
-        [anchorElement]
     );
 
     const handleItemClick = React.useCallback(

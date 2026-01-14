@@ -1,0 +1,28 @@
+## UI
+
+- [x] Completions popover not changing top position at once when query chip changes position
+- [ ] Completions popover is "jumping" on scroll -> postpone for now
+- [ ] Selecting query chips
+- [ ] Copy & Paste
+- [ ] Arrow buttons to browse through possible matches
+- [ ] Truncation
+- [ ] Coordinate to caret offset mapping (also for truncation)
+- [x] Text selection should stop at segment boundaries
+- [ ] Ctrl+A
+- [ ] Ctrl+C
+- [ ] Ctrl+V
+- [x] Delete
+- [x] Home
+- [x] End
+- [ ] Tab
+- [ ] Shift+Tab
+- [ ] Update on data change
+- [ ] Mode selection (easy, advanced)
+- [ ] Caret context availability
+- [ ] Completion wizard in easy mode
+- [ ] Visualize diagnostics/parser errors
+
+## Core
+
+- [ ] Completions vs Matches? Old SNS was using matches at the respective node level, could forward to next segment. With completions, this is not working. How to handle completions vs matches?
+- [ ] Selection in caret context only working when anchor offset < caret offset

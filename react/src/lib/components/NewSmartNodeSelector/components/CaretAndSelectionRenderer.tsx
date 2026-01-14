@@ -22,7 +22,7 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
 
     // Track main container bounding rect changes
-    const mainBoundingRect = useElementBoundingRect(props.mainRef);
+    const mainBoundingRect = useElementBoundingRect(props.mainRef.current);
 
     const [mappedCaretPositions, setMappedCaretPositions] = React.useState<
         Array<{ left: number; top: number }>

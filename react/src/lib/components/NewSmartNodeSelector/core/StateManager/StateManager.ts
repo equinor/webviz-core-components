@@ -326,6 +326,125 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
     }
 
+    private getSegmentForCaretOffset(
+        query: string,
+        offset: number
+    ): {
+        index: number;
+        startOffset: number;
+        endOffset: number;
+        length: number;
+    } {
+        const segments = query.split(this._delimiter);
+        let accumulatedLength = 0;
+        for (let i = 0; i < segments.length; i++) {
+            const segmentEnd = accumulatedLength + segments[i].length;
+            if (offset <= segmentEnd) {
+                return {
+                    index: i,
+                    startOffset: accumulatedLength,
+                    endOffset: segmentEnd,
+                    length: segments[i].length,
+                };
+            }
+            accumulatedLength = segmentEnd + this._delimiter.length;
+        }
+        return {
+            index: segments.length - 1,
+            startOffset:
+                accumulatedLength -
+                segments[segments.length - 1].length -
+                this._delimiter.length,
+            endOffset: accumulatedLength - this._delimiter.length,
+            length: segments[segments.length - 1].length,
+        };
+    }
+
+    moveCaretToStartOrEndOfCurrentSegment(
+        where: "start" | "end",
+        selecting: boolean
+    ): void {
+        const newCaretPositions: CaretPosition[] = [];
+        for (const caretPosition of this._caretPositions) {
+            const queryItem = this._queriesStoreDelegate.getItemById(
+                caretPosition.queryId
+            );
+
+            if (!queryItem) {
+                newCaretPositions.push(caretPosition);
+                continue;
+            }
+
+            const segment = this.getSegmentForCaretOffset(
+                queryItem.query,
+                caretPosition.offset
+            );
+
+            const newCaretOffset =
+                where === "start" ? segment.startOffset : segment.endOffset;
+
+            const newCaretPosition: CaretPosition = {
+                queryId: caretPosition.queryId,
+                offset: newCaretOffset,
+                anchorOffset: selecting
+                    ? caretPosition.anchorOffset
+                    : newCaretOffset,
+            };
+            newCaretPositions.push(newCaretPosition);
+        }
+
+        this.updateCaretPositions(newCaretPositions);
+    }
+
+    private maybeCollapseSelection(
+        caretPosition: CaretPosition,
+        selecting: boolean
+    ): { hasCollapsed: boolean; newCaretPosition: CaretPosition } {
+        if (caretPosition.offset === caretPosition.anchorOffset || selecting) {
+            return { hasCollapsed: false, newCaretPosition: caretPosition };
+        }
+
+        const newCaretPosition: CaretPosition = {
+            queryId: caretPosition.queryId,
+            offset: caretPosition.offset,
+            anchorOffset: caretPosition.offset,
+        };
+        return { hasCollapsed: true, newCaretPosition };
+    }
+
+    private maybeChangeSelection(
+        caretPosition: CaretPosition,
+        dx: number,
+        selecting: boolean
+    ): { hasChanged: boolean; newCaretPosition: CaretPosition } {
+        const queryItem = this._queriesStoreDelegate.getItemById(
+            caretPosition.queryId
+        );
+
+        if (!selecting || !queryItem) {
+            return { hasChanged: false, newCaretPosition: caretPosition };
+        }
+
+        const segment = this.getSegmentForCaretOffset(
+            queryItem.query,
+            caretPosition.offset
+        );
+
+        let newOffset = caretPosition.offset + dx;
+
+        if (newOffset < segment.startOffset) {
+            newOffset = segment.startOffset;
+        } else if (newOffset > segment.endOffset) {
+            newOffset = segment.endOffset;
+        }
+        const newCaretPosition: CaretPosition = {
+            queryId: caretPosition.queryId,
+            offset: newOffset,
+            anchorOffset: caretPosition.anchorOffset,
+        };
+        return { hasChanged: true, newCaretPosition };
+    }
+
     moveCaretRelative(dx: number, selecting: boolean): void {
         const newCaretPositions: CaretPosition[] = [];
         for (const caretPosition of this._caretPositions) {
@@ -338,22 +457,25 @@ export class StateManager implements PubSub<TopicPayloads> {
                 continue;
             }
 
-            if (
-                caretPosition.offset !== caretPosition.anchorOffset &&
-                !selecting
-            ) {
-                // Collapse selection to the end we're moving towards
-                const newCaretPosition: CaretPosition = {
-                    queryId: caretPosition.queryId,
-                    offset: caretPosition.offset,
-                    anchorOffset: caretPosition.offset,
-                };
+            const { hasCollapsed, newCaretPosition: collapsedCaretPosition } =
+                this.maybeCollapseSelection(caretPosition, selecting);
+            if (hasCollapsed) {
+                newCaretPositions.push(collapsedCaretPosition);
+                continue;
+            }
+
+            const { hasChanged, newCaretPosition } = this.maybeChangeSelection(
+                caretPosition,
+                dx,
+                selecting
+            );
+            if (hasChanged) {
                 newCaretPositions.push(newCaretPosition);
                 continue;
             }
 
-            let newOffset = caretPosition.offset + dx;
             let newQueryId = caretPosition.queryId;
+            let newOffset = caretPosition.offset + dx;
 
             if (newOffset > queryItem.query.length) {
                 if (caretPosition.anchorOffset === caretPosition.offset) {
@@ -532,7 +654,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         };
     }
 
-    backspaceAtCaret(): void {
+    removeFromQueryAtCaret(direction: "backward" | "forward"): void {
         const newCaretPositions: CaretPosition[] = [];
 
         for (const caretPosition of this._caretPositions) {
@@ -591,17 +713,23 @@ export class StateManager implements PubSub<TopicPayloads> {
                 newCaretPositions.push(newCaretPosition);
                 continue;
             }
-
-            const before = queryItem.query.slice(0, caretPosition.offset - 1);
-            const after = queryItem.query.slice(caretPosition.offset);
+            const before = queryItem.query.slice(
+                0,
+                caretPosition.offset + (direction === "backward" ? -1 : 0)
+            );
+            const after = queryItem.query.slice(
+                caretPosition.offset + (direction === "forward" ? 1 : 0)
+            );
             const newQuery = before + after;
 
             this._queriesStoreDelegate.updateItem(queryItem.id, newQuery);
 
             const newCaretPosition: CaretPosition = {
                 queryId: caretPosition.queryId,
-                offset: caretPosition.offset - 1,
-                anchorOffset: caretPosition.offset - 1,
+                offset:
+                    caretPosition.offset - (direction === "backward" ? 1 : 0),
+                anchorOffset:
+                    caretPosition.offset - (direction === "backward" ? 1 : 0),
             };
             newCaretPositions.push(newCaretPosition);
         }
@@ -724,7 +852,7 @@ export class StateManager implements PubSub<TopicPayloads> {
                 continue;
             }
 
-            let start = Math.min(
+            const start = Math.min(
                 caretPosition.offset,
                 caretPosition.anchorOffset
             );

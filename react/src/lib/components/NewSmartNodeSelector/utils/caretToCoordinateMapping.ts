@@ -118,3 +118,55 @@ export function getCaretOffsetFromX(
 
     return closestOffset;
 }
+
+export type TruncationInfo = {
+    startText: string;
+    hiddenText: string;
+    endText: string;
+    ellipsisText: string;
+};
+
+/**
+ * Maps a click x-coordinate on a truncated segment to the actual caret offset in the full text.
+ * Uses proportional width-based mapping for accurate positioning.
+ */
+export function mapTruncatedClickToFullOffset(
+    clickX: number,
+    truncationInfo: TruncationInfo,
+    segmentElement: HTMLElement
+): number {
+    const { startText, hiddenText, endText, ellipsisText } = truncationInfo;
+    const fullText = startText + hiddenText + endText;
+
+    // The segment is currently rendered as: startText + "..." + endText
+    // We need to measure each part as rendered in the actual DOM with token styling
+
+    // Measure widths using the actual rendered segment content
+    const startWidth = computeTextWidthAndHeight(startText, segmentElement).width;
+    const startPlusEllipsisWidth = computeTextWidthAndHeight(
+        startText + ellipsisText,
+        segmentElement
+    ).width;
+    const ellipsisWidth = startPlusEllipsisWidth - startWidth;
+
+    // Determine which region was clicked
+    if (clickX <= startWidth) {
+        // Click in start portion - direct mapping
+        return getCaretOffsetFromX(clickX, startText, segmentElement);
+    } else if (clickX <= startPlusEllipsisWidth) {
+        // Click on ellipsis - map to middle of hidden text
+        const relativeX = clickX - startWidth;
+        const ratio = relativeX / ellipsisWidth;
+
+        // Simple proportional mapping: map the ellipsis region to the hidden text
+        const hiddenOffset = Math.round(ratio * hiddenText.length);
+
+        return startText.length + hiddenOffset;
+    } else {
+        // Click in end portion - map to end text with offset
+        const relativeX = clickX - startPlusEllipsisWidth;
+        const endOffset = getCaretOffsetFromX(relativeX, endText, segmentElement);
+
+        return fullText.length - endText.length + endOffset;
+    }
+}

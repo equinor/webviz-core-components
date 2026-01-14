@@ -17,7 +17,8 @@ function elementIsVisible(element: HTMLElement | SVGSVGElement): boolean {
 }
 
 export function useElementBoundingRect(
-    ref: React.RefObject<HTMLElement | SVGSVGElement>
+    element: HTMLElement | SVGSVGElement | null,
+    onChange?: (rect: DOMRect) => void
 ): DOMRect {
     const [rect, setRect] = React.useState<DOMRect>(new DOMRect(0, 0, 0, 0));
 
@@ -33,10 +34,13 @@ export function useElementBoundingRect(
                 // https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API#rootmargin
                 intersectionObserver?.disconnect();
 
-                if (ref.current) {
-                    // Using the browser's viewport as the root for the intersection observer and calculating the root margin based on the element's position
-                    const rect = ref.current.getBoundingClientRect();
-                    const margins = `${-Math.round(rect.top)}px ${-Math.round(rect.right)}px ${-Math.round(rect.bottom)}px ${-Math.round(rect.left)}px`;
+                if (element) {
+                    // Using the browser's viewport as the root for the intersection observer
+                    // and calculating the root margin based on the element's position
+                    const rect = element.getBoundingClientRect();
+                    const margins =
+                        `${-Math.round(rect.top)}px ${-Math.round(rect.right)}px ` +
+                        `${-Math.round(rect.bottom)}px ${-Math.round(rect.left)}px`;
 
                     intersectionObserver = new IntersectionObserver(
                         handlePotentialRectChange,
@@ -46,10 +50,10 @@ export function useElementBoundingRect(
                         }
                     );
 
-                    intersectionObserver.observe(ref.current);
+                    intersectionObserver.observe(element);
 
                     // If element is not visible do not change size as it might be expensive to render
-                    if (!isHidden && !elementIsVisible(ref.current)) {
+                    if (!isHidden && !elementIsVisible(element)) {
                         isHidden = true;
                         return;
                     }
@@ -61,11 +65,18 @@ export function useElementBoundingRect(
                     }
 
                     currentRect = rect;
+
+                    // Call onChange immediately before state update
+                    if (onChange) {
+                        onChange(rect);
+                    }
+
                     setRect(rect);
                 }
             }
 
-            // Anytime the element's position might change, the intersection observer must be reinitialized with the correct root margin.
+            // Anytime the element's position might change,
+            // the intersection observer must be reinitialized with the correct root margin.
             // Hence, we listen to resize, scroll, and mutation events.
             const resizeObserver = new ResizeObserver(
                 handlePotentialRectChange
@@ -76,9 +87,9 @@ export function useElementBoundingRect(
             window.addEventListener("resize", handlePotentialRectChange, true);
             window.addEventListener("scroll", handlePotentialRectChange, true);
 
-            if (ref.current) {
+            if (element) {
                 resizeObserver.observe(document.body);
-                mutationObserver.observe(ref.current, {
+                mutationObserver.observe(element, {
                     attributes: true,
                     subtree: false,
                     childList: false,
@@ -103,7 +114,7 @@ export function useElementBoundingRect(
                 );
             };
         },
-        [ref]
+        [element, onChange]
     );
 
     return rect;

@@ -91,6 +91,7 @@ export class KeyboardHandler {
 
         // Default keyboard handling - route to StateManager operations
         switch (key) {
+            // Navigation
             case "ArrowRight":
                 this._stateManager.moveCaretRelative(1, selecting);
                 event.preventDefault();
@@ -99,8 +100,28 @@ export class KeyboardHandler {
                 this._stateManager.moveCaretRelative(-1, selecting);
                 event.preventDefault();
                 break;
+            case "Home":
+                this._stateManager.moveCaretToStartOrEndOfCurrentSegment(
+                    "start",
+                    selecting
+                );
+                event.preventDefault();
+                break;
+            case "End":
+                this._stateManager.moveCaretToStartOrEndOfCurrentSegment(
+                    "end",
+                    selecting
+                );
+                event.preventDefault();
+                break;
+
+            // Editing
             case "Backspace":
-                this._stateManager.backspaceAtCaret();
+                this._stateManager.removeFromQueryAtCaret("backward");
+                event.preventDefault();
+                break;
+            case "Delete":
+                this._stateManager.removeFromQueryAtCaret("forward");
                 event.preventDefault();
                 break;
             case "Enter":
