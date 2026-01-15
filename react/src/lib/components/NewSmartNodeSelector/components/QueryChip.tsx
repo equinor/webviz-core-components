@@ -12,6 +12,7 @@ import { QuerySegment } from "./QuerySegment";
 import { TokenRenderer } from "./TokenRenderer";
 
 export type QueryChipProps = {
+    index: number;
     queryItem: QueryItem;
     isLast: boolean;
 };
@@ -22,10 +23,28 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
 
     const matchedLeafNodes = useLeafNodeMatches(props.queryItem);
 
-    const caretPositions = useSubscribeToTopic(
+    const textSelections = useSubscribeToTopic(
         dataContext.stateManager,
-        Topic.CARET_POSITIONS
+        Topic.QUERY_TEXT_SELECTIONS
     );
+
+    const querySelection = useSubscribeToTopic(
+        dataContext.stateManager,
+        Topic.QUERY_SELECTION
+    );
+
+    const isSelected = React.useMemo(() => {
+        if (!querySelection) {
+            return false;
+        }
+
+        const range = [
+            Math.min(querySelection.anchorIndex, querySelection.focusIndex),
+            Math.max(querySelection.anchorIndex, querySelection.focusIndex),
+        ];
+
+        return props.index >= range[0] && props.index <= range[1];
+    }, [querySelection, props.index]);
 
     const handleRemoveTagClick = React.useCallback(
         function handleRemoveTagClick() {
@@ -39,7 +58,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
 
     const isValid = matchedLeafNodes.length > 0;
     const isEditing =
-        caretPositions.find((pos) => pos.queryId === props.queryItem.id) !==
+        textSelections.find((pos) => pos.queryId === props.queryItem.id) !==
         undefined;
     const hasMoreThanOneSegment = props.queryItem.query.includes(
         dataContext.delimiter
@@ -119,7 +138,8 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
             tabIndex={0}
             style={makeStyle(
                 props.isLast && !hasMoreThanOneSegment,
-                isValid || isEditing
+                isValid || isEditing,
+                isSelected
             )}
         >
             <MatchesCounter matches={matchedLeafNodes} />
@@ -176,7 +196,11 @@ function Placeholder(props: PlaceholderProps) {
     );
 }
 
-function makeStyle(isLast: boolean, isValid: boolean): React.CSSProperties {
+function makeStyle(
+    isLast: boolean,
+    isValid: boolean,
+    isSelected: boolean
+): React.CSSProperties {
     if (isLast) {
         return {
             display: "flex",
@@ -194,5 +218,6 @@ function makeStyle(isLast: boolean, isValid: boolean): React.CSSProperties {
         borderRadius: "4px",
         backgroundColor: isValid ? "#f5f5f5" : "#f4bdbdff",
         padding: "2px 4px",
+        outline: isSelected ? "2px solid #272727" : "none",
     };
 }

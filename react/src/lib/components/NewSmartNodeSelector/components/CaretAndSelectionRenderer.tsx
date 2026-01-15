@@ -1,9 +1,9 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import { Topic } from "../core/StateManager/StateManager";
-import { computeTextWidthAndHeight } from "../utils/caretToCoordinateMapping";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import { Topic } from "../core/StateManager/StateManager";
 import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
+import { computeTextWidthAndHeight } from "../utils/caretToCoordinateMapping";
 
 export type CaretRendererProps = {
     mainRef: React.RefObject<HTMLDivElement>;
@@ -14,9 +14,9 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
         SmartNodeSelectorDataContext
     );
 
-    const segmentCaretPositions = useSubscribeToTopic(
+    const segmentTextSelections = useSubscribeToTopic(
         stateManager,
-        Topic.SEGMENT_CARET_POSITIONS
+        Topic.SEGMENT_TEXT_SELECTIONS
     );
 
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
@@ -39,7 +39,7 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
         function updateCaretPositions() {
             const newMappedCaretPositions = [];
             const newMappedSelectionPositions = [];
-            for (const position of segmentCaretPositions) {
+            for (const position of segmentTextSelections) {
                 // Find the segment element instead of the chip content
                 const segmentElement = props.mainRef.current?.querySelector(
                     `[data-segment-query-id="${position.queryId}"][data-segment-index="${position.segmentIndex}"]`
@@ -71,7 +71,10 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                 const segments = queryItem.query.split(delimiter);
                 const segmentText = segments[position.segmentIndex] ?? "";
 
-                const textBeforeCaret = segmentText.slice(0, position.offset);
+                const textBeforeCaret = segmentText.slice(
+                    0,
+                    position.focusOffset
+                );
 
                 const { width: textWidth } = computeTextWidthAndHeight(
                     textBeforeCaret,
@@ -96,13 +99,13 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
 
                 setFontSize(caretHeight);
 
-                if (position.anchorOffset !== position.offset) {
+                if (position.anchorOffset !== position.focusOffset) {
                     const startOffset = Math.min(
-                        position.offset,
+                        position.focusOffset,
                         position.anchorOffset
                     );
                     const endOffset = Math.max(
-                        position.offset,
+                        position.focusOffset,
                         position.anchorOffset
                     );
 
@@ -135,7 +138,7 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
             setMappedSelectionPositions(newMappedSelectionPositions);
         },
         [
-            segmentCaretPositions,
+            segmentTextSelections,
             queryItems,
             stateManager,
             props.mainRef,

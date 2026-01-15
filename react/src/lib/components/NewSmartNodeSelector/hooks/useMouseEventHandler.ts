@@ -1,10 +1,10 @@
 import React from "react";
+import type { StateManager } from "../core/StateManager/StateManager";
 import {
     getCaretOffsetFromX,
     mapTruncatedClickToFullOffset,
     type TruncationInfo,
 } from "../utils/caretToCoordinateMapping";
-import type { StateManager } from "../core/StateManager/StateManager";
 
 export function useMouseEventHandler(
     ref: React.RefObject<HTMLElement>,
@@ -21,7 +21,8 @@ export function useMouseEventHandler(
                 const target = event.target as HTMLElement;
                 const selection = event.shiftKey;
 
-                const currentCaretPositions = stateManager.getCaretPositions();
+                const currentCaretPositions =
+                    stateManager.getQueryTextSelections();
 
                 // Find the closest segment element
                 const segmentElement = target.closest(
@@ -63,7 +64,8 @@ export function useMouseEventHandler(
 
                 // Check if segment is truncated
                 const isTruncated =
-                    segmentElement.getAttribute("data-segment-truncated") === "true";
+                    segmentElement.getAttribute("data-segment-truncated") ===
+                    "true";
 
                 // Map X to character offset within the segment
                 let offset: number;
@@ -71,15 +73,21 @@ export function useMouseEventHandler(
                     // Use special mapping for truncated segments
                     const truncationInfo: TruncationInfo = {
                         startText:
-                            segmentElement.getAttribute("data-truncation-start") ?? "",
+                            segmentElement.getAttribute(
+                                "data-truncation-start"
+                            ) ?? "",
                         hiddenText:
-                            segmentElement.getAttribute("data-truncation-hidden") ??
-                            "",
+                            segmentElement.getAttribute(
+                                "data-truncation-hidden"
+                            ) ?? "",
                         endText:
-                            segmentElement.getAttribute("data-truncation-end") ?? "",
+                            segmentElement.getAttribute(
+                                "data-truncation-end"
+                            ) ?? "",
                         ellipsisText:
-                            segmentElement.getAttribute("data-truncation-ellipsis") ??
-                            "...",
+                            segmentElement.getAttribute(
+                                "data-truncation-ellipsis"
+                            ) ?? "...",
                     };
                     offset = mapTruncatedClickToFullOffset(
                         localX,
@@ -87,7 +95,11 @@ export function useMouseEventHandler(
                         segmentElement
                     );
                 } else {
-                    offset = getCaretOffsetFromX(localX, segmentText, segmentElement);
+                    offset = getCaretOffsetFromX(
+                        localX,
+                        segmentText,
+                        segmentElement
+                    );
                 }
 
                 const textBeforeSegment = segments
@@ -115,7 +127,7 @@ export function useMouseEventHandler(
                 // which will cause HiddenTextarea to focus
                 stateManager.setCaretPosition({
                     queryId: queryId,
-                    offset: offset,
+                    focusOffset: offset,
                     anchorOffset: anchorOffset,
                 });
 
@@ -127,7 +139,8 @@ export function useMouseEventHandler(
 
                 const target = event.target as HTMLElement;
 
-                const currentCaretPositions = stateManager.getCaretPositions();
+                const currentCaretPositions =
+                    stateManager.getQueryTextSelections();
 
                 // Find the closest segment element
                 const segmentElement = target.closest(
@@ -162,7 +175,8 @@ export function useMouseEventHandler(
 
                 // Check if segment is truncated
                 const isTruncated =
-                    segmentElement.getAttribute("data-segment-truncated") === "true";
+                    segmentElement.getAttribute("data-segment-truncated") ===
+                    "true";
 
                 // Map X to character offset within the segment
                 let offset: number;
@@ -170,15 +184,21 @@ export function useMouseEventHandler(
                     // Use special mapping for truncated segments
                     const truncationInfo: TruncationInfo = {
                         startText:
-                            segmentElement.getAttribute("data-truncation-start") ?? "",
+                            segmentElement.getAttribute(
+                                "data-truncation-start"
+                            ) ?? "",
                         hiddenText:
-                            segmentElement.getAttribute("data-truncation-hidden") ??
-                            "",
+                            segmentElement.getAttribute(
+                                "data-truncation-hidden"
+                            ) ?? "",
                         endText:
-                            segmentElement.getAttribute("data-truncation-end") ?? "",
+                            segmentElement.getAttribute(
+                                "data-truncation-end"
+                            ) ?? "",
                         ellipsisText:
-                            segmentElement.getAttribute("data-truncation-ellipsis") ??
-                            "...",
+                            segmentElement.getAttribute(
+                                "data-truncation-ellipsis"
+                            ) ?? "...",
                     };
                     offset = Math.max(
                         0,
@@ -196,7 +216,11 @@ export function useMouseEventHandler(
                         0,
                         Math.min(
                             segmentText.length,
-                            getCaretOffsetFromX(localX, segmentText, segmentElement)
+                            getCaretOffsetFromX(
+                                localX,
+                                segmentText,
+                                segmentElement
+                            )
                         )
                     );
                 }
@@ -224,7 +248,7 @@ export function useMouseEventHandler(
                 // Update caret position
                 stateManager.setCaretPosition({
                     queryId: queryId,
-                    offset: offset,
+                    focusOffset: offset,
                     anchorOffset: anchorOffset,
                 });
 

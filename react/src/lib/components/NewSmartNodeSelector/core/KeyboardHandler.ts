@@ -48,7 +48,7 @@ export class KeyboardHandler {
 
         this._completionsState.updateCompletions(
             parsedQuery,
-            completionContext.caretPosition.offset
+            completionContext.queryTextSelection.focusOffset
         );
     }
 
@@ -93,25 +93,19 @@ export class KeyboardHandler {
         switch (key) {
             // Navigation
             case "ArrowRight":
-                this._stateManager.moveCaretRelative(1, selecting);
+                this._stateManager.moveFocus(1, selecting);
                 event.preventDefault();
                 break;
             case "ArrowLeft":
-                this._stateManager.moveCaretRelative(-1, selecting);
+                this._stateManager.moveFocus(-1, selecting);
                 event.preventDefault();
                 break;
             case "Home":
-                this._stateManager.moveCaretToStartOrEndOfCurrentSegment(
-                    "start",
-                    selecting
-                );
+                this._stateManager.moveFocusToStartOrEnd("start", selecting);
                 event.preventDefault();
                 break;
             case "End":
-                this._stateManager.moveCaretToStartOrEndOfCurrentSegment(
-                    "end",
-                    selecting
-                );
+                this._stateManager.moveFocusToStartOrEnd("end", selecting);
                 event.preventDefault();
                 break;
 
@@ -130,8 +124,6 @@ export class KeyboardHandler {
                     pasteData.then((text) => {
                         this._stateManager.pasteAtCaret(text);
                     });
-                    // Paste is handled in handleInput
-                    // Do nothing here to allow default paste behavior
                     event.preventDefault();
                 }
                 break;

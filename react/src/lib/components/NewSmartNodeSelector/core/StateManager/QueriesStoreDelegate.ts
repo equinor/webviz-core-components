@@ -10,6 +10,10 @@ export class QueriesStoreDelegate {
         return this._items;
     }
 
+    getNumItems(): number {
+        return this._items.length;
+    }
+
     getFirstItem(): QueryItem | null {
         return this._items[0] ?? null;
     }
@@ -20,6 +24,10 @@ export class QueriesStoreDelegate {
 
     getItemById(id: string): QueryItem | null {
         return this._items.find((item) => item.id === id) ?? null;
+    }
+
+    getIndexById(id: string): number {
+        return this._items.findIndex((item) => item.id === id);
     }
 
     getNextItem(id: string): QueryItem | null {

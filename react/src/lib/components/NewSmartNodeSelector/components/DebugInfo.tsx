@@ -1,8 +1,8 @@
 import React from "react";
 import { SmartNodeSelectorDataContext } from "../SmartNodeSelector";
-import { Topic } from "../core/StateManager/StateManager";
-import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { CompletionsTopic } from "../core/CompletionsState";
+import { useSubscribeToTopic } from "../core/PubSubDelegate";
+import { Topic } from "../core/StateManager/StateManager";
 
 export function DebugInfo(): React.ReactElement {
     const context = React.useContext(SmartNodeSelectorDataContext);
@@ -14,9 +14,9 @@ export function DebugInfo(): React.ReactElement {
         context.stateManager,
         Topic.QUERY_ITEMS
     );
-    const caretPositions = useSubscribeToTopic(
+    const textSelections = useSubscribeToTopic(
         context.stateManager,
-        Topic.CARET_POSITIONS
+        Topic.QUERY_TEXT_SELECTIONS
     );
     const hasFocus = useSubscribeToTopic(context.stateManager, Topic.HAS_FOCUS);
     const focusedSegment = useSubscribeToTopic(
@@ -26,6 +26,10 @@ export function DebugInfo(): React.ReactElement {
     const selectedIndex = useSubscribeToTopic(
         context.completionsState,
         CompletionsTopic.SELECTED_INDEX
+    );
+    const querySelection = useSubscribeToTopic(
+        context.stateManager,
+        Topic.QUERY_SELECTION
     );
 
     const handleMouseDown = React.useCallback(
@@ -209,8 +213,11 @@ export function DebugInfo(): React.ReactElement {
                 </div>
                 <div
                     style={{
+                        display: "flex",
+                        flexDirection: "column",
                         flex: "1 1 350px",
                         minWidth: 300,
+                        gap: 8,
                     }}
                 >
                     <div
@@ -218,12 +225,11 @@ export function DebugInfo(): React.ReactElement {
                             fontSize: 12,
                             fontWeight: 600,
                             color: "#666",
-                            marginBottom: 8,
                             textTransform: "uppercase",
                             letterSpacing: "0.5px",
                         }}
                     >
-                        Caret Positions
+                        Text Selections
                     </div>
                     <table
                         style={{
@@ -265,7 +271,7 @@ export function DebugInfo(): React.ReactElement {
                                         borderBottom: "1px solid #e0e0e0",
                                     }}
                                 >
-                                    Caret
+                                    Focus
                                 </th>
                                 <th
                                     style={{
@@ -283,12 +289,12 @@ export function DebugInfo(): React.ReactElement {
                             </tr>
                         </thead>
                         <tbody>
-                            {caretPositions.map((pos, index) => (
+                            {textSelections.map((pos, index) => (
                                 <tr
                                     key={index}
                                     style={{
                                         borderBottom:
-                                            index < caretPositions.length - 1
+                                            index < textSelections.length - 1
                                                 ? "1px solid #f0f0f0"
                                                 : "none",
                                     }}
@@ -311,7 +317,7 @@ export function DebugInfo(): React.ReactElement {
                                             color: "#333",
                                         }}
                                     >
-                                        {pos.offset}
+                                        {pos.focusOffset}
                                     </td>
                                     <td
                                         style={{
@@ -325,6 +331,88 @@ export function DebugInfo(): React.ReactElement {
                                     </td>
                                 </tr>
                             ))}
+                        </tbody>
+                    </table>
+                    <div
+                        style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "#666",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                        }}
+                    >
+                        Query Selection
+                    </div>
+                    <table
+                        style={{
+                            width: "100%",
+                            borderCollapse: "collapse",
+                            backgroundColor: "white",
+                            borderRadius: 4,
+                            overflow: "hidden",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        }}
+                    >
+                        <thead>
+                            <tr
+                                style={{
+                                    backgroundColor: "#f5f5f5",
+                                }}
+                            >
+                                <th
+                                    style={{
+                                        padding: "8px 12px",
+                                        textAlign: "left",
+                                        fontFamily: "monospace",
+                                        fontSize: 12,
+                                        fontWeight: 600,
+                                        color: "#666",
+                                        borderBottom: "1px solid #e0e0e0",
+                                    }}
+                                >
+                                    Focus
+                                </th>
+                                <th
+                                    style={{
+                                        padding: "8px 12px",
+                                        textAlign: "left",
+                                        fontFamily: "monospace",
+                                        fontSize: 12,
+                                        fontWeight: 600,
+                                        color: "#666",
+                                        borderBottom: "1px solid #e0e0e0",
+                                    }}
+                                >
+                                    Anchor
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {querySelection !== null && (
+                                <tr>
+                                    <td
+                                        style={{
+                                            padding: "8px 12px",
+                                            fontFamily: "monospace",
+                                            fontSize: 12,
+                                            color: "#333",
+                                        }}
+                                    >
+                                        {querySelection.focusIndex}
+                                    </td>
+                                    <td
+                                        style={{
+                                            padding: "8px 12px",
+                                            fontFamily: "monospace",
+                                            fontSize: 12,
+                                            color: "#333",
+                                        }}
+                                    >
+                                        {querySelection.anchorIndex}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

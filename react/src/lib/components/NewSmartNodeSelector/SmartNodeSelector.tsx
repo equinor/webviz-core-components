@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { merge } from "lodash";
 import React from "react";
 import { CaretRenderer } from "./components/CaretAndSelectionRenderer";
 import { CompletionsPopover } from "./components/CompletionsPopover";
@@ -24,7 +25,6 @@ import type {
     SyntaxCompletionItem,
 } from "./core/query-language/types/completion";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
-import { merge } from "lodash";
 import type { DeepRequired } from "./utils/deepRequired";
 
 export type SmartNodeSelectorClassNames = {
@@ -427,6 +427,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                                     key={queryItem.id}
                                     queryItem={queryItem}
                                     isLast={index === queryItems.length - 1}
+                                    index={index}
                                 />
                             ))}
                             <CaretRenderer mainRef={ref} />
