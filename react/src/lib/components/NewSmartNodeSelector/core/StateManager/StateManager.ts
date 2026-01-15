@@ -11,6 +11,10 @@ import type { Range } from "../utils/range";
 import { Cache } from "./Cache";
 import { QueriesStoreDelegate } from "./QueriesStoreDelegate";
 import {
+    QuerySelectionDelegate,
+    type QuerySelectionDelegateSnapshot,
+} from "./QuerySelectionDelegate";
+import {
     QueryTextSelectionsDelegate,
     type QueryTextSelectionsDelegateSnapshot,
 } from "./QueryTextSelectionsDelegate";
@@ -52,6 +56,7 @@ export type StateManagerOptions = {
 export class StateManager implements PubSub<TopicPayloads> {
     private _pubSubDelegate = new PubSubDelegate<TopicPayloads>();
     private _queryTextSelectionsDelegate = new QueryTextSelectionsDelegate();
+    private _querySelectionDelegate = new QuerySelectionDelegate();
 
     // Settings
     private _delimiter: string;
@@ -91,6 +96,15 @@ export class StateManager implements PubSub<TopicPayloads> {
                     return null;
                 }
                 return this.getSegmentForTextOffset(queryId, offset);
+            },
+        };
+    }
+
+    private makeQuerySelectionSnapshot(): QuerySelectionDelegateSnapshot {
+        return {
+            querySelection: this._querySelection,
+            getNumberOfQueries: (): number => {
+                return this._queriesStoreDelegate.getNumItems();
             },
         };
     }
@@ -217,7 +231,8 @@ export class StateManager implements PubSub<TopicPayloads> {
                 return () => this._focusedSegment as TopicPayloads[T];
             case Topic.HAS_FOCUS:
                 return () =>
-                    (this._queryTextSelections.length > 0) as TopicPayloads[T];
+                    (this._queryTextSelections.length > 0 ||
+                        this._querySelection !== null) as TopicPayloads[T];
             case Topic.COMPLETION_CONTEXT:
                 return () => this._completionContext as TopicPayloads[T];
         }
@@ -435,7 +450,20 @@ export class StateManager implements PubSub<TopicPayloads> {
 
     moveFocus(dx: number, selecting: boolean): void {
         if (this._selectionMode !== "text") {
-            return;
+            const snapshot = this.makeQuerySelectionSnapshot();
+            const result = this._querySelectionDelegate.moveFocus(snapshot, {
+                dx,
+                selecting,
+            });
+
+            if (result.kind === "moved") {
+                this.applyPatch(result.patch);
+                return;
+            }
+
+            if (result.kind === "hitBoundary") {
+                return;
+            }
         }
 
         const snapshot = this.makeTextSelectionsSnapshot();
