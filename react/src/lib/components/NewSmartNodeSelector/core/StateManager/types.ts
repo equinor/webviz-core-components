@@ -3,19 +3,16 @@ export type QueryItem = {
     query: string;
 };
 
-export type TextSelection = {
-    anchorOffset: number;
-    focusOffset: number;
+export type Selection = {
+    anchor: number;
+    focus: number;
 };
 
-export type QueryTextSelection = TextSelection & {
+export type QueryTextSelection = Selection & {
     queryId: string;
 };
 
-export type QuerySelection = {
-    anchorIndex: number;
-    focusIndex: number;
-};
+export type QuerySelection = Selection;
 
 export type SegmentTextSelection = QueryTextSelection & {
     queryId: string;
@@ -43,9 +40,14 @@ export type Segment = {
 
 export type SelectionMode = "query" | "text";
 
+export type QueryItemUpdate = {
+    kind: "update" | "remove" | "add";
+    item: QueryItem;
+};
+
 export type StatePatch = {
     selectionMode?: SelectionMode;
-    queryItemUpdates?: QueryItem[];
+    queryItemUpdates?: QueryItemUpdate[];
     textSelections?: QueryTextSelection[];
     querySelection?: QuerySelection | null;
 };

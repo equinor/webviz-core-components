@@ -39,8 +39,8 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
         }
 
         const range = [
-            Math.min(querySelection.anchorIndex, querySelection.focusIndex),
-            Math.max(querySelection.anchorIndex, querySelection.focusIndex),
+            Math.min(querySelection.anchor, querySelection.focus),
+            Math.max(querySelection.anchor, querySelection.focus),
         ];
 
         return props.index >= range[0] && props.index <= range[1];
@@ -160,9 +160,11 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                     isLast={props.isLast}
                 />
             </div>
-            <button onClick={handleRemoveTagClick} aria-label="Remove tag">
-                &#x2715;
-            </button>
+            {!props.isLast && hasMoreThanOneSegment && (
+                <button onClick={handleRemoveTagClick} aria-label="Remove tag">
+                    &#x2715;
+                </button>
+            )}
         </QueryChipComponent>
     );
 }

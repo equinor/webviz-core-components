@@ -5,7 +5,6 @@ import {
 } from "../query-language/evaluator/evaluateQuery";
 import { parseQuery, type ParsedQuery } from "../query-language/parse";
 import type { TreeAccessor } from "../query-language/types/tree";
-import { makeIndexedNodeAccessor, type BuildResult } from "../TreeIndexBuilder";
 import type { IndexedNode } from "../types";
 import type { Range } from "../utils/range";
 import { Cache } from "./Cache";
@@ -25,6 +24,7 @@ import type {
     QuerySelection,
     QueryTextSelection,
     SegmentTextSelection,
+    Selection,
     SelectionMode,
     StatePatch,
 } from "./types";
@@ -37,6 +37,7 @@ export enum Topic {
     SEGMENT_TEXT_SELECTIONS = "segmentTextSelections",
     FOCUSED_SEGMENT = "focusedSegment",
     COMPLETION_CONTEXT = "completionContext",
+    DATA_REVISION = "dataRevision",
 }
 
 export type TopicPayloads = {
@@ -47,10 +48,12 @@ export type TopicPayloads = {
     [Topic.SEGMENT_TEXT_SELECTIONS]: SegmentTextSelection[];
     [Topic.FOCUSED_SEGMENT]: QuerySegment | null;
     [Topic.COMPLETION_CONTEXT]: CompletionContext | null;
+    [Topic.DATA_REVISION]: number;
 };
 
 export type StateManagerOptions = {
-    delimiter: string;
+    segmentDelimiter: string;
+    queryDelimiter: string;
 };
 
 export class StateManager implements PubSub<TopicPayloads> {
@@ -59,9 +62,10 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _querySelectionDelegate = new QuerySelectionDelegate();
 
     // Settings
-    private _delimiter: string;
+    private _options: StateManagerOptions;
 
     // State
+    private _dataRevision: number = 0;
     private _queriesStoreDelegate = new QueriesStoreDelegate();
     private _queryTextSelections: QueryTextSelection[] = [];
     private _querySelection: QuerySelection | null = null;
@@ -74,7 +78,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _completionContext: CompletionContext | null = null;
 
     constructor(options: StateManagerOptions) {
-        this._delimiter = options.delimiter;
+        this._options = options;
     }
 
     private makeTextSelectionsSnapshot(): QueryTextSelectionsDelegateSnapshot {
@@ -106,6 +110,9 @@ export class StateManager implements PubSub<TopicPayloads> {
             getNumberOfQueries: (): number => {
                 return this._queriesStoreDelegate.getNumItems();
             },
+            getQueryItemByIndex: (index: number): QueryItem | null => {
+                return this._queriesStoreDelegate.getItemByIndex(index);
+            },
         };
     }
 
@@ -117,9 +124,28 @@ export class StateManager implements PubSub<TopicPayloads> {
     private applyPatch(patch: StatePatch): void {
         if (patch.queryItemUpdates) {
             for (const update of patch.queryItemUpdates) {
-                this._queriesStoreDelegate.updateItem(update.id, update.query);
+                if (update.kind === "remove") {
+                    this._queriesStoreDelegate.removeItem(update.item.id);
+                    continue;
+                }
+                if (update.kind === "add") {
+                    this._queriesStoreDelegate.addItem(update.item.query);
+                    continue;
+                }
+                if (update.kind === "update") {
+                    this._queriesStoreDelegate.updateItem(
+                        update.item.id,
+                        update.item.query
+                    );
+                    continue;
+                }
+                throw new Error(
+                    `Unknown query item update kind: ${update.kind}`
+                );
             }
             this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+            this.ensureAtLeastOneQueryItem();
+            this.ensureValidSelection();
         }
 
         if (patch.textSelections !== undefined) {
@@ -136,10 +162,102 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
     }
 
+    getCurrentSelection(): string {
+        if (this._selectionMode === "query") {
+            if (!this._querySelection) {
+                return "";
+            }
+
+            const range = selectionToRange(this._querySelection);
+            const queryItems = this._queriesStoreDelegate.getItems();
+            const selectedQueries = queryItems.slice(
+                range.start,
+                range.end + 1
+            );
+
+            return (
+                selectedQueries
+                    .map((item) => item.query)
+                    .join(this._options.queryDelimiter) +
+                this._options.queryDelimiter
+            );
+        }
+
+        if (this._selectionMode === "text") {
+            const selectedTexts: string[] = [];
+            for (const sel of this._queryTextSelections) {
+                const queryItem = this._queriesStoreDelegate.getItemById(
+                    sel.queryId
+                );
+
+                if (!queryItem) {
+                    continue;
+                }
+
+                const range = selectionToRange(sel);
+                selectedTexts.push(
+                    queryItem.query.slice(range.start, range.end)
+                );
+            }
+            return selectedTexts.join("");
+        }
+
+        throw new Error("Invalid selection mode");
+    }
+
+    private ensureAtLeastOneQueryItem(): void {
+        if (this._queriesStoreDelegate.getNumItems() === 0) {
+            this.addQueryItem("");
+        }
+    }
+
+    private ensureValidSelection(): void {
+        if (this._selectionMode === "query") {
+            if (!this._querySelection) {
+                return;
+            }
+
+            // Check if selection is valid
+            const numQueries = this._queriesStoreDelegate.getNumItems();
+            const { focus: focusIndex, anchor: anchorIndex } =
+                this._querySelection;
+            const correctedFocusIndex = Math.max(
+                0,
+                Math.min(focusIndex, numQueries - 1)
+            );
+            const correctedAnchorIndex = Math.max(
+                0,
+                Math.min(anchorIndex, numQueries - 1)
+            );
+
+            if (this.hasSingleEmptyQueryItem()) {
+                this.clearQuerySelection();
+                this.setTextFocusOffsetToEndOfLastItem();
+                return;
+            }
+
+            this.applyPatch({
+                querySelection: {
+                    focus: correctedFocusIndex,
+                    anchor: correctedAnchorIndex,
+                },
+            });
+            return;
+        }
+    }
+
+    private hasSingleEmptyQueryItem(): boolean {
+        if (this._queriesStoreDelegate.getNumItems() !== 1) {
+            return false;
+        }
+        const firstItem = this._queriesStoreDelegate.getFirstItem();
+        return firstItem?.query === "";
+    }
+
     setSelectionMode(mode: SelectionMode): void {
         this._selectionMode = mode;
         if (mode === "query") {
-            this.clearCaretPositions();
+            this.clearQueryTextSelections();
         } else {
             this.clearQuerySelection();
         }
@@ -150,14 +268,20 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_SELECTION);
     }
 
-    updateDelimiter(delimiter: string): void {
+    updateOptions(options: StateManagerOptions): void {
         this._parseCache.clear();
-        this._delimiter = delimiter;
+        this._options = options;
     }
 
-    updateBuildResult(buildResult: BuildResult): void {
+    updateTreeAccessor(treeAccessor: TreeAccessor<IndexedNode>): void {
         this._treeMatchCache.clear();
-        this._treeAccessor = makeIndexedNodeAccessor(buildResult);
+        this._treeAccessor = treeAccessor;
+        this.increaseRevisionNumber();
+    }
+
+    private increaseRevisionNumber(): void {
+        this._dataRevision += 1;
+        this._pubSubDelegate.notifySubscribers(Topic.DATA_REVISION);
     }
 
     getPubSubDelegate(): PubSubDelegate<TopicPayloads> {
@@ -179,7 +303,9 @@ export class StateManager implements PubSub<TopicPayloads> {
             return parsedQuery;
         }
 
-        parsedQuery = parseQuery(query, { delimiter: this._delimiter });
+        parsedQuery = parseQuery(query, {
+            delimiter: this._options.segmentDelimiter,
+        });
         this._parseCache.setItem(query, parsedQuery);
         return parsedQuery;
     }
@@ -235,6 +361,8 @@ export class StateManager implements PubSub<TopicPayloads> {
                         this._querySelection !== null) as TopicPayloads[T];
             case Topic.COMPLETION_CONTEXT:
                 return () => this._completionContext as TopicPayloads[T];
+            case Topic.DATA_REVISION:
+                return () => this._dataRevision as TopicPayloads[T];
         }
     }
 
@@ -244,19 +372,19 @@ export class StateManager implements PubSub<TopicPayloads> {
         if (hasFocus) {
             // Only set caret position if we don't already have focus
             if (!currentlyHasFocus) {
-                this.setCaretPositionToEndOfLastItem();
+                this.setTextFocusOffsetToEndOfLastItem();
             }
         } else {
             // Only clear if we currently have focus
             if (currentlyHasFocus) {
-                this.clearCaretPositions();
+                this.clearQueryTextSelections();
                 this.clearQuerySelection();
             }
         }
     }
 
     private computeSegmentIndex(query: string, focusOffset: number): number {
-        const segments = query.split(this._delimiter);
+        const segments = query.split(this._options.segmentDelimiter);
         let accumulatedLength = 0;
 
         for (let i = 0; i < segments.length; i++) {
@@ -265,7 +393,7 @@ export class StateManager implements PubSub<TopicPayloads> {
                 return i;
             }
             // Account for delimiter length
-            accumulatedLength += this._delimiter.length;
+            accumulatedLength += this._options.segmentDelimiter.length;
         }
 
         return segments.length - 1;
@@ -275,47 +403,48 @@ export class StateManager implements PubSub<TopicPayloads> {
         textSelection: QueryTextSelection,
         query: string
     ): SegmentTextSelection {
-        const segments = query.split(this._delimiter);
+        const segments = query.split(this._options.segmentDelimiter);
         let accumulatedLength = 0;
         let segmentIndex = 0;
-        let segmentFocusOffset = textSelection.focusOffset;
-        let segmentAnchorOffset = textSelection.anchorOffset;
+        let segmentFocusOffset = textSelection.focus;
+        let segmentAnchorOffset = textSelection.anchor;
 
         // Find segment for caret offset
         for (let i = 0; i < segments.length; i++) {
             const segmentEnd = accumulatedLength + segments[i].length;
-            if (textSelection.focusOffset <= segmentEnd) {
+            if (textSelection.focus <= segmentEnd) {
                 segmentIndex = i;
-                segmentFocusOffset =
-                    textSelection.focusOffset - accumulatedLength;
+                segmentFocusOffset = textSelection.focus - accumulatedLength;
                 break;
             }
-            accumulatedLength = segmentEnd + this._delimiter.length;
+            accumulatedLength =
+                segmentEnd + this._options.segmentDelimiter.length;
         }
 
         // Find anchor offset relative to the same segment
         accumulatedLength = 0;
         for (let i = 0; i < segments.length; i++) {
             const segmentEnd = accumulatedLength + segments[i].length;
-            if (textSelection.anchorOffset <= segmentEnd) {
+            if (textSelection.anchor <= segmentEnd) {
                 if (i === segmentIndex) {
                     // Anchor is in the same segment
                     segmentAnchorOffset =
-                        textSelection.anchorOffset - accumulatedLength;
+                        textSelection.anchor - accumulatedLength;
                 } else {
                     // Anchor is in a different segment - collapse to caret position
                     segmentAnchorOffset = segmentFocusOffset;
                 }
                 break;
             }
-            accumulatedLength = segmentEnd + this._delimiter.length;
+            accumulatedLength =
+                segmentEnd + this._options.segmentDelimiter.length;
         }
 
         return {
             queryId: textSelection.queryId,
             segmentIndex,
-            focusOffset: segmentFocusOffset,
-            anchorOffset: segmentAnchorOffset,
+            focus: segmentFocusOffset,
+            anchor: segmentAnchorOffset,
         };
     }
 
@@ -332,8 +461,8 @@ export class StateManager implements PubSub<TopicPayloads> {
                 return {
                     queryId: selection.queryId,
                     segmentIndex: 0,
-                    focusOffset: selection.focusOffset,
-                    anchorOffset: selection.anchorOffset,
+                    focus: selection.focus,
+                    anchor: selection.anchor,
                 };
             }
             return this.convertToSegmentQueryTextSelection(
@@ -353,7 +482,7 @@ export class StateManager implements PubSub<TopicPayloads> {
                 queryId: textSelections[0].queryId,
                 segmentIndex: this.computeSegmentIndex(
                     queryItem.query,
-                    textSelections[0].focusOffset
+                    textSelections[0].focus
                 ),
             };
         } else {
@@ -388,7 +517,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             queryTextSelection: this._queryTextSelections[0],
             segmentIndex: this.computeSegmentIndex(
                 queryItem.query,
-                this._queryTextSelections[0].focusOffset
+                this._queryTextSelections[0].focus
             ),
         };
 
@@ -404,7 +533,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         endOffset: number;
         length: number;
     } {
-        const segments = query.split(this._delimiter);
+        const segments = query.split(this._options.segmentDelimiter);
         let accumulatedLength = 0;
         for (let i = 0; i < segments.length; i++) {
             const segmentEnd = accumulatedLength + segments[i].length;
@@ -416,15 +545,17 @@ export class StateManager implements PubSub<TopicPayloads> {
                     length: segments[i].length,
                 };
             }
-            accumulatedLength = segmentEnd + this._delimiter.length;
+            accumulatedLength =
+                segmentEnd + this._options.segmentDelimiter.length;
         }
         return {
             index: segments.length - 1,
             startOffset:
                 accumulatedLength -
                 segments[segments.length - 1].length -
-                this._delimiter.length,
-            endOffset: accumulatedLength - this._delimiter.length,
+                this._options.segmentDelimiter.length,
+            endOffset:
+                accumulatedLength - this._options.segmentDelimiter.length,
             length: segments[segments.length - 1].length,
         };
     }
@@ -446,7 +577,29 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
     }
 
-    confirm(): void {}
+    confirm(): void {
+        if (this._selectionMode === "query") {
+            const queryIndex = this._querySelection?.focus;
+            if (queryIndex === undefined) {
+                return;
+            }
+            const queryItem =
+                this._queriesStoreDelegate.getItemByIndex(queryIndex);
+            if (!queryItem) {
+                return;
+            }
+            this.setTextFocusOffsetToEndOfQueryItem(queryItem.id);
+            return;
+        }
+
+        if (this._selectionMode === "text") {
+            this.addQueryItem("");
+            this.setTextFocusOffsetToEndOfLastItem();
+            return;
+        }
+
+        throw new Error("Invalid selection mode");
+    }
 
     moveFocus(dx: number, selecting: boolean): void {
         if (this._selectionMode !== "text") {
@@ -456,7 +609,18 @@ export class StateManager implements PubSub<TopicPayloads> {
                 selecting,
             });
 
+            const numQueries = this._queriesStoreDelegate.getNumItems();
+
             if (result.kind === "moved") {
+                // If we moved to the last query item and the query is empty, change to text mode
+                if (result.patch.querySelection?.focus === numQueries - 1) {
+                    const lastQueryItem =
+                        this._queriesStoreDelegate.getLastItem();
+                    if (lastQueryItem && lastQueryItem.query === "") {
+                        this.setTextFocusOffsetToEndOfLastItem();
+                        return;
+                    }
+                }
                 this.applyPatch(result.patch);
                 return;
             }
@@ -486,9 +650,38 @@ export class StateManager implements PubSub<TopicPayloads> {
             }
 
             const queryText = this.getQueryItemText(result.queryId);
+            if (queryText === null) {
+                return;
+            }
+
+            const numItems = this._queriesStoreDelegate.getNumItems();
+
+            // If last query item is empty and moving forward, stay in place
             if (
-                queryText?.split(this._delimiter).length! <= 1 &&
-                queryIndex === this._queriesStoreDelegate.getNumItems() - 1 &&
+                result.boundary === "end" &&
+                queryText === "" &&
+                queryIndex === numItems - 1
+            ) {
+                return;
+            }
+
+            // If only query item is empty and moving backward, stay in place
+            if (
+                result.boundary === "start" &&
+                queryText === "" &&
+                numItems === 1
+            ) {
+                return;
+            }
+
+            const numSegments = getNumberOfSegments(
+                queryText,
+                this._options.segmentDelimiter
+            );
+            if (
+                result.boundary === "start" &&
+                numSegments <= 1 &&
+                queryIndex === numItems - 1 &&
                 queryIndex > 0
             ) {
                 queryIndex--;
@@ -497,23 +690,51 @@ export class StateManager implements PubSub<TopicPayloads> {
             this.applyPatch({
                 selectionMode: "query",
                 querySelection: {
-                    anchorIndex: queryIndex,
-                    focusIndex: queryIndex,
+                    anchor: queryIndex,
+                    focus: queryIndex,
                 },
             });
         }
     }
 
-    removeFromQueryAtCaret(direction: "backward" | "forward"): void {
-        const snapshot = this.makeTextSelectionsSnapshot();
-        const result = this._queryTextSelectionsDelegate.removeAtFocusOffset(
-            snapshot,
-            { direction }
-        );
+    removeCurrentSelection(direction: "backward" | "forward"): void {
+        if (this._selectionMode === "query") {
+            const snapshot = this.makeQuerySelectionSnapshot();
+            const result = this._querySelectionDelegate.remove(snapshot);
 
-        if (result.kind === "moved") {
-            this.applyPatch(result.patch);
+            if (result.kind === "moved") {
+                this.applyPatch(result.patch);
+            }
+            return;
         }
+
+        if (this._selectionMode === "text") {
+            const snapshot = this.makeTextSelectionsSnapshot();
+            const result =
+                this._queryTextSelectionsDelegate.removeAtFocusOffset(
+                    snapshot,
+                    { direction }
+                );
+
+            if (result.kind === "moved") {
+                this.applyPatch(result.patch);
+                return;
+            }
+
+            if (result.kind === "hitBoundary") {
+                if (result.boundary === "start" && direction === "backward") {
+                    this.moveFocus(-1, false);
+                }
+                if (result.boundary === "end" && direction === "forward") {
+                    this.moveFocus(1, false);
+                }
+                return;
+            }
+
+            return;
+        }
+
+        throw new Error("Invalid selection mode");
     }
 
     addQueryItem(query: string): void {
@@ -576,8 +797,8 @@ export class StateManager implements PubSub<TopicPayloads> {
             const offset = queries[i].length;
             newCaretPosition = {
                 queryId: newItem.id,
-                focusOffset: offset,
-                anchorOffset: offset,
+                focus: offset,
+                anchor: offset,
             };
         }
 
@@ -586,12 +807,12 @@ export class StateManager implements PubSub<TopicPayloads> {
         return true;
     }
 
-    pasteAtCaret(text: string): void {
+    pasteText(text: string): void {
         if (this.maybeParsePastingTextToNewQueries(text)) {
             return;
         }
 
-        this.insertTextAtCaret(text);
+        this.insertText(text);
     }
 
     updateFocusedQueryItem(insertText: string, range?: Range): boolean {
@@ -611,11 +832,11 @@ export class StateManager implements PubSub<TopicPayloads> {
 
         const newOffset = range
             ? range.start + insertText.length
-            : this._queryTextSelections[0].focusOffset + insertText.length;
+            : this._queryTextSelections[0].focus + insertText.length;
         const newCaretPosition: QueryTextSelection = {
             queryId: queryId,
-            focusOffset: newOffset,
-            anchorOffset: newOffset,
+            focus: newOffset,
+            anchor: newOffset,
         };
         this.updateQueryTextSelections([newCaretPosition]);
         return true;
@@ -648,15 +869,15 @@ export class StateManager implements PubSub<TopicPayloads> {
             const firstItem = this._queriesStoreDelegate.addItem("");
             const newCaretPosition: QueryTextSelection = {
                 queryId: firstItem.id,
-                focusOffset: 0,
-                anchorOffset: 0,
+                focus: 0,
+                anchor: 0,
             };
             this.updateQueryTextSelections([newCaretPosition]);
         }
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
-    setCaretPositionToEndOfQueryItem(id: string): void {
+    setTextFocusOffsetToEndOfQueryItem(id: string): void {
         const queryItem = this._queriesStoreDelegate.getItemById(id);
         if (!queryItem) {
             return;
@@ -665,18 +886,19 @@ export class StateManager implements PubSub<TopicPayloads> {
         const offset = queryItem.query.length;
         const caretPosition: QueryTextSelection = {
             queryId: id,
-            focusOffset: offset,
-            anchorOffset: offset,
+            focus: offset,
+            anchor: offset,
         };
 
+        this.setSelectionMode("text");
         this.updateQueryTextSelections([caretPosition]);
     }
 
-    setCaretPosition(position: QueryTextSelection): void {
-        this.updateQueryTextSelections([position]);
+    setQueryTextSelection(selection: QueryTextSelection): void {
+        this.updateQueryTextSelections([selection]);
     }
 
-    insertTextAtCaret(text: string): void {
+    insertText(text: string): void {
         const snapshot = this.makeTextSelectionsSnapshot();
         const result = this._queryTextSelectionsDelegate.insertAtFocusOffset(
             snapshot,
@@ -688,7 +910,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
     }
 
-    setCaretPositionToEndOfLastItem() {
+    setTextFocusOffsetToEndOfLastItem() {
         const lastItem = this._queriesStoreDelegate.getLastItem();
         if (!lastItem) {
             return;
@@ -697,20 +919,32 @@ export class StateManager implements PubSub<TopicPayloads> {
         const offset = lastItem.query.length;
         const caretPosition: QueryTextSelection = {
             queryId: lastItem.id,
-            focusOffset: offset,
-            anchorOffset: offset,
+            focus: offset,
+            anchor: offset,
         };
 
         this.setSelectionMode("text");
         this.updateQueryTextSelections([caretPosition]);
     }
 
-    private clearCaretPositions() {
+    private clearQueryTextSelections() {
         this._queryTextSelections = [];
         this._segmentTextSelections = [];
         this._focusedSegment = null;
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_TEXT_SELECTIONS);
+        this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_TEXT_SELECTIONS);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
     }
+}
+
+function getNumberOfSegments(query: string, delimiter: string): number {
+    return query.split(delimiter).length;
+}
+
+function selectionToRange(selection: Selection): Range {
+    return {
+        start: Math.min(selection.anchor, selection.focus),
+        end: Math.max(selection.anchor, selection.focus),
+    };
 }

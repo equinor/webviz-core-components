@@ -48,7 +48,7 @@ export class KeyboardHandler {
 
         this._completionsState.updateCompletions(
             parsedQuery,
-            completionContext.queryTextSelection.focusOffset
+            completionContext.queryTextSelection.focus
         );
     }
 
@@ -122,31 +122,38 @@ export class KeyboardHandler {
                 if (event.ctrlKey || event.metaKey) {
                     const pasteData = navigator.clipboard.readText();
                     pasteData.then((text) => {
-                        this._stateManager.pasteAtCaret(text);
+                        this._stateManager.pasteText(text);
                     });
+                    event.preventDefault();
+                }
+                break;
+
+            case "c":
+                if (event.ctrlKey || event.metaKey) {
+                    const selection = this._stateManager.getCurrentSelection();
+                    navigator.clipboard.writeText(selection);
                     event.preventDefault();
                 }
                 break;
 
             // Editing
             case "Backspace":
-                this._stateManager.removeFromQueryAtCaret("backward");
+                this._stateManager.removeCurrentSelection("backward");
                 event.preventDefault();
                 break;
             case "Delete":
-                this._stateManager.removeFromQueryAtCaret("forward");
+                this._stateManager.removeCurrentSelection("forward");
                 event.preventDefault();
                 break;
             case "Enter":
-                this._stateManager.addQueryItem("");
-                this._stateManager.setCaretPositionToEndOfLastItem();
+                this._stateManager.confirm();
                 event.preventDefault();
                 break;
         }
     }
 
     handleInput(value: string): void {
-        this._stateManager.insertTextAtCaret(value);
+        this._stateManager.insertText(value);
     }
 
     destroy(): void {

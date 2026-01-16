@@ -49,8 +49,12 @@ export type SmartNodeSelectorOptions = {
         completionItemHeight?: number;
     };
     lexical?: {
-        delimiter?: string;
+        segmentDelimiter?: string;
         // Add options for special chars
+    };
+    importExport?: {
+        // Options for import/export functionality
+        queryDelimiter?: string;
     };
     queryChips?: {
         truncation?: {
@@ -78,6 +82,9 @@ export type SmartNodeSelectorProps<
     };
 
     /** Initially selected tags */
+    initialValue?: string[];
+
+    /** Controlled selected tags */
     value?: string[];
 
     /** Callback when selected tags change */
@@ -288,13 +295,16 @@ const DEFAULT_OPTIONS: DeepRequired<SmartNodeSelectorOptions> = {
         maxNumberCompletions: 10,
     },
     lexical: {
-        delimiter: ":",
+        segmentDelimiter: ":",
     },
     queryChips: {
         truncation: {
             enable: false,
             maxSegmentChars: 15,
         },
+    },
+    importExport: {
+        queryDelimiter: "\n",
     },
 };
 
@@ -324,17 +334,22 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
 
     const stateManager = React.useMemo(() => {
         const stateManager = new StateManager({
-            delimiter: defaultedOptions.lexical.delimiter,
+            segmentDelimiter: defaultedOptions.lexical.segmentDelimiter,
+            queryDelimiter: defaultedOptions.importExport.queryDelimiter,
         });
+        for (const tag of props.initialValue ?? []) {
+            stateManager.addQueryItem(tag);
+        }
+        // Make sure we have an empty query item at the end
         stateManager.addQueryItem("");
         return stateManager;
     }, []) as StateManager;
 
     const treeIndexBuildResult = React.useMemo(() => {
-        return new TreeIndexBuilder(defaultedOptions.lexical.delimiter).build(
-            props.data
-        );
-    }, [props.data, defaultedOptions.lexical.delimiter]);
+        return new TreeIndexBuilder(
+            defaultedOptions.lexical.segmentDelimiter
+        ).build(props.data);
+    }, [props.data, defaultedOptions.lexical.segmentDelimiter]);
 
     const treeAccessor = React.useMemo(() => {
         return makeIndexedNodeAccessor(treeIndexBuildResult);
@@ -349,10 +364,14 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
     }, [treeAccessor, defaultedOptions.completions.maxNumberCompletions]);
 
     React.useEffect(() => {
-        stateManager.updateBuildResult(treeIndexBuildResult);
-    }, [stateManager, treeIndexBuildResult]);
+        stateManager.updateTreeAccessor(treeAccessor);
+    }, [stateManager, treeAccessor]);
 
-    useMouseEventHandler(ref, stateManager, defaultedOptions.lexical.delimiter);
+    useMouseEventHandler(
+        ref,
+        stateManager,
+        defaultedOptions.lexical.segmentDelimiter
+    );
 
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
     const hasFocus = useSubscribeToTopic(stateManager, Topic.HAS_FOCUS);
@@ -366,13 +385,13 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                 incompleteTag:
                     props.placeholders?.incompleteQuery ?? "Continue typing...",
             },
-            delimiter: defaultedOptions.lexical.delimiter,
+            delimiter: defaultedOptions.lexical.segmentDelimiter,
         }),
         [
             stateManager,
             completionsState,
             props.placeholders,
-            defaultedOptions.lexical.delimiter,
+            defaultedOptions.lexical.segmentDelimiter,
         ]
     );
 

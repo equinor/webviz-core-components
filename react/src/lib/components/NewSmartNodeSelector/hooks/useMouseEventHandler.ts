@@ -33,7 +33,7 @@ export function useMouseEventHandler(
                     // Clicking outside a segment should set caret to end
                     // This will trigger hasFocus=true, which will make HiddenTextarea focus
                     event.preventDefault();
-                    stateManager.setCaretPositionToEndOfLastItem();
+                    stateManager.setTextFocusOffsetToEndOfLastItem();
                     return;
                 }
 
@@ -45,7 +45,7 @@ export function useMouseEventHandler(
 
                 if (!queryId || segmentIndexStr === null) {
                     event.preventDefault();
-                    stateManager.setCaretPositionToEndOfLastItem();
+                    stateManager.setTextFocusOffsetToEndOfLastItem();
                     return;
                 }
 
@@ -120,15 +120,15 @@ export function useMouseEventHandler(
                     currentCaretPositions[0].queryId === queryId
                 ) {
                     // If there is an existing caret position in this segment, use its offset as anchor
-                    anchorOffset = currentCaretPositions[0].anchorOffset;
+                    anchorOffset = currentCaretPositions[0].anchor;
                 }
 
                 // Update caret position - this will trigger hasFocus change
                 // which will cause HiddenTextarea to focus
-                stateManager.setCaretPosition({
+                stateManager.setQueryTextSelection({
                     queryId: queryId,
-                    focusOffset: offset,
-                    anchorOffset: anchorOffset,
+                    focus: offset,
+                    anchor: anchorOffset,
                 });
 
                 event.preventDefault();
@@ -242,14 +242,14 @@ export function useMouseEventHandler(
                     currentCaretPositions[0].queryId === queryId
                 ) {
                     // If there is an existing caret position in this segment, use its offset as anchor
-                    anchorOffset = currentCaretPositions[0].anchorOffset;
+                    anchorOffset = currentCaretPositions[0].anchor;
                 }
 
                 // Update caret position
-                stateManager.setCaretPosition({
+                stateManager.setQueryTextSelection({
                     queryId: queryId,
-                    focusOffset: offset,
-                    anchorOffset: anchorOffset,
+                    focus: offset,
+                    anchor: anchorOffset,
                 });
 
                 event.preventDefault();

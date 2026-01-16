@@ -151,7 +151,7 @@ export function CompletionsPopover(
                 completion.insertText,
                 completion.replaceRange
             );
-            stateManager.setCaretPositionToEndOfQueryItem(
+            stateManager.setTextFocusOffsetToEndOfQueryItem(
                 focusedSegment.queryId
             );
         },

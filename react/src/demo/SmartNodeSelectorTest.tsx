@@ -533,6 +533,7 @@ const SmartNodeSelectorTest: React.FC = () => {
                 key={JSON.stringify(newSelectorOptions)}
                 data={TEST_DATA_MAP[testData]}
                 options={newSelectorOptions}
+                initialValue={["Data Source A:Category 2:Item B1"]}
             />
             <div style={{ marginTop: "30px" }}>
                 <OptionsConfigurator

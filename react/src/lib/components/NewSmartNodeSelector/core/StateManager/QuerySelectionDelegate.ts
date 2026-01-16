@@ -1,4 +1,4 @@
-import type { QuerySelection, StatePatch } from "./types";
+import type { QueryItem, QuerySelection, StatePatch } from "./types";
 
 export type QueryFocusMoveResult =
     | {
@@ -17,6 +17,7 @@ export type QueryFocusMoveResult =
 export type QuerySelectionDelegateSnapshot = {
     querySelection: QuerySelection | null;
     getNumberOfQueries(): number;
+    getQueryItemByIndex(index: number): QueryItem | null;
 };
 
 export class QuerySelectionDelegate {
@@ -34,7 +35,7 @@ export class QuerySelectionDelegate {
         }
 
         const numQueries = snapshot.getNumberOfQueries();
-        let newFocusIndex = snapshot.querySelection.focusIndex + dx;
+        let newFocusIndex = snapshot.querySelection.focus + dx;
 
         if (newFocusIndex < 0) {
             newFocusIndex = 0;
@@ -57,10 +58,8 @@ export class QuerySelectionDelegate {
         }
 
         const newSelection: QuerySelection = {
-            anchorIndex: selecting
-                ? snapshot.querySelection.anchorIndex
-                : newFocusIndex,
-            focusIndex: newFocusIndex,
+            anchor: selecting ? snapshot.querySelection.anchor : newFocusIndex,
+            focus: newFocusIndex,
         };
 
         return {
@@ -71,43 +70,14 @@ export class QuerySelectionDelegate {
         };
     }
 
-    removeAtFocusOffset(
-        snapshot: QuerySelectionDelegateSnapshot,
-        payload: {
-            direction: "backward" | "forward";
-        }
-    ): QueryFocusMoveResult {
-        const { direction } = payload;
-
+    remove(snapshot: QuerySelectionDelegateSnapshot): QueryFocusMoveResult {
         if (snapshot.querySelection === null) {
             return { kind: "none" };
         }
 
         const numQueries = snapshot.getNumberOfQueries();
-        let { anchorIndex, focusIndex } = snapshot.querySelection;
-
-        if (anchorIndex === focusIndex) {
-            // No selection, just a caret
-            if (direction === "backward") {
-                if (focusIndex === 0) {
-                    return {
-                        kind: "hitBoundary",
-                        boundary: "start",
-                        queryId: "",
-                    };
-                }
-                focusIndex -= 1;
-            } else {
-                if (focusIndex === numQueries - 1) {
-                    return {
-                        kind: "hitBoundary",
-                        boundary: "end",
-                        queryId: "",
-                    };
-                }
-                focusIndex += 1;
-            }
-        }
+        const { anchor: anchorIndex, focus: focusIndex } =
+            snapshot.querySelection;
 
         const newAnchorIndex = Math.min(anchorIndex, focusIndex);
         const newFocusIndex = Math.max(anchorIndex, focusIndex);
@@ -116,14 +86,26 @@ export class QuerySelectionDelegate {
             newAnchorIndex === 0 && newFocusIndex === numQueries - 1
                 ? null
                 : {
-                      anchorIndex: newAnchorIndex,
-                      focusIndex: newAnchorIndex,
+                      anchor: newAnchorIndex,
+                      focus: newAnchorIndex,
                   };
+
+        const queryItemUpdates = [];
+        for (let i = newFocusIndex; i >= newAnchorIndex; i--) {
+            const item = snapshot.getQueryItemByIndex(i);
+            if (item) {
+                queryItemUpdates.push({
+                    kind: "remove" as const,
+                    item,
+                });
+            }
+        }
 
         return {
             kind: "moved",
             patch: {
                 querySelection: newSelection,
+                queryItemUpdates,
             },
         };
     }

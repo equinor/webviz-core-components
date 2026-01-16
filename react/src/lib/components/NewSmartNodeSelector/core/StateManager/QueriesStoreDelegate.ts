@@ -26,6 +26,10 @@ export class QueriesStoreDelegate {
         return this._items.find((item) => item.id === id) ?? null;
     }
 
+    getItemByIndex(index: number): QueryItem | null {
+        return this._items[index] ?? null;
+    }
+
     getIndexById(id: string): number {
         return this._items.findIndex((item) => item.id === id);
     }

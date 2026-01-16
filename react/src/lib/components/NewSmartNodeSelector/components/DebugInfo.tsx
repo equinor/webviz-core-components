@@ -317,7 +317,7 @@ export function DebugInfo(): React.ReactElement {
                                             color: "#333",
                                         }}
                                     >
-                                        {pos.focusOffset}
+                                        {pos.focus}
                                     </td>
                                     <td
                                         style={{
@@ -327,7 +327,7 @@ export function DebugInfo(): React.ReactElement {
                                             color: "#333",
                                         }}
                                     >
-                                        {pos.anchorOffset}
+                                        {pos.anchor}
                                     </td>
                                 </tr>
                             ))}
@@ -399,7 +399,7 @@ export function DebugInfo(): React.ReactElement {
                                             color: "#333",
                                         }}
                                     >
-                                        {querySelection.focusIndex}
+                                        {querySelection.focus}
                                     </td>
                                     <td
                                         style={{
@@ -409,7 +409,7 @@ export function DebugInfo(): React.ReactElement {
                                             color: "#333",
                                         }}
                                     >
-                                        {querySelection.anchorIndex}
+                                        {querySelection.anchor}
                                     </td>
                                 </tr>
                             )}

@@ -71,10 +71,7 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                 const segments = queryItem.query.split(delimiter);
                 const segmentText = segments[position.segmentIndex] ?? "";
 
-                const textBeforeCaret = segmentText.slice(
-                    0,
-                    position.focusOffset
-                );
+                const textBeforeCaret = segmentText.slice(0, position.focus);
 
                 const { width: textWidth } = computeTextWidthAndHeight(
                     textBeforeCaret,
@@ -99,15 +96,12 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
 
                 setFontSize(caretHeight);
 
-                if (position.anchorOffset !== position.focusOffset) {
+                if (position.anchor !== position.focus) {
                     const startOffset = Math.min(
-                        position.focusOffset,
-                        position.anchorOffset
+                        position.focus,
+                        position.anchor
                     );
-                    const endOffset = Math.max(
-                        position.focusOffset,
-                        position.anchorOffset
-                    );
+                    const endOffset = Math.max(position.focus, position.anchor);
 
                     // Calculate selection bounds within the segment
                     const { width: startWidth } = computeTextWidthAndHeight(

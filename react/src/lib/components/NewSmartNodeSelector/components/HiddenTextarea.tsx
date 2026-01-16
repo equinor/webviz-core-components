@@ -25,6 +25,14 @@ export function HiddenTextarea(): React.ReactElement {
     }, [keyboardHandler]);
 
     const hasFocus = useSubscribeToTopic(stateManager, Topic.HAS_FOCUS);
+    const queryTextSelections = useSubscribeToTopic(
+        stateManager,
+        Topic.QUERY_TEXT_SELECTIONS
+    );
+    const querySelection = useSubscribeToTopic(
+        stateManager,
+        Topic.QUERY_SELECTION
+    );
 
     React.useEffect(
         function focusTextarea() {
@@ -32,12 +40,15 @@ export function HiddenTextarea(): React.ReactElement {
                 return;
             }
             if (hasFocus) {
+                // Always call focus when hasFocus is true or queryTextSelections changes.
+                // This handles the case where the textarea lost focus externally
+                // but the state manager still thinks we have focus.
                 ref.current.focus({ preventScroll: true });
             } else {
                 ref.current.blur();
             }
         },
-        [hasFocus]
+        [hasFocus, queryTextSelections, querySelection]
     );
 
     const handleInput = React.useCallback(

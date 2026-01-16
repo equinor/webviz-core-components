@@ -1,4 +1,9 @@
-import type { QueryTextSelection, Segment, StatePatch } from "./types";
+import type {
+    QueryItemUpdate,
+    QueryTextSelection,
+    Segment,
+    StatePatch,
+} from "./types";
 
 export type TextFocusMoveResult =
     | {
@@ -42,17 +47,17 @@ export class QueryTextSelectionsDelegate {
             }
 
             // Check if we have selections to collapse
-            if (!selecting && sel.anchorOffset !== sel.focusOffset) {
+            if (!selecting && sel.anchor !== sel.focus) {
                 newTextSelections.push({
                     queryId: sel.queryId,
-                    focusOffset: sel.focusOffset,
-                    anchorOffset: sel.focusOffset,
+                    focus: sel.focus,
+                    anchor: sel.focus,
                 });
                 continue;
             }
 
             // Check for boundary conditions
-            const newFocusOffset = sel.focusOffset + dx;
+            const newFocusOffset = sel.focus + dx;
 
             if (newFocusOffset < 0) {
                 if (singleSelection) {
@@ -64,8 +69,8 @@ export class QueryTextSelectionsDelegate {
                 } else {
                     newTextSelections.push({
                         queryId: sel.queryId,
-                        focusOffset: 0,
-                        anchorOffset: selecting ? sel.anchorOffset : 0,
+                        focus: 0,
+                        anchor: selecting ? sel.anchor : 0,
                     });
                     continue;
                 }
@@ -81,10 +86,8 @@ export class QueryTextSelectionsDelegate {
                 } else {
                     newTextSelections.push({
                         queryId: sel.queryId,
-                        focusOffset: queryLength,
-                        anchorOffset: selecting
-                            ? sel.anchorOffset
-                            : queryLength,
+                        focus: queryLength,
+                        anchor: selecting ? sel.anchor : queryLength,
                     });
                     continue;
                 }
@@ -92,8 +95,8 @@ export class QueryTextSelectionsDelegate {
 
             newTextSelections.push({
                 queryId: sel.queryId,
-                focusOffset: newFocusOffset,
-                anchorOffset: selecting ? sel.anchorOffset : newFocusOffset,
+                focus: newFocusOffset,
+                anchor: selecting ? sel.anchor : newFocusOffset,
             });
         }
 
@@ -124,7 +127,7 @@ export class QueryTextSelectionsDelegate {
 
             const segment = snapshot.getSegmentForTextOffset(
                 sel.queryId,
-                sel.focusOffset
+                sel.focus
             );
 
             if (segment === null) {
@@ -137,8 +140,8 @@ export class QueryTextSelectionsDelegate {
 
             newTextSelections.push({
                 queryId: sel.queryId,
-                focusOffset: newFocusOffset,
-                anchorOffset: selecting ? sel.anchorOffset : newFocusOffset,
+                focus: newFocusOffset,
+                anchor: selecting ? sel.anchor : newFocusOffset,
             });
         }
         return {
@@ -157,8 +160,10 @@ export class QueryTextSelectionsDelegate {
     ): TextFocusMoveResult {
         const { direction } = payload;
 
+        const isSingleSelection = snapshot.queryTextSelections.length === 1;
+
         const newTextSelections: QueryTextSelection[] = [];
-        const queryItemUpdates: { id: string; query: string }[] = [];
+        const queryItemUpdates: QueryItemUpdate[] = [];
 
         for (const sel of snapshot.queryTextSelections) {
             const queryText = snapshot.getQueryTextById(sel.queryId);
@@ -167,42 +172,75 @@ export class QueryTextSelectionsDelegate {
             }
 
             // At start of query with backward delete - nothing to do
-            if (sel.focusOffset === 0 && sel.anchorOffset === 0 && direction === "backward") {
+            if (
+                sel.focus === 0 &&
+                sel.anchor === 0 &&
+                direction === "backward"
+            ) {
+                if (isSingleSelection) {
+                    return {
+                        kind: "hitBoundary",
+                        boundary: "start",
+                        queryId: sel.queryId,
+                    };
+                }
                 newTextSelections.push(sel);
                 continue;
             }
 
             // At end of query with forward delete - nothing to do
-            if (sel.focusOffset === queryText.length && sel.anchorOffset === queryText.length && direction === "forward") {
+            if (
+                sel.focus === queryText.length &&
+                sel.anchor === queryText.length &&
+                direction === "forward"
+            ) {
+                if (isSingleSelection) {
+                    return {
+                        kind: "hitBoundary",
+                        boundary: "end",
+                        queryId: sel.queryId,
+                    };
+                }
                 newTextSelections.push(sel);
                 continue;
             }
 
             // If there's a selection, delete the selected text
-            if (sel.anchorOffset !== sel.focusOffset) {
-                const start = Math.min(sel.focusOffset, sel.anchorOffset);
-                const end = Math.max(sel.focusOffset, sel.anchorOffset);
-                const newQuery = queryText.slice(0, start) + queryText.slice(end);
+            if (sel.anchor !== sel.focus) {
+                const start = Math.min(sel.focus, sel.anchor);
+                const end = Math.max(sel.focus, sel.anchor);
+                const newQuery =
+                    queryText.slice(0, start) + queryText.slice(end);
 
-                queryItemUpdates.push({ id: sel.queryId, query: newQuery });
+                queryItemUpdates.push({
+                    kind: "update",
+                    item: { id: sel.queryId, query: newQuery },
+                });
                 newTextSelections.push({
                     queryId: sel.queryId,
-                    focusOffset: start,
-                    anchorOffset: start,
+                    focus: start,
+                    anchor: start,
                 });
                 continue;
             }
 
             // Delete a single character
-            const deleteOffset = direction === "backward" ? sel.focusOffset - 1 : sel.focusOffset;
-            const newQuery = queryText.slice(0, deleteOffset) + queryText.slice(deleteOffset + 1);
-            const newOffset = direction === "backward" ? sel.focusOffset - 1 : sel.focusOffset;
+            const deleteOffset =
+                direction === "backward" ? sel.focus - 1 : sel.focus;
+            const newQuery =
+                queryText.slice(0, deleteOffset) +
+                queryText.slice(deleteOffset + 1);
+            const newOffset =
+                direction === "backward" ? sel.focus - 1 : sel.focus;
 
-            queryItemUpdates.push({ id: sel.queryId, query: newQuery });
+            queryItemUpdates.push({
+                kind: "update",
+                item: { id: sel.queryId, query: newQuery },
+            });
             newTextSelections.push({
                 queryId: sel.queryId,
-                focusOffset: newOffset,
-                anchorOffset: newOffset,
+                focus: newOffset,
+                anchor: newOffset,
             });
         }
 
@@ -224,7 +262,7 @@ export class QueryTextSelectionsDelegate {
         const { text } = payload;
 
         const newTextSelections: QueryTextSelection[] = [];
-        const queryItemUpdates: { id: string; query: string }[] = [];
+        const queryItemUpdates: QueryItemUpdate[] = [];
 
         for (const sel of snapshot.queryTextSelections) {
             const queryText = snapshot.getQueryTextById(sel.queryId);
@@ -232,20 +270,23 @@ export class QueryTextSelectionsDelegate {
                 continue;
             }
 
-            const start = Math.min(sel.focusOffset, sel.anchorOffset);
-            const end = Math.max(sel.focusOffset, sel.anchorOffset);
+            const start = Math.min(sel.focus, sel.anchor);
+            const end = Math.max(sel.focus, sel.anchor);
 
             const before = queryText.slice(0, start);
             const after = queryText.slice(end);
             const newQuery = before + text + after;
 
-            queryItemUpdates.push({ id: sel.queryId, query: newQuery });
+            queryItemUpdates.push({
+                kind: "update",
+                item: { id: sel.queryId, query: newQuery },
+            });
 
             const newOffset = start + text.length;
             newTextSelections.push({
                 queryId: sel.queryId,
-                focusOffset: newOffset,
-                anchorOffset: newOffset,
+                focus: newOffset,
+                anchor: newOffset,
             });
         }
 
