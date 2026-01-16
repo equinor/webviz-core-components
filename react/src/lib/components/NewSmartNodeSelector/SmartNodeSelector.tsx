@@ -7,11 +7,11 @@
 
 import { merge } from "lodash";
 import React from "react";
-import { CaretRenderer } from "./components/CaretAndSelectionRenderer";
-import { CompletionsPopover } from "./components/CompletionsPopover";
-import { DebugInfo } from "./components/DebugInfo";
-import { HiddenTextarea } from "./components/HiddenTextarea";
-import { QueryChip } from "./components/QueryChip";
+import { CaretRenderer } from "./ui/CaretAndSelectionRenderer";
+import { CompletionsPopover } from "./ui/CompletionsPopover";
+import { DebugInfo } from "./ui/DebugInfo";
+import { HiddenTextarea } from "./ui/HiddenTextarea";
+import { QueryChip } from "./ui/QueryChip";
 import { type IndexedNode, type TreeDataNode } from "./core";
 import { CompletionsState } from "./core/CompletionsState";
 import { useSubscribeToTopic } from "./core/PubSubDelegate";
@@ -20,12 +20,10 @@ import {
     makeIndexedNodeAccessor,
     TreeIndexBuilder,
 } from "./core/TreeIndexBuilder";
-import type {
-    NodeCompletionItem,
-    SyntaxCompletionItem,
-} from "./core/query-language/types/completion";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
 import type { DeepRequired } from "./utils/deepRequired";
+import type { CompletionsAdapter } from "./completion-adapters/interface";
+import { AdvancedCompletionAdapter } from "./completion-adapters/advanced/AdvancedCompletionAdapter";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -35,19 +33,7 @@ export type SmartNodeSelectorClassNames = {
 };
 
 export type SmartNodeSelectorOptions = {
-    completions?: {
-        maxNumberCompletions?: number;
-        renderSyntaxCompletionItems?: (
-            completions: SyntaxCompletionItem[],
-            onClick: (completion: SyntaxCompletionItem) => void,
-            selectedIndex: number | null
-        ) => React.ReactNode;
-        renderNodeCompletionItem?: (
-            completion: NodeCompletionItem<IndexedNode>,
-            isSelected: boolean
-        ) => React.ReactNode;
-        completionItemHeight?: number;
-    };
+    completionsAdapter?: CompletionsAdapter;
     lexical?: {
         segmentDelimiter?: string;
         // Add options for special chars
@@ -62,6 +48,7 @@ export type SmartNodeSelectorOptions = {
             maxSegmentChars?: number;
         };
     };
+    mode: "simple" | "advanced";
 };
 
 export type SmartNodeSelectorProps<
@@ -120,7 +107,7 @@ type SmartNodeSelectorSlotProps<
 
 export type SmartNodeSelectorDataContextType = {
     stateManager: StateManager;
-    completionsState: CompletionsState<IndexedNode>;
+    completionsState: CompletionsState;
     placeholders: {
         newTag: string;
         incompleteTag: string;
@@ -161,139 +148,7 @@ const DEFAULT_SLOT_PROPS: CompleteSlotProps = {
 };
 
 const DEFAULT_OPTIONS: DeepRequired<SmartNodeSelectorOptions> = {
-    completions: {
-        renderSyntaxCompletionItems: (
-            completions: SyntaxCompletionItem[],
-            onClick: (completion: SyntaxCompletionItem) => void,
-            selectedIndex: number | null
-        ) => {
-            function makeTitle(completion: SyntaxCompletionItem): string {
-                if (completion.kind === "group") {
-                    if (completion.insertText === "(") {
-                        return "Open a new group";
-                    } else if (completion.insertText === ")") {
-                        return "Close the current group";
-                    }
-                } else if (completion.kind === "set") {
-                    if (completion.insertText === "{") {
-                        return "Open a new set for unions";
-                    } else if (completion.insertText === "}") {
-                        return "Close the current set";
-                    }
-                } else if (completion.kind === "unionFlag") {
-                    if (completion.insertText === "+") {
-                        return "Union flag: create a union of the children of all the matched nodes";
-                    }
-                } else if (completion.kind === "wildcard") {
-                    if (completion.insertText === "*") {
-                        return "Wildcard: matches any single segment";
-                    } else if (completion.insertText === "**") {
-                        return "Deep wildcard: matches any number of segments";
-                    } else if (completion.insertText === "?") {
-                        return "Wildcard: matches any single character in a segment";
-                    }
-                } else if (completion.kind === "delimiter") {
-                    return "Delimiter: use to start new segment";
-                } else if (completion.kind === "operator") {
-                    if (completion.insertText === "|") {
-                        return "OR operator: matches either side";
-                    } else if (completion.insertText === ",") {
-                        return "Separator for set items";
-                    }
-                }
-                return "";
-            }
-
-            return (
-                <ul
-                    style={{
-                        listStyle: "none",
-                        margin: 0,
-                        padding: 4,
-                        display: "flex",
-                        gap: "8px",
-                        borderBottom: "1px solid #ccc",
-                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                        alignItems: "center",
-                    }}
-                >
-                    {completions.map((completion, index) => (
-                        <li
-                            key={index}
-                            className="suggestion-item"
-                            style={{
-                                padding: "8px 12px",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "1em",
-                                border: "1px solid #ccc",
-                                borderRadius: "8px",
-                                backgroundColor:
-                                    selectedIndex === index
-                                        ? "#235de4ff"
-                                        : "#f5f5f5",
-                                color:
-                                    selectedIndex === index ? "white" : "black",
-                            }}
-                            title={makeTitle(completion)}
-                            onClick={() => onClick(completion)}
-                        >
-                            {completion.insertText}
-                        </li>
-                    ))}
-                </ul>
-            );
-        },
-        renderNodeCompletionItem: (
-            completion: NodeCompletionItem<IndexedNode>,
-            isSelected: boolean
-        ) => {
-            let label: string | React.ReactNode = completion.insertText;
-            let detail: React.ReactNode = null;
-
-            if (completion.origin.kind === "single") {
-                const name = completion.origin.node.name;
-                const range = completion.origin.nodeNameRange;
-                const left = name.slice(0, range.start);
-                const mid = name.slice(range.start, range.end);
-                const right = name.slice(range.end);
-                label = (
-                    <span style={{ color: "rgba(199, 199, 199, 1)" }}>
-                        {left}
-                        <span style={{ color: "black" }}>{mid}</span>
-                        {right}
-                    </span>
-                );
-                detail = completion.origin.node.description;
-            } else if (completion.origin.kind === "multi") {
-                detail = `${completion.origin.count} matching nodes`;
-            }
-
-            return (
-                <li
-                    className="suggestion-item"
-                    style={{
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        backgroundColor: isSelected ? "#e6f0ff" : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "1em",
-                    }}
-                >
-                    <div style={{ fontWeight: 800 }}>{label}</div>
-                    {detail && (
-                        <div style={{ fontSize: "smaller", color: "#666" }}>
-                            {detail}
-                        </div>
-                    )}
-                </li>
-            );
-        },
-        completionItemHeight: 48,
-        maxNumberCompletions: 10,
-    },
+    completionsAdapter: new AdvancedCompletionAdapter(),
     lexical: {
         segmentDelimiter: ":",
     },
@@ -306,6 +161,7 @@ const DEFAULT_OPTIONS: DeepRequired<SmartNodeSelectorOptions> = {
     importExport: {
         queryDelimiter: "\n",
     },
+    mode: "advanced",
 };
 
 export const SmartNodeSelectorOptionsContext =
@@ -358,10 +214,10 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
     const completionsState = React.useMemo(() => {
         return new CompletionsState({
             treeAccessor,
-            maxNumCompletions:
-                defaultedOptions.completions.maxNumberCompletions,
+            completionsAdapter:
+                defaultedOptions.completionsAdapter as CompletionsAdapter,
         });
-    }, [treeAccessor, defaultedOptions.completions.maxNumberCompletions]);
+    }, [treeAccessor, defaultedOptions.completionsAdapter]);
 
     React.useEffect(() => {
         stateManager.updateTreeAccessor(treeAccessor);
@@ -452,24 +308,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                             <CaretRenderer mainRef={ref} />
                         </RootComponent>
                         <DebugInfo />
-                        <CompletionsPopover
-                            renderNodeCompletionItem={
-                                defaultedOptions.completions
-                                    .renderNodeCompletionItem
-                            }
-                            renderSyntaxCompletionItems={
-                                defaultedOptions.completions
-                                    .renderSyntaxCompletionItems
-                            }
-                            completionItemHeight={
-                                defaultedOptions.completions
-                                    .completionItemHeight
-                            }
-                            maxNumberCompletions={
-                                defaultedOptions.completions
-                                    .maxNumberCompletions
-                            }
-                        />
+                        <CompletionsPopover />
                     </div>
                 </SmartNodeSelectorOptionsContext.Provider>
             </SmartNodeSelectorSlotsContext.Provider>

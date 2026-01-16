@@ -4,7 +4,7 @@ import { Topic } from "./StateManager/StateManager";
 
 export type KeyboardHandlerOptions = {
     stateManager: StateManager;
-    suggestionsState: CompletionsState<any>;
+    suggestionsState: CompletionsState;
 };
 
 /**
@@ -14,7 +14,7 @@ export type KeyboardHandlerOptions = {
  */
 export class KeyboardHandler {
     private _stateManager: StateManager;
-    private _completionsState: CompletionsState<any>;
+    private _completionsState: CompletionsState;
     private _unsubscribeFunctions: (() => void)[] = [];
 
     constructor(options: KeyboardHandlerOptions) {
@@ -69,18 +69,13 @@ export class KeyboardHandler {
                 case "Enter": {
                     const selected =
                         this._completionsState.getSelectedCompletion();
-                    const queryItem = this._stateManager.getFocusedQueryItem();
-                    if (selected && queryItem) {
-                        // TODO: Accept suggestion - insert into query
-                        this._stateManager.updateFocusedQueryItem(
-                            selected.insertText,
-                            selected.replaceRange
-                        );
-                        event.preventDefault();
-                        return;
+                    if (!selected) {
+                        break;
                     }
-                    // Fall through to default Enter handling if no suggestion selected
-                    break;
+                    const { text, range } = selected;
+                    this._stateManager.updateFocusedQueryItem(text, range);
+                    event.preventDefault();
+                    return;
                 }
                 case "Escape":
                     this._completionsState.clearCompletions();

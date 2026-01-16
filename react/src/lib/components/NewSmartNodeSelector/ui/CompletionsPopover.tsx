@@ -1,38 +1,17 @@
 import React from "react";
 
-import type { IndexedNode } from "../core";
-import { CompletionsTopic } from "../core/CompletionsState";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
-import type {
-    CompletionItem,
-    NodeCompletionItem,
-    SyntaxCompletionItem,
-} from "../core/query-language/types/completion";
 import { Topic } from "../core/StateManager/StateManager";
 import {
     SmartNodeSelectorDataContext,
     type SmartNodeSelectorDataContextType,
 } from "../SmartNodeSelector";
-import { VirtualizedList } from "./VirtualizedList";
 import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
+import { CompletionsTopic } from "../core/CompletionsState";
+import type { CompletionItem } from "../core/query-language/types/completion";
+import type { IndexedNode } from "../core";
 
-export type CompletionsPopoverProps = {
-    renderSyntaxCompletionItems: (
-        completions: SyntaxCompletionItem[],
-        onClick: (completion: SyntaxCompletionItem) => void,
-        selectedIndex: number | null
-    ) => React.ReactNode;
-    renderNodeCompletionItem: (
-        completion: NodeCompletionItem<IndexedNode>,
-        isSelected: boolean
-    ) => React.ReactNode;
-    completionItemHeight: number;
-    maxNumberCompletions: number;
-};
-
-export function CompletionsPopover(
-    props: CompletionsPopoverProps
-): React.ReactElement {
+export function CompletionsPopover(): React.ReactElement {
     const { stateManager, completionsState }: SmartNodeSelectorDataContextType =
         React.useContext(SmartNodeSelectorDataContext);
 
@@ -42,6 +21,21 @@ export function CompletionsPopover(
         React.useState<HTMLElement | null>(null);
     const [maxHeight, setMaxHeight] = React.useState<number>(0);
     const directionRef = React.useRef<"down" | "up">("down");
+
+    const completions = useSubscribeToTopic(
+        completionsState,
+        CompletionsTopic.COMPLETIONS
+    );
+
+    const selectedIndex = useSubscribeToTopic(
+        completionsState,
+        CompletionsTopic.SELECTED_INDEX
+    );
+
+    const caretContext = useSubscribeToTopic(
+        completionsState,
+        CompletionsTopic.CARET_CONTEXT
+    );
 
     const updatePosition = React.useCallback(
         function updatePosition() {
@@ -103,21 +97,6 @@ export function CompletionsPopover(
         Topic.FOCUSED_SEGMENT
     );
 
-    const nodeCompletions = useSubscribeToTopic(
-        completionsState,
-        CompletionsTopic.NODE_COMPLETIONS
-    ) as NodeCompletionItem<IndexedNode>[];
-
-    const syntaxCompletions = useSubscribeToTopic(
-        completionsState,
-        CompletionsTopic.SYNTAX_COMPLETIONS
-    ) as SyntaxCompletionItem[];
-
-    const selectedIndex = useSubscribeToTopic(
-        completionsState,
-        CompletionsTopic.SELECTED_INDEX
-    );
-
     React.useEffect(
         function onFocusedAddressChange() {
             if (focusedSegment === null) {
@@ -140,22 +119,17 @@ export function CompletionsPopover(
         [focusedSegment]
     );
 
-    const handleItemClick = React.useCallback(
-        function handleItemClick(completion: CompletionItem<IndexedNode>) {
-            const focusedSegment = stateManager.getFocusedSegment();
-            if (focusedSegment === null) {
-                return;
-            }
-            stateManager.updateQueryItem(
-                focusedSegment.queryId,
-                completion.insertText,
-                completion.replaceRange
-            );
-            stateManager.setTextFocusOffsetToEndOfQueryItem(
-                focusedSegment.queryId
-            );
+    const CompletionsComponent = completionsState.getComponent();
+
+    const handleSelectCompletion = React.useCallback(
+        function handleSelectCompletion(
+            completion: CompletionItem<IndexedNode>
+        ) {
+            const { text, range } =
+                completionsState.transformCompletion(completion);
+            stateManager.updateFocusedQueryItem(text, range);
         },
-        [stateManager]
+        [stateManager, completionsState]
     );
 
     return (
@@ -176,37 +150,13 @@ export function CompletionsPopover(
                 inset: "unset",
             }}
         >
-            {props.renderSyntaxCompletionItems(
-                syntaxCompletions,
-                handleItemClick,
-                selectedIndex !== null && selectedIndex < 0
-                    ? Math.abs(selectedIndex) - 1
-                    : null
-            )}
-            <div style={{ padding: 4, overflow: "auto" }}>
-                <VirtualizedList
-                    items={nodeCompletions}
-                    itemHeight={props.completionItemHeight}
-                    maxHeight={Math.min(
-                        maxHeight - 24,
-                        props.completionItemHeight * props.maxNumberCompletions
-                    )}
-                    renderItem={props.renderNodeCompletionItem}
-                    onItemClick={handleItemClick}
-                    selectedIndex={selectedIndex}
-                />
-            </div>
-            {nodeCompletions.length === 0 && syntaxCompletions.length === 0 && (
-                <div
-                    style={{
-                        padding: "8px 12px",
-                        color: "#666",
-                        fontStyle: "italic",
-                    }}
-                >
-                    No completions
-                </div>
-            )}
+            <CompletionsComponent
+                completions={completions}
+                maxContainerHeight={maxHeight}
+                selectedIndex={selectedIndex}
+                onSelectCompletion={handleSelectCompletion}
+                caretContext={caretContext}
+            />
         </div>
     );
 }

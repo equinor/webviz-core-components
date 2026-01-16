@@ -1,4 +1,11 @@
+import type {
+    CompletionsAdapter,
+    CompletionsAdapterComponentProps,
+    CompletionsAdapterFuncArgs,
+    SelectedCompletion,
+} from "../completion-adapters/interface";
 import { PubSubDelegate, type PubSub } from "./PubSubDelegate";
+import type { CaretContext } from "./query-language/completion/caretContext";
 import { getCompletions } from "./query-language/completion/completion";
 import { evaluateExpression } from "./query-language/evaluator/evaluateExpression";
 import { matchName } from "./query-language/matcher/matchName";
@@ -8,35 +15,35 @@ import type { TreeAccessor } from "./query-language/types/tree";
 import type { IndexedNode } from "./types";
 
 export enum CompletionsTopic {
-    NODE_COMPLETIONS = "nodeCompletions",
-    SYNTAX_COMPLETIONS = "syntaxCompletions",
+    COMPLETIONS = "nodeCompletions",
+    CARET_CONTEXT = "caretContext",
     SELECTED_INDEX = "selectedIndex",
 }
 
 export type CompletionsStateTopicPayloads = {
-    [CompletionsTopic.NODE_COMPLETIONS]: CompletionItem<IndexedNode>[];
-    [CompletionsTopic.SYNTAX_COMPLETIONS]: CompletionItem<IndexedNode>[];
+    [CompletionsTopic.COMPLETIONS]: CompletionItem<IndexedNode>[];
+    [CompletionsTopic.CARET_CONTEXT]: CaretContext | null;
     [CompletionsTopic.SELECTED_INDEX]: number | null;
 };
 
-export type CompletionsStateOptions<TNode> = {
-    treeAccessor: TreeAccessor<TNode>;
-    maxNumCompletions: number;
+export type CompletionsStateOptions<IndexedNode> = {
+    completionsAdapter: CompletionsAdapter;
+    treeAccessor: TreeAccessor<IndexedNode>;
 };
 
-export class CompletionsState<
-    TNode,
-> implements PubSub<CompletionsStateTopicPayloads> {
+export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
     private _pubSubDelegate =
         new PubSubDelegate<CompletionsStateTopicPayloads>();
-    private _treeAccessor: TreeAccessor<TNode>;
+    private _treeAccessor: TreeAccessor<IndexedNode>;
+    private _adapter: CompletionsAdapter;
 
-    private _nodeCompletions: CompletionItem<TNode>[] = [];
-    private _syntaxCompletions: CompletionItem<TNode>[] = [];
+    private _completions: CompletionItem<IndexedNode>[] = [];
+    private _caretContext: CaretContext | null = null;
     private _selectedIndex: number | null = null;
 
-    constructor(options: CompletionsStateOptions<TNode>) {
+    constructor(options: CompletionsStateOptions<IndexedNode>) {
         this._treeAccessor = options.treeAccessor;
+        this._adapter = options.completionsAdapter;
     }
 
     getPubSubDelegate(): PubSubDelegate<CompletionsStateTopicPayloads> {
@@ -47,44 +54,53 @@ export class CompletionsState<
         topic: T
     ): () => CompletionsStateTopicPayloads[T] {
         switch (topic) {
-            case CompletionsTopic.NODE_COMPLETIONS:
+            case CompletionsTopic.COMPLETIONS:
                 return () =>
-                    this._nodeCompletions as CompletionsStateTopicPayloads[T];
-            case CompletionsTopic.SYNTAX_COMPLETIONS:
-                return () =>
-                    this._syntaxCompletions as CompletionsStateTopicPayloads[T];
+                    this._completions as CompletionsStateTopicPayloads[T];
             case CompletionsTopic.SELECTED_INDEX:
                 return () =>
                     this._selectedIndex as CompletionsStateTopicPayloads[T];
+            case CompletionsTopic.CARET_CONTEXT:
+                return () =>
+                    this._caretContext as CompletionsStateTopicPayloads[T];
+            default:
+                throw new Error(`Unknown topic: ${topic}`);
         }
     }
 
-    getCompletions(): CompletionItem<TNode>[] {
-        return this._nodeCompletions;
+    getCompletions(): CompletionItem<IndexedNode>[] {
+        return this._completions;
     }
 
     getSelectedIndex(): number | null {
         return this._selectedIndex;
     }
 
-    getSelectedCompletion(): CompletionItem<TNode> | null {
-        if (
-            this._selectedIndex === null ||
-            this._selectedIndex >= this._nodeCompletions.length ||
-            this._selectedIndex < -this._syntaxCompletions.length
-        ) {
+    private makeAdapterArgs(): CompletionsAdapterFuncArgs {
+        return {
+            completions: this._completions,
+            selectedIndex: this._selectedIndex,
+        };
+    }
+
+    getSelectedCompletion(): SelectedCompletion | null {
+        const selectedCompletion = this._adapter.getSelectedCompletion(
+            this.makeAdapterArgs()
+        );
+        if (!selectedCompletion) {
             return null;
         }
-        if (this._selectedIndex < 0) {
-            return this._syntaxCompletions[Math.abs(this._selectedIndex) - 1];
-        }
-        return this._nodeCompletions[this._selectedIndex];
+        return this._adapter.transformCompletion(selectedCompletion);
     }
 
     hasCompletions(): boolean {
-        return (
-            this._nodeCompletions.length + this._syntaxCompletions.length > 0
-        );
+        return this._adapter.hasCompletions(this.makeAdapterArgs());
+    }
+
+    transformCompletion(
+        completion: CompletionItem<IndexedNode>
+    ): SelectedCompletion {
+        return this._adapter.transformCompletion(completion);
     }
 
     /**
@@ -92,7 +108,7 @@ export class CompletionsState<
      * Called by input handlers when the focused segment changes.
      */
     updateCompletions(parsedQuery: ParsedQuery, caretOffset: number): void {
-        const allCompletions = getCompletions<TNode>(
+        const { completions, caretContext } = getCompletions<IndexedNode>(
             parsedQuery,
             caretOffset,
             this._treeAccessor,
@@ -100,23 +116,15 @@ export class CompletionsState<
             evaluateExpression
         );
 
-        this._nodeCompletions = allCompletions.filter(
-            (comp) => comp.kind === "node"
-        );
-        this._syntaxCompletions = allCompletions.filter(
-            (comp) => comp.kind !== "node"
-        );
+        this._completions = completions;
+        this._caretContext = caretContext;
 
         // Reset selected index when completions change
         this._selectedIndex = null;
 
-        this._pubSubDelegate.notifySubscribers(
-            CompletionsTopic.NODE_COMPLETIONS
-        );
-        this._pubSubDelegate.notifySubscribers(
-            CompletionsTopic.SYNTAX_COMPLETIONS
-        );
+        this._pubSubDelegate.notifySubscribers(CompletionsTopic.COMPLETIONS);
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
+        this._pubSubDelegate.notifySubscribers(CompletionsTopic.CARET_CONTEXT);
     }
 
     /**
@@ -124,14 +132,11 @@ export class CompletionsState<
      * Called by input handlers when focus is lost or no segment is focused.
      */
     clearCompletions(): void {
-        if (this._nodeCompletions.length > 0 || this._selectedIndex !== null) {
-            this._nodeCompletions = [];
+        if (this._completions.length > 0 || this._selectedIndex !== null) {
+            this._completions = [];
             this._selectedIndex = null;
             this._pubSubDelegate.notifySubscribers(
-                CompletionsTopic.NODE_COMPLETIONS
-            );
-            this._pubSubDelegate.notifySubscribers(
-                CompletionsTopic.SYNTAX_COMPLETIONS
+                CompletionsTopic.COMPLETIONS
             );
             this._pubSubDelegate.notifySubscribers(
                 CompletionsTopic.SELECTED_INDEX
@@ -139,45 +144,19 @@ export class CompletionsState<
         }
     }
 
-    selectNext(): void {
-        if (
-            this._nodeCompletions.length + this._syntaxCompletions.length ===
-            0
-        ) {
-            return;
-        }
+    getComponent(): React.ComponentType<CompletionsAdapterComponentProps> {
+        return this._adapter.component;
+    }
 
-        if (this._selectedIndex === null) {
-            if (this._nodeCompletions.length > 0) {
-                this._selectedIndex = 0;
-            } else {
-                this._selectedIndex = -1;
-            }
-        } else {
-            this._selectedIndex = Math.min(
-                this._selectedIndex + 1,
-                this._nodeCompletions.length - 1
-            );
-        }
+    selectNext(): void {
+        this._selectedIndex = this._adapter.selectNext(this.makeAdapterArgs());
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }
 
     selectPrevious(): void {
-        if (
-            this._nodeCompletions.length + this._syntaxCompletions.length ===
-            0
-        ) {
-            return;
-        }
-
-        if (this._selectedIndex === null) {
-            this._selectedIndex = this._nodeCompletions.length - 1;
-        } else {
-            this._selectedIndex = Math.max(
-                this._selectedIndex - 1,
-                -this._syntaxCompletions.length
-            );
-        }
+        this._selectedIndex = this._adapter.selectPrevious(
+            this.makeAdapterArgs()
+        );
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.SELECTED_INDEX);
     }
 

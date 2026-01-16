@@ -99,7 +99,7 @@ export class StateManager implements PubSub<TopicPayloads> {
                 if (!text) {
                     return null;
                 }
-                return this.getSegmentForTextOffset(queryId, offset);
+                return this.getSegmentForTextOffset(text, offset);
             },
         };
     }
@@ -384,16 +384,16 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     private computeSegmentIndex(query: string, focusOffset: number): number {
-        const segments = query.split(this._options.segmentDelimiter);
-        let accumulatedLength = 0;
+        const parsedQuery = this.getParsedQuery(query);
+        if (!parsedQuery || parsedQuery.segments.length === 0) {
+            return 0;
+        }
 
+        const segments = parsedQuery.segments;
         for (let i = 0; i < segments.length; i++) {
-            accumulatedLength += segments[i].length;
-            if (focusOffset <= accumulatedLength) {
+            if (focusOffset <= segments[i].charRange.end) {
                 return i;
             }
-            // Account for delimiter length
-            accumulatedLength += this._options.segmentDelimiter.length;
         }
 
         return segments.length - 1;
@@ -403,41 +403,46 @@ export class StateManager implements PubSub<TopicPayloads> {
         textSelection: QueryTextSelection,
         query: string
     ): SegmentTextSelection {
-        const segments = query.split(this._options.segmentDelimiter);
-        let accumulatedLength = 0;
+        const parsedQuery = this.getParsedQuery(query);
+        if (!parsedQuery || parsedQuery.segments.length === 0) {
+            return {
+                queryId: textSelection.queryId,
+                segmentIndex: 0,
+                focus: textSelection.focus,
+                anchor: textSelection.anchor,
+            };
+        }
+
+        const segments = parsedQuery.segments;
         let segmentIndex = 0;
         let segmentFocusOffset = textSelection.focus;
         let segmentAnchorOffset = textSelection.anchor;
 
-        // Find segment for caret offset
+        // Find segment for focus offset
         for (let i = 0; i < segments.length; i++) {
-            const segmentEnd = accumulatedLength + segments[i].length;
-            if (textSelection.focus <= segmentEnd) {
+            const segment = segments[i];
+            if (textSelection.focus <= segment.charRange.end) {
                 segmentIndex = i;
-                segmentFocusOffset = textSelection.focus - accumulatedLength;
+                segmentFocusOffset =
+                    textSelection.focus - segment.charRange.start;
                 break;
             }
-            accumulatedLength =
-                segmentEnd + this._options.segmentDelimiter.length;
         }
 
         // Find anchor offset relative to the same segment
-        accumulatedLength = 0;
         for (let i = 0; i < segments.length; i++) {
-            const segmentEnd = accumulatedLength + segments[i].length;
-            if (textSelection.anchor <= segmentEnd) {
+            const segment = segments[i];
+            if (textSelection.anchor <= segment.charRange.end) {
                 if (i === segmentIndex) {
                     // Anchor is in the same segment
                     segmentAnchorOffset =
-                        textSelection.anchor - accumulatedLength;
+                        textSelection.anchor - segment.charRange.start;
                 } else {
-                    // Anchor is in a different segment - collapse to caret position
+                    // Anchor is in a different segment - collapse to focus position
                     segmentAnchorOffset = segmentFocusOffset;
                 }
                 break;
             }
-            accumulatedLength =
-                segmentEnd + this._options.segmentDelimiter.length;
         }
 
         return {
@@ -524,7 +529,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
     }
 
-    private getSegmentForTextOffset(
+    getSegmentForTextOffset(
         query: string,
         offset: number
     ): {
@@ -532,31 +537,46 @@ export class StateManager implements PubSub<TopicPayloads> {
         startOffset: number;
         endOffset: number;
         length: number;
+        text: string;
     } {
-        const segments = query.split(this._options.segmentDelimiter);
-        let accumulatedLength = 0;
+        const parsedQuery = this.getParsedQuery(query);
+        if (!parsedQuery || parsedQuery.segments.length === 0) {
+            return {
+                index: 0,
+                startOffset: 0,
+                endOffset: query.length,
+                length: query.length,
+                text: query,
+            };
+        }
+
+        const segments = parsedQuery.segments;
         for (let i = 0; i < segments.length; i++) {
-            const segmentEnd = accumulatedLength + segments[i].length;
-            if (offset <= segmentEnd) {
+            const segment = segments[i];
+            if (offset <= segment.charRange.end) {
                 return {
                     index: i,
-                    startOffset: accumulatedLength,
-                    endOffset: segmentEnd,
-                    length: segments[i].length,
+                    startOffset: segment.charRange.start,
+                    endOffset: segment.charRange.end,
+                    length: segment.charRange.end - segment.charRange.start,
+                    text: query.slice(
+                        segment.charRange.start,
+                        segment.charRange.end
+                    ),
                 };
             }
-            accumulatedLength =
-                segmentEnd + this._options.segmentDelimiter.length;
         }
+
+        const lastSegment = segments[segments.length - 1];
         return {
             index: segments.length - 1,
-            startOffset:
-                accumulatedLength -
-                segments[segments.length - 1].length -
-                this._options.segmentDelimiter.length,
-            endOffset:
-                accumulatedLength - this._options.segmentDelimiter.length,
-            length: segments[segments.length - 1].length,
+            startOffset: lastSegment.charRange.start,
+            endOffset: lastSegment.charRange.end,
+            length: lastSegment.charRange.end - lastSegment.charRange.start,
+            text: query.slice(
+                lastSegment.charRange.start,
+                lastSegment.charRange.end
+            ),
         };
     }
 
@@ -674,10 +694,8 @@ export class StateManager implements PubSub<TopicPayloads> {
                 return;
             }
 
-            const numSegments = getNumberOfSegments(
-                queryText,
-                this._options.segmentDelimiter
-            );
+            const parsedQuery = this.getParsedQuery(queryText);
+            const numSegments = parsedQuery?.segments.length ?? 1;
             if (
                 result.boundary === "start" &&
                 numSegments <= 1 &&
@@ -936,10 +954,6 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
     }
-}
-
-function getNumberOfSegments(query: string, delimiter: string): number {
-    return query.split(delimiter).length;
 }
 
 function selectionToRange(selection: Selection): Range {

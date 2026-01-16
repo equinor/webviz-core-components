@@ -68,8 +68,11 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                 const chipBoundingRect = chipElement?.getBoundingClientRect();
 
                 // Get the segment text
-                const segments = queryItem.query.split(delimiter);
-                const segmentText = segments[position.segmentIndex] ?? "";
+                const segment = stateManager.getSegmentForTextOffset(
+                    queryItem.query,
+                    position.focus
+                );
+                const segmentText = segment.text;
 
                 const textBeforeCaret = segmentText.slice(0, position.focus);
 

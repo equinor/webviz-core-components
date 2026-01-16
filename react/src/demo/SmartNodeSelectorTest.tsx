@@ -3,7 +3,11 @@
  */
 import React from "react";
 import { SmartNodeSelector } from "../lib";
-import { SmartNodeSelector as NewSmartNodeSelector } from "../lib/components/NewSmartNodeSelector/SmartNodeSelector";
+import { SimpleCompletionsAdapter } from "../lib/components/NewSmartNodeSelector/completion-adapters/simple/SimpleCompletionsAdapter";
+import {
+    SmartNodeSelector as NewSmartNodeSelector,
+    type SmartNodeSelectorOptions,
+} from "../lib/components/NewSmartNodeSelector/SmartNodeSelector";
 import { TEST_DATA } from "./testdata";
 
 type SmartNodeSelectorState = {
@@ -104,7 +108,7 @@ type ConfigurableOptions = {
         completionItemHeight?: number;
     };
     lexical?: {
-        delimiter?: string;
+        segmentDelimiter?: string;
     };
     queryChips?: {
         truncation?: {
@@ -112,6 +116,10 @@ type ConfigurableOptions = {
             maxSegmentChars?: number;
         };
     };
+    importExport?: {
+        queryDelimiter?: string;
+    };
+    mode: SmartNodeSelectorOptions["mode"];
 };
 
 /**
@@ -353,7 +361,7 @@ const OptionsConfigurator: React.FC<{
             completionItemHeight: 48,
         },
         lexical: {
-            delimiter: ":",
+            segmentDelimiter: ":",
         },
         queryChips: {
             truncation: {
@@ -361,6 +369,57 @@ const OptionsConfigurator: React.FC<{
                 maxSegmentChars: 15,
             },
         },
+        importExport: {
+            queryDelimiter: "\n",
+        },
+        mode: "simple",
+    };
+
+    const renderModeSelector = (): React.ReactNode => {
+        const modes: Array<SmartNodeSelectorOptions["mode"]> = [
+            "simple",
+            "advanced",
+        ];
+        return (
+            <div
+                style={{
+                    marginBottom: "20px",
+                    padding: "16px",
+                    backgroundColor: "#fafafa",
+                    borderRadius: "6px",
+                    border: "1px solid #e0e0e0",
+                }}
+            >
+                <h4
+                    style={{
+                        margin: "0 0 12px 0",
+                        fontSize: "16px",
+                        color: "#333",
+                        textTransform: "capitalize",
+                    }}
+                >
+                    Mode
+                </h4>
+                <div style={{ display: "flex", gap: "16px" }}>
+                    {modes.map((mode) => (
+                        <label
+                            key={mode}
+                            style={{ display: "flex", gap: "6px" }}
+                        >
+                            <input
+                                type="radio"
+                                name="mode"
+                                checked={options.mode === mode}
+                                onChange={() => onChange({ ...options, mode })}
+                            />
+                            <span style={{ textTransform: "capitalize" }}>
+                                {mode}
+                            </span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -375,9 +434,14 @@ const OptionsConfigurator: React.FC<{
             <h3 style={{ marginTop: 0, marginBottom: "20px" }}>
                 Component Options
             </h3>
-            {Object.entries(defaultStructure).map(([category, categoryObj]) =>
-                renderCategory(category, categoryObj)
-            )}
+            {renderModeSelector()}
+            {Object.entries(defaultStructure).map(([category, categoryObj]) => {
+                // Skip mode since it's handled separately
+                if (category === "mode") {
+                    return null;
+                }
+                return renderCategory(category, categoryObj);
+            })}
         </div>
     );
 };
@@ -397,7 +461,7 @@ const SmartNodeSelectorTest: React.FC = () => {
                 completionItemHeight: 48,
             },
             lexical: {
-                delimiter: ":",
+                segmentDelimiter: ":",
             },
             queryChips: {
                 truncation: {
@@ -405,6 +469,10 @@ const SmartNodeSelectorTest: React.FC = () => {
                     maxSegmentChars: 15,
                 },
             },
+            importExport: {
+                queryDelimiter: "\n",
+            },
+            mode: "simple",
         });
 
     return (
@@ -532,7 +600,13 @@ const SmartNodeSelectorTest: React.FC = () => {
             <NewSmartNodeSelector
                 key={JSON.stringify(newSelectorOptions)}
                 data={TEST_DATA_MAP[testData]}
-                options={newSelectorOptions}
+                options={{
+                    ...newSelectorOptions,
+                    completionsAdapter:
+                        newSelectorOptions.mode === "simple"
+                            ? new SimpleCompletionsAdapter()
+                            : undefined,
+                }}
                 initialValue={["Data Source A:Category 2:Item B1"]}
             />
             <div style={{ marginTop: "30px" }}>

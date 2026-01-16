@@ -24,7 +24,7 @@ export function getCompletions<Node>(
         tree: TreeAccessor<Node>,
         matchName: (name: string, atoms: Atom[]) => boolean
     ) => Set<Node>
-): CompletionItem<Node>[] {
+): { completions: CompletionItem<Node>[]; caretContext: CaretContext } {
     const context = getCaretContext(parsed, caretOffset);
 
     const { frontier, deepMode, unionMode } = evaluatePrefix(
@@ -44,7 +44,7 @@ export function getCompletions<Node>(
     const all: CompletionItem<Node>[] = [];
 
     if (pool.size === 0) {
-        return all;
+        return { completions: all, caretContext: context };
     }
 
     // Check if we have a full match in the current segment
@@ -58,7 +58,10 @@ export function getCompletions<Node>(
 
     // Deduplicate completions - we can later rank them as well
     const deduped = dedupeCompletions(all);
-    return rankCompletions(deduped, context.expectation);
+    return {
+        completions: rankCompletions(deduped, context.expectation),
+        caretContext: context,
+    };
 }
 
 /**
