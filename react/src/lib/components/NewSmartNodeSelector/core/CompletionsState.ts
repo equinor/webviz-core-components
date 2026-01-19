@@ -80,6 +80,7 @@ export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
         return {
             completions: this._completions,
             selectedIndex: this._selectedIndex,
+            caretContext: this._caretContext,
         };
     }
 

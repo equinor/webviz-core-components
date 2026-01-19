@@ -1,8 +1,8 @@
+import React from "react";
 import type { IndexedNode } from "../../core";
 import type { NodeCompletionItem } from "../../core/query-language/types/completion";
 import { VirtualizedList } from "../../ui/VirtualizedList";
 import type { CompletionsAdapterComponentProps } from "../interface";
-import React from "react";
 
 export function SimpleCompletionsComponent(
     props: CompletionsAdapterComponentProps
@@ -30,11 +30,20 @@ export function SimpleCompletionsComponent(
                         className="suggestion-item"
                         style={{
                             padding: "8px 12px",
-                            color: "#666",
-                            fontStyle: "italic",
+                            cursor: "pointer",
+                            backgroundColor:
+                                props.selectedIndex === -1
+                                    ? "#e6f0ff"
+                                    : "transparent",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "1em",
                         }}
                     >
-                        Close group
+                        <div style={{ fontWeight: 800 }}>Close group</div>
+                        <div style={{ fontSize: "smaller", color: "#666" }}>
+                            Close the current group
+                        </div>
                     </li>
                 ) : (
                     <li

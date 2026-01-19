@@ -23,6 +23,7 @@ export type CompletionsAdapterComponentProps = {
 export type CompletionsAdapterFuncArgs = {
     completions: CompletionItem<IndexedNode>[];
     selectedIndex: number | null;
+    caretContext: CaretContext | null;
 };
 
 export interface CompletionsAdapter {

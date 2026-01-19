@@ -107,7 +107,7 @@ export class KeyboardHandler {
             // Selection
             case "a":
                 if (event.ctrlKey || event.metaKey) {
-                    // this._stateManager.selectAllInCurrentQueryItem();
+                    this._stateManager.selectAll();
                     event.preventDefault();
                 }
                 break;

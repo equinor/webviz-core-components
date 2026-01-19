@@ -55,8 +55,18 @@ export function useMouseEventHandler(
                 const queryItem = stateManager.getQueryItemById(queryId);
                 if (!queryItem) return;
 
-                const segments = queryItem.query.split(delimiter);
-                const segmentText = segments[segmentIndex] ?? "";
+                const segments = stateManager.getParsedQuery(
+                    queryItem.query
+                )?.segments;
+                if (!segments) return;
+
+                const segment = segments[segmentIndex];
+
+                const range = segment.charRange;
+                const segmentText = queryItem.query.slice(
+                    range.start,
+                    range.end
+                );
 
                 // Calculate local X position relative to segment
                 const rect = segmentElement.getBoundingClientRect();
@@ -102,15 +112,8 @@ export function useMouseEventHandler(
                     );
                 }
 
-                const textBeforeSegment = segments
-                    .slice(0, segmentIndex)
-                    .join(delimiter);
-
+                const textBeforeSegment = queryItem.query.slice(0, range.start);
                 offset += textBeforeSegment.length;
-                if (segmentIndex > 0) {
-                    // Account for delimiter length
-                    offset += delimiter.length;
-                }
 
                 let anchorOffset = offset;
 
@@ -132,120 +135,145 @@ export function useMouseEventHandler(
                 });
 
                 event.preventDefault();
+
+                window.addEventListener("mousemove", handleMouseMove, {
+                    signal: abortController.signal,
+                });
+                window.addEventListener("mouseup", handleMouseUp, {
+                    signal: abortController.signal,
+                    once: true,
+                });
             }
 
             function handleMouseMove(event: MouseEvent) {
                 if (event.buttons !== 1) return; // Only proceed if mouse button is pressed
 
-                const target = event.target as HTMLElement;
-
                 const currentCaretPositions =
                     stateManager.getQueryTextSelections();
 
-                // Find the closest segment element
-                const segmentElement = target.closest(
-                    "[data-segment-index]"
-                ) as HTMLElement;
-
-                if (!segmentElement) {
-                    return;
-                }
-                const queryId = segmentElement.getAttribute(
-                    "data-segment-query-id"
-                );
-                const segmentIndexStr =
-                    segmentElement.getAttribute("data-segment-index");
-
-                if (!queryId || segmentIndexStr === null) {
+                // We need an existing selection to extend from
+                if (currentCaretPositions.length !== 1) {
                     return;
                 }
 
-                const segmentIndex = parseInt(segmentIndexStr, 10);
+                const currentSelection = currentCaretPositions[0];
+                const queryId = currentSelection.queryId;
+                const anchorOffset = currentSelection.anchor;
 
-                // Get query item and segment text
+                // Get query item
                 const queryItem = stateManager.getQueryItemById(queryId);
                 if (!queryItem) return;
 
-                const segments = queryItem.query.split(delimiter);
-                const segmentText = segments[segmentIndex] ?? "";
+                // Find the query chip element using the queryId from the anchor
+                const queryChipElement = ref.current?.querySelector(
+                    `[data-querychip-id="${queryId}"]`
+                ) as HTMLElement | null;
 
-                // Calculate local X position relative to segment
-                const rect = segmentElement.getBoundingClientRect();
-                const localX = event.clientX - rect.left;
+                if (!queryChipElement) return;
 
-                // Check if segment is truncated
-                const isTruncated =
-                    segmentElement.getAttribute("data-segment-truncated") ===
-                    "true";
+                const chipRect = queryChipElement.getBoundingClientRect();
 
-                // Map X to character offset within the segment
+                // Calculate offset based on x position relative to the chip
                 let offset: number;
-                if (isTruncated) {
-                    // Use special mapping for truncated segments
-                    const truncationInfo: TruncationInfo = {
-                        startText:
-                            segmentElement.getAttribute(
-                                "data-truncation-start"
-                            ) ?? "",
-                        hiddenText:
-                            segmentElement.getAttribute(
-                                "data-truncation-hidden"
-                            ) ?? "",
-                        endText:
-                            segmentElement.getAttribute(
-                                "data-truncation-end"
-                            ) ?? "",
-                        ellipsisText:
-                            segmentElement.getAttribute(
-                                "data-truncation-ellipsis"
-                            ) ?? "...",
-                    };
-                    offset = Math.max(
-                        0,
-                        Math.min(
-                            segmentText.length,
-                            mapTruncatedClickToFullOffset(
-                                localX,
-                                truncationInfo,
-                                segmentElement
-                            )
-                        )
-                    );
+
+                if (event.clientX <= chipRect.left) {
+                    // Cursor is at or to the left of the chip - select to start
+                    offset = 0;
+                } else if (event.clientX >= chipRect.right) {
+                    // Cursor is at or to the right of the chip - select to end
+                    offset = queryItem.query.length;
                 } else {
-                    offset = Math.max(
-                        0,
-                        Math.min(
-                            segmentText.length,
-                            getCaretOffsetFromX(
-                                localX,
-                                segmentText,
-                                segmentElement
-                            )
-                        )
+                    // Cursor is within the chip - find the segment under the cursor
+                    const target = event.target as HTMLElement;
+                    const segmentElement = target.closest(
+                        "[data-segment-index]"
+                    ) as HTMLElement;
+
+                    if (!segmentElement) {
+                        return;
+                    }
+
+                    const segmentQueryId = segmentElement.getAttribute(
+                        "data-segment-query-id"
                     );
+                    const segmentIndexStr =
+                        segmentElement.getAttribute("data-segment-index");
+
+                    // Only process if we're still in the same query
+                    if (
+                        segmentQueryId !== queryId ||
+                        segmentIndexStr === null
+                    ) {
+                        return;
+                    }
+
+                    const segmentIndex = parseInt(segmentIndexStr, 10);
+
+                    const segments = stateManager.getParsedQuery(
+                        queryItem.query
+                    )?.segments;
+                    if (!segments) return;
+
+                    const segment = segments[segmentIndex];
+                    const range = segment.charRange;
+                    const segmentText = queryItem.query.slice(
+                        range.start,
+                        range.end
+                    );
+
+                    // Calculate local X position relative to segment
+                    const rect = segmentElement.getBoundingClientRect();
+                    const localX = event.clientX - rect.left;
+
+                    // Check if segment is truncated
+                    const isTruncated =
+                        segmentElement.getAttribute(
+                            "data-segment-truncated"
+                        ) === "true";
+
+                    // Map X to character offset within the segment
+                    if (isTruncated) {
+                        // Use special mapping for truncated segments
+                        const truncationInfo: TruncationInfo = {
+                            startText:
+                                segmentElement.getAttribute(
+                                    "data-truncation-start"
+                                ) ?? "",
+                            hiddenText:
+                                segmentElement.getAttribute(
+                                    "data-truncation-hidden"
+                                ) ?? "",
+                            endText:
+                                segmentElement.getAttribute(
+                                    "data-truncation-end"
+                                ) ?? "",
+                            ellipsisText:
+                                segmentElement.getAttribute(
+                                    "data-truncation-ellipsis"
+                                ) ?? "...",
+                        };
+                        offset = mapTruncatedClickToFullOffset(
+                            localX,
+                            truncationInfo,
+                            segmentElement
+                        );
+                    } else {
+                        offset = getCaretOffsetFromX(
+                            localX,
+                            segmentText,
+                            segmentElement
+                        );
+                    }
+
+                    // Convert segment-local offset to query-global offset
+                    const textBeforeSegment = queryItem.query.slice(
+                        0,
+                        range.start
+                    );
+                    offset += textBeforeSegment.length;
                 }
 
-                const textBeforeSegment = segments
-                    .slice(0, segmentIndex)
-                    .join(delimiter);
-
-                offset += textBeforeSegment.length;
-                if (segmentIndex > 0) {
-                    // Account for delimiter length
-                    offset += delimiter.length;
-                }
-
-                let anchorOffset = offset;
-
-                if (
-                    currentCaretPositions.length === 1 &&
-                    currentCaretPositions[0].queryId === queryId
-                ) {
-                    // If there is an existing caret position in this segment, use its offset as anchor
-                    anchorOffset = currentCaretPositions[0].anchor;
-                }
-
-                // Update caret position
+                // Update caret position with the anchor preserved
                 stateManager.setQueryTextSelection({
                     queryId: queryId,
                     focus: offset,
@@ -255,10 +283,11 @@ export function useMouseEventHandler(
                 event.preventDefault();
             }
 
+            function handleMouseUp() {
+                window.removeEventListener("mousemove", handleMouseMove);
+            }
+
             ref.current?.addEventListener("mousedown", handleMouseDown, {
-                signal: abortController.signal,
-            });
-            ref.current?.addEventListener("mousemove", handleMouseMove, {
                 signal: abortController.signal,
             });
 

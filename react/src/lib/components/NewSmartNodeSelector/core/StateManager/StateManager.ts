@@ -150,10 +150,12 @@ export class StateManager implements PubSub<TopicPayloads> {
 
         if (patch.textSelections !== undefined) {
             this.updateQueryTextSelections(patch.textSelections);
+            this.setSelectionMode("text");
         }
 
         if (patch.querySelection !== undefined) {
             this._querySelection = patch.querySelection;
+            this.setSelectionMode("query");
             this._pubSubDelegate.notifySubscribers(Topic.QUERY_SELECTION);
         }
 
@@ -912,8 +914,47 @@ export class StateManager implements PubSub<TopicPayloads> {
         this.updateQueryTextSelections([caretPosition]);
     }
 
-    setQueryTextSelection(selection: QueryTextSelection): void {
+    selectAll(): void {
+        if (this._selectionMode === "query") {
+            const numQueries = this._queriesStoreDelegate.getNumItems();
+            if (numQueries === 0) {
+                return;
+            }
+
+            const selection: QuerySelection = {
+                anchor: 0,
+                focus: numQueries - 1,
+            };
+
+            this.applyPatch({ querySelection: selection });
+            return;
+        }
+
+        if (this._queryTextSelections.length !== 1) {
+            return;
+        }
+
+        const queryId = this._queryTextSelections[0].queryId;
+        const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+        if (!queryItem) {
+            return;
+        }
+
+        const selection: QueryTextSelection = {
+            queryId: queryId,
+            focus: queryItem.query.length,
+            anchor: 0,
+        };
+
+        this.setSelectionMode("text");
         this.updateQueryTextSelections([selection]);
+    }
+
+    setQueryTextSelection(selection: QueryTextSelection): void {
+        const patch = {
+            textSelections: [selection],
+        };
+        this.applyPatch(patch);
     }
 
     insertText(text: string): void {

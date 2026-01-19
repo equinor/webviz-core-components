@@ -64,6 +64,16 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
         }
 
         if (args.selectedIndex === -1) {
+            if (args.caretContext?.insideGroup) {
+                const closeGroupCompletion: SyntaxCompletionItem = {
+                    label: ")",
+                    kind: "group",
+                    insertText: ")",
+                    replaceRange: { start: 0, end: 0 },
+                    segmentReplaceRange: { start: 0, end: 0 },
+                };
+                return closeGroupCompletion as CompletionItem<IndexedNode>;
+            }
             const openGroupCompletion: SyntaxCompletionItem = {
                 label: "(",
                 kind: "group",
@@ -93,7 +103,29 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
     transformCompletion(
         completion: CompletionItem<IndexedNode>
     ): SelectedCompletion {
-        // Implementation to transform a completion item
+        if (completion.kind === "group" && completion.label === "(") {
+            return {
+                text: completion.label,
+                range: completion.replaceRange,
+            };
+        } else if (completion.kind === "group" && completion.label === ")") {
+            return {
+                text: completion.label,
+                range: completion.replaceRange,
+            };
+        }
+
+        if (completion.kind === "node") {
+            const isLeaf =
+                completion.origin.kind === "single" &&
+                completion.origin.node.isLeaf;
+            if (isLeaf) {
+                return {
+                    text: completion.label,
+                    range: completion.replaceRange,
+                };
+            }
+        }
         return {
             text: completion.label + ":",
             range: completion.replaceRange,
