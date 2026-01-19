@@ -34,7 +34,7 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
         }
 
         if (args.selectedIndex === null) {
-            return nodeCompletions.length - 1;
+            return null;
         } else {
             return Math.max(args.selectedIndex - 1, -1);
         }
@@ -63,25 +63,43 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
             return null;
         }
 
-        if (args.selectedIndex === -1) {
-            if (args.caretContext?.insideGroup) {
+        const range = args.caretContext
+            ? {
+                  start: args.caretContext.caretOffset,
+                  end: args.caretContext.caretOffset,
+              }
+            : { start: 0, end: 0 };
+        if (args.caretContext?.insideGroup) {
+            if (args.selectedIndex === -2) {
+                const unionCompletion: SyntaxCompletionItem = {
+                    label: "+",
+                    kind: "unionFlag",
+                    insertText: "+",
+                    replaceRange: { start: 0, end: 0 },
+                    segmentReplaceRange: { start: 0, end: 0 },
+                };
+                return unionCompletion as CompletionItem<IndexedNode>;
+            } else if (args.selectedIndex === -1) {
                 const closeGroupCompletion: SyntaxCompletionItem = {
                     label: ")",
                     kind: "group",
                     insertText: ")",
-                    replaceRange: { start: 0, end: 0 },
-                    segmentReplaceRange: { start: 0, end: 0 },
+                    replaceRange: range,
+                    segmentReplaceRange: range,
                 };
                 return closeGroupCompletion as CompletionItem<IndexedNode>;
             }
-            const openGroupCompletion: SyntaxCompletionItem = {
-                label: "(",
-                kind: "group",
-                insertText: "(",
-                replaceRange: { start: 0, end: 0 },
-                segmentReplaceRange: { start: 0, end: 0 },
-            };
-            return openGroupCompletion as CompletionItem<IndexedNode>;
+        } else {
+            if (args.selectedIndex === -1) {
+                const openGroupCompletion: SyntaxCompletionItem = {
+                    label: "(",
+                    kind: "group",
+                    insertText: "(",
+                    replaceRange: { start: 0, end: 0 },
+                    segmentReplaceRange: { start: 0, end: 0 },
+                };
+                return openGroupCompletion as CompletionItem<IndexedNode>;
+            }
         }
 
         const nodeCompletions = this.makeNodeCompletions(args.completions);
@@ -101,7 +119,8 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
     }
 
     transformCompletion(
-        completion: CompletionItem<IndexedNode>
+        completion: CompletionItem<IndexedNode>,
+        args: CompletionsAdapterFuncArgs
     ): SelectedCompletion {
         if (completion.kind === "group" && completion.label === "(") {
             return {
@@ -109,9 +128,13 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
                 range: completion.replaceRange,
             };
         } else if (completion.kind === "group" && completion.label === ")") {
+            const newRange = { ...completion.replaceRange };
+            if (args.caretContext?.tokenAt?.type === "OR") {
+                newRange.start -= 1;
+            }
             return {
-                text: completion.label,
-                range: completion.replaceRange,
+                text: completion.label + args.delimiter,
+                range: newRange,
             };
         }
 
@@ -126,8 +149,19 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
                 };
             }
         }
+
+        let suffix = args.delimiter;
+
+        if (args.caretContext?.insideGroup) {
+            if (completion.kind == "unionFlag") {
+                suffix = "";
+            } else {
+                suffix = "|";
+            }
+        }
+
         return {
-            text: completion.label + ":",
+            text: completion.label + suffix,
             range: completion.replaceRange,
         };
     }

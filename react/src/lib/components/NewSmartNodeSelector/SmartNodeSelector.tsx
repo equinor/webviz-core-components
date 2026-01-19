@@ -7,11 +7,8 @@
 
 import { merge } from "lodash";
 import React from "react";
-import { CaretRenderer } from "./ui/CaretAndSelectionRenderer";
-import { CompletionsPopover } from "./ui/CompletionsPopover";
-import { DebugInfo } from "./ui/DebugInfo";
-import { HiddenTextarea } from "./ui/HiddenTextarea";
-import { QueryChip } from "./ui/QueryChip";
+import { AdvancedCompletionAdapter } from "./completion-adapters/advanced/AdvancedCompletionAdapter";
+import type { CompletionsAdapter } from "./completion-adapters/interface";
 import { type IndexedNode, type TreeDataNode } from "./core";
 import { CompletionsState } from "./core/CompletionsState";
 import { useSubscribeToTopic } from "./core/PubSubDelegate";
@@ -21,9 +18,12 @@ import {
     TreeIndexBuilder,
 } from "./core/TreeIndexBuilder";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
+import { CaretRenderer } from "./ui/CaretAndSelectionRenderer";
+import { CompletionsPopover } from "./ui/CompletionsPopover";
+import { DebugInfo } from "./ui/DebugInfo";
+import { HiddenTextarea } from "./ui/HiddenTextarea";
+import { QueryChip } from "./ui/QueryChip";
 import type { DeepRequired } from "./utils/deepRequired";
-import type { CompletionsAdapter } from "./completion-adapters/interface";
-import { AdvancedCompletionAdapter } from "./completion-adapters/advanced/AdvancedCompletionAdapter";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -47,6 +47,9 @@ export type SmartNodeSelectorOptions = {
             enable?: boolean;
             maxSegmentChars?: number;
         };
+    };
+    matching?: {
+        caseInsensitive?: boolean;
     };
     mode: "simple" | "advanced";
 };
@@ -161,6 +164,9 @@ const DEFAULT_OPTIONS: DeepRequired<SmartNodeSelectorOptions> = {
     importExport: {
         queryDelimiter: "\n",
     },
+    matching: {
+        caseInsensitive: false,
+    },
     mode: "advanced",
 };
 
@@ -216,8 +222,16 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
             treeAccessor,
             completionsAdapter:
                 defaultedOptions.completionsAdapter as CompletionsAdapter,
+            matchOptions: {
+                caseInsensitive: defaultedOptions.matching.caseInsensitive,
+            },
+            delimiter: defaultedOptions.lexical.segmentDelimiter,
         });
-    }, [treeAccessor, defaultedOptions.completionsAdapter]);
+    }, [
+        treeAccessor,
+        defaultedOptions.completionsAdapter,
+        defaultedOptions.matching.caseInsensitive,
+    ]);
 
     React.useEffect(() => {
         stateManager.updateTreeAccessor(treeAccessor);

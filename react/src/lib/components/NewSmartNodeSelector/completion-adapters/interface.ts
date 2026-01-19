@@ -15,7 +15,7 @@ export interface CompletionsAdapterConstructor {
 export type CompletionsAdapterComponentProps = {
     selectedIndex: number | null;
     completions: CompletionItem<IndexedNode>[];
-    onSelectCompletion: (completion: CompletionItem<IndexedNode>) => void;
+    onSelectCompletion: (index: number) => void;
     maxContainerHeight: number;
     caretContext: CaretContext | null;
 };
@@ -24,6 +24,7 @@ export type CompletionsAdapterFuncArgs = {
     completions: CompletionItem<IndexedNode>[];
     selectedIndex: number | null;
     caretContext: CaretContext | null;
+    delimiter: string;
 };
 
 export interface CompletionsAdapter {
@@ -33,7 +34,8 @@ export interface CompletionsAdapter {
         args: CompletionsAdapterFuncArgs
     ): CompletionItem<IndexedNode> | null;
     transformCompletion(
-        completion: CompletionItem<IndexedNode>
+        completion: CompletionItem<IndexedNode>,
+        args: CompletionsAdapterFuncArgs
     ): SelectedCompletion;
     hasCompletions(args: CompletionsAdapterFuncArgs): boolean;
     component: React.ComponentType<CompletionsAdapterComponentProps>;

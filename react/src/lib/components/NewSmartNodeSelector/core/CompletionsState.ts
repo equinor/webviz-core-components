@@ -9,6 +9,7 @@ import type { CaretContext } from "./query-language/completion/caretContext";
 import { getCompletions } from "./query-language/completion/completion";
 import { evaluateExpression } from "./query-language/evaluator/evaluateExpression";
 import { matchName } from "./query-language/matcher/matchName";
+import type { MatchOptions } from "./query-language/matcher/matchesName";
 import type { ParsedQuery } from "./query-language/parse";
 import type { CompletionItem } from "./query-language/types/completion";
 import type { TreeAccessor } from "./query-language/types/tree";
@@ -29,6 +30,8 @@ export type CompletionsStateTopicPayloads = {
 export type CompletionsStateOptions<IndexedNode> = {
     completionsAdapter: CompletionsAdapter;
     treeAccessor: TreeAccessor<IndexedNode>;
+    matchOptions?: MatchOptions;
+    delimiter: string;
 };
 
 export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
@@ -36,6 +39,8 @@ export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
         new PubSubDelegate<CompletionsStateTopicPayloads>();
     private _treeAccessor: TreeAccessor<IndexedNode>;
     private _adapter: CompletionsAdapter;
+    private _matchOptions: MatchOptions;
+    private _delimiter: string;
 
     private _completions: CompletionItem<IndexedNode>[] = [];
     private _caretContext: CaretContext | null = null;
@@ -44,6 +49,8 @@ export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
     constructor(options: CompletionsStateOptions<IndexedNode>) {
         this._treeAccessor = options.treeAccessor;
         this._adapter = options.completionsAdapter;
+        this._matchOptions = options.matchOptions ?? {};
+        this._delimiter = options.delimiter;
     }
 
     getPubSubDelegate(): PubSubDelegate<CompletionsStateTopicPayloads> {
@@ -81,7 +88,17 @@ export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
             completions: this._completions,
             selectedIndex: this._selectedIndex,
             caretContext: this._caretContext,
+            delimiter: this._delimiter,
         };
+    }
+
+    setSelectedIndex(index: number | null): void {
+        if (this._selectedIndex !== index) {
+            this._selectedIndex = index;
+            this._pubSubDelegate.notifySubscribers(
+                CompletionsTopic.SELECTED_INDEX
+            );
+        }
     }
 
     getSelectedCompletion(): SelectedCompletion | null {
@@ -91,7 +108,10 @@ export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
         if (!selectedCompletion) {
             return null;
         }
-        return this._adapter.transformCompletion(selectedCompletion);
+        return this._adapter.transformCompletion(
+            selectedCompletion,
+            this.makeAdapterArgs()
+        );
     }
 
     hasCompletions(): boolean {
@@ -101,7 +121,10 @@ export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
     transformCompletion(
         completion: CompletionItem<IndexedNode>
     ): SelectedCompletion {
-        return this._adapter.transformCompletion(completion);
+        return this._adapter.transformCompletion(
+            completion,
+            this.makeAdapterArgs()
+        );
     }
 
     /**
@@ -114,7 +137,8 @@ export class CompletionsState implements PubSub<CompletionsStateTopicPayloads> {
             caretOffset,
             this._treeAccessor,
             matchName,
-            evaluateExpression
+            evaluateExpression,
+            this._matchOptions
         );
 
         this._completions = completions;

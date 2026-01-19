@@ -119,6 +119,9 @@ type ConfigurableOptions = {
     importExport?: {
         queryDelimiter?: string;
     };
+    matching?: {
+        caseInsensitive?: boolean;
+    };
     mode: SmartNodeSelectorOptions["mode"];
 };
 
@@ -372,6 +375,9 @@ const OptionsConfigurator: React.FC<{
         importExport: {
             queryDelimiter: "\n",
         },
+        matching: {
+            caseInsensitive: false,
+        },
         mode: "simple",
     };
 
@@ -471,6 +477,9 @@ const SmartNodeSelectorTest: React.FC = () => {
             },
             importExport: {
                 queryDelimiter: "\n",
+            },
+            matching: {
+                caseInsensitive: false,
             },
             mode: "simple",
         });

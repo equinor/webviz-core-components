@@ -1,15 +1,13 @@
 import React from "react";
 
+import { CompletionsTopic } from "../core/CompletionsState";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
 import { Topic } from "../core/StateManager/StateManager";
+import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
 import {
     SmartNodeSelectorDataContext,
     type SmartNodeSelectorDataContextType,
 } from "../SmartNodeSelector";
-import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
-import { CompletionsTopic } from "../core/CompletionsState";
-import type { CompletionItem } from "../core/query-language/types/completion";
-import type { IndexedNode } from "../core";
 
 export function CompletionsPopover(): React.ReactElement {
     const { stateManager, completionsState }: SmartNodeSelectorDataContextType =
@@ -122,11 +120,13 @@ export function CompletionsPopover(): React.ReactElement {
     const CompletionsComponent = completionsState.getComponent();
 
     const handleSelectCompletion = React.useCallback(
-        function handleSelectCompletion(
-            completion: CompletionItem<IndexedNode>
-        ) {
-            const { text, range } =
-                completionsState.transformCompletion(completion);
+        function handleSelectCompletion(completionIndex: number) {
+            completionsState.setSelectedIndex(completionIndex);
+            const selectedCompletion = completionsState.getSelectedCompletion();
+            if (!selectedCompletion) {
+                return;
+            }
+            const { text, range } = selectedCompletion;
             stateManager.updateFocusedQueryItem(text, range);
         },
         [stateManager, completionsState]

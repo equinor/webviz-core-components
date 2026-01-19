@@ -26,25 +26,48 @@ export function SimpleCompletionsComponent(
                 }}
             >
                 {insideGroup ? (
-                    <li
-                        className="suggestion-item"
-                        style={{
-                            padding: "8px 12px",
-                            cursor: "pointer",
-                            backgroundColor:
-                                props.selectedIndex === -1
-                                    ? "#e6f0ff"
-                                    : "transparent",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "1em",
-                        }}
-                    >
-                        <div style={{ fontWeight: 800 }}>Close group</div>
-                        <div style={{ fontSize: "smaller", color: "#666" }}>
-                            Close the current group
-                        </div>
-                    </li>
+                    <>
+                        <li
+                            className="suggestion-item"
+                            style={{
+                                padding: "8px 12px",
+                                cursor: "pointer",
+                                backgroundColor:
+                                    props.selectedIndex === -2
+                                        ? "#e6f0ff"
+                                        : "transparent",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "1em",
+                            }}
+                            onClick={() => props.onSelectCompletion(-2)}
+                        >
+                            <div style={{ fontWeight: 800 }}>Toggle Union</div>
+                            <div style={{ fontSize: "smaller", color: "#666" }}>
+                                Toggle union match
+                            </div>
+                        </li>
+                        <li
+                            className="suggestion-item"
+                            style={{
+                                padding: "8px 12px",
+                                cursor: "pointer",
+                                backgroundColor:
+                                    props.selectedIndex === -1
+                                        ? "#e6f0ff"
+                                        : "transparent",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "1em",
+                            }}
+                            onClick={() => props.onSelectCompletion(-1)}
+                        >
+                            <div style={{ fontWeight: 800 }}>Close group</div>
+                            <div style={{ fontSize: "smaller", color: "#666" }}>
+                                Close the current group
+                            </div>
+                        </li>
+                    </>
                 ) : (
                     <li
                         className="suggestion-item"
@@ -59,6 +82,7 @@ export function SimpleCompletionsComponent(
                             alignItems: "center",
                             gap: "1em",
                         }}
+                        onClick={() => props.onSelectCompletion(-1)}
                     >
                         <div style={{ fontWeight: 800 }}>Start a group</div>
                         <div style={{ fontSize: "smaller", color: "#666" }}>
@@ -73,7 +97,7 @@ export function SimpleCompletionsComponent(
                     itemHeight={48}
                     maxHeight={Math.min(props.maxContainerHeight - 24, 48 * 10)}
                     renderItem={renderNodeCompletionItem}
-                    onItemClick={props.onSelectCompletion}
+                    onItemClick={(_, index) => props.onSelectCompletion(index)}
                     selectedIndex={props.selectedIndex}
                 />
             </div>

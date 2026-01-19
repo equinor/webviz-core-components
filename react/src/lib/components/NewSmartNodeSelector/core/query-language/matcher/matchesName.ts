@@ -1,22 +1,31 @@
 import type { Range } from "../../utils/range";
 import type { Atom, ConcatExpr, Expr, PatternExpr } from "../ast/ast";
 
-export function matchesName(expr: Expr, name: string): boolean {
-    const ends = matchFrom(expr, name, 0);
+export type MatchOptions = {
+    caseInsensitive?: boolean;
+};
+
+export function matchesName(
+    expr: Expr,
+    name: string,
+    opts?: MatchOptions
+): boolean {
+    const ends = matchFrom(expr, name, 0, new Map(), opts);
     return ends.has(name.length);
 }
 
 export function matchWithHole(
     expr: Expr,
     caretOffset: number,
-    name: string
+    name: string,
+    opts?: MatchOptions
 ): Range | null {
     const { prefix, suffix } = splitExprAtCaret(expr, caretOffset);
 
     const n = name.length;
     const memo = new Map<string, Set<number>>();
 
-    const prefixEnds = matchFrom(prefix, name, 0, memo);
+    const prefixEnds = matchFrom(prefix, name, 0, memo, opts);
     if (prefixEnds.size === 0) {
         return null;
     }
@@ -24,7 +33,7 @@ export function matchWithHole(
     // Compute suffix feasability for each start position in name
     const suffixOK = new Array<boolean>(n + 1).fill(false);
     for (let start = 0; start <= n; start++) {
-        if (matchFrom(suffix, name, start, memo).has(n)) {
+        if (matchFrom(suffix, name, start, memo, opts).has(n)) {
             suffixOK[start] = true;
         }
     }
@@ -275,7 +284,8 @@ function matchFrom(
     expr: AnyExpr,
     str: string,
     pos: number,
-    memo: Map<string, Set<number>> = new Map()
+    memo: Map<string, Set<number>> = new Map(),
+    opts?: MatchOptions
 ): Set<number> {
     const key = makeKey(expr, pos);
 
@@ -294,7 +304,7 @@ function matchFrom(
 
     switch (expr.kind) {
         case "pattern":
-            result = matchAtomsFrom(expr.atoms, str, pos);
+            result = matchAtomsFrom(expr.atoms, str, pos, opts);
             break;
 
         case "concat": {
@@ -302,7 +312,7 @@ function matchFrom(
             for (const part of expr.parts) {
                 const next = new Set<number>();
                 for (const p of positions) {
-                    const ends = matchFrom(part, str, p, memo);
+                    const ends = matchFrom(part, str, p, memo, opts);
                     for (const e of ends) {
                         next.add(e);
                     }
@@ -317,14 +327,14 @@ function matchFrom(
         }
 
         case "group": {
-            result = matchFrom(expr.expr, str, pos, memo);
+            result = matchFrom(expr.expr, str, pos, memo, opts);
             break;
         }
 
         case "set": {
             const next = new Set<number>();
             for (const item of expr.items) {
-                const ends = matchFrom(item, str, pos, memo);
+                const ends = matchFrom(item, str, pos, memo, opts);
                 for (const e of ends) {
                     next.add(e);
                 }
@@ -334,8 +344,8 @@ function matchFrom(
         }
 
         case "binary": {
-            const leftEnds = matchFrom(expr.left, str, pos, memo);
-            const rightEnds = matchFrom(expr.right, str, pos, memo);
+            const leftEnds = matchFrom(expr.left, str, pos, memo, opts);
+            const rightEnds = matchFrom(expr.right, str, pos, memo, opts);
 
             if (expr.operator === "|") {
                 // Union
@@ -359,18 +369,25 @@ function matchFrom(
 function matchAtomsFrom(
     atoms: readonly Atom[],
     str: string,
-    startPos: number
+    startPos: number,
+    opts?: MatchOptions
 ): Set<number> {
     const n = str.length;
     // dp[i] = set of positions in s reachable after processing first i atoms
     let curr = new Set<number>([startPos]);
 
+    const caseInsensitive = opts?.caseInsensitive ?? false;
+    const strToMatch = caseInsensitive ? str.toLowerCase() : str;
+
     for (const atom of atoms) {
         const next = new Set<number>();
 
         if (atom.kind === "literal") {
+            const atomText = caseInsensitive
+                ? atom.text.toLowerCase()
+                : atom.text;
             for (const p of curr) {
-                if (str.startsWith(atom.text, p))
+                if (strToMatch.startsWith(atomText, p))
                     next.add(p + atom.text.length);
             }
         } else if (atom.kind === "qmark") {

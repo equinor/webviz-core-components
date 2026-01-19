@@ -5,7 +5,7 @@ import {
     collectCommonChildren,
 } from "../evaluator/_utils";
 import { evaluatePrefix } from "../evaluator/evaluatePrefix";
-import { matchesName } from "../matcher/matchesName";
+import { matchesName, type MatchOptions } from "../matcher/matchesName";
 import type { ParsedQuery } from "../parse";
 import type { CompletionItem } from "../types/completion";
 import type { TreeAccessor } from "../types/tree";
@@ -23,7 +23,8 @@ export function getCompletions<Node>(
         pool: Iterable<Node>,
         tree: TreeAccessor<Node>,
         matchName: (name: string, atoms: Atom[]) => boolean
-    ) => Set<Node>
+    ) => Set<Node>,
+    opts?: MatchOptions
 ): { completions: CompletionItem<Node>[]; caretContext: CaretContext } {
     const context = getCaretContext(parsed, caretOffset);
 
@@ -48,13 +49,13 @@ export function getCompletions<Node>(
     }
 
     // Check if we have a full match in the current segment
-    const hasFullMatch = checkForFullMatch(context, pool, tree);
+    const hasFullMatch = checkForFullMatch(context, pool, tree, opts);
 
     // Add syntax-based completions
     all.push(...getSyntaxCompletions<Node>(context, hasFullMatch));
 
     // Add tree-based completions
-    all.push(...getTreeCompletions<Node>(context, pool, tree));
+    all.push(...getTreeCompletions<Node>(context, pool, tree, opts));
 
     // Deduplicate completions - we can later rank them as well
     const deduped = dedupeCompletions(all);
@@ -71,7 +72,8 @@ export function getCompletions<Node>(
 function checkForFullMatch<Node>(
     context: CaretContext,
     pool: Iterable<Node>,
-    tree: TreeAccessor<Node>
+    tree: TreeAccessor<Node>,
+    opts?: MatchOptions
 ): { fullMatch: boolean; isLeafMatch: boolean } {
     const segmentAst = context.segmentAst;
 
@@ -89,7 +91,7 @@ function checkForFullMatch<Node>(
     // Check if any node in the pool is a full match for the current expression
     for (const node of pool) {
         const name = tree.getName(node);
-        if (matchesName(segmentAst.expr, name)) {
+        if (matchesName(segmentAst.expr, name, opts)) {
             const isLeaf = tree.isLeaf(node);
             return { fullMatch: true, isLeafMatch: isLeaf };
         }
