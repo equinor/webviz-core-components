@@ -1,6 +1,7 @@
 import React from "react";
 import {
     SmartNodeSelectorDataContext,
+    SmartNodeSelectorOptionsContext,
     SmartNodeSelectorSlotsContext,
 } from "../SmartNodeSelector";
 import { useSubscribeToTopic } from "../core/PubSubDelegate";
@@ -10,6 +11,7 @@ import { useLeafNodeMatches } from "../hooks/useLeafNodeMatches";
 import { MatchesCounter } from "./MatchesCounter";
 import { QuerySegment } from "./QuerySegment";
 import { TokenRenderer } from "./TokenRenderer";
+import { usePreviousQueriesLeafNodeMatches } from "../hooks/usePreviousQueriesLeafNodeMatches";
 
 export type QueryChipProps = {
     index: number;
@@ -19,9 +21,13 @@ export type QueryChipProps = {
 
 export function QueryChip(props: QueryChipProps): React.ReactElement {
     const dataContext = React.useContext(SmartNodeSelectorDataContext);
+    const options = React.useContext(SmartNodeSelectorOptionsContext);
     const slotsContext = React.useContext(SmartNodeSelectorSlotsContext);
 
     const matchedLeafNodes = useLeafNodeMatches(props.queryItem);
+    const previousQueriesMatchedLeafNodes = usePreviousQueriesLeafNodeMatches(
+        props.queryItem
+    );
 
     const textSelections = useSubscribeToTopic(
         dataContext.stateManager,
@@ -46,6 +52,15 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
         return props.index >= range[0] && props.index <= range[1];
     }, [querySelection, props.index]);
 
+    const isDuplicate = React.useMemo(() => {
+        for (const match of matchedLeafNodes) {
+            if (previousQueriesMatchedLeafNodes.includes(match)) {
+                return true;
+            }
+        }
+        return false;
+    }, [matchedLeafNodes, previousQueriesMatchedLeafNodes]);
+
     const handleRemoveTagClick = React.useCallback(
         function handleRemoveTagClick() {
             dataContext.stateManager.removeQueryItemById(props.queryItem.id);
@@ -60,9 +75,11 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const isEditing =
         textSelections.find((pos) => pos.queryId === props.queryItem.id) !==
         undefined;
-    const hasMoreThanOneSegment = props.queryItem.query.includes(
-        dataContext.delimiter
+
+    const parsedQuery = dataContext.stateManager.getParsedQuery(
+        props.queryItem.query
     );
+    const hasMoreThanOneSegment = (parsedQuery?.segments.length ?? 0) > 1;
 
     const content = React.useMemo(
         function makeContent() {
@@ -80,18 +97,61 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
 
             const diagnostics = parsedQuery.diagnostics;
 
-            for (const segment of parsedQuery?.segments ?? []) {
-                for (let i = tokenIndex; i < segment.tokenStartIndex; i++) {
-                    const token = parsedQuery.tokens[i];
-                    // Token not part of any segment, must be a delimiter
-                    nodes.push(
-                        <TokenRenderer
-                            key={nodes.length}
-                            token={token}
-                            queryId={props.queryItem.id}
-                            diagnostics={diagnostics}
-                        />
+            // Get selections for this query to determine which segments are active
+            const selectionsForQuery = textSelections.filter(
+                (s) => s.queryId === props.queryItem.id
+            );
+
+            // Helper to check if a segment is active (has selection intersecting it)
+            function isSegmentActive(segIndex: number): boolean {
+                if (selectionsForQuery.length === 0) return false;
+                const seg = parsedQuery?.segments[segIndex];
+                if (!seg) return false;
+
+                const segStart = seg.charRange.start;
+                const segEnd = seg.charRange.end;
+
+                return selectionsForQuery.some((sel) => {
+                    const selStart = Math.min(sel.anchor, sel.focus);
+                    const selEnd = Math.max(sel.anchor, sel.focus);
+                    // Check if selection intersects segment using inclusive boundaries
+                    const startInSegment =
+                        selStart >= segStart && selStart <= segEnd;
+                    const endInSegment = selEnd >= segStart && selEnd <= segEnd;
+                    const selectionSpansSegment =
+                        selStart <= segStart && selEnd >= segEnd;
+                    return (
+                        startInSegment || endInSegment || selectionSpansSegment
                     );
+                });
+            }
+
+            // Helper to check if a segment uses custom renderer
+            function segmentUsesCustomRenderer(segIndex: number): boolean {
+                const Component =
+                    options.ui.inactiveSegmentRenderer?.(segIndex);
+                return Component !== null && !isSegmentActive(segIndex);
+            }
+
+            for (const segment of parsedQuery?.segments ?? []) {
+                // Render delimiter tokens before this segment, but skip if previous segment used custom renderer
+                const prevSegmentUsedCustomRenderer =
+                    segmentIndex > 0 &&
+                    segmentUsesCustomRenderer(segmentIndex - 1);
+
+                if (!prevSegmentUsedCustomRenderer) {
+                    for (let i = tokenIndex; i < segment.tokenStartIndex; i++) {
+                        const token = parsedQuery.tokens[i];
+                        // Token not part of any segment, must be a delimiter
+                        nodes.push(
+                            <TokenRenderer
+                                key={nodes.length}
+                                token={token}
+                                queryId={props.queryItem.id}
+                                diagnostics={diagnostics}
+                            />
+                        );
+                    }
                 }
 
                 const segmentTokens = parsedQuery.tokens.slice(
@@ -106,6 +166,9 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                         segmentIndex={segmentIndex}
                         tokens={segmentTokens}
                         diagnostics={diagnostics}
+                        mayUseCustomRenderer={
+                            !(props.isLast && !hasMoreThanOneSegment)
+                        }
                     />
                 );
 
@@ -113,34 +176,47 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                 tokenIndex = segment.tokenEndIndex;
             }
 
-            for (let i = tokenIndex; i < parsedQuery.tokens.length; i++) {
-                const token = parsedQuery.tokens[i];
-                // Token not part of any segment, must be a delimiter
-                nodes.push(
-                    <TokenRenderer
-                        key={nodes.length}
-                        token={token}
-                        queryId={props.queryItem.id}
-                        diagnostics={diagnostics}
-                    />
-                );
+            // Render trailing delimiter tokens, but skip if last segment used custom renderer
+            const lastSegmentUsedCustomRenderer =
+                segmentIndex > 0 && segmentUsesCustomRenderer(segmentIndex - 1);
+
+            if (!lastSegmentUsedCustomRenderer) {
+                for (let i = tokenIndex; i < parsedQuery.tokens.length; i++) {
+                    const token = parsedQuery.tokens[i];
+                    // Token not part of any segment, must be a delimiter
+                    nodes.push(
+                        <TokenRenderer
+                            key={nodes.length}
+                            token={token}
+                            queryId={props.queryItem.id}
+                            diagnostics={diagnostics}
+                        />
+                    );
+                }
             }
 
             return nodes;
         },
-        [props.queryItem, dataContext.stateManager]
+        [props.queryItem, dataContext.stateManager, textSelections, options]
     );
 
     return (
         <QueryChipComponent
             {...queryChipProps}
             data-querychip-id={props.queryItem.id}
-            tabIndex={0}
             style={makeStyle(
                 props.isLast && !hasMoreThanOneSegment,
                 isValid || isEditing,
-                isSelected
+                isSelected,
+                isDuplicate
             )}
+            title={
+                !isValid
+                    ? "No matches for this query"
+                    : isDuplicate
+                      ? "This query has matches that were already matched by previous queries"
+                      : undefined
+            }
         >
             <MatchesCounter matches={matchedLeafNodes} />
             <div
@@ -201,7 +277,8 @@ function Placeholder(props: PlaceholderProps) {
 function makeStyle(
     isLast: boolean,
     isValid: boolean,
-    isSelected: boolean
+    isSelected: boolean,
+    isDuplicate: boolean
 ): React.CSSProperties {
     if (isLast) {
         return {
@@ -216,9 +293,17 @@ function makeStyle(
         display: "flex",
         alignItems: "center",
         gap: "1px",
-        border: isValid ? "1px solid #ccc" : "1px solid #f4bdbdff",
+        border: !isValid
+            ? "1px solid #f4bdbdff"
+            : isDuplicate
+              ? "1px solid rgb(173, 116, 0)"
+              : "1px solid #ccc",
         borderRadius: "4px",
-        backgroundColor: isValid ? "#f5f5f5" : "#f4bdbdff",
+        backgroundColor: !isValid
+            ? "#f4bdbdff"
+            : isDuplicate
+              ? "rgb(255, 234, 172)"
+              : "#f5f5f5",
         padding: "2px 4px",
         outline: isSelected ? "2px solid #272727" : "none",
     };

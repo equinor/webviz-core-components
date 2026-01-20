@@ -24,6 +24,8 @@ import { DebugInfo } from "./ui/DebugInfo";
 import { HiddenTextarea } from "./ui/HiddenTextarea";
 import { QueryChip } from "./ui/QueryChip";
 import type { DeepRequired } from "./utils/deepRequired";
+import type { InputModifier } from "./input-modifiers/interface";
+import type { InactiveSegmentRenderer } from "./inactive-segment-renderer/interface";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -34,6 +36,10 @@ export type SmartNodeSelectorClassNames = {
 
 export type SmartNodeSelectorOptions = {
     completionsAdapter?: CompletionsAdapter;
+    inputModifier?: InputModifier;
+    ui: {
+        inactiveSegmentRenderer?: InactiveSegmentRenderer<IndexedNode>;
+    };
     lexical?: {
         segmentDelimiter?: string;
         // Add options for special chars
@@ -152,6 +158,10 @@ const DEFAULT_SLOT_PROPS: CompleteSlotProps = {
 
 const DEFAULT_OPTIONS: DeepRequired<SmartNodeSelectorOptions> = {
     completionsAdapter: new AdvancedCompletionAdapter(),
+    inputModifier: (input: string) => input,
+    ui: {
+        inactiveSegmentRenderer: () => null,
+    },
     lexical: {
         segmentDelimiter: ":",
     },
@@ -198,6 +208,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         const stateManager = new StateManager({
             segmentDelimiter: defaultedOptions.lexical.segmentDelimiter,
             queryDelimiter: defaultedOptions.importExport.queryDelimiter,
+            inputModifier: defaultedOptions.inputModifier,
         });
         for (const tag of props.initialValue ?? []) {
             stateManager.addQueryItem(tag);
@@ -206,6 +217,11 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         stateManager.addQueryItem("");
         return stateManager;
     }, []) as StateManager;
+
+    const completionContext = useSubscribeToTopic(
+        stateManager,
+        Topic.COMPLETION_CONTEXT
+    );
 
     const treeIndexBuildResult = React.useMemo(() => {
         return new TreeIndexBuilder(
@@ -234,8 +250,41 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
     ]);
 
     React.useEffect(() => {
+        if (!completionContext) {
+            completionsState.clearCompletions();
+            return;
+        }
+
+        const parsedQuery = stateManager.getParsedQuery(
+            completionContext.queryItem.query
+        );
+        if (!parsedQuery) {
+            completionsState.clearCompletions();
+            return;
+        }
+
+        completionsState.updateCompletions(
+            parsedQuery,
+            completionContext.queryTextSelection.focus
+        );
+    }, [completionContext, completionsState, stateManager]);
+
+    React.useEffect(() => {
         stateManager.updateTreeAccessor(treeAccessor);
     }, [stateManager, treeAccessor]);
+
+    React.useEffect(() => {
+        stateManager.updateOptions({
+            segmentDelimiter: defaultedOptions.lexical.segmentDelimiter,
+            queryDelimiter: defaultedOptions.importExport.queryDelimiter,
+            inputModifier: defaultedOptions.inputModifier,
+        });
+    }, [
+        stateManager,
+        defaultedOptions.lexical.segmentDelimiter,
+        defaultedOptions.importExport.queryDelimiter,
+        defaultedOptions.inputModifier,
+    ]);
 
     useMouseEventHandler(
         ref,

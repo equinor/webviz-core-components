@@ -1,3 +1,4 @@
+import type { InputModifier } from "../../input-modifiers/interface";
 import { PubSubDelegate, type PubSub } from "../PubSubDelegate";
 import {
     evaluateQuery,
@@ -54,6 +55,7 @@ export type TopicPayloads = {
 export type StateManagerOptions = {
     segmentDelimiter: string;
     queryDelimiter: string;
+    inputModifier: InputModifier;
 };
 
 export class StateManager implements PubSub<TopicPayloads> {
@@ -156,12 +158,13 @@ export class StateManager implements PubSub<TopicPayloads> {
         if (patch.querySelection !== undefined) {
             this._querySelection = patch.querySelection;
             this.setSelectionMode("query");
-            this._pubSubDelegate.notifySubscribers(Topic.QUERY_SELECTION);
         }
 
         if (patch.selectionMode !== undefined) {
             this.setSelectionMode(patch.selectionMode);
         }
+
+        this.updateCompletionsContext();
     }
 
     getCurrentSelection(): string {
@@ -268,6 +271,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     clearQuerySelection(): void {
         this._querySelection = null;
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_SELECTION);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
     }
 
     updateOptions(options: StateManagerOptions): void {
@@ -299,6 +303,14 @@ export class StateManager implements PubSub<TopicPayloads> {
         return queryBaseItem;
     }
 
+    getQueryItemIndexById(id: string): number {
+        return this._queriesStoreDelegate.getIndexById(id);
+    }
+
+    getQueryItemByIndex(index: number): QueryItem | null {
+        return this._queriesStoreDelegate.getItemByIndex(index);
+    }
+
     getParsedQuery(query: string): ParsedQuery | null {
         let parsedQuery = this._parseCache.getItem(query);
         if (parsedQuery) {
@@ -327,6 +339,46 @@ export class StateManager implements PubSub<TopicPayloads> {
 
         matchedNodes = evaluateQuery(parsedQuery, this._treeAccessor);
         this._treeMatchCache.setItem(query, matchedNodes);
+        return matchedNodes;
+    }
+
+    getMatchedNodesForQuerySegment(
+        queryId: string,
+        segmentIndex: number
+    ): EvaluationResult<IndexedNode> | null {
+        const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+        if (!queryItem) {
+            return null;
+        }
+
+        let matchedNodes = this._treeMatchCache.getItem(
+            `${queryItem.query}::segment${segmentIndex}`
+        );
+        if (matchedNodes) {
+            return matchedNodes;
+        }
+
+        const parsedQuery = this.getParsedQuery(queryItem.query);
+        if (!parsedQuery || !this._treeAccessor) {
+            return null;
+        }
+
+        const segment = parsedQuery.segments[segmentIndex];
+        if (!segment) {
+            return null;
+        }
+
+        const textUptoSegment = queryItem.query.slice(0, segment.charRange.end);
+
+        const parsedSegment = parseQuery(textUptoSegment, {
+            delimiter: this._options.segmentDelimiter,
+        });
+
+        matchedNodes = evaluateQuery(parsedSegment, this._treeAccessor);
+        this._treeMatchCache.setItem(
+            `${queryItem.query}::segment${segmentIndex}`,
+            matchedNodes
+        );
         return matchedNodes;
     }
 
@@ -409,14 +461,16 @@ export class StateManager implements PubSub<TopicPayloads> {
         if (!parsedQuery || parsedQuery.segments.length === 0) {
             return {
                 queryId: textSelection.queryId,
-                segmentIndex: 0,
+                focusSegmentIndex: 0,
+                anchorSegmentIndex: 0,
                 focus: textSelection.focus,
                 anchor: textSelection.anchor,
             };
         }
 
         const segments = parsedQuery.segments;
-        let segmentIndex = 0;
+        let focusSegmentIndex = 0;
+        let anchorSegmentIndex = 0;
         let segmentFocusOffset = textSelection.focus;
         let segmentAnchorOffset = textSelection.anchor;
 
@@ -424,32 +478,28 @@ export class StateManager implements PubSub<TopicPayloads> {
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
             if (textSelection.focus <= segment.charRange.end) {
-                segmentIndex = i;
+                focusSegmentIndex = i;
                 segmentFocusOffset =
                     textSelection.focus - segment.charRange.start;
                 break;
             }
         }
 
-        // Find anchor offset relative to the same segment
+        // Find segment for anchor offset
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
             if (textSelection.anchor <= segment.charRange.end) {
-                if (i === segmentIndex) {
-                    // Anchor is in the same segment
-                    segmentAnchorOffset =
-                        textSelection.anchor - segment.charRange.start;
-                } else {
-                    // Anchor is in a different segment - collapse to focus position
-                    segmentAnchorOffset = segmentFocusOffset;
-                }
+                anchorSegmentIndex = i;
+                segmentAnchorOffset =
+                    textSelection.anchor - segment.charRange.start;
                 break;
             }
         }
 
         return {
             queryId: textSelection.queryId,
-            segmentIndex,
+            focusSegmentIndex,
+            anchorSegmentIndex,
             focus: segmentFocusOffset,
             anchor: segmentAnchorOffset,
         };
@@ -467,7 +517,8 @@ export class StateManager implements PubSub<TopicPayloads> {
                 // Fallback for invalid query ID
                 return {
                     queryId: selection.queryId,
-                    segmentIndex: 0,
+                    focusSegmentIndex: 0,
+                    anchorSegmentIndex: 0,
                     focus: selection.focus,
                     anchor: selection.anchor,
                 };
@@ -506,6 +557,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     private updateCompletionsContext(): void {
         if (this._queryTextSelections.length !== 1) {
             this._completionContext = null;
+            this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
             return;
         }
 
@@ -623,7 +675,48 @@ export class StateManager implements PubSub<TopicPayloads> {
         throw new Error("Invalid selection mode");
     }
 
-    moveFocus(dx: number, selecting: boolean): void {
+    exit() {
+        if (this._selectionMode === "text") {
+            if (this._queryTextSelections.length === 0) {
+                this.clearQueryTextSelections();
+                return;
+            }
+
+            const queryIndexRange: Range = {
+                start: Number.MAX_SAFE_INTEGER,
+                end: Number.MIN_SAFE_INTEGER,
+            };
+
+            for (const sel of this._queryTextSelections) {
+                const queryIndex = this._queriesStoreDelegate.getIndexById(
+                    sel.queryId
+                );
+                if (queryIndex === -1) {
+                    continue;
+                }
+                if (queryIndex < queryIndexRange.start) {
+                    queryIndexRange.start = queryIndex;
+                }
+                if (queryIndex > queryIndexRange.end) {
+                    queryIndexRange.end = queryIndex;
+                }
+            }
+
+            const patch: StatePatch = {
+                selectionMode: "query",
+                querySelection: {
+                    anchor: queryIndexRange.start,
+                    focus: queryIndexRange.end,
+                },
+            };
+            this.applyPatch(patch);
+            return;
+        }
+
+        this.clearQuerySelection();
+    }
+
+    moveFocus(dx: number, selecting: boolean, keyHoldPressed: boolean): void {
         if (this._selectionMode !== "text") {
             const snapshot = this.makeQuerySelectionSnapshot();
             const result = this._querySelectionDelegate.moveFocus(snapshot, {
@@ -664,6 +757,10 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
 
         if (result.kind === "hitBoundary") {
+            if (selecting || keyHoldPressed) {
+                return;
+            }
+
             let queryIndex = this._queriesStoreDelegate.getIndexById(
                 result.queryId
             );
@@ -743,10 +840,10 @@ export class StateManager implements PubSub<TopicPayloads> {
 
             if (result.kind === "hitBoundary") {
                 if (result.boundary === "start" && direction === "backward") {
-                    this.moveFocus(-1, false);
+                    this.moveFocus(-1, false, false);
                 }
                 if (result.boundary === "end" && direction === "forward") {
-                    this.moveFocus(1, false);
+                    this.moveFocus(1, false, false);
                 }
                 return;
             }
@@ -832,7 +929,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             return;
         }
 
-        this.insertText(text);
+        this.insertText(text, false);
     }
 
     updateFocusedQueryItem(insertText: string, range?: Range): boolean {
@@ -957,11 +1054,19 @@ export class StateManager implements PubSub<TopicPayloads> {
         this.applyPatch(patch);
     }
 
-    insertText(text: string): void {
+    insertText(text: string, allowModification: boolean = false): void {
+        const focusedSegment = this.getFocusedSegment();
+        let modifiedText = text;
+        if (focusedSegment && allowModification) {
+            modifiedText = this._options.inputModifier(text, {
+                segmentIndex: focusedSegment.segmentIndex,
+                delimiter: this._options.segmentDelimiter,
+            });
+        }
         const snapshot = this.makeTextSelectionsSnapshot();
         const result = this._queryTextSelectionsDelegate.insertAtFocusOffset(
             snapshot,
-            { text }
+            { text: modifiedText }
         );
 
         if (result.kind === "moved") {

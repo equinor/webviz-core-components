@@ -14,19 +14,27 @@
 - [x] Delete
 - [x] Home
 - [x] End
-- [ ] Tab
-- [ ] Shift+Tab
-- [ ] Update on data change
+- [x] Update on data change
 - [x] Mode selection (easy, advanced)
 - [x] Caret context availability
 - [ ] Completion wizard in easy mode
-- [ ] Visualize diagnostics/parser errors
+- [x] Visualize diagnostics/parser errors
 - [ ] Expectation when clicking on tag - text or query mode?
+- [ ] Single select
+- [x] Highlight duplicates
+- [x] Individual rendering of segments
+- [x] Input modifier
+- [ ] Custom render functions for:
+- [ ] Main component
+- [ ] QueryChip
+- [ ] QuerySegment
+- [ ] Tokens
 
 ## Core
 
 - [ ] Completions vs Matches? Old SNS was using matches at the respective node level, could forward to next segment. With completions, this is not working. How to handle completions vs matches?
 - [ ] Selection in caret context only working when anchor offset < caret offset
+- [ ] Search for filterable metadata
 
 Data Source A:Category 2:Item B1
 Data Source B:Category 1:Item A1

@@ -11,6 +11,7 @@ import { TokenRenderer } from "./TokenRenderer";
 
 export type QuerySegmentProps = {
     queryId: string;
+    mayUseCustomRenderer: boolean;
     segmentIndex: number;
     tokens: Token[];
     diagnostics?: Diagnostic[];
@@ -25,9 +26,61 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
         Topic.FOCUSED_SEGMENT
     );
 
+    const textSelections = useSubscribeToTopic(
+        dataContext.stateManager,
+        Topic.QUERY_TEXT_SELECTIONS
+    );
+
     const isFocused =
         focusedSegment?.queryId === props.queryId &&
         focusedSegment?.segmentIndex === props.segmentIndex;
+
+    const hasSelectionInSegment = React.useMemo(() => {
+        const selectionsForQuery = textSelections.filter(
+            (s) => s.queryId === props.queryId
+        );
+        if (selectionsForQuery.length === 0) return false;
+
+        const queryItem = dataContext.stateManager.getQueryItemById(
+            props.queryId
+        );
+        if (!queryItem) return false;
+
+        const parsedQuery = dataContext.stateManager.getParsedQuery(
+            queryItem.query
+        );
+        const segment = parsedQuery?.segments[props.segmentIndex];
+        if (!segment) return false;
+
+        const segStart = segment.charRange.start;
+        const segEnd = segment.charRange.end;
+
+        return selectionsForQuery.some((sel) => {
+            const selStart = Math.min(sel.anchor, sel.focus);
+            const selEnd = Math.max(sel.anchor, sel.focus);
+            // Check if selection intersects segment using inclusive boundaries
+            // A point is in segment if: segStart <= point <= segEnd
+            // Selection intersects if either endpoint is in segment, or selection spans segment
+            const startInSegment = selStart >= segStart && selStart <= segEnd;
+            const endInSegment = selEnd >= segStart && selEnd <= segEnd;
+            const selectionSpansSegment =
+                selStart <= segStart && selEnd >= segEnd;
+            return startInSegment || endInSegment || selectionSpansSegment;
+        });
+    }, [
+        textSelections,
+        props.queryId,
+        props.segmentIndex,
+        dataContext.stateManager,
+    ]);
+
+    const isActive = isFocused || hasSelectionInSegment;
+
+    const matchedNodes =
+        dataContext.stateManager.getMatchedNodesForQuerySegment(
+            props.queryId,
+            props.segmentIndex
+        );
 
     const { tokensToRender, isTruncated, truncationInfo } =
         React.useMemo(() => {
@@ -58,6 +111,25 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
             );
         }, [props.tokens, isFocused, options.queryChips.truncation.enable]);
 
+    function makeContent() {
+        const Component = options.ui.inactiveSegmentRenderer?.(
+            props.segmentIndex
+        );
+        if (!isActive && Component && props.mayUseCustomRenderer) {
+            return (
+                <Component matchedNodes={matchedNodes?.matches ?? new Set()} />
+            );
+        }
+        return tokensToRender.map((token, index) => (
+            <TokenRenderer
+                key={index}
+                token={token}
+                queryId={props.queryId}
+                diagnostics={props.diagnostics}
+            />
+        ));
+    }
+
     return (
         <div
             data-segment-query-id={props.queryId}
@@ -68,14 +140,7 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
             data-truncation-end={truncationInfo?.endText ?? ""}
             data-truncation-ellipsis={truncationInfo?.ellipsisText ?? ""}
         >
-            {tokensToRender.map((token, index) => (
-                <TokenRenderer
-                    key={index}
-                    token={token}
-                    queryId={props.queryId}
-                    diagnostics={props.diagnostics}
-                />
-            ))}
+            {makeContent()}
         </div>
     );
 }

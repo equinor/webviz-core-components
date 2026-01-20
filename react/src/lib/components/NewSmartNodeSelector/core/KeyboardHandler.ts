@@ -1,6 +1,5 @@
 import type { CompletionsState } from "./CompletionsState";
 import type { StateManager } from "./StateManager/StateManager";
-import { Topic } from "./StateManager/StateManager";
 
 export type KeyboardHandlerOptions = {
     stateManager: StateManager;
@@ -16,44 +15,25 @@ export class KeyboardHandler {
     private _stateManager: StateManager;
     private _completionsState: CompletionsState;
     private _unsubscribeFunctions: (() => void)[] = [];
+    private _inputBuffer: string[] = [];
 
     constructor(options: KeyboardHandlerOptions) {
         this._stateManager = options.stateManager;
         this._completionsState = options.suggestionsState;
-
-        // Subscribe to focused segment changes to update suggestions
-        const pubSub = this._stateManager.getPubSubDelegate();
-        this._unsubscribeFunctions = [
-            pubSub.subscribe(
-                Topic.COMPLETION_CONTEXT,
-                this.updateCompletions.bind(this)
-            ),
-        ];
     }
 
-    private updateCompletions(): void {
-        const completionContext = this._stateManager.getCompletionContext();
-        if (!completionContext) {
-            this._completionsState.clearCompletions();
-            return;
-        }
+    handleKeyUp(_: React.KeyboardEvent<HTMLTextAreaElement>): void {
+        this._inputBuffer = [];
+    }
 
-        const parsedQuery = this._stateManager.getParsedQuery(
-            completionContext.queryItem.query
-        );
-        if (!parsedQuery) {
-            this._completionsState.clearCompletions();
-            return;
-        }
-
-        this._completionsState.updateCompletions(
-            parsedQuery,
-            completionContext.queryTextSelection.focus
-        );
+    private hasBufferedInput(): boolean {
+        return this._inputBuffer.length > 1;
     }
 
     handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>): void {
         const { key, shiftKey: selecting } = event;
+
+        this._inputBuffer.push(key);
 
         // Try suggestions navigation first (if suggestions are visible)
         if (this._completionsState.hasCompletions()) {
@@ -88,11 +68,19 @@ export class KeyboardHandler {
         switch (key) {
             // Navigation
             case "ArrowRight":
-                this._stateManager.moveFocus(1, selecting);
+                this._stateManager.moveFocus(
+                    1,
+                    selecting,
+                    this.hasBufferedInput()
+                );
                 event.preventDefault();
                 break;
             case "ArrowLeft":
-                this._stateManager.moveFocus(-1, selecting);
+                this._stateManager.moveFocus(
+                    -1,
+                    selecting,
+                    this.hasBufferedInput()
+                );
                 event.preventDefault();
                 break;
             case "Home":
@@ -101,6 +89,10 @@ export class KeyboardHandler {
                 break;
             case "End":
                 this._stateManager.moveFocusToStartOrEnd("end", selecting);
+                event.preventDefault();
+                break;
+            case "Escape":
+                this._stateManager.exit();
                 event.preventDefault();
                 break;
 
@@ -148,7 +140,7 @@ export class KeyboardHandler {
     }
 
     handleInput(value: string): void {
-        this._stateManager.insertText(value);
+        this._stateManager.insertText(value, true);
     }
 
     destroy(): void {

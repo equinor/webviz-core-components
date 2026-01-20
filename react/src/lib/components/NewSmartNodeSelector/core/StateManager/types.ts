@@ -14,9 +14,12 @@ export type QueryTextSelection = Selection & {
 
 export type QuerySelection = Selection;
 
-export type SegmentTextSelection = QueryTextSelection & {
+export type SegmentTextSelection = {
     queryId: string;
-    segmentIndex: number;
+    focusSegmentIndex: number;
+    anchorSegmentIndex: number;
+    focus: number; // segment-relative offset
+    anchor: number; // segment-relative offset
 };
 
 export type QuerySegment = {

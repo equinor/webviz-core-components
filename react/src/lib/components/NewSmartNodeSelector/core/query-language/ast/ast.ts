@@ -6,6 +6,7 @@ export type Expr =
     | GroupExpr
     | SetExpr
     | PatternExpr
+    | AttributeFilterExpr
     | ErrorExpr;
 
 export interface ConcatExpr {
@@ -39,6 +40,14 @@ export interface SetExpr {
 export interface PatternExpr {
     kind: "pattern";
     atoms: Atom[];
+    charRange: Range;
+}
+
+export interface AttributeFilterExpr {
+    kind: "attributeFilter";
+    attributeName: string;
+    values: Expr[];
+    closed: boolean;
     charRange: Range;
 }
 

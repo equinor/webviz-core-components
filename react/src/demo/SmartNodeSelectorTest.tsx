@@ -9,6 +9,8 @@ import {
     type SmartNodeSelectorOptions,
 } from "../lib/components/NewSmartNodeSelector/SmartNodeSelector";
 import { TEST_DATA } from "./testdata";
+import { vectorSelectorModifier } from "../lib/components/NewSmartNodeSelector/input-modifiers/VectorSelectorModifier";
+import { IconRenderer } from "../lib/components/NewSmartNodeSelector/inactive-segment-renderer/iconRenderer";
 
 type SmartNodeSelectorState = {
     selectedTags: string[];
@@ -22,6 +24,10 @@ const DATA = [
         name: "Data Source A",
         description: "First data source",
         color: "#0095FF",
+        filterableMetadata: {
+            type: "database",
+            owner: "team-alpha",
+        },
         children: [
             {
                 id: "1.1",
@@ -68,6 +74,10 @@ const DATA = [
         id: "2",
         name: "Data Source B",
         description: "Second data source",
+        filterableMetadata: {
+            type: "text-document",
+            owner: "team-beta",
+        },
         color: "#FF5555",
         children: [
             {
@@ -615,6 +625,16 @@ const SmartNodeSelectorTest: React.FC = () => {
                         newSelectorOptions.mode === "simple"
                             ? new SimpleCompletionsAdapter()
                             : undefined,
+                    inputModifier:
+                        testData === "simpleTestData"
+                            ? undefined
+                            : vectorSelectorModifier,
+                    ui: {
+                        inactiveSegmentRenderer:
+                            testData === "simpleTestData"
+                                ? undefined
+                                : IconRenderer,
+                    },
                 }}
                 initialValue={["Data Source A:Category 2:Item B1"]}
             />

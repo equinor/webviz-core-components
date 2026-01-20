@@ -14,9 +14,9 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
         SmartNodeSelectorDataContext
     );
 
-    const queryTextSelections = useSubscribeToTopic(
+    const segmentTextSelections = useSubscribeToTopic(
         stateManager,
-        Topic.QUERY_TEXT_SELECTIONS
+        Topic.SEGMENT_TEXT_SELECTIONS
     );
 
     const queryItems = useSubscribeToTopic(stateManager, Topic.QUERY_ITEMS);
@@ -37,9 +37,18 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
 
     React.useLayoutEffect(
         function updateCaretPositions() {
-            const newMappedCaretPositions = [];
-            const newMappedSelectionPositions = [];
-            for (const position of queryTextSelections) {
+            const newMappedCaretPositions: Array<{
+                left: number;
+                top: number;
+            }> = [];
+            const newMappedSelectionPositions: Array<{
+                left: number;
+                top: number;
+                width: number;
+                height: number;
+            }> = [];
+
+            for (const position of segmentTextSelections) {
                 const queryItem = stateManager.getQueryItemById(
                     position.queryId
                 );
@@ -52,7 +61,14 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                     continue;
                 }
 
-                // Get the query chip element to determine the correct height
+                const parsedQuery = stateManager.getParsedQuery(
+                    queryItem.query
+                );
+                if (!parsedQuery) {
+                    continue;
+                }
+
+                // Get chip element for height calculation
                 const chipElement = props.mainRef.current?.querySelector(
                     `[data-querychip-id="${position.queryId}"]>[data-query-chip-content]`
                 ) as HTMLElement | null;
@@ -61,63 +77,135 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                     continue;
                 }
 
-                const chipBoundingRect = chipElement?.getBoundingClientRect();
-
-                const textBeforeCaret = queryItem.query.slice(
-                    0,
-                    position.focus
-                );
-
-                const { width: textWidth } = computeTextWidthAndHeight(
-                    textBeforeCaret,
-                    chipElement
-                );
-
-                // Get height from chip element to handle empty segments correctly
+                const chipBoundingRect = chipElement.getBoundingClientRect();
                 const caretHeight = chipBoundingRect.height - 4;
-
-                // Use chip's top position for empty segments to ensure correct alignment
                 const caretTop = chipBoundingRect.top + 1;
 
-                newMappedCaretPositions.push({
-                    left:
-                        chipBoundingRect.left +
-                        textWidth -
-                        mainBoundingRect.left,
-                    top: caretTop - mainBoundingRect.top,
-                });
+                // Render caret at focus position
+                const focusSegment =
+                    parsedQuery.segments[position.focusSegmentIndex];
+                if (focusSegment) {
+                    const focusSegmentElement =
+                        props.mainRef.current?.querySelector(
+                            `[data-segment-query-id="${position.queryId}"][data-segment-index="${position.focusSegmentIndex}"]`
+                        ) as HTMLElement | null;
 
-                setFontSize(caretHeight);
+                    if (focusSegmentElement) {
+                        const focusSegmentRect =
+                            focusSegmentElement.getBoundingClientRect();
+                        const focusSegmentText = queryItem.query.slice(
+                            focusSegment.charRange.start,
+                            focusSegment.charRange.end
+                        );
 
-                if (position.anchor !== position.focus) {
-                    const startOffset = Math.min(
-                        position.focus,
-                        position.anchor
-                    );
-                    const endOffset = Math.max(position.focus, position.anchor);
+                        const textBeforeCaret = focusSegmentText.slice(
+                            0,
+                            position.focus
+                        );
 
-                    // Calculate selection bounds within the segment
-                    const { width: startWidth } = computeTextWidthAndHeight(
-                        queryItem.query.slice(0, startOffset),
-                        chipElement
-                    );
-                    const { width: endWidth } = computeTextWidthAndHeight(
-                        queryItem.query.slice(0, endOffset),
-                        chipElement
-                    );
+                        const { width: textWidth } = computeTextWidthAndHeight(
+                            textBeforeCaret,
+                            focusSegmentElement
+                        );
 
-                    const selectionStartX =
-                        chipBoundingRect.left +
-                        startWidth -
-                        mainBoundingRect.left;
-                    const selectionWidth = endWidth - startWidth;
+                        newMappedCaretPositions.push({
+                            left:
+                                focusSegmentRect.left +
+                                textWidth -
+                                mainBoundingRect.left,
+                            top: caretTop - mainBoundingRect.top,
+                        });
 
-                    newMappedSelectionPositions.push({
-                        left: selectionStartX,
-                        top: caretTop - mainBoundingRect.top,
-                        width: selectionWidth,
-                        height: caretHeight,
-                    });
+                        setFontSize(caretHeight);
+                    }
+                }
+
+                // Render a single selection highlight spanning from anchor to focus
+                if (
+                    position.focusSegmentIndex !== position.anchorSegmentIndex ||
+                    position.focus !== position.anchor
+                ) {
+                    // Determine which position comes first visually
+                    const anchorIsFirst =
+                        position.anchorSegmentIndex < position.focusSegmentIndex ||
+                        (position.anchorSegmentIndex === position.focusSegmentIndex &&
+                            position.anchor < position.focus);
+
+                    const startSegIdx = anchorIsFirst
+                        ? position.anchorSegmentIndex
+                        : position.focusSegmentIndex;
+                    const startOffset = anchorIsFirst
+                        ? position.anchor
+                        : position.focus;
+                    const endSegIdx = anchorIsFirst
+                        ? position.focusSegmentIndex
+                        : position.anchorSegmentIndex;
+                    const endOffset = anchorIsFirst
+                        ? position.focus
+                        : position.anchor;
+
+                    // Get start segment element and calculate start X position
+                    const startSegment = parsedQuery.segments[startSegIdx];
+                    const startSegmentElement =
+                        props.mainRef.current?.querySelector(
+                            `[data-segment-query-id="${position.queryId}"][data-segment-index="${startSegIdx}"]`
+                        ) as HTMLElement | null;
+
+                    // Get end segment element and calculate end X position
+                    const endSegment = parsedQuery.segments[endSegIdx];
+                    const endSegmentElement =
+                        props.mainRef.current?.querySelector(
+                            `[data-segment-query-id="${position.queryId}"][data-segment-index="${endSegIdx}"]`
+                        ) as HTMLElement | null;
+
+                    if (
+                        startSegment &&
+                        startSegmentElement &&
+                        endSegment &&
+                        endSegmentElement
+                    ) {
+                        const startSegmentRect =
+                            startSegmentElement.getBoundingClientRect();
+                        const startSegmentText = queryItem.query.slice(
+                            startSegment.charRange.start,
+                            startSegment.charRange.end
+                        );
+                        const { width: startTextWidth } =
+                            computeTextWidthAndHeight(
+                                startSegmentText.slice(0, startOffset),
+                                startSegmentElement
+                            );
+                        const selectionStartX =
+                            startSegmentRect.left +
+                            startTextWidth -
+                            mainBoundingRect.left;
+
+                        const endSegmentRect =
+                            endSegmentElement.getBoundingClientRect();
+                        const endSegmentText = queryItem.query.slice(
+                            endSegment.charRange.start,
+                            endSegment.charRange.end
+                        );
+                        const { width: endTextWidth } = computeTextWidthAndHeight(
+                            endSegmentText.slice(0, endOffset),
+                            endSegmentElement
+                        );
+                        const selectionEndX =
+                            endSegmentRect.left +
+                            endTextWidth -
+                            mainBoundingRect.left;
+
+                        const selectionWidth = selectionEndX - selectionStartX;
+
+                        if (selectionWidth > 0) {
+                            newMappedSelectionPositions.push({
+                                left: selectionStartX,
+                                top: caretTop - mainBoundingRect.top,
+                                width: selectionWidth,
+                                height: caretHeight,
+                            });
+                        }
+                    }
                 }
             }
 
@@ -125,7 +213,7 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
             setMappedSelectionPositions(newMappedSelectionPositions);
         },
         [
-            queryTextSelections,
+            segmentTextSelections,
             queryItems,
             stateManager,
             props.mainRef,

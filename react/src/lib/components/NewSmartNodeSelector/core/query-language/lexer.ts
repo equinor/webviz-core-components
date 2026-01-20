@@ -33,6 +33,16 @@ export interface RBRACE extends GroupToken {
     value: "}";
 }
 
+export interface LSQUAREBRACKET extends GroupToken {
+    type: "LSQUAREBRACKET";
+    value: "[";
+}
+
+export interface RSQUAREBRACKET extends GroupToken {
+    type: "RSQUAREBRACKET";
+    value: "]";
+}
+
 export interface OR extends BaseToken {
     type: "OR";
     value: "|";
@@ -68,6 +78,11 @@ export interface PLUS extends BaseToken {
     value: "+";
 }
 
+export interface EQUALS extends BaseToken {
+    type: "EQUALS";
+    value: "=";
+}
+
 export interface LITERAL extends BaseToken {
     type: "LITERAL";
     value: string;
@@ -78,6 +93,8 @@ export type Token =
     | RPAREN
     | LBRACE
     | RBRACE
+    | LSQUAREBRACKET
+    | RSQUAREBRACKET
     | OR
     | COMMA
     | DELIMITER
@@ -85,6 +102,7 @@ export type Token =
     | STAR
     | QMARK
     | PLUS
+    | EQUALS
     | LITERAL;
 
 export function tokenize(text: string, delimiter: string): Token[] {
@@ -208,6 +226,40 @@ export function tokenize(text: string, delimiter: string): Token[] {
             continue;
         }
 
+        if (char === "[") {
+            pushToken<LSQUAREBRACKET>({
+                type: "LSQUAREBRACKET",
+                value: "[",
+                charRange: {
+                    start: position,
+                    end: position + 1,
+                },
+                refTokenId: undefined,
+            });
+            position++;
+            continue;
+        }
+
+        if (char === "]") {
+            const openingBracketIndex =
+                findPrevGroupTokenOfType("LSQUAREBRACKET");
+            const closingBracketIndex = pushToken<RSQUAREBRACKET>({
+                type: "RSQUAREBRACKET",
+                value: "]",
+                charRange: {
+                    start: position,
+                    end: position + 1,
+                },
+                refTokenId: openingBracketIndex,
+            });
+            if (openingBracketIndex !== undefined) {
+                (tokens[openingBracketIndex] as LSQUAREBRACKET).refTokenId =
+                    closingBracketIndex;
+            }
+            position++;
+            continue;
+        }
+
         if (char === "|") {
             pushToken({
                 type: "OR",
@@ -251,6 +303,19 @@ export function tokenize(text: string, delimiter: string): Token[] {
             pushToken({
                 type: "PLUS",
                 value: "+",
+                charRange: {
+                    start: position,
+                    end: position + 1,
+                },
+            });
+            position++;
+            continue;
+        }
+
+        if (char === "=") {
+            pushToken({
+                type: "EQUALS",
+                value: "=",
                 charRange: {
                     start: position,
                     end: position + 1,

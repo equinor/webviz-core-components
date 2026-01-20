@@ -69,6 +69,13 @@ export function HiddenTextarea(): React.ReactElement {
         [keyboardHandler]
     );
 
+    const handleKeyUp = React.useCallback(
+        function handleKeyUp(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+            keyboardHandler.handleKeyUp(event);
+        },
+        [keyboardHandler]
+    );
+
     const handleFocus = React.useCallback(
         function handleFocus() {
             // Set focus in state manager when textarea is focused
@@ -102,6 +109,7 @@ export function HiddenTextarea(): React.ReactElement {
                 overflow: "hidden",
             }}
             onKeyDown={handleKeyDown}
+            onKeyUp={handleKeyUp}
             onInput={handleInput}
             onFocus={handleFocus}
             onBlur={handleBlur}

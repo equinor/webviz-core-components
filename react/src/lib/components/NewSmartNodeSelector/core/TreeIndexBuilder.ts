@@ -204,5 +204,8 @@ export function makeIndexedNodeAccessor(
         isLeaf: (node: IndexedNode) => {
             return node.isLeaf;
         },
+        getFilterableMetadata: (node: IndexedNode) => {
+            return node.filterableMetadata;
+        },
     };
 }

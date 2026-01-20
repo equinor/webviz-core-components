@@ -85,7 +85,7 @@ export function parseSegment(
         tokensToParse = segmentTokens.slice(1); // Remove the + prefix
     }
 
-    const parser = new SegmentParser(tokensToParse, span, unionMode);
+    const parser = new SegmentParser(tokensToParse, span);
     const expr = parser.parseExpression(0);
 
     diagnostics.push(...parser.getDiagnostics());
