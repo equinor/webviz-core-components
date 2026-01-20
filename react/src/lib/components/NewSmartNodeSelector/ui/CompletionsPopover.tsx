@@ -9,7 +9,13 @@ import {
     type SmartNodeSelectorDataContextType,
 } from "../SmartNodeSelector";
 
-export function CompletionsPopover(): React.ReactElement {
+export type CompletionsPopoverProps = {
+    mainRef: React.RefObject<HTMLDivElement>;
+};
+
+export function CompletionsPopover(
+    props: CompletionsPopoverProps
+): React.ReactElement {
     const { stateManager, completionsState }: SmartNodeSelectorDataContextType =
         React.useContext(SmartNodeSelectorDataContext);
 
@@ -103,7 +109,7 @@ export function CompletionsPopover(): React.ReactElement {
                 return;
             }
 
-            const inputElement = document.querySelector(
+            const inputElement = props.mainRef.current?.querySelector(
                 `[data-querychip-id="${focusedSegment.queryId}"]`
             ) as HTMLElement | null;
             if (inputElement) {
@@ -114,7 +120,7 @@ export function CompletionsPopover(): React.ReactElement {
                 setAnchorElement(null);
             }
         },
-        [focusedSegment]
+        [focusedSegment, props.mainRef]
     );
 
     const CompletionsComponent = completionsState.getComponent();

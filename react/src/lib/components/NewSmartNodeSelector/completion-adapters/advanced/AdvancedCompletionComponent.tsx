@@ -28,7 +28,7 @@ export function AdvancedCompletionComponent(
             {renderSyntaxCompletionItems(
                 syntaxCompletions,
                 props.onSelectCompletion,
-                props.selectedIndex ? -(props.selectedIndex + 1) : null
+                props.selectedIndex !== null ? -(props.selectedIndex + 1) : null
             )}
             <div style={{ padding: 4, overflow: "auto" }}>
                 <VirtualizedList
@@ -36,7 +36,7 @@ export function AdvancedCompletionComponent(
                     itemHeight={48}
                     maxHeight={Math.min(props.maxContainerHeight - 24, 48 * 10)}
                     renderItem={renderNodeCompletionItem}
-                    onItemClick={props.onSelectCompletion}
+                    onItemClick={(_, index) => props.onSelectCompletion(index)}
                     selectedIndex={props.selectedIndex}
                 />
             </div>
@@ -57,7 +57,7 @@ export function AdvancedCompletionComponent(
 
 function renderSyntaxCompletionItems(
     completions: SyntaxCompletionItem[],
-    onClick: (completion: SyntaxCompletionItem) => void,
+    onClick: (index: number) => void,
     selectedIndex: number | null
 ): React.ReactNode {
     function makeTitle(completion: SyntaxCompletionItem): string {
@@ -127,7 +127,7 @@ function renderSyntaxCompletionItems(
                         color: selectedIndex === index ? "white" : "black",
                     }}
                     title={makeTitle(completion)}
-                    onClick={() => onClick(completion)}
+                    onClick={() => onClick(-index)}
                 >
                     {completion.insertText}
                 </li>

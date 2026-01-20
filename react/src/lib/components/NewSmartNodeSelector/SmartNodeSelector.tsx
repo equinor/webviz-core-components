@@ -18,7 +18,7 @@ import {
     TreeIndexBuilder,
 } from "./core/TreeIndexBuilder";
 import { useMouseEventHandler } from "./hooks/useMouseEventHandler";
-import { CaretRenderer } from "./ui/CaretAndSelectionRenderer";
+import { CaretAndSelectionRenderer } from "./ui/CaretAndSelectionRenderer";
 import { CompletionsPopover } from "./ui/CompletionsPopover";
 import { DebugInfo } from "./ui/DebugInfo";
 import { HiddenTextarea } from "./ui/HiddenTextarea";
@@ -368,10 +368,10 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                                     index={index}
                                 />
                             ))}
-                            <CaretRenderer mainRef={ref} />
+                            <CaretAndSelectionRenderer mainRef={ref} />
                         </RootComponent>
                         <DebugInfo />
-                        <CompletionsPopover />
+                        <CompletionsPopover mainRef={ref} />
                     </div>
                 </SmartNodeSelectorOptionsContext.Provider>
             </SmartNodeSelectorSlotsContext.Provider>

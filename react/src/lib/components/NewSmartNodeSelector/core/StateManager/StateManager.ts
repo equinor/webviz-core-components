@@ -276,6 +276,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
     updateOptions(options: StateManagerOptions): void {
         this._parseCache.clear();
+        this._treeMatchCache.clear();
         this._options = options;
     }
 

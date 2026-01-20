@@ -5,11 +5,13 @@ import { Topic } from "../core/StateManager/StateManager";
 import { useElementBoundingRect } from "../hooks/useElementBoundingRect";
 import { computeTextWidthAndHeight } from "../utils/caretToCoordinateMapping";
 
-export type CaretRendererProps = {
+export type CaretAndSelectionRendererProps = {
     mainRef: React.RefObject<HTMLDivElement>;
 };
 
-export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
+export function CaretAndSelectionRenderer(
+    props: CaretAndSelectionRendererProps
+): React.ReactElement {
     const { stateManager, delimiter } = React.useContext(
         SmartNodeSelectorDataContext
     );
@@ -122,13 +124,16 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
 
                 // Render a single selection highlight spanning from anchor to focus
                 if (
-                    position.focusSegmentIndex !== position.anchorSegmentIndex ||
+                    position.focusSegmentIndex !==
+                        position.anchorSegmentIndex ||
                     position.focus !== position.anchor
                 ) {
                     // Determine which position comes first visually
                     const anchorIsFirst =
-                        position.anchorSegmentIndex < position.focusSegmentIndex ||
-                        (position.anchorSegmentIndex === position.focusSegmentIndex &&
+                        position.anchorSegmentIndex <
+                            position.focusSegmentIndex ||
+                        (position.anchorSegmentIndex ===
+                            position.focusSegmentIndex &&
                             position.anchor < position.focus);
 
                     const startSegIdx = anchorIsFirst
@@ -186,10 +191,11 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
                             endSegment.charRange.start,
                             endSegment.charRange.end
                         );
-                        const { width: endTextWidth } = computeTextWidthAndHeight(
-                            endSegmentText.slice(0, endOffset),
-                            endSegmentElement
-                        );
+                        const { width: endTextWidth } =
+                            computeTextWidthAndHeight(
+                                endSegmentText.slice(0, endOffset),
+                                endSegmentElement
+                            );
                         const selectionEndX =
                             endSegmentRect.left +
                             endTextWidth -
@@ -264,3 +270,4 @@ export function CaretRenderer(props: CaretRendererProps): React.ReactElement {
         </>
     );
 }
+
