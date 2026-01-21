@@ -31,10 +31,6 @@ export class SegmentParser {
         return this._tokens[this._index - 1] ?? null;
     }
 
-    private peek(offset: number): Token | null {
-        return this._tokens[this._index + offset] ?? null;
-    }
-
     private atEnd(): boolean {
         return this._index >= this._tokens.length;
     }
@@ -302,6 +298,9 @@ export class SegmentParser {
                 "RPAREN",
                 "LBRACE",
                 "RBRACE",
+                "LSQUAREBRACKET",
+                "RSQUAREBRACKET",
+                "EQUALS",
                 "DELIMITER",
                 "DEEP", // should not happen inside patterns, but just in case
             ];

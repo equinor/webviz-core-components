@@ -51,11 +51,32 @@ export function getCompletions<Node>(
     // Check if we have a full match in the current segment
     const hasFullMatch = checkForFullMatch(context, pool, tree, opts);
 
-    // Add syntax-based completions
-    all.push(...getSyntaxCompletions<Node>(context, hasFullMatch));
+    // Handle attribute filter completions
+    if (context.insideAttributeFilter && context.attributeFilterContext) {
+        // Filter pool by nodes matching the name pattern (attribute filter treated as epsilon)
+        const filteredPool = filterPoolByNamePattern(context, pool, tree, opts);
 
-    // Add tree-based completions
-    all.push(...getTreeCompletions<Node>(context, pool, tree, opts));
+        if (context.expectation === "attributeName") {
+            all.push(
+                ...getAttributeNameCompletions<Node>(context, filteredPool, tree)
+            );
+        } else if (context.expectation === "attributeValue") {
+            all.push(
+                ...getAttributeValueCompletions<Node>(
+                    context,
+                    filteredPool,
+                    tree,
+                    opts
+                )
+            );
+        }
+    } else {
+        // Add syntax-based completions
+        all.push(...getSyntaxCompletions<Node>(context, hasFullMatch));
+
+        // Add tree-based completions
+        all.push(...getTreeCompletions<Node>(context, pool, tree, opts));
+    }
 
     // Deduplicate completions - we can later rank them as well
     const deduped = dedupeCompletions(all);
@@ -100,6 +121,15 @@ function checkForFullMatch<Node>(
     return { fullMatch: false, isLeafMatch: false };
 }
 
+type SyntaxKind =
+    | "unionFlag"
+    | "operator"
+    | "wildcard"
+    | "group"
+    | "set"
+    | "delimiter"
+    | "attributeFilter";
+
 function getSyntaxCompletions<Node>(
     context: CaretContext,
     hasFullMatch: { fullMatch: boolean; isLeafMatch: boolean }
@@ -109,11 +139,8 @@ function getSyntaxCompletions<Node>(
     function add(
         label: string,
         insertText = label,
-        kind: CompletionItem<Node>["kind"] = "operator"
+        kind: SyntaxKind = "operator"
     ) {
-        if (kind === "node") {
-            throw new Error("Node completions cannot be added via syntax");
-        }
         completions.push({
             label,
             insertText,
@@ -144,6 +171,10 @@ function getSyntaxCompletions<Node>(
 
             if (context.isEmptySegment) {
                 add("**", "**", "wildcard");
+            }
+
+            if (!context.insideAttributeFilter) {
+                add("[", "[", "attributeFilter");
             }
 
             // If we have a full match, also suggest delimiter and operator
@@ -184,6 +215,197 @@ function getSyntaxCompletions<Node>(
         topOfStack?.refTokenId === undefined
     ) {
         add("}", "}", "set");
+    }
+
+    return completions;
+}
+
+/**
+ * Filter pool by nodes that match the name pattern part of the current segment.
+ * Attribute filters are stripped out before matching, so this only considers
+ * the non-attribute-filter parts of the expression.
+ */
+function filterPoolByNamePattern<Node>(
+    context: CaretContext,
+    pool: Iterable<Node>,
+    tree: TreeAccessor<Node>,
+    opts?: MatchOptions
+): Set<Node> {
+    const segmentAst = context.segmentAst;
+    if (segmentAst.kind !== "expr") {
+        return new Set(pool);
+    }
+
+    // Strip attribute filters from the expression to get just the name pattern
+    const namePattern = stripAttributeFilters(segmentAst.expr);
+
+    // If there's no name pattern (only attribute filters), return all nodes
+    if (!namePattern) {
+        return new Set(pool);
+    }
+
+    const filtered = new Set<Node>();
+    for (const node of pool) {
+        const name = tree.getName(node);
+        if (matchesName(namePattern, name, opts)) {
+            filtered.add(node);
+        }
+    }
+    return filtered;
+}
+
+/**
+ * Strip attribute filters from an expression, returning just the name-matching parts.
+ * Returns null if the expression is ONLY attribute filters (no name pattern).
+ */
+function stripAttributeFilters(expr: Expr): Expr | null {
+    switch (expr.kind) {
+        case "attributeFilter":
+            // Attribute filter only - no name pattern
+            return null;
+
+        case "pattern":
+        case "error":
+            // These are name patterns
+            return expr;
+
+        case "group": {
+            const innerStripped = stripAttributeFilters(expr.expr);
+            if (!innerStripped) return null;
+            return { ...expr, expr: innerStripped };
+        }
+
+        case "set": {
+            const strippedItems = expr.items
+                .map(stripAttributeFilters)
+                .filter((item): item is Expr => item !== null);
+            if (strippedItems.length === 0) return null;
+            return { ...expr, items: strippedItems };
+        }
+
+        case "concat": {
+            const strippedParts = expr.parts
+                .map(stripAttributeFilters)
+                .filter((part): part is Expr => part !== null);
+            if (strippedParts.length === 0) return null;
+            if (strippedParts.length === 1) return strippedParts[0];
+            return { ...expr, parts: strippedParts };
+        }
+
+        case "binary": {
+            const leftStripped = stripAttributeFilters(expr.left);
+            const rightStripped = stripAttributeFilters(expr.right);
+
+            // For OR: if both sides have patterns, keep both
+            // If only one side has a pattern, use that
+            if (!leftStripped && !rightStripped) return null;
+            if (!leftStripped) return rightStripped;
+            if (!rightStripped) return leftStripped;
+            return { ...expr, left: leftStripped, right: rightStripped };
+        }
+    }
+}
+
+function getAttributeNameCompletions<Node>(
+    context: CaretContext,
+    pool: Iterable<Node>,
+    tree: TreeAccessor<Node>
+): CompletionItem<Node>[] {
+    const completions: CompletionItem<Node>[] = [];
+    const getMetadata = tree.getFilterableMetadata;
+
+    if (!getMetadata) {
+        return completions;
+    }
+
+    // Collect all unique attribute names from the pool
+    const attributeNames = new Set<string>();
+    for (const node of pool) {
+        const metadata = getMetadata(node);
+        for (const key of Object.keys(metadata)) {
+            attributeNames.add(key);
+        }
+    }
+
+    // Create completions for each attribute name
+    for (const attrName of attributeNames) {
+        completions.push({
+            label: attrName,
+            insertText: attrName + "=",
+            replaceRange: context.replaceRange,
+            segmentReplaceRange: {
+                start:
+                    context.replaceRange.start -
+                    context.segmentAst.charRange.start,
+                end:
+                    context.replaceRange.end -
+                    context.segmentAst.charRange.start,
+            },
+            kind: "attributeName",
+        });
+    }
+
+    return completions;
+}
+
+function getAttributeValueCompletions<Node>(
+    context: CaretContext,
+    pool: Iterable<Node>,
+    tree: TreeAccessor<Node>,
+    opts?: MatchOptions
+): CompletionItem<Node>[] {
+    const completions: CompletionItem<Node>[] = [];
+    const getMetadata = tree.getFilterableMetadata;
+    const attributeName = context.attributeFilterContext?.attributeName;
+
+    if (!getMetadata || !attributeName) {
+        return completions;
+    }
+
+    // Collect all unique values for this attribute from the pool
+    // Group nodes by their attribute value
+    const valueToNodes = new Map<string, Set<Node>>();
+    for (const node of pool) {
+        const metadata = getMetadata(node);
+        const value = metadata[attributeName];
+        if (value !== undefined) {
+            if (!valueToNodes.has(value)) {
+                valueToNodes.set(value, new Set());
+            }
+            valueToNodes.get(value)!.add(node);
+        }
+    }
+
+    // Create completions for each unique value
+    for (const [value, nodes] of valueToNodes) {
+        const origin =
+            nodes.size === 1
+                ? {
+                      kind: "single" as const,
+                      node: nodes.values().next().value as Node,
+                      nodeNameRange: { start: 0, end: value.length },
+                  }
+                : {
+                      kind: "multi" as const,
+                      nodes,
+                      count: nodes.size,
+                  };
+
+        completions.push({
+            label: value,
+            insertText: value,
+            replaceRange: context.replaceRange,
+            segmentReplaceRange: {
+                start:
+                    context.replaceRange.start -
+                    context.segmentAst.charRange.start,
+                end:
+                    context.replaceRange.end -
+                    context.segmentAst.charRange.start,
+            },
+            kind: "attributeValue",
+            origin,
+        });
     }
 
     return completions;

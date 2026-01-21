@@ -10,7 +10,16 @@ export type Expectation =
     | "term"
     | "operator"
     | "comma"
-    | "delimiterOrEnd";
+    | "delimiterOrEnd"
+    | "attributeName"
+    | "attributeValue";
+
+export type AttributeFilterContext = {
+    /** The attribute name being filtered (if already typed) */
+    attributeName?: string;
+    /** Whether we're after the '=' sign */
+    afterEquals: boolean;
+};
 
 export type CaretContext = {
     caretOffset: number;
@@ -27,6 +36,8 @@ export type CaretContext = {
     stack: Token[];
     insideGroup: boolean;
     insideSet: boolean;
+    insideAttributeFilter: boolean;
+    attributeFilterContext?: AttributeFilterContext;
 
     expectation: Expectation;
 
@@ -88,11 +99,20 @@ export function getCaretContext(
 
     const insideGroup = stack.find((t) => t.type === "LPAREN") !== undefined;
     const insideSet = stack.find((t) => t.type === "LBRACE") !== undefined;
+    const insideAttributeFilter =
+        stack.find((t) => t.type === "LSQUAREBRACKET") !== undefined;
+
+    // Determine attribute filter context
+    const attributeFilterContext = insideAttributeFilter
+        ? getAttributeFilterContext(segmentTokens, stack, caret)
+        : undefined;
 
     const expectation = determineExpectation(
         prevSignificantToken,
         insideGroup,
-        insideSet
+        insideSet,
+        insideAttributeFilter,
+        attributeFilterContext
     );
 
     const replaceRange = { start: caret, end: caret }; // computeReplaceRange(tokenAt, caret);
@@ -109,6 +129,8 @@ export function getCaretContext(
         stack,
         insideGroup,
         insideSet,
+        insideAttributeFilter,
+        attributeFilterContext,
         expectation,
         replaceRange,
         isEmptySegment: segment.tokenStartIndex === segment.tokenEndIndex,
@@ -151,11 +173,64 @@ function isSignificantToken(token: Token): boolean {
     return true;
 }
 
+function getAttributeFilterContext(
+    segmentTokens: Token[],
+    stack: Token[],
+    caret: number
+): AttributeFilterContext {
+    // Find the opening bracket token in the stack
+    const openBracket = stack.find((t) => t.type === "LSQUAREBRACKET");
+    if (!openBracket) {
+        return { afterEquals: false };
+    }
+
+    // Find tokens after the opening bracket and before caret
+    let attributeName: string | undefined;
+    let afterEquals = false;
+
+    for (const token of segmentTokens) {
+        if (token.charRange.start < openBracket.charRange.start) {
+            continue;
+        }
+        if (token.charRange.start >= caret) {
+            break;
+        }
+
+        if (token.type === "LITERAL" && !afterEquals) {
+            attributeName = token.value;
+        }
+        if (token.type === "EQUALS") {
+            afterEquals = true;
+        }
+    }
+
+    return { attributeName, afterEquals };
+}
+
 function determineExpectation(
     token: Token | null,
     insideGroup: boolean,
-    insideSet: boolean
+    insideSet: boolean,
+    insideAttributeFilter: boolean,
+    attributeFilterContext?: AttributeFilterContext
 ): Expectation {
+    // Handle attribute filter context first
+    if (insideAttributeFilter && attributeFilterContext) {
+        if (!attributeFilterContext.afterEquals) {
+            // After '[' but before '=' - expecting attribute name
+            if (!token || token.type === "LSQUAREBRACKET") {
+                return "attributeName";
+            }
+            // After attribute name, still expecting '=' (treat as attributeName for now)
+            if (token.type === "LITERAL") {
+                return "attributeName";
+            }
+        } else {
+            // After '=' - expecting attribute value
+            return "attributeValue";
+        }
+    }
+
     if (!token) {
         return "term";
     }
@@ -173,6 +248,7 @@ function determineExpectation(
     const tokensThatExpectTerm: Token["type"][] = [
         "LPAREN",
         "LBRACE",
+        "LSQUAREBRACKET",
         "OR",
         "COMMA",
         "LITERAL",

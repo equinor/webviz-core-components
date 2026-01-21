@@ -10,6 +10,8 @@ function kindBase(
     // Lower = better
     const isNode = itemKind === "node";
     const isSyntax = itemKind !== "node";
+    const isAttributeName = itemKind === "attributeName";
+    const isAttributeValue = itemKind === "attributeValue";
 
     switch (expectation) {
         case "unionFlag":
@@ -20,6 +22,10 @@ function kindBase(
         case "comma":
         case "delimiterOrEnd":
             return isSyntax ? 0 : 50;
+        case "attributeName":
+            return isAttributeName ? 0 : 50;
+        case "attributeValue":
+            return isAttributeValue ? 0 : 50;
         default:
             return 0;
     }

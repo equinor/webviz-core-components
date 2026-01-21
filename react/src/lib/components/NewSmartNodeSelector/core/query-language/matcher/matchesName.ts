@@ -272,11 +272,20 @@ function splitExprAtCaret(
             }
 
             throw new Error("Unknown operator not supported in name matcher");
-            break;
         }
 
         case "error":
             return { prefix: epsilon(), suffix: epsilon() };
+
+        case "attributeFilter": {
+            // Follow the value that contains the caret
+            for (const value of expr.values) {
+                if (containsRange(value.charRange, caret)) {
+                    return splitExprAtCaret(value, caret);
+                }
+            }
+            return { prefix: epsilon(), suffix: epsilon() };
+        }
     }
 }
 
@@ -359,6 +368,13 @@ function matchFrom(
 
         case "error":
             result = new Set<number>();
+            break;
+
+        case "attributeFilter":
+            // Attribute filters don't match against the name string directly
+            // They are handled separately in evaluateExpression
+            // For name matching purposes, treat as epsilon (matches empty)
+            result.add(pos);
             break;
     }
 

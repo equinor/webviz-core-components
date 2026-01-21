@@ -23,15 +23,15 @@ function getDiagnosticsForToken(
     token: Token,
     diagnostics: Diagnostic[]
 ): Diagnostic[] {
-    return diagnostics.filter((d) => rangesOverlap(token.charRange, d.charRange));
+    return diagnostics.filter((d) =>
+        rangesOverlap(token.charRange, d.charRange)
+    );
 }
 
 /**
  * Get the most severe diagnostic level for a token
  */
-function getMaxSeverity(
-    diagnostics: Diagnostic[]
-): "error" | "warning" | null {
+function getMaxSeverity(diagnostics: Diagnostic[]): "error" | "warning" | null {
     if (diagnostics.some((d) => d.severity === "error")) {
         return "error";
     }
@@ -47,13 +47,18 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
     const tokenDiagnostics = getDiagnosticsForToken(token, diagnostics);
     const severity = getMaxSeverity(tokenDiagnostics);
     const errorStyle = getErrorStyle(severity);
-    const title = tokenDiagnostics.map((d) => d.message).join("\n") || undefined;
+    const title =
+        tokenDiagnostics.map((d) => d.message).join("\n") || undefined;
 
     switch (token.type) {
         case "OR":
             return (
                 <span
-                    style={{ color: "#cc4700ff", fontWeight: "bold", ...errorStyle }}
+                    style={{
+                        color: "#cc4700ff",
+                        fontWeight: "bold",
+                        ...errorStyle,
+                    }}
                     title={title}
                 >
                     {token.value}
@@ -70,7 +75,11 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
         case "DEEP":
             return (
                 <span
-                    style={{ color: "#0066CC", fontWeight: "bold", ...errorStyle }}
+                    style={{
+                        color: "#0066CC",
+                        fontWeight: "bold",
+                        ...errorStyle,
+                    }}
                     title={title}
                 >
                     {token.value}
@@ -124,7 +133,11 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
         case "QMARK":
             return (
                 <span
-                    style={{ color: "#0066CC", fontWeight: "bold", ...errorStyle }}
+                    style={{
+                        color: "#0066CC",
+                        fontWeight: "bold",
+                        ...errorStyle,
+                    }}
                     title={title}
                 >
                     {token.value}
@@ -134,7 +147,11 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
         case "STAR":
             return (
                 <span
-                    style={{ color: "#f3ad0aff", fontWeight: "bold", ...errorStyle }}
+                    style={{
+                        color: "#f3ad0aff",
+                        fontWeight: "bold",
+                        ...errorStyle,
+                    }}
                     title={title}
                 >
                     {token.value}
@@ -144,7 +161,11 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
         case "DELIMITER":
             return (
                 <span
-                    style={{ color: "#0996e8ff", fontWeight: "bold", ...errorStyle }}
+                    style={{
+                        color: "#0996e8ff",
+                        fontWeight: "bold",
+                        ...errorStyle,
+                    }}
                     title={title}
                 >
                     {token.value}
@@ -161,7 +182,42 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
         case "PLUS":
             return (
                 <span
-                    style={{ color: "#7e00ccff", fontWeight: "bold", ...errorStyle }}
+                    style={{
+                        color: "#7e00ccff",
+                        fontWeight: "bold",
+                        ...errorStyle,
+                    }}
+                    title={title}
+                >
+                    {token.value}
+                </span>
+            );
+        case "LSQUAREBRACKET":
+            return (
+                <span
+                    style={{ color: "#999", fontWeight: "bold", ...errorStyle }}
+                    title={title}
+                >
+                    {token.value}
+                </span>
+            );
+        case "RSQUAREBRACKET":
+            return (
+                <span
+                    style={{ color: "#999", fontWeight: "bold", ...errorStyle }}
+                    title={title}
+                >
+                    {token.value}
+                </span>
+            );
+        case "EQUALS":
+            return (
+                <span
+                    style={{
+                        color: "#1c9730",
+                        fontWeight: "bold",
+                        ...errorStyle,
+                    }}
                     title={title}
                 >
                     {token.value}

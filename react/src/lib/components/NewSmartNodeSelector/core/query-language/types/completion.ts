@@ -18,9 +18,27 @@ export type NodeCompletionItem<Node> = CompletionItemBase & {
 };
 
 export type SyntaxCompletionItem = CompletionItemBase & {
-    kind: "unionFlag" | "operator" | "wildcard" | "group" | "set" | "delimiter";
+    kind:
+        | "unionFlag"
+        | "operator"
+        | "wildcard"
+        | "group"
+        | "set"
+        | "delimiter"
+        | "attributeFilter";
+};
+
+export type AttributeNameCompletionItem = CompletionItemBase & {
+    kind: "attributeName";
+};
+
+export type AttributeValueCompletionItem<Node> = CompletionItemBase & {
+    kind: "attributeValue";
+    origin: CompletionNodeOrigin<Node>;
 };
 
 export type CompletionItem<Node> =
     | NodeCompletionItem<Node>
-    | SyntaxCompletionItem;
+    | SyntaxCompletionItem
+    | AttributeNameCompletionItem
+    | AttributeValueCompletionItem<Node>;

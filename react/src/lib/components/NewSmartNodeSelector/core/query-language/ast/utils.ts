@@ -17,6 +17,8 @@ function expressionHasParseErrors(expr: Expr): boolean {
             return !expr.closed || expressionHasParseErrors(expr.expr);
         case "set":
             return !expr.closed || expr.items.some(expressionHasParseErrors);
+        case "attributeFilter":
+            return !expr.closed || expr.values.some(expressionHasParseErrors);
         case "binary":
             return (
                 expressionHasParseErrors(expr.left) ||
