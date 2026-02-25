@@ -27,6 +27,12 @@ export type QuerySegment = {
     segmentIndex: number;
 };
 
+export type SegmentSelection = {
+    queryId: string;
+    anchor: number; // segment index
+    focus: number;  // segment index (where cycling acts)
+};
+
 export type CompletionContext = {
     queryId: string;
     queryItem: QueryItem;
@@ -41,7 +47,7 @@ export type Segment = {
     length: number;
 };
 
-export type SelectionMode = "query" | "text";
+export type SelectionMode = "query" | "segment" | "text";
 
 export type QueryItemUpdate = {
     kind: "update" | "remove" | "add";
@@ -53,4 +59,5 @@ export type StatePatch = {
     queryItemUpdates?: QueryItemUpdate[];
     textSelections?: QueryTextSelection[];
     querySelection?: QuerySelection | null;
+    segmentSelection?: SegmentSelection | null;
 };

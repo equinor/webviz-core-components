@@ -26,6 +26,16 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
         Topic.FOCUSED_SEGMENT
     );
 
+    const segmentSelection = useSubscribeToTopic(
+        dataContext.stateManager,
+        Topic.SEGMENT_SELECTION
+    );
+
+    const isSegmentSelected =
+        segmentSelection?.queryId === props.queryId &&
+        props.segmentIndex >= Math.min(segmentSelection.anchor, segmentSelection.focus) &&
+        props.segmentIndex <= Math.max(segmentSelection.anchor, segmentSelection.focus);
+
     const textSelections = useSubscribeToTopic(
         dataContext.stateManager,
         Topic.QUERY_TEXT_SELECTIONS
@@ -139,6 +149,15 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
             data-truncation-hidden={truncationInfo?.hiddenText ?? ""}
             data-truncation-end={truncationInfo?.endText ?? ""}
             data-truncation-ellipsis={truncationInfo?.ellipsisText ?? ""}
+            style={
+                isSegmentSelected
+                    ? {
+                          outline: "2px solid #1a73e8",
+                          borderRadius: 2,
+                          backgroundColor: "#e8f0fe",
+                      }
+                    : undefined
+            }
         >
             {makeContent()}
         </div>

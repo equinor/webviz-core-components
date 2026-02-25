@@ -469,7 +469,7 @@ const SmartNodeSelectorTest: React.FC = () => {
         selectedTags: [],
     });
     const [testData, setTestData] =
-        React.useState<keyof typeof TEST_DATA_MAP>("simpleTestData");
+        React.useState<keyof typeof TEST_DATA_MAP>("vectorTestData");
     const [newSelectorOptions, setNewSelectorOptions] =
         React.useState<ConfigurableOptions>({
             completions: {
@@ -636,7 +636,7 @@ const SmartNodeSelectorTest: React.FC = () => {
                                 : IconRenderer,
                     },
                 }}
-                initialValue={["Data Source A:Category 2:Item B1"]}
+                initialValue={["W:WOPT:A1", "W:WOPT:A2"]}
             />
             <div style={{ marginTop: "30px" }}>
                 <OptionsConfigurator

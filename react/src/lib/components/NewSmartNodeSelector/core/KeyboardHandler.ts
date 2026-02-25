@@ -64,6 +64,39 @@ export class KeyboardHandler {
             }
         }
 
+        // Segment selection mode handling
+        if (this._stateManager.getSelectionMode() === "segment") {
+            switch (key) {
+                case "ArrowLeft":
+                    this._stateManager.navigateSegment(-1);
+                    event.preventDefault();
+                    return;
+                case "ArrowRight":
+                    this._stateManager.navigateSegment(1);
+                    event.preventDefault();
+                    return;
+                case "ArrowUp":
+                    this._stateManager.cycleSibling(-1);
+                    event.preventDefault();
+                    return;
+                case "ArrowDown":
+                    this._stateManager.cycleSibling(1);
+                    event.preventDefault();
+                    return;
+                case "Escape":
+                    this._stateManager.exit();
+                    event.preventDefault();
+                    return;
+                case "Enter":
+                    this._stateManager.confirm();
+                    event.preventDefault();
+                    return;
+                // Any other key falls through to handleInput → insertText,
+                // which auto-switches to text mode before inserting.
+            }
+            return;
+        }
+
         // Default keyboard handling - route to StateManager operations
         switch (key) {
             // Navigation

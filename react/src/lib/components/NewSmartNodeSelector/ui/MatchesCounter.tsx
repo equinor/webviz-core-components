@@ -9,10 +9,6 @@ export type MatchesCounterProps = {
 export function MatchesCounter(props: MatchesCounterProps) {
     const slotsContext = React.useContext(SmartNodeSelectorSlotsContext);
 
-    if (props.matches.length === 0) {
-        return null;
-    }
-
     const MatchesCounterComponent = slotsContext.slots.matchesCounter;
     const matchesCounterProps = {
         style: {

@@ -23,6 +23,7 @@ import { CompletionsPopover } from "./ui/CompletionsPopover";
 import { DebugInfo } from "./ui/DebugInfo";
 import { HiddenTextarea } from "./ui/HiddenTextarea";
 import { QueryChip } from "./ui/QueryChip";
+import { SiblingBrowserController } from "./ui/SiblingBrowserController";
 import type { DeepRequired } from "./utils/deepRequired";
 import type { InputModifier } from "./input-modifiers/interface";
 import type { InactiveSegmentRenderer } from "./inactive-segment-renderer/interface";
@@ -372,6 +373,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         </RootComponent>
                         <DebugInfo />
                         <CompletionsPopover mainRef={ref} />
+                        <SiblingBrowserController mainRef={ref} />
                     </div>
                 </SmartNodeSelectorOptionsContext.Provider>
             </SmartNodeSelectorSlotsContext.Provider>

@@ -51,6 +51,47 @@ export function useMouseEventHandler(
 
                 const segmentIndex = parseInt(segmentIndexStr, 10);
 
+                const selectionMode = stateManager.getSelectionMode();
+                if (selectionMode === "query") {
+                    // In query mode, clicking any segment enters segment mode
+                    stateManager.enterSegmentSelection(queryId, segmentIndex);
+                    event.preventDefault();
+                    return;
+                }
+                if (selectionMode === "segment") {
+                    const currentSeg = stateManager.getSegmentSelection();
+                    const isActiveSegment =
+                        currentSeg?.queryId === queryId &&
+                        currentSeg?.focus === segmentIndex;
+                    if (!isActiveSegment) {
+                        // Different segment → enter segment mode for that one
+                        stateManager.enterSegmentSelection(
+                            queryId,
+                            segmentIndex
+                        );
+                        event.preventDefault();
+                        return;
+                    }
+                    // Active segment clicked → fall through to text-mode caret positioning
+                }
+                if (selectionMode === "text") {
+                    // Clicking a segment on a different query (or no query focused) →
+                    // enter segment mode rather than jumping straight to text mode
+                    const focusedQueryId =
+                        currentCaretPositions.length === 1
+                            ? currentCaretPositions[0].queryId
+                            : null;
+                    if (focusedQueryId !== queryId) {
+                        stateManager.enterSegmentSelection(
+                            queryId,
+                            segmentIndex
+                        );
+                        event.preventDefault();
+                        return;
+                    }
+                    // Same query → fall through to text-mode caret positioning
+                }
+
                 // Get query item and segment text
                 const queryItem = stateManager.getQueryItemById(queryId);
                 if (!queryItem) return;

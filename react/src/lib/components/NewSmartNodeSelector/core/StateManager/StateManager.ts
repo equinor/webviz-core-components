@@ -18,12 +18,14 @@ import {
     QueryTextSelectionsDelegate,
     type QueryTextSelectionsDelegateSnapshot,
 } from "./QueryTextSelectionsDelegate";
+import { SegmentSelectionDelegate } from "./SegmentSelectionDelegate";
 import type {
     CompletionContext,
     QueryItem,
     QuerySegment,
     QuerySelection,
     QueryTextSelection,
+    SegmentSelection,
     SegmentTextSelection,
     Selection,
     SelectionMode,
@@ -39,6 +41,7 @@ export enum Topic {
     FOCUSED_SEGMENT = "focusedSegment",
     COMPLETION_CONTEXT = "completionContext",
     DATA_REVISION = "dataRevision",
+    SEGMENT_SELECTION = "segmentSelection",
 }
 
 export type TopicPayloads = {
@@ -50,6 +53,7 @@ export type TopicPayloads = {
     [Topic.FOCUSED_SEGMENT]: QuerySegment | null;
     [Topic.COMPLETION_CONTEXT]: CompletionContext | null;
     [Topic.DATA_REVISION]: number;
+    [Topic.SEGMENT_SELECTION]: SegmentSelection | null;
 };
 
 export type StateManagerOptions = {
@@ -62,6 +66,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _pubSubDelegate = new PubSubDelegate<TopicPayloads>();
     private _queryTextSelectionsDelegate = new QueryTextSelectionsDelegate();
     private _querySelectionDelegate = new QuerySelectionDelegate();
+    private _segmentSelectionDelegate = new SegmentSelectionDelegate();
 
     // Settings
     private _options: StateManagerOptions;
@@ -74,6 +79,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _selectionMode: SelectionMode = "text";
     private _segmentTextSelections: SegmentTextSelection[] = [];
     private _focusedSegment: QuerySegment | null = null;
+    private _segmentSelection: SegmentSelection | null = null;
     private _treeAccessor: TreeAccessor<IndexedNode> | null = null;
     private _parseCache = new Cache<ParsedQuery>();
     private _treeMatchCache = new Cache<EvaluationResult<IndexedNode>>();
@@ -160,6 +166,15 @@ export class StateManager implements PubSub<TopicPayloads> {
             this.setSelectionMode("query");
         }
 
+        if (patch.segmentSelection !== undefined) {
+            this._segmentSelection = patch.segmentSelection;
+            if (patch.segmentSelection !== null) {
+                this.setSelectionMode("segment");
+                this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_SELECTION);
+                this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
+            }
+        }
+
         if (patch.selectionMode !== undefined) {
             this.setSelectionMode(patch.selectionMode);
         }
@@ -205,6 +220,31 @@ export class StateManager implements PubSub<TopicPayloads> {
                 );
             }
             return selectedTexts.join("");
+        }
+
+        if (this._selectionMode === "segment") {
+            if (!this._segmentSelection) {
+                return "";
+            }
+            const { queryId, anchor, focus } = this._segmentSelection;
+            const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+            if (!queryItem) {
+                return "";
+            }
+            const parsedQuery = this.getParsedQuery(queryItem.query);
+            if (!parsedQuery) {
+                return "";
+            }
+            const start = Math.min(anchor, focus);
+            const end = Math.max(anchor, focus);
+            const segments = parsedQuery.segments.slice(start, end + 1);
+            if (segments.length === 0) {
+                return "";
+            }
+            return queryItem.query.slice(
+                segments[0].charRange.start,
+                segments[segments.length - 1].charRange.end
+            );
         }
 
         throw new Error("Invalid selection mode");
@@ -263,9 +303,23 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._selectionMode = mode;
         if (mode === "query") {
             this.clearQueryTextSelections();
+            this.clearSegmentSelection();
+        } else if (mode === "segment") {
+            this.clearQueryTextSelections();
+            this.clearQuerySelection();
         } else {
             this.clearQuerySelection();
+            this.clearSegmentSelection();
         }
+    }
+
+    private clearSegmentSelection(): void {
+        if (this._segmentSelection === null) {
+            return;
+        }
+        this._segmentSelection = null;
+        this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_SELECTION);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
     }
 
     clearQuerySelection(): void {
@@ -413,16 +467,23 @@ export class StateManager implements PubSub<TopicPayloads> {
             case Topic.HAS_FOCUS:
                 return () =>
                     (this._queryTextSelections.length > 0 ||
-                        this._querySelection !== null) as TopicPayloads[T];
+                        this._querySelection !== null ||
+                        this._segmentSelection !== null) as TopicPayloads[T];
             case Topic.COMPLETION_CONTEXT:
                 return () => this._completionContext as TopicPayloads[T];
             case Topic.DATA_REVISION:
                 return () => this._dataRevision as TopicPayloads[T];
+            case Topic.SEGMENT_SELECTION:
+                return () => this._segmentSelection as TopicPayloads[T];
         }
+        throw new Error(`Unknown topic: ${topic}`);
     }
 
     processFocusChange(hasFocus: boolean): void {
-        const currentlyHasFocus = this._queryTextSelections.length > 0;
+        const currentlyHasFocus =
+            this._queryTextSelections.length > 0 ||
+            this._querySelection !== null ||
+            this._segmentSelection !== null;
 
         if (hasFocus) {
             // Only set caret position if we don't already have focus
@@ -430,10 +491,11 @@ export class StateManager implements PubSub<TopicPayloads> {
                 this.setTextFocusOffsetToEndOfLastItem();
             }
         } else {
-            // Only clear if we currently have focus
+            // Clear all selection states when focus is lost
             if (currentlyHasFocus) {
                 this.clearQueryTextSelections();
                 this.clearQuerySelection();
+                this.clearSegmentSelection();
             }
         }
     }
@@ -556,7 +618,10 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     private updateCompletionsContext(): void {
-        if (this._queryTextSelections.length !== 1) {
+        if (
+            this._queryTextSelections.length !== 1 ||
+            this._selectionMode === "segment"
+        ) {
             this._completionContext = null;
             this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
             return;
@@ -663,7 +728,29 @@ export class StateManager implements PubSub<TopicPayloads> {
             if (!queryItem) {
                 return;
             }
+            // Non-empty chip → enter segment mode on last segment
+            if (queryItem.query.length > 0) {
+                const parsedQuery = this.getParsedQuery(queryItem.query);
+                const lastSegmentIndex = Math.max(
+                    0,
+                    (parsedQuery?.segments.length ?? 1) - 1
+                );
+                this.enterSegmentSelection(queryItem.id, lastSegmentIndex);
+                return;
+            }
+            // Empty chip → enter text mode (existing behaviour)
             this.setTextFocusOffsetToEndOfQueryItem(queryItem.id);
+            return;
+        }
+
+        if (this._selectionMode === "segment") {
+            if (!this._segmentSelection) {
+                return;
+            }
+            this.setTextFocusOffsetToEndOfSegment(
+                this._segmentSelection.queryId,
+                this._segmentSelection.focus
+            );
             return;
         }
 
@@ -680,6 +767,15 @@ export class StateManager implements PubSub<TopicPayloads> {
         if (this._selectionMode === "text") {
             if (this._queryTextSelections.length === 0) {
                 this.clearQueryTextSelections();
+                return;
+            }
+
+            // If there is a focused segment, go back to segment mode first
+            if (this._focusedSegment) {
+                this.enterSegmentSelection(
+                    this._focusedSegment.queryId,
+                    this._focusedSegment.segmentIndex
+                );
                 return;
             }
 
@@ -711,6 +807,25 @@ export class StateManager implements PubSub<TopicPayloads> {
                 },
             };
             this.applyPatch(patch);
+            return;
+        }
+
+        if (this._selectionMode === "segment") {
+            if (!this._segmentSelection) {
+                this.clearSegmentSelection();
+                return;
+            }
+            const queryIndex = this._queriesStoreDelegate.getIndexById(
+                this._segmentSelection.queryId
+            );
+            if (queryIndex === -1) {
+                this.clearSegmentSelection();
+                return;
+            }
+            this.applyPatch({
+                selectionMode: "query",
+                querySelection: { anchor: queryIndex, focus: queryIndex },
+            });
             return;
         }
 
@@ -1056,6 +1171,14 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     insertText(text: string, allowModification: boolean = false): void {
+        // If in segment mode, switch to text mode at end of current segment first
+        if (this._selectionMode === "segment" && this._segmentSelection) {
+            this.setTextFocusOffsetToEndOfSegment(
+                this._segmentSelection.queryId,
+                this._segmentSelection.focus
+            );
+        }
+
         const focusedSegment = this.getFocusedSegment();
         let modifiedText = text;
         if (focusedSegment && allowModification) {
@@ -1100,6 +1223,166 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_TEXT_SELECTIONS);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
+    }
+
+    // ── Segment selection ──────────────────────────────────────────────────
+
+    getSelectionMode(): SelectionMode {
+        return this._selectionMode;
+    }
+
+    getSegmentSelection(): SegmentSelection | null {
+        return this._segmentSelection;
+    }
+
+    private makeSegmentSelectionSnapshot() {
+        return {
+            segmentSelection: this._segmentSelection,
+            getQueryById: (id: string) =>
+                this._queriesStoreDelegate.getItemById(id),
+            getQueryIndexById: (id: string) =>
+                this._queriesStoreDelegate.getIndexById(id),
+            getParsedQuery: (query: string) => this.getParsedQuery(query),
+            getSegmentSiblings: (queryId: string, segmentIndex: number) =>
+                this.getSegmentSiblings(queryId, segmentIndex),
+        };
+    }
+
+    enterSegmentSelection(queryId: string, segmentIndex: number): void {
+        this._segmentSelection = {
+            queryId,
+            anchor: segmentIndex,
+            focus: segmentIndex,
+        };
+        this.setSelectionMode("segment");
+        this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_SELECTION);
+        this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
+        this.updateCompletionsContext();
+    }
+
+    navigateSegment(direction: 1 | -1): void {
+        if (this._selectionMode !== "segment") {
+            return;
+        }
+        const snapshot = this.makeSegmentSelectionSnapshot();
+        const result = this._segmentSelectionDelegate.navigateSegment(
+            snapshot,
+            { direction }
+        );
+        if (result.kind === "moved") {
+            this.applyPatch(result.patch);
+        }
+    }
+
+    cycleSibling(direction: 1 | -1): void {
+        if (this._selectionMode !== "segment") {
+            return;
+        }
+        const snapshot = this.makeSegmentSelectionSnapshot();
+        const result = this._segmentSelectionDelegate.cycleSibling(snapshot, {
+            direction,
+        });
+        if (result.kind === "moved") {
+            // Clear caches before applying the query-text patch
+            this._parseCache.clear();
+            this._treeMatchCache.clear();
+            this.applyPatch(result.patch);
+        }
+    }
+
+    getSegmentBrowserInfo(
+        queryId: string,
+        segmentIndex: number
+    ): { siblings: string[]; currentIndex: number } | null {
+        const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+        if (!queryItem) {
+            return null;
+        }
+        const parsedQuery = this.getParsedQuery(queryItem.query);
+        const segment = parsedQuery?.segments[segmentIndex];
+        if (!segment) {
+            return null;
+        }
+        const currentText = queryItem.query.slice(
+            segment.charRange.start,
+            segment.charRange.end
+        );
+        const siblings = this.getSegmentSiblings(queryId, segmentIndex);
+        const currentIndex = siblings.indexOf(currentText);
+        return { siblings, currentIndex };
+    }
+
+    private setTextFocusOffsetToEndOfSegment(
+        queryId: string,
+        segmentIndex: number
+    ): void {
+        const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+        if (!queryItem) {
+            return;
+        }
+        const parsedQuery = this.getParsedQuery(queryItem.query);
+        if (!parsedQuery) {
+            return;
+        }
+        const segment = parsedQuery.segments[segmentIndex];
+        if (!segment) {
+            return;
+        }
+        const caretPosition: QueryTextSelection = {
+            queryId,
+            focus: segment.charRange.end,
+            anchor: segment.charRange.end,
+        };
+        this.setSelectionMode("text");
+        this.updateQueryTextSelections([caretPosition]);
+    }
+
+    private getSegmentSiblings(
+        queryId: string,
+        segmentIndex: number
+    ): string[] {
+        if (!this._treeAccessor) {
+            return [];
+        }
+        const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+        if (!queryItem) {
+            return [];
+        }
+
+        if (segmentIndex === 0) {
+            const root = this._treeAccessor.getRoot();
+            const names = new Set<string>();
+            for (const child of this._treeAccessor.getChildren(root)) {
+                names.add(this._treeAccessor.getName(child));
+            }
+            return [...names].sort();
+        }
+
+        const parsedQuery = this.getParsedQuery(queryItem.query);
+        if (!parsedQuery) {
+            return [];
+        }
+        const prevSegment = parsedQuery.segments[segmentIndex - 1];
+        if (!prevSegment) {
+            return [];
+        }
+
+        const prefixText = queryItem.query.slice(0, prevSegment.charRange.end);
+        const parsedPrefix = parseQuery(prefixText, {
+            delimiter: this._options.segmentDelimiter,
+        });
+        const result = evaluateQuery(parsedPrefix, this._treeAccessor);
+        if (result.matches.size === 0) {
+            return [];
+        }
+
+        const names = new Set<string>();
+        for (const node of result.matches) {
+            for (const child of this._treeAccessor.getChildren(node)) {
+                names.add(this._treeAccessor.getName(child));
+            }
+        }
+        return [...names].sort();
     }
 }
 
