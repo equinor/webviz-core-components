@@ -3,6 +3,7 @@ import type { IndexedNode } from "../core";
 import { SmartNodeSelectorSlotsContext } from "../SmartNodeSelector";
 
 export type MatchesCounterProps = {
+    visible: boolean;
     matches: IndexedNode[];
 };
 
@@ -17,6 +18,10 @@ export function MatchesCounter(props: MatchesCounterProps) {
         },
         ...slotsContext.slotProps.matchesCounter,
     };
+
+    if (!props.visible) {
+        return null;
+    }
 
     function makeTitle() {
         let title = "";

@@ -218,7 +218,10 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                       : undefined
             }
         >
-            <MatchesCounter matches={matchedLeafNodes} />
+            <MatchesCounter
+                visible={hasMoreThanOneSegment}
+                matches={matchedLeafNodes}
+            />
             <div
                 data-query-chip-content
                 style={{
@@ -236,7 +239,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                     isLast={props.isLast}
                 />
             </div>
-            {!props.isLast && hasMoreThanOneSegment && (
+            {hasMoreThanOneSegment && (
                 <button onClick={handleRemoveTagClick} aria-label="Remove tag">
                     &#x2715;
                 </button>

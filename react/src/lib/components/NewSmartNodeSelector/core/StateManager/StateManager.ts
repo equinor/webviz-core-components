@@ -153,6 +153,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             }
             this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
             this.ensureAtLeastOneQueryItem();
+            this.ensureTrailingEmptyQuery();
             this.ensureValidSelection();
         }
 
@@ -254,6 +255,19 @@ export class StateManager implements PubSub<TopicPayloads> {
         if (this._queriesStoreDelegate.getNumItems() === 0) {
             this.addQueryItem("");
         }
+    }
+
+    private ensureTrailingEmptyQuery(): void {
+        const lastItem = this._queriesStoreDelegate.getLastItem();
+        if (!lastItem || lastItem.query === "") {
+            return;
+        }
+        const parsedQuery = this.getParsedQuery(lastItem.query);
+        if (!parsedQuery || parsedQuery.segments.length <= 1) {
+            return;
+        }
+        this._queriesStoreDelegate.addItem("");
+        this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
     }
 
     private ensureValidSelection(): void {
@@ -1090,6 +1104,7 @@ export class StateManager implements PubSub<TopicPayloads> {
 
         this._queriesStoreDelegate.updateItem(id, newQuery);
         this._pubSubDelegate.notifySubscribers(Topic.QUERY_ITEMS);
+        this.ensureTrailingEmptyQuery();
         return true;
     }
 
