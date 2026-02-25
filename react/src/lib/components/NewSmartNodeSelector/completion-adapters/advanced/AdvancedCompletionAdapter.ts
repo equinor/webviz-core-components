@@ -69,7 +69,7 @@ export class AdvancedCompletionAdapter implements CompletionsAdapter {
         if (args.selectedIndex >= 0) {
             return nodeCompletions[args.selectedIndex] ?? null;
         } else {
-            const syntaxIndex = syntaxCompletions.length + args.selectedIndex;
+            const syntaxIndex = -args.selectedIndex - 1;
             return syntaxCompletions[syntaxIndex] ?? null;
         }
     }

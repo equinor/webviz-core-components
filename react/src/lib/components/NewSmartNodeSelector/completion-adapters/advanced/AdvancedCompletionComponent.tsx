@@ -127,7 +127,7 @@ function renderSyntaxCompletionItems(
                         color: selectedIndex === index ? "white" : "black",
                     }}
                     title={makeTitle(completion)}
-                    onClick={() => onClick(-index)}
+                    onClick={() => onClick(-(index + 1))}
                 >
                     {completion.insertText}
                 </li>
