@@ -39,7 +39,7 @@ export function SiblingBrowserPopover(
         siblingsAfter.push(siblings[index]);
     }
 
-    const wheelHeight = ITEM_HEIGHT * visibleSiblings * 2 + 1;
+    const wheelHeight = ITEM_HEIGHT * (visibleSiblings * 2 + 1);
 
     return (
         <>
@@ -84,11 +84,15 @@ function HalfWheel(props: HalfWheelProps) {
             const popoverWidth = 200;
             const requiredHeight =
                 requiredHalfHeightPx({
-                    steps: props.items.length, // for this half
+                    numItems: props.items.length,
                     itemHeightPx: ITEM_HEIGHT,
                     anglePerStepDeg: ANGLE_PER_STEP_DEG,
-                    radiusPx: WHEEL_RADIUS_PX / 2, // we reduce the radius for half wheel to make it less tall
-                }) + margin;
+                    radiusPx: WHEEL_RADIUS_PX,
+                    direction: props.direction,
+                    paddingPx: margin,
+                }) *
+                    2 +
+                margin;
 
             const spaceBelow = viewportHeight - (rect.bottom + margin);
             const spaceAbove = rect.top - margin;
@@ -110,7 +114,7 @@ function HalfWheel(props: HalfWheelProps) {
                 popoverElement.style.maxHeight = `${Math.min(spaceAbove, requiredHeight)}px`;
             }
         },
-        [props.anchorElement, props.direction, props.wheelHeight]
+        [props.anchorElement, props.direction, props.wheelHeight, props.items]
     );
 
     React.useEffect(
@@ -134,11 +138,8 @@ function HalfWheel(props: HalfWheelProps) {
             onMouseDown={(e) => e.preventDefault()}
             style={{
                 boxSizing: "border-box",
-                borderRadius: 4,
                 border: 0,
-                boxShadow: "0 2px 8px rgba(42, 42, 42, 0.15)",
-                backgroundColor: "rgba(255, 255, 255, 0.5)",
-                backdropFilter: "blur(3px)",
+                backgroundColor: "transparent",
                 inset: "unset",
                 padding: 0,
                 overflow: "hidden",
@@ -153,8 +154,6 @@ function HalfWheel(props: HalfWheelProps) {
                     padding: 0,
                     flex: 1,
                     overflow: "hidden",
-
-                    // ✅ this is the key
                     display: "flex",
                     flexDirection: "column",
                     justifyContent:
@@ -169,21 +168,22 @@ function HalfWheel(props: HalfWheelProps) {
 
                     const rotateX = offset * ANGLE_PER_STEP_DEG;
                     const abs = Math.abs(offset);
-                    const opacity = 1 - abs * 0.05;
-                    const scale = 1 - abs * 0.01;
+                    const opacity = 1 - (abs - 1) * 0.2;
+                    const scale = 1 - (abs - 1) * 0.15;
 
                     return (
                         <li
                             key={index}
                             style={{
-                                padding: "5px 10px",
+                                padding: "4px 10px",
                                 cursor: "pointer",
                                 backgroundColor: "transparent",
-                                fontWeight: 400,
+                                fontWeight: 600,
                                 fontSize: "13px",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
+                                textShadow: "0 0 5px rgba(255, 255, 255, 0.8)",
                                 textAlign: "center",
                                 transformStyle: "preserve-3d",
                                 transform: `translateY(${offset * ITEM_HEIGHT}px) rotateX(${rotateX}deg) translateZ(${WHEEL_RADIUS_PX}px) scale(${scale})`,
