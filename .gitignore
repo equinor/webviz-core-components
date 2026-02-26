@@ -17,6 +17,7 @@ R/
 man/
 inst/
 react/dist/
+react/demo-dist/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### VisualStudioCode template

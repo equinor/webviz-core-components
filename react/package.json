@@ -16,6 +16,8 @@
     ],
     "scripts": {
         "start": "webpack serve --mode development --devtool inline-source-map --open",
+        "build:demo": "webpack --mode production --env outputDir=demo-dist && copyfiles -f index.html demo-dist",
+        "deploy:demo": "npm run build:demo && npx gh-pages -d demo-dist",
         "copy-package-json": "cp ./package.json ../webviz_core_components/package.json",
         "transpile": "tsc && npm run copy-files",
         "transpile:dash": "tsc && rimraf ./dist/components/*/**/",

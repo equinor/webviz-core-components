@@ -42,6 +42,11 @@ module.exports = (env, argv) => {
 
     const filenameCss = demo ? "output.css" : `${dashLibraryName}.css`;
 
+    const demoOutputDir =
+        demo && env && env.outputDir
+            ? path.resolve(__dirname, env.outputDir)
+            : __dirname;
+
     // Devtool
 
     const devtool =
@@ -67,7 +72,7 @@ module.exports = (env, argv) => {
         target: "web",
         output: {
             path: demo
-                ? __dirname
+                ? demoOutputDir
                 : path.resolve(__dirname, "..", dashLibraryName),
             filename: filenameJs,
             library: dashLibraryName,
