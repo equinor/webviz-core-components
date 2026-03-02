@@ -161,7 +161,7 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
         }
 
         return {
-            text: completion.label + suffix,
+            text: completion.label,
             range: completion.replaceRange,
         };
     }

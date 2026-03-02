@@ -42,6 +42,7 @@ export enum Topic {
     COMPLETION_CONTEXT = "completionContext",
     DATA_REVISION = "dataRevision",
     SEGMENT_SELECTION = "segmentSelection",
+    COMPLETIONS_POPOVER_FOCUSED = "completionsPopoverFocused",
 }
 
 export type TopicPayloads = {
@@ -54,6 +55,7 @@ export type TopicPayloads = {
     [Topic.COMPLETION_CONTEXT]: CompletionContext | null;
     [Topic.DATA_REVISION]: number;
     [Topic.SEGMENT_SELECTION]: SegmentSelection | null;
+    [Topic.COMPLETIONS_POPOVER_FOCUSED]: boolean;
 };
 
 export type StateManagerOptions = {
@@ -84,6 +86,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _parseCache = new Cache<ParsedQuery>();
     private _treeMatchCache = new Cache<EvaluationResult<IndexedNode>>();
     private _completionContext: CompletionContext | null = null;
+    private _completionsPopoverFocused: boolean = false;
 
     constructor(options: StateManagerOptions) {
         this._options = options;
@@ -489,6 +492,8 @@ export class StateManager implements PubSub<TopicPayloads> {
                 return () => this._dataRevision as TopicPayloads[T];
             case Topic.SEGMENT_SELECTION:
                 return () => this._segmentSelection as TopicPayloads[T];
+            case Topic.COMPLETIONS_POPOVER_FOCUSED:
+                return () => this._completionsPopoverFocused as TopicPayloads[T];
         }
         throw new Error(`Unknown topic: ${topic}`);
     }
@@ -505,12 +510,25 @@ export class StateManager implements PubSub<TopicPayloads> {
                 this.setTextFocusOffsetToEndOfLastItem();
             }
         } else {
-            // Clear all selection states when focus is lost
-            if (currentlyHasFocus) {
+            // Clear all selection states when focus is lost, unless the
+            // completions popover currently holds focus (e.g. a NewCompletionsAdapter
+            // component with its own interactive input).
+            if (currentlyHasFocus && !this._completionsPopoverFocused) {
                 this.clearQueryTextSelections();
                 this.clearQuerySelection();
                 this.clearSegmentSelection();
             }
+        }
+    }
+
+    setCompletionsPopoverFocused(hasFocus: boolean): void {
+        if (this._completionsPopoverFocused === hasFocus) return;
+        this._completionsPopoverFocused = hasFocus;
+        this._pubSubDelegate.notifySubscribers(Topic.COMPLETIONS_POPOVER_FOCUSED);
+        if (!hasFocus) {
+            // Re-notify HAS_FOCUS so HiddenTextarea re-focuses the textarea
+            // if we still have an active selection.
+            this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
         }
     }
 

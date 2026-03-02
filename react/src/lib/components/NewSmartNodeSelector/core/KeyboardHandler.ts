@@ -35,18 +35,26 @@ export class KeyboardHandler {
 
         this._inputBuffer.push(key);
 
-        // Try suggestions navigation first (if suggestions are visible)
+        // When completions are visible, Tab/ArrowDown/ArrowUp switch focus to
+        // the popover. The popover owns its own keyboard handler from there.
         if (this._completionsState.hasCompletions()) {
             switch (key) {
+                case "Tab":
+                    this._stateManager.setCompletionsPopoverFocused(true);
+                    event.preventDefault();
+                    return;
                 case "ArrowDown":
                     this._completionsState.selectNext();
+                    this._stateManager.setCompletionsPopoverFocused(true);
                     event.preventDefault();
                     return;
                 case "ArrowUp":
                     this._completionsState.selectPrevious();
+                    this._stateManager.setCompletionsPopoverFocused(true);
                     event.preventDefault();
                     return;
                 case "Enter": {
+                    // Immediate confirm from textarea without switching focus.
                     const selected =
                         this._completionsState.getSelectedCompletion();
                     if (!selected) {

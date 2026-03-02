@@ -185,8 +185,6 @@ function HalfWheel(props: HalfWheelProps) {
                                 whiteSpace: "nowrap",
                                 textShadow: "0 0 5px rgba(255, 255, 255, 0.8)",
                                 textAlign: "center",
-                                transformStyle: "preserve-3d",
-                                transform: `translateY(${offset * ITEM_HEIGHT}px) rotateX(${rotateX}deg) translateZ(${WHEEL_RADIUS_PX}px) scale(${scale})`,
                                 opacity,
                             }}
                             title={name}

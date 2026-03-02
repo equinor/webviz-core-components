@@ -1,4 +1,5 @@
 import type { IndexedNode } from "../core";
+import { QueryAST } from "../core/query-language/ast/ast";
 import type { CaretContext } from "../core/query-language/completion/caretContext";
 import type { CompletionItem } from "../core/query-language/types/completion";
 import type { Range } from "../core/utils/range";
@@ -39,4 +40,18 @@ export interface CompletionsAdapter {
     ): SelectedCompletion;
     hasCompletions(args: CompletionsAdapterFuncArgs): boolean;
     component: React.ComponentType<CompletionsAdapterComponentProps>;
+}
+
+
+export type NewCompletionsAdapterComponentProps = {
+    queryBefore: QueryAST;
+    completions: CompletionItem<IndexedNode>[];
+    onSelect: (index: number) => void;
+    onDoneEditing: () => void;
+    onNextSegment: () => void;
+}
+
+export interface NewCompletionsAdapter {
+    component: React.ComponentType<NewCompletionsAdapterComponentProps>;
+    onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => boolean;
 }

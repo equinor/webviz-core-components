@@ -123,6 +123,20 @@ export function CompletionsPopover(
         [focusedSegment, props.mainRef]
     );
 
+    const completionsPopoverFocused = useSubscribeToTopic(
+        stateManager,
+        Topic.COMPLETIONS_POPOVER_FOCUSED
+    );
+
+    React.useEffect(
+        function focusPopoverWhenActive() {
+            if (completionsPopoverFocused) {
+                popoverRef.current?.focus({ preventScroll: true });
+            }
+        },
+        [completionsPopoverFocused]
+    );
+
     const CompletionsComponent = completionsState.getComponent();
 
     const handleSelectCompletion = React.useCallback(
@@ -138,15 +152,59 @@ export function CompletionsPopover(
         [stateManager, completionsState]
     );
 
+    const handleKeyDown = React.useCallback(
+        function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+            switch (e.key) {
+                case "ArrowDown":
+                    completionsState.selectNext();
+                    e.preventDefault();
+                    break;
+                case "ArrowUp":
+                    completionsState.selectPrevious();
+                    e.preventDefault();
+                    break;
+                case "Enter": {
+                    const selected = completionsState.getSelectedCompletion();
+                    if (selected) {
+                        stateManager.updateFocusedQueryItem(
+                            selected.text,
+                            selected.range
+                        );
+                    }
+                    stateManager.setCompletionsPopoverFocused(false);
+                    e.preventDefault();
+                    break;
+                }
+                case "Escape":
+                case "Tab":
+                    stateManager.setCompletionsPopoverFocused(false);
+                    e.preventDefault();
+                    break;
+            }
+        },
+        [stateManager, completionsState]
+    );
+
     return (
         <div
             ref={popoverRef}
             popover="manual"
             data-completion-popover
+            tabIndex={-1}
             onMouseDown={(e) => {
                 // Prevent mousedown from causing textarea to lose focus
                 e.preventDefault();
             }}
+            onFocus={() => {
+                stateManager.setCompletionsPopoverFocused(true);
+            }}
+            onBlur={(e) => {
+                // Only clear when focus leaves the popover entirely
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                    stateManager.setCompletionsPopoverFocused(false);
+                }
+            }}
+            onKeyDown={handleKeyDown}
             style={{
                 boxSizing: "border-box" as const,
                 border: "1px solid #ccc",
