@@ -33,22 +33,26 @@ export function HiddenTextarea(): React.ReactElement {
         stateManager,
         Topic.QUERY_SELECTION
     );
+    const completionsPopoverFocused = useSubscribeToTopic(
+        stateManager,
+        Topic.COMPLETIONS_POPOVER_FOCUSED
+    );
 
     React.useEffect(
         function focusTextarea() {
             if (!ref.current) {
                 return;
             }
-            if (hasFocus) {
-                // Always call focus when hasFocus is true or queryTextSelections changes.
-                // This handles the case where the textarea lost focus externally
-                // but the state manager still thinks we have focus.
+            if (hasFocus && !completionsPopoverFocused) {
+                // Focus the textarea whenever we have active state and the
+                // completions popover is not holding focus. This also handles
+                // the case where the popover releases focus back to us.
                 ref.current.focus({ preventScroll: true });
-            } else {
+            } else if (!hasFocus) {
                 ref.current.blur();
             }
         },
-        [hasFocus, queryTextSelections, querySelection]
+        [hasFocus, queryTextSelections, querySelection, completionsPopoverFocused]
     );
 
     const handleInput = React.useCallback(

@@ -1,8 +1,5 @@
 import type { IndexedNode } from "../../core";
-import type {
-    CompletionItem,
-    SyntaxCompletionItem,
-} from "../../core/query-language/types/completion";
+import type { CompletionItem } from "../../core/query-language/types/completion";
 import type {
     CompletionsAdapter,
     CompletionsAdapterFuncArgs,
@@ -36,7 +33,7 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
         if (args.selectedIndex === null) {
             return null;
         } else {
-            return Math.max(args.selectedIndex - 1, -1);
+            return Math.max(args.selectedIndex - 1, 0);
         }
     }
 
@@ -61,45 +58,6 @@ export class SimpleCompletionsAdapter implements CompletionsAdapter {
     ): CompletionItem<IndexedNode> | null {
         if (args.selectedIndex === null) {
             return null;
-        }
-
-        const range = args.caretContext
-            ? {
-                  start: args.caretContext.caretOffset,
-                  end: args.caretContext.caretOffset,
-              }
-            : { start: 0, end: 0 };
-        if (args.caretContext?.insideGroup) {
-            if (args.selectedIndex === -2) {
-                const unionCompletion: SyntaxCompletionItem = {
-                    label: "+",
-                    kind: "unionFlag",
-                    insertText: "+",
-                    replaceRange: { start: 0, end: 0 },
-                    segmentReplaceRange: { start: 0, end: 0 },
-                };
-                return unionCompletion as CompletionItem<IndexedNode>;
-            } else if (args.selectedIndex === -1) {
-                const closeGroupCompletion: SyntaxCompletionItem = {
-                    label: ")",
-                    kind: "group",
-                    insertText: ")",
-                    replaceRange: range,
-                    segmentReplaceRange: range,
-                };
-                return closeGroupCompletion as CompletionItem<IndexedNode>;
-            }
-        } else {
-            if (args.selectedIndex === -1) {
-                const openGroupCompletion: SyntaxCompletionItem = {
-                    label: "(",
-                    kind: "group",
-                    insertText: "(",
-                    replaceRange: { start: 0, end: 0 },
-                    segmentReplaceRange: { start: 0, end: 0 },
-                };
-                return openGroupCompletion as CompletionItem<IndexedNode>;
-            }
         }
 
         const nodeCompletions = this.makeNodeCompletions(args.completions);

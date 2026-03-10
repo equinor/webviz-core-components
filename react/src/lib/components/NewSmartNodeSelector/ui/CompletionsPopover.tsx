@@ -31,9 +31,9 @@ export function CompletionsPopover(
         CompletionsTopic.COMPLETIONS
     );
 
-    const selectedIndex = useSubscribeToTopic(
+    const sessionState = useSubscribeToTopic(
         completionsState,
-        CompletionsTopic.SELECTED_INDEX
+        CompletionsTopic.SESSION_STATE
     );
 
     const caretContext = useSubscribeToTopic(
@@ -137,53 +137,101 @@ export function CompletionsPopover(
         [completionsPopoverFocused]
     );
 
-    const CompletionsComponent = completionsState.getComponent();
+    const strategy = completionsState.getStrategy();
+    const StrategyComponent = strategy.component;
 
-    const handleSelectCompletion = React.useCallback(
-        function handleSelectCompletion(completionIndex: number) {
-            completionsState.setSelectedIndex(completionIndex);
-            const selectedCompletion = completionsState.getSelectedCompletion();
-            if (!selectedCompletion) {
+    const handleAccept = React.useCallback(
+        function handleAccept() {
+            const appliedCompletion = completionsState.getAppliedCompletion();
+            if (!appliedCompletion) {
                 return;
             }
-            const { text, range } = selectedCompletion;
-            stateManager.updateFocusedQueryItem(text, range);
+
+            stateManager.updateFocusedQueryItem(
+                appliedCompletion.text,
+                appliedCompletion.range
+            );
+            stateManager.setCompletionsPopoverFocused(false);
         },
-        [stateManager, completionsState]
+        [completionsState, stateManager]
+    );
+
+    const handleClose = React.useCallback(
+        function handleClose() {
+            stateManager.setCompletionsPopoverFocused(false);
+        },
+        [stateManager]
+    );
+
+    const handleSetState = React.useCallback(
+        function handleSetState(updater: any) {
+            if (typeof updater === "function") {
+                completionsState.updateSessionState(updater);
+            } else {
+                completionsState.setSessionState(updater);
+            }
+        },
+        [completionsState]
     );
 
     const handleKeyDown = React.useCallback(
         function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-            switch (e.key) {
-                case "ArrowDown":
-                    completionsState.selectNext();
-                    e.preventDefault();
-                    break;
-                case "ArrowUp":
-                    completionsState.selectPrevious();
-                    e.preventDefault();
-                    break;
-                case "Enter": {
-                    const selected = completionsState.getSelectedCompletion();
-                    if (selected) {
-                        stateManager.updateFocusedQueryItem(
-                            selected.text,
-                            selected.range
-                        );
-                    }
-                    stateManager.setCompletionsPopoverFocused(false);
-                    e.preventDefault();
-                    break;
-                }
-                case "Escape":
-                case "Tab":
-                    stateManager.setCompletionsPopoverFocused(false);
-                    e.preventDefault();
-                    break;
+            if (sessionState === null) {
+                return;
+            }
+
+            const result = strategy.onKeyDown(e, {
+                state: sessionState,
+                completions,
+                caretContext,
+                delimiter: completionsState.getDelimiter(),
+            });
+
+            if (result.nextState !== undefined) {
+                completionsState.setSessionState(result.nextState);
+            }
+
+            if (result.accept) {
+                handleAccept();
+            }
+
+            if (result.close) {
+                handleClose();
+            }
+
+            if (result.focusEditor) {
+                stateManager.setCompletionsPopoverFocused(false);
+            }
+
+            if (
+                result.nextState !== undefined ||
+                result.accept ||
+                result.close ||
+                result.focusEditor
+            ) {
+                e.preventDefault();
             }
         },
-        [stateManager, completionsState]
+        [
+            strategy,
+            sessionState,
+            completions,
+            caretContext,
+            completionsState,
+            handleAccept,
+            handleClose,
+            stateManager,
+        ]
     );
+
+    const segmentSelections = focusedSegment?.queryId
+        ? stateManager.getMatchedNodesForQuerySegment(
+              focusedSegment.queryId,
+              focusedSegment.segmentIndex
+          )?.matches
+        : [];
+
+    const shouldRenderStrategy = sessionState !== null;
 
     return (
         <div
@@ -214,13 +262,21 @@ export function CompletionsPopover(
                 inset: "unset",
             }}
         >
-            <CompletionsComponent
-                completions={completions}
-                maxContainerHeight={maxHeight}
-                selectedIndex={selectedIndex}
-                onSelectCompletion={handleSelectCompletion}
-                caretContext={caretContext}
-            />
+            {shouldRenderStrategy && (
+                <StrategyComponent
+                    state={sessionState}
+                    completions={completions}
+                    caretContext={caretContext}
+                    delimiter={completionsState.getDelimiter()}
+                    maxContainerHeight={maxHeight}
+                    currentSegmentSelections={Array.from(
+                        segmentSelections ?? []
+                    )}
+                    setState={handleSetState}
+                    accept={handleAccept}
+                    close={handleClose}
+                />
+            )}
         </div>
     );
 }

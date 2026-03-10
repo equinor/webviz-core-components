@@ -493,7 +493,8 @@ export class StateManager implements PubSub<TopicPayloads> {
             case Topic.SEGMENT_SELECTION:
                 return () => this._segmentSelection as TopicPayloads[T];
             case Topic.COMPLETIONS_POPOVER_FOCUSED:
-                return () => this._completionsPopoverFocused as TopicPayloads[T];
+                return () =>
+                    this._completionsPopoverFocused as TopicPayloads[T];
         }
         throw new Error(`Unknown topic: ${topic}`);
     }
@@ -524,7 +525,9 @@ export class StateManager implements PubSub<TopicPayloads> {
     setCompletionsPopoverFocused(hasFocus: boolean): void {
         if (this._completionsPopoverFocused === hasFocus) return;
         this._completionsPopoverFocused = hasFocus;
-        this._pubSubDelegate.notifySubscribers(Topic.COMPLETIONS_POPOVER_FOCUSED);
+        this._pubSubDelegate.notifySubscribers(
+            Topic.COMPLETIONS_POPOVER_FOCUSED
+        );
         if (!hasFocus) {
             // Re-notify HAS_FOCUS so HiddenTextarea re-focuses the textarea
             // if we still have an active selection.

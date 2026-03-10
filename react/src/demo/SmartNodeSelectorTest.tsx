@@ -3,7 +3,6 @@
  */
 import React from "react";
 import { SmartNodeSelector } from "../lib";
-import { SimpleCompletionsAdapter } from "../lib/components/NewSmartNodeSelector/completion-adapters/simple/SimpleCompletionsAdapter";
 import {
     SmartNodeSelector as NewSmartNodeSelector,
     type SmartNodeSelectorOptions,
@@ -11,6 +10,7 @@ import {
 import { TEST_DATA } from "./testdata";
 import { vectorSelectorModifier } from "../lib/components/NewSmartNodeSelector/input-modifiers/VectorSelectorModifier";
 import { IconRenderer } from "../lib/components/NewSmartNodeSelector/inactive-segment-renderer/iconRenderer";
+import { SimpleCompletionStrategy } from "../lib/components/NewSmartNodeSelector/completions-strategies/simple/Strategy";
 
 type SmartNodeSelectorState = {
     selectedTags: string[];
@@ -621,9 +621,9 @@ const SmartNodeSelectorTest: React.FC = () => {
                 data={TEST_DATA_MAP[testData]}
                 options={{
                     ...newSelectorOptions,
-                    completionsAdapter:
+                    completionStrategy:
                         newSelectorOptions.mode === "simple"
-                            ? new SimpleCompletionsAdapter()
+                            ? new SimpleCompletionStrategy()
                             : undefined,
                     inputModifier:
                         testData === "simpleTestData"

@@ -7,8 +7,6 @@
 
 import { merge } from "lodash";
 import React from "react";
-import { AdvancedCompletionAdapter } from "./completion-adapters/advanced/AdvancedCompletionAdapter";
-import type { CompletionsAdapter } from "./completion-adapters/interface";
 import { type IndexedNode, type TreeDataNode } from "./core";
 import { CompletionsState } from "./core/CompletionsState";
 import { useSubscribeToTopic } from "./core/PubSubDelegate";
@@ -27,6 +25,8 @@ import { SiblingBrowserController } from "./ui/SiblingBrowserController";
 import type { DeepRequired } from "./utils/deepRequired";
 import type { InputModifier } from "./input-modifiers/interface";
 import type { InactiveSegmentRenderer } from "./inactive-segment-renderer/interface";
+import type { CompletionStrategy } from "./completions-strategies/interface";
+import { SimpleCompletionStrategy } from "./completions-strategies/simple/Strategy";
 
 export type SmartNodeSelectorClassNames = {
     root?: string;
@@ -36,7 +36,7 @@ export type SmartNodeSelectorClassNames = {
 };
 
 export type SmartNodeSelectorOptions = {
-    completionsAdapter?: CompletionsAdapter;
+    completionStrategy?: CompletionStrategy<IndexedNode, any>;
     inputModifier?: InputModifier;
     ui: {
         inactiveSegmentRenderer?: InactiveSegmentRenderer<IndexedNode>;
@@ -117,7 +117,7 @@ type SmartNodeSelectorSlotProps<
 
 export type SmartNodeSelectorDataContextType = {
     stateManager: StateManager;
-    completionsState: CompletionsState;
+    completionsState: CompletionsState<IndexedNode, unknown>;
     placeholders: {
         newTag: string;
         incompleteTag: string;
@@ -158,7 +158,7 @@ const DEFAULT_SLOT_PROPS: CompleteSlotProps = {
 };
 
 const DEFAULT_OPTIONS: DeepRequired<SmartNodeSelectorOptions> = {
-    completionsAdapter: new AdvancedCompletionAdapter(),
+    completionStrategy: new SimpleCompletionStrategy(),
     inputModifier: (input: string) => input,
     ui: {
         inactiveSegmentRenderer: () => null,
@@ -237,8 +237,11 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
     const completionsState = React.useMemo(() => {
         return new CompletionsState({
             treeAccessor,
-            completionsAdapter:
-                defaultedOptions.completionsAdapter as CompletionsAdapter,
+            completionStrategy:
+                defaultedOptions.completionStrategy as CompletionStrategy<
+                    IndexedNode,
+                    unknown
+                >,
             matchOptions: {
                 caseInsensitive: defaultedOptions.matching.caseInsensitive,
             },
@@ -246,7 +249,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         });
     }, [
         treeAccessor,
-        defaultedOptions.completionsAdapter,
+        defaultedOptions.completionStrategy,
         defaultedOptions.matching.caseInsensitive,
     ]);
 

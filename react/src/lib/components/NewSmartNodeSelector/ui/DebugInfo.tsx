@@ -23,9 +23,9 @@ export function DebugInfo(): React.ReactElement {
         context.stateManager,
         Topic.FOCUSED_SEGMENT
     );
-    const selectedIndex = useSubscribeToTopic(
+    const sessionState = useSubscribeToTopic(
         context.completionsState,
-        CompletionsTopic.SELECTED_INDEX
+        CompletionsTopic.SESSION_STATE
     );
     const querySelection = useSubscribeToTopic(
         context.stateManager,
@@ -562,7 +562,7 @@ export function DebugInfo(): React.ReactElement {
                                         color: "#666",
                                     }}
                                 >
-                                    Selected Index:
+                                    Completion Session State
                                 </span>
                                 <span
                                     style={{
@@ -572,7 +572,7 @@ export function DebugInfo(): React.ReactElement {
                                         color: "#0066cc",
                                     }}
                                 >
-                                    {selectedIndex ?? "—"}
+                                    {JSON.stringify(sessionState ?? "-")}
                                 </span>
                             </div>
                         </div>

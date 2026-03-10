@@ -3,6 +3,7 @@ import type { IndexedNode } from "../../core";
 import type { NodeCompletionItem } from "../../core/query-language/types/completion";
 import { VirtualizedList } from "../../ui/VirtualizedList";
 import type { CompletionsAdapterComponentProps } from "../interface";
+import { Checkbox } from "@equinor/eds-core-react";
 
 export function SimpleCompletionsComponent(
     props: CompletionsAdapterComponentProps
@@ -14,87 +15,13 @@ export function SimpleCompletionsComponent(
         );
     }, [props.completions]);
 
-    const insideGroup = props.caretContext?.insideGroup ?? false;
-
     return (
         <>
-            <ul
-                style={{
-                    borderBottom: "1px solid #ccc",
-                    marginBottom: 4,
-                    padding: "2px 8px",
-                }}
-            >
-                {insideGroup ? (
-                    <>
-                        <li
-                            className="suggestion-item"
-                            style={{
-                                padding: "8px 12px",
-                                cursor: "pointer",
-                                backgroundColor:
-                                    props.selectedIndex === -2
-                                        ? "#e6f0ff"
-                                        : "transparent",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "1em",
-                            }}
-                            onClick={() => props.onSelectCompletion(-2)}
-                        >
-                            <div style={{ fontWeight: 800 }}>Toggle Union</div>
-                            <div style={{ fontSize: "smaller", color: "#666" }}>
-                                Toggle union match
-                            </div>
-                        </li>
-                        <li
-                            className="suggestion-item"
-                            style={{
-                                padding: "8px 12px",
-                                cursor: "pointer",
-                                backgroundColor:
-                                    props.selectedIndex === -1
-                                        ? "#e6f0ff"
-                                        : "transparent",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "1em",
-                            }}
-                            onClick={() => props.onSelectCompletion(-1)}
-                        >
-                            <div style={{ fontWeight: 800 }}>Close group</div>
-                            <div style={{ fontSize: "smaller", color: "#666" }}>
-                                Close the current group
-                            </div>
-                        </li>
-                    </>
-                ) : (
-                    <li
-                        className="suggestion-item"
-                        style={{
-                            padding: "8px 12px",
-                            cursor: "pointer",
-                            backgroundColor:
-                                props.selectedIndex === -1
-                                    ? "#e6f0ff"
-                                    : "transparent",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "1em",
-                        }}
-                        onClick={() => props.onSelectCompletion(-1)}
-                    >
-                        <div style={{ fontWeight: 800 }}>Start a group</div>
-                        <div style={{ fontSize: "smaller", color: "#666" }}>
-                            Create a new group to match multiple nodes
-                        </div>
-                    </li>
-                )}
-            </ul>
             <div style={{ padding: 4, overflow: "auto" }}>
                 <VirtualizedList
                     items={nodeCompletions}
                     itemHeight={48}
+                    context={props.currentSegmentSelections}
                     maxHeight={Math.min(props.maxContainerHeight - 24, 48 * 10)}
                     renderItem={renderNodeCompletionItem}
                     onItemClick={(_, index) => props.onSelectCompletion(index)}
@@ -118,7 +45,8 @@ export function SimpleCompletionsComponent(
 
 function renderNodeCompletionItem(
     completion: NodeCompletionItem<IndexedNode>,
-    isSelected: boolean
+    isSelected: boolean,
+    context: IndexedNode[]
 ) {
     let label: string | React.ReactNode = completion.insertText;
     let detail: React.ReactNode = null;
@@ -141,6 +69,13 @@ function renderNodeCompletionItem(
         detail = `${completion.origin.count} matching nodes`;
     }
 
+    const isSelectedInContext = context.some((node) => {
+        if (completion.origin.kind === "single") {
+            return node === completion.origin.node;
+        }
+        return false;
+    });
+
     return (
         <li
             className="suggestion-item"
@@ -153,6 +88,7 @@ function renderNodeCompletionItem(
                 gap: "1em",
             }}
         >
+            <Checkbox checked={isSelectedInContext} readOnly />
             <div style={{ fontWeight: 800 }}>{label}</div>
             {detail && (
                 <div style={{ fontSize: "smaller", color: "#666" }}>

@@ -1,21 +1,26 @@
 import React from "react";
 
-export type VirtualizedListProps<TItem> = {
+export type VirtualizedListProps<TItem, TContext> = {
     items: TItem[];
     itemHeight: number;
     maxHeight: number;
-    renderItem: (item: TItem, isSelected: boolean) => React.ReactNode;
+    context?: TContext;
+    renderItem: (
+        item: TItem,
+        isSelected: boolean,
+        context: TContext
+    ) => React.ReactNode;
     onItemClick?: (item: TItem, index: number) => void;
     overscanCount?: number;
     selectedIndex?: number | null;
 };
 
-const DEFAULT_PROPS: Partial<VirtualizedListProps<unknown>> = {
+const DEFAULT_PROPS: Partial<VirtualizedListProps<unknown, unknown>> = {
     overscanCount: 3,
 };
 
-export function VirtualizedList<TItem>(
-    props: VirtualizedListProps<TItem>
+export function VirtualizedList<TItem, TContext>(
+    props: VirtualizedListProps<TItem, TContext>
 ): React.ReactElement {
     const defaultedProps = {
         ...DEFAULT_PROPS,
@@ -124,7 +129,8 @@ export function VirtualizedList<TItem>(
                             <React.Fragment key={itemIndex}>
                                 {defaultedProps.renderItem(
                                     item,
-                                    itemIndex === defaultedProps.selectedIndex
+                                    itemIndex === defaultedProps.selectedIndex,
+                                    defaultedProps.context as TContext
                                 )}
                             </React.Fragment>
                         </div>

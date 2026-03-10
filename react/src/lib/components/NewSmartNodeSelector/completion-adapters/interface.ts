@@ -16,6 +16,7 @@ export interface CompletionsAdapterConstructor {
 export type CompletionsAdapterComponentProps = {
     selectedIndex: number | null;
     completions: CompletionItem<IndexedNode>[];
+    currentSegmentSelections: IndexedNode[];
     onSelectCompletion: (index: number) => void;
     maxContainerHeight: number;
     caretContext: CaretContext | null;
@@ -42,14 +43,10 @@ export interface CompletionsAdapter {
     component: React.ComponentType<CompletionsAdapterComponentProps>;
 }
 
-
 export type NewCompletionsAdapterComponentProps = {
     queryBefore: QueryAST;
     completions: CompletionItem<IndexedNode>[];
-    onSelect: (index: number) => void;
-    onDoneEditing: () => void;
-    onNextSegment: () => void;
-}
+};
 
 export interface NewCompletionsAdapter {
     component: React.ComponentType<NewCompletionsAdapterComponentProps>;
