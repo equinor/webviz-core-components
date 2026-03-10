@@ -3,7 +3,7 @@ import type { StateManager } from "./StateManager/StateManager";
 
 export type KeyboardHandlerOptions = {
     stateManager: StateManager;
-    suggestionsState: CompletionsState;
+    suggestionsState: CompletionsState<any, any>;
 };
 
 /**
@@ -13,7 +13,7 @@ export type KeyboardHandlerOptions = {
  */
 export class KeyboardHandler {
     private _stateManager: StateManager;
-    private _completionsState: CompletionsState;
+    private _completionsState: CompletionsState<any, any>;
     private _unsubscribeFunctions: (() => void)[] = [];
     private _inputBuffer: string[] = [];
 
@@ -37,34 +37,20 @@ export class KeyboardHandler {
 
         // When completions are visible, Tab/ArrowDown/ArrowUp switch focus to
         // the popover. The popover owns its own keyboard handler from there.
-        if (this._completionsState.hasCompletions()) {
+        if (this._completionsState.getCompletions().length > 0) {
             switch (key) {
                 case "Tab":
                     this._stateManager.setCompletionsPopoverFocused(true);
                     event.preventDefault();
                     return;
                 case "ArrowDown":
-                    this._completionsState.selectNext();
                     this._stateManager.setCompletionsPopoverFocused(true);
                     event.preventDefault();
                     return;
                 case "ArrowUp":
-                    this._completionsState.selectPrevious();
                     this._stateManager.setCompletionsPopoverFocused(true);
                     event.preventDefault();
                     return;
-                case "Enter": {
-                    // Immediate confirm from textarea without switching focus.
-                    const selected =
-                        this._completionsState.getSelectedCompletion();
-                    if (!selected) {
-                        break;
-                    }
-                    const { text, range } = selected;
-                    this._stateManager.updateFocusedQueryItem(text, range);
-                    event.preventDefault();
-                    return;
-                }
                 case "Escape":
                     this._completionsState.clearCompletions();
                     event.preventDefault();
