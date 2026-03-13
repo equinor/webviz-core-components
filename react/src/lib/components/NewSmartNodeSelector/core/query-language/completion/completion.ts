@@ -7,7 +7,7 @@ import {
 import { evaluatePrefix } from "../evaluator/evaluatePrefix";
 import { matchesName, type MatchOptions } from "../matcher/matchesName";
 import type { ParsedQuery } from "../parse";
-import type { CompletionItem } from "../types/completion";
+import type { CompletionItem, SegmentCompletionItem } from "../types/completion";
 import type { TreeAccessor } from "../types/tree";
 import { getCaretContext, type CaretContext } from "./caretContext";
 import { rankCompletions } from "./ranking";
@@ -73,6 +73,26 @@ export function getCompletions<Node>(
     } else {
         // Add syntax-based completions
         all.push(...getSyntaxCompletions<Node>(context, hasFullMatch));
+
+        // Added all nodes matching the current segment as completions, with tree-based matching and filtering
+        all.push(...Array.from(pool).map((node) => {
+            const completionItem: SegmentCompletionItem<Node> = {
+                label: tree.getName(node),
+                insertText: tree.getName(node),
+                replaceRange: context.replaceRange,
+                segmentReplaceRange: {
+                    start:
+                        context.replaceRange.start -
+                        context.segmentAst.charRange.start,
+                    end:
+                        context.replaceRange.end -
+                        context.segmentAst.charRange.start,
+                },
+                kind: "segment",
+                origin: { kind: "single", node, nodeNameRange: { start: 0, end: tree.getName(node).length } },
+            };
+            return completionItem;
+        }));
 
         // Add tree-based completions
         all.push(...getTreeCompletions<Node>(context, pool, tree, opts));

@@ -10,8 +10,8 @@ function getCompletionKey<Node>(item: CompletionItem<Node>): string {
 
 function isSimpleNodeCompletion<Node>(
     item: CompletionItem<Node>
-): item is Extract<CompletionItem<Node>, { kind: "node" }> {
-    return item.kind === "node" && item.origin.kind === "single";
+): item is Extract<CompletionItem<Node>, { kind: "segment" }> {
+    return item.kind === "segment" && item.origin.kind === "single";
 }
 
 export function SimpleCompletionStrategyComponent(
@@ -20,7 +20,9 @@ export function SimpleCompletionStrategyComponent(
         SimpleCompletionSessionState
     >
 ): React.ReactElement {
-    const items = props.completions.filter(isSimpleNodeCompletion);
+    const items = React.useMemo(() => {
+        return props.completions.filter(isSimpleNodeCompletion);
+    }, [props.completions]);
 
     return (
         <div
@@ -39,40 +41,6 @@ export function SimpleCompletionStrategyComponent(
                     marginBottom: 8,
                 }}
             >
-                <button
-                    type="button"
-                    onClick={() =>
-                        props.setState((prev) => ({
-                            ...prev,
-                            operator: "union",
-                        }))
-                    }
-                    style={{
-                        fontWeight:
-                            props.state.operator === "union"
-                                ? "bold"
-                                : "normal",
-                    }}
-                >
-                    OR
-                </button>
-                <button
-                    type="button"
-                    onClick={() =>
-                        props.setState((prev) => ({
-                            ...prev,
-                            operator: "intersection",
-                        }))
-                    }
-                    style={{
-                        fontWeight:
-                            props.state.operator === "intersection"
-                                ? "bold"
-                                : "normal",
-                    }}
-                >
-                    AND
-                </button>
                 <button type="button" onClick={props.accept}>
                     Apply
                 </button>
@@ -87,50 +55,24 @@ export function SimpleCompletionStrategyComponent(
                         const selected = props.state.selectedIds.includes(id);
                         const highlighted = props.state.highlightedId === id;
 
-                        return (
-                            <button
-                                key={id}
-                                type="button"
-                                onClick={() =>
-                                    props.setState((prev) => ({
-                                        ...prev,
-                                        highlightedId: id,
-                                        selectedIds: prev.selectedIds.includes(
-                                            id
-                                        )
-                                            ? prev.selectedIds.filter(
-                                                  (x) => x !== id
-                                              )
-                                            : [...prev.selectedIds, id],
-                                    }))
-                                }
-                                style={{
-                                    display: "flex",
-                                    width: "100%",
-                                    alignItems: "center",
-                                    gap: 8,
-                                    padding: "6px 8px",
-                                    border: "none",
-                                    background: highlighted
-                                        ? "#f3f3f3"
-                                        : "transparent",
-                                    cursor: "pointer",
-                                    textAlign: "left",
-                                }}
-                            >
-                                <span>{selected ? "✓" : ""}</span>
-                                <span>{item.label}</span>
-                                {item.detail && (
-                                    <span
-                                        style={{
-                                            marginLeft: "auto",
-                                            opacity: 0.7,
-                                        }}
-                                    >
-                                        {item.detail}
-                                    </span>
-                                )}
-                            </button>
+                        return (<div key={id} style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: 4,
+                            backgroundColor: highlighted ? "#def" : undefined,
+                            cursor: "pointer",
+                        }} onMouseEnter={() => props.setState((prev) => ({ ...prev, highlightedId: id }))}>
+                            <input type="checkbox" key={id} id={id} checked={selected} onChange={() => {
+                                props.setState((prev) => ({
+                                    ...prev,
+                                    highlightedId: id,
+                                    selectedIds: prev.selectedIds.includes(id)
+                                        ? prev.selectedIds.filter((x) => x !== id)
+                                        : [...prev.selectedIds, id],
+                                }));
+                            }} />
+                            <label style={{ marginLeft: 4 }} htmlFor={id}>{item.label}</label>
+                            </div>
                         );
                     })}
                 </div>

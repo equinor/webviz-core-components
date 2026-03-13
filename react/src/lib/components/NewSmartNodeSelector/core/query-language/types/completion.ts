@@ -17,6 +17,11 @@ export type NodeCompletionItem<Node> = CompletionItemBase & {
     origin: CompletionNodeOrigin<Node>;
 };
 
+export type SegmentCompletionItem<Node> = CompletionItemBase & {
+    kind: "segment";
+    origin: CompletionNodeOrigin<Node>;
+};
+
 export type SyntaxCompletionItem = CompletionItemBase & {
     kind:
         | "unionFlag"
@@ -39,6 +44,7 @@ export type AttributeValueCompletionItem<Node> = CompletionItemBase & {
 
 export type CompletionItem<Node> =
     | NodeCompletionItem<Node>
+    | SegmentCompletionItem<Node>
     | SyntaxCompletionItem
     | AttributeNameCompletionItem
     | AttributeValueCompletionItem<Node>;

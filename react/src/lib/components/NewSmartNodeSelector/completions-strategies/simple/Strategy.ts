@@ -12,7 +12,6 @@ import { SimpleCompletionStrategyComponent } from "./Component";
 export type SimpleCompletionSessionState = {
     highlightedId: string | null;
     selectedIds: string[];
-    operator: "union" | "intersection";
 };
 
 export class SimpleCompletionStrategy implements CompletionStrategy<
@@ -64,20 +63,7 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
                     },
                 };
 
-            case "ArrowLeft":
-            case "ArrowRight":
-                return {
-                    nextState: {
-                        ...args.state,
-                        operator:
-                            args.state.operator === "union"
-                                ? "intersection"
-                                : "union",
-                    },
-                };
-
-            case " ":
-            case "Enter": {
+            case " ":{
                 const highlightedId = args.state.highlightedId;
                 if (!highlightedId) {
                     return {};
@@ -98,6 +84,7 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
                 };
             }
 
+            case "Enter":
             case "Tab":
                 return { accept: true };
 
@@ -126,11 +113,11 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
 
         const joined = selectedItems.map((item) => item.insertText).join("|");
         const text =
-            args.state.operator === "intersection" ? `+${joined}` : joined;
+            `${joined}${args.delimiter}`;
 
         return {
             text,
-            range: selectedItems[0].segmentReplaceRange,
+            range: selectedItems[0].replaceRange,
         };
     }
 }
@@ -141,8 +128,8 @@ function getCompletionKey<Node>(item: CompletionItem<Node>): string {
 
 function isSimpleNodeCompletion<Node>(
     item: CompletionItem<Node>
-): item is Extract<CompletionItem<Node>, { kind: "node" }> {
-    if (item.kind !== "node") {
+): item is Extract<CompletionItem<Node>, { kind: "segment" }> {
+    if (item.kind !== "segment") {
         return false;
     }
 
@@ -153,8 +140,8 @@ function isSimpleNodeCompletion<Node>(
 
 function getSimpleItems<Node>(
     completions: CompletionItem<Node>[]
-): Extract<CompletionItem<Node>, { kind: "node" }>[] {
-    return completions.filter(isSimpleNodeCompletion);
+): Extract<CompletionItem<Node>, { kind: "segment" }>[] {
+    return completions.filter(isSimpleNodeCompletion) as Extract<CompletionItem<Node>, { kind: "segment" }>[];
 }
 
 function reconcileSimpleState<Node>(
@@ -177,13 +164,12 @@ function reconcileSimpleState<Node>(
     return {
         highlightedId,
         selectedIds,
-        operator: prevState?.operator ?? "union",
     };
 }
 
 function moveHighlightedId<Node>(
     currentId: string | null,
-    items: Extract<CompletionItem<Node>, { kind: "node" }>[],
+    items: Extract<CompletionItem<Node>, { kind: "segment" }>[],
     direction: 1 | -1
 ): string | null {
     if (items.length === 0) {

@@ -87,6 +87,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     private _treeMatchCache = new Cache<EvaluationResult<IndexedNode>>();
     private _completionContext: CompletionContext | null = null;
     private _completionsPopoverFocused: boolean = false;
+    private _hasFocus: boolean = false;
 
     constructor(options: StateManagerOptions) {
         this._options = options;
@@ -500,15 +501,13 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     processFocusChange(hasFocus: boolean): void {
-        const currentlyHasFocus =
-            this._queryTextSelections.length > 0 ||
-            this._querySelection !== null ||
-            this._segmentSelection !== null;
+        const currentlyHasFocus = this._hasFocus;
+        this._hasFocus = hasFocus;
 
         if (hasFocus) {
             // Only set caret position if we don't already have focus
             if (!currentlyHasFocus) {
-                this.setTextFocusOffsetToEndOfLastItem();
+                this.setSegmentFocusOffsetToLastItem();
             }
         } else {
             // Clear all selection states when focus is lost, unless the
@@ -1232,6 +1231,23 @@ export class StateManager implements PubSub<TopicPayloads> {
         if (result.kind === "moved") {
             this.applyPatch(result.patch);
         }
+    }
+
+    setSegmentFocusOffsetToLastItem() {
+        const lastItem = this._queriesStoreDelegate.getLastItem();
+        if (!lastItem) {
+            return;
+        }
+
+        const parsedQuery = this.getParsedQuery(lastItem.query);
+        if (!parsedQuery || parsedQuery.segments.length === 0) {
+            return;
+        }
+
+        const lastSegmentIndex = parsedQuery.segments.length - 1;
+
+        this.setSelectionMode("segment");
+        this.enterSegmentSelection(lastItem.id, lastSegmentIndex);
     }
 
     setTextFocusOffsetToEndOfLastItem() {
