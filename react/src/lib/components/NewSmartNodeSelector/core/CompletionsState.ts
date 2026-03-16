@@ -46,6 +46,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
     private _completions: CompletionItem<TNode>[] = [];
     private _caretContext: CaretContext | null = null;
     private _sessionState: TState | null = null;
+    private _currentSegmentSelections: TNode[] = [];
 
     constructor(options: CompletionsStateOptions<TNode, TState>) {
         this._treeAccessor = options.treeAccessor;
@@ -121,11 +122,15 @@ export class CompletionsState<TNode, TState> implements PubSub<
         return this._caretContext;
     }
 
+    getCurrentSegmentSelections(): TNode[] {
+        return this._currentSegmentSelections;
+    }
+
     /**
      * Update completions for the given query and segment index.
      * Called by input handlers when the focused segment changes.
      */
-    updateCompletions(parsedQuery: ParsedQuery, caretOffset: number): void {
+    updateCompletions(parsedQuery: ParsedQuery, caretOffset: number, currentSegmentSelections: TNode[] = []): void {
         const { completions, caretContext } = getCompletions<TNode>(
             parsedQuery,
             caretOffset,
@@ -137,12 +142,14 @@ export class CompletionsState<TNode, TState> implements PubSub<
 
         this._completions = completions;
         this._caretContext = caretContext;
+        this._currentSegmentSelections = currentSegmentSelections;
 
         this._sessionState = this._strategy.reconcileState({
             prevState: this._sessionState,
             completions: this._completions,
             caretContext: this._caretContext,
             delimiter: this._delimiter,
+            currentSegmentSelections: this._currentSegmentSelections,
         });
 
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.COMPLETIONS);
@@ -173,6 +180,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
             completions: this._completions,
             caretContext: this._caretContext,
             delimiter: this._delimiter,
+            currentSegmentSelections: this._currentSegmentSelections,
             state: this._sessionState,
         });
     }

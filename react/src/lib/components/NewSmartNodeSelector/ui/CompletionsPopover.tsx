@@ -147,7 +147,7 @@ export function CompletionsPopover(
                 return;
             }
 
-            stateManager.updateFocusedQueryItem(
+            stateManager.applyFocusedCompletion(
                 appliedCompletion.text,
                 appliedCompletion.range
             );
@@ -185,6 +185,7 @@ export function CompletionsPopover(
                 completions,
                 caretContext,
                 delimiter: completionsState.getDelimiter(),
+                currentSegmentSelections: completionsState.getCurrentSegmentSelections(),
             });
 
             if (result.nextState !== undefined) {

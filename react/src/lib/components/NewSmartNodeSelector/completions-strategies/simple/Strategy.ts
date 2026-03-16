@@ -26,7 +26,7 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
             SimpleCompletionSessionState
         >
     ): SimpleCompletionSessionState {
-        return reconcileSimpleState(args.prevState, args.completions);
+        return reconcileSimpleState(args.prevState, args.completions, args.currentSegmentSelections);
     }
 
     onKeyDown(
@@ -146,13 +146,21 @@ function getSimpleItems<Node>(
 
 function reconcileSimpleState<Node>(
     prevState: SimpleCompletionSessionState | null,
-    completions: CompletionItem<Node>[]
+    completions: CompletionItem<Node>[],
+    currentSegmentSelections: Node[] = []
 ): SimpleCompletionSessionState {
     const items = getSimpleItems(completions);
     const validIds = new Set(items.map(getCompletionKey));
 
-    const selectedIds =
-        prevState?.selectedIds.filter((id) => validIds.has(id)) ?? [];
+    const persistedIds = prevState?.selectedIds.filter((id) => validIds.has(id)) ?? [];
+    const selectedIds = persistedIds.length > 0
+        ? persistedIds
+        : (() => {
+            const selectionSet = new Set(currentSegmentSelections);
+            return items
+                .filter((item) => item.origin.kind === "single" && selectionSet.has(item.origin.node))
+                .map(getCompletionKey);
+        })();
 
     const highlightedId =
         prevState?.highlightedId && validIds.has(prevState.highlightedId)

@@ -12,7 +12,7 @@ export function useLeafNodeMatches(queryItem: QueryItem): IndexedNode[] {
         Topic.DATA_REVISION
     );
 
-    const matchedLeafNodes = React.useMemo(() => {
+    const matchedLeafNodes = React.useMemo(function computeMatchedLeafNodes() {
         const evaluationResult =
             dataContext.stateManager.getMatchedNodesForQuery(queryItem.query);
         if (evaluationResult === null) {

@@ -10,6 +10,7 @@ export type CompletionStrategyContext<Node> = {
     completions: CompletionItem<Node>[];
     caretContext: CaretContext | null;
     delimiter: string;
+    currentSegmentSelections: Node[];
 };
 
 export type CompletionStrategyRuntimeArgs<Node, TState> =

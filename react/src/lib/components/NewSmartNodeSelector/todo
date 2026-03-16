@@ -29,6 +29,7 @@
 - [ ] QueryChip
 - [ ] QuerySegment
 - [ ] Tokens
+- [ ] What is expected when pressing Enter on a complete query? -> Move to query selection and select current query? -> Move to last empty query? Insert new query after?
 
 ## Core
 

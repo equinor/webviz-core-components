@@ -652,20 +652,38 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     private updateCompletionsContext(): void {
-        if (
-            this._queryTextSelections.length !== 1 ||
-            this._selectionMode === "segment"
-        ) {
+        let queryItem: QueryItem | null = null;
+        let segmentIndex: number | null = null;
+
+        if (this._selectionMode === "query") {
             this._completionContext = null;
-            this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
             return;
         }
 
-        const queryItem = this._queriesStoreDelegate.getItemById(
-            this._queryTextSelections[0].queryId
-        );
+        if (this._selectionMode === "segment") {
+            if (!this._segmentSelection) {
+                this._completionContext = null;
+                return;
+            }
+            queryItem = this._queriesStoreDelegate.getItemById(
+                this._segmentSelection.queryId
+            );
+            segmentIndex = this._segmentSelection.focus;
+        } else if (this._selectionMode === "text") {
+            if (this._queryTextSelections.length === 0) {
+                this._completionContext = null;
+                return;
+            }
+            queryItem = this._queriesStoreDelegate.getItemById(
+                this._queryTextSelections[0].queryId
+            );
+            segmentIndex = this.computeSegmentIndex(
+                queryItem?.query ?? "",
+                this._queryTextSelections[0].focus
+            );
+        }
 
-        if (!queryItem) {
+        if (!queryItem || segmentIndex === null) {
             this._completionContext = null;
             return;
         }
@@ -674,10 +692,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             queryId: queryItem.id,
             queryItem,
             queryTextSelection: this._queryTextSelections[0],
-            segmentIndex: this.computeSegmentIndex(
-                queryItem.query,
-                this._queryTextSelections[0].focus
-            ),
+            segmentIndex,
         };
 
         this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
@@ -789,8 +804,41 @@ export class StateManager implements PubSub<TopicPayloads> {
         }
 
         if (this._selectionMode === "text") {
-            this.addQueryItem("");
-            this.setTextFocusOffsetToEndOfLastItem();
+            const queryId = this._queryTextSelections[0]?.queryId;
+            if (queryId === undefined) {
+                return;
+            }
+
+            const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+
+            if (!queryItem) {
+                return;
+            }
+
+            const matchedNodes =
+                this.getMatchedNodesForQuery(queryItem.query)?.matches ?? [];
+            const matchedLeafNodes = Array.from(matchedNodes).filter(
+                (node) => node.isLeaf
+            );
+
+            if (matchedLeafNodes.length > 0) {
+                this.setTextFocusOffsetToEndOfLastItem();
+                return;
+            }
+
+            const segmentIndex = this.computeSegmentIndex(
+                queryItem.query,
+                this._queryTextSelections[0].focus
+            );
+            if (
+                segmentIndex <
+                queryItem.query.split(this._options.segmentDelimiter).length - 1
+            ) {
+                this.moveFocus(1, false, false);
+                return;
+            }
+
+            this.insertText(this._options.segmentDelimiter, false);
             return;
         }
 
@@ -1082,6 +1130,17 @@ export class StateManager implements PubSub<TopicPayloads> {
         this.insertText(text, false);
     }
 
+    applyFocusedCompletion(insertText: string, range: Range): boolean {
+        if (this._selectionMode === "segment" && this._segmentSelection) {
+            if (!this.updateQueryItem(this._segmentSelection.queryId, insertText, range)) {
+                return false;
+            }
+            this.updateCompletionsContext();
+            return true;
+        }
+        return this.updateFocusedQueryItem(insertText, range);
+    }
+
     updateFocusedQueryItem(insertText: string, range?: Range): boolean {
         if (this._queryTextSelections.length !== 1) {
             return false;
@@ -1307,8 +1366,10 @@ export class StateManager implements PubSub<TopicPayloads> {
             focus: segmentIndex,
         };
         this.setSelectionMode("segment");
+        this._focusedSegment = { queryId, segmentIndex };
         this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_SELECTION);
         this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
+        this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
         this.updateCompletionsContext();
     }
 

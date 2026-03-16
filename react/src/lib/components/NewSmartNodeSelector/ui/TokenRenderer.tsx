@@ -164,11 +164,13 @@ export function TokenRenderer(props: TokenRendererProps): React.ReactElement {
                     style={{
                         color: "#0996e8ff",
                         fontWeight: "bold",
+                        paddingInline: "2px",
+                        transform: "scale(0.5)",
                         ...errorStyle,
                     }}
                     title={title}
                 >
-                    {token.value}
+                    ➤
                 </span>
             );
 

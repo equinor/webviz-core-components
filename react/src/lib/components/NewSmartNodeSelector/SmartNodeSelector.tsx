@@ -21,7 +21,6 @@ import { CompletionsPopover } from "./ui/CompletionsPopover";
 import { DebugInfo } from "./ui/DebugInfo";
 import { HiddenTextarea } from "./ui/HiddenTextarea";
 import { QueryChip } from "./ui/QueryChip";
-import { SiblingBrowserController } from "./ui/SiblingBrowserController";
 import type { DeepRequired } from "./utils/deepRequired";
 import type { InputModifier } from "./input-modifiers/interface";
 import type { InactiveSegmentRenderer } from "./inactive-segment-renderer/interface";
@@ -267,9 +266,20 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
             return;
         }
 
+        const currentSegmentSelections = Array.from(
+            stateManager.getMatchedNodesForQuerySegment(
+                completionContext.queryId,
+                completionContext.segmentIndex
+            )?.matches ?? []
+        );
+
         completionsState.updateCompletions(
             parsedQuery,
-            completionContext.queryTextSelection.focus
+            completionContext.queryTextSelection?.focus ??
+                parsedQuery.segments[completionContext.segmentIndex]
+                    ?.charRange.end ??
+                0,
+            currentSegmentSelections
         );
     }, [completionContext, completionsState, stateManager]);
 
@@ -304,7 +314,7 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
             stateManager,
             completionsState,
             placeholders: {
-                newTag: props.placeholders?.newTag ?? "Type to search...",
+                newTag: props.placeholders?.newTag ?? "Add query...",
                 incompleteTag:
                     props.placeholders?.incompleteQuery ?? "Continue typing...",
             },
@@ -376,7 +386,6 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
                         </RootComponent>
                         <DebugInfo />
                         <CompletionsPopover mainRef={ref} />
-                        <SiblingBrowserController mainRef={ref} />
                     </div>
                 </SmartNodeSelectorOptionsContext.Provider>
             </SmartNodeSelectorSlotsContext.Provider>
