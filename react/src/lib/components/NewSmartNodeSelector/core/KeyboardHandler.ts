@@ -58,11 +58,19 @@ export class KeyboardHandler {
         if (this._stateManager.getSelectionMode() === "segment") {
             switch (key) {
                 case "ArrowLeft":
-                    this._stateManager.navigateSegment(-1);
+                    this._stateManager.moveFocus(
+                        -1,
+                        selecting,
+                        this.hasBufferedInput()
+                    );
                     event.preventDefault();
                     return;
                 case "ArrowRight":
-                    this._stateManager.navigateSegment(1);
+                    this._stateManager.moveFocus(
+                        1,
+                        selecting,
+                        this.hasBufferedInput()
+                    );
                     event.preventDefault();
                     return;
                 case "ArrowUp":
@@ -73,6 +81,22 @@ export class KeyboardHandler {
                     this._stateManager.cycleSibling(1);
                     event.preventDefault();
                     return;
+                case "PageUp": {
+                    const sel = this._stateManager.getSegmentSelection();
+                    if (sel && sel.anchor === sel.focus) {
+                        this._stateManager.cycleSibling(-1);
+                        event.preventDefault();
+                    }
+                    return;
+                }
+                case "PageDown": {
+                    const sel = this._stateManager.getSegmentSelection();
+                    if (sel && sel.anchor === sel.focus) {
+                        this._stateManager.cycleSibling(1);
+                        event.preventDefault();
+                    }
+                    return;
+                }
                 case "Escape":
                     this._stateManager.exit();
                     event.preventDefault();

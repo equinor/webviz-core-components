@@ -12,6 +12,9 @@ import type {
     QueryContext,
     SelectedCompletion,
 } from "../completions-strategies/interface";
+import type { SelectionMode } from "./StateManager/types";
+
+export type CompletionsSelectionMode = Exclude<SelectionMode, "query">;
 
 export enum CompletionsTopic {
     COMPLETIONS = "nodeCompletions",
@@ -49,6 +52,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
     private _queryContext: QueryContext = { segmentCount: 0 };
     private _sessionState: TState | null = null;
     private _currentSegmentSelections: TNode[] = [];
+    private _selectionMode: CompletionsSelectionMode = "segment";
 
     constructor(options: CompletionsStateOptions<TNode, TState>) {
         this._treeAccessor = options.treeAccessor;
@@ -132,11 +136,20 @@ export class CompletionsState<TNode, TState> implements PubSub<
         return this._currentSegmentSelections;
     }
 
+    getSelectionMode(): CompletionsSelectionMode {
+        return this._selectionMode;
+    }
+
     /**
      * Update completions for the given query and segment index.
      * Called by input handlers when the focused segment changes.
      */
-    updateCompletions(parsedQuery: ParsedQuery, caretOffset: number, currentSegmentSelections: TNode[] = []): void {
+    updateCompletions(
+        parsedQuery: ParsedQuery,
+        caretOffset: number,
+        selectionMode: CompletionsSelectionMode,
+        currentSegmentSelections: TNode[] = []
+    ): void {
         const { completions, caretContext } = getCompletions<TNode>(
             parsedQuery,
             caretOffset,
@@ -150,6 +163,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
         this._caretContext = caretContext;
         this._queryContext = { segmentCount: parsedQuery.segments.length };
         this._currentSegmentSelections = currentSegmentSelections;
+        this._selectionMode = selectionMode;
 
         this._sessionState = this._strategy.reconcileState({
             prevState: this._sessionState,
@@ -157,6 +171,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
             caretContext: this._caretContext,
             queryContext: this._queryContext,
             delimiter: this._delimiter,
+            selectionMode: this._selectionMode,
             currentSegmentSelections: this._currentSegmentSelections,
         });
 
@@ -190,6 +205,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
             queryContext: this._queryContext,
             delimiter: this._delimiter,
             currentSegmentSelections: this._currentSegmentSelections,
+            selectionMode: this._selectionMode,
             state: this._sessionState,
         });
     }

@@ -30,10 +30,43 @@ export function useMouseEventHandler(
                 ) as HTMLElement;
 
                 if (!segmentElement) {
-                    // Clicking outside a segment should set caret to end
-                    // This will trigger hasFocus=true, which will make HiddenTextarea focus
+                    // Don't intercept interactive elements (e.g. remove buttons)
+                    if ((target as HTMLElement).closest("button")) {
+                        return;
+                    }
+
+                    // If a query chip is under the cursor, enter query selection
+                    // for that chip rather than jumping to the end of the last item.
+                    const chipElement = target.closest(
+                        "[data-querychip-id]"
+                    ) as HTMLElement | null;
+                    if (chipElement) {
+                        const chipId =
+                            chipElement.getAttribute("data-querychip-id");
+                        if (chipId) {
+                            const chipIndex =
+                                stateManager.getQueryItemIndexById(chipId);
+                            // Only enter query selection for non-last chips.
+                            // The last chip is the editing slot that fills the
+                            // remaining space; clicking its empty area should
+                            // fall through to selecting the last segment below.
+                            const isLastChip =
+                                stateManager.getQueryItemByIndex(
+                                    chipIndex + 1
+                                ) === null;
+                            if (chipIndex >= 0 && !isLastChip) {
+                                event.preventDefault();
+                                stateManager.enterQuerySelectionAtIndex(
+                                    chipIndex
+                                );
+                                return;
+                            }
+                        }
+                    }
+
+                    // Clicking outside any chip — select last segment
                     event.preventDefault();
-                    stateManager.setTextFocusOffsetToEndOfLastItem();
+                    stateManager.setSegmentFocusOffsetToLastItem();
                     return;
                 }
 

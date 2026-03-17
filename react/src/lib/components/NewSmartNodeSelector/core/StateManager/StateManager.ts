@@ -172,6 +172,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         if (patch.querySelection !== undefined) {
             this._querySelection = patch.querySelection;
             this.setSelectionMode("query");
+            this._pubSubDelegate.notifySubscribers(Topic.QUERY_SELECTION);
         }
 
         if (patch.segmentSelection !== undefined) {
@@ -337,6 +338,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             this.clearQuerySelection();
             this.clearSegmentSelection();
         }
+        this.updateCompletionsContext();
     }
 
     private clearSegmentSelection(): void {
@@ -513,9 +515,17 @@ export class StateManager implements PubSub<TopicPayloads> {
         this._hasFocus = hasFocus;
 
         if (hasFocus) {
-            // Only set caret position if we don't already have focus
+            // Only fall back to last item if we don't already have focus AND
+            // no selection was set by a prior mousedown handler (e.g. a click
+            // on a segment or chip before the textarea received its focus event).
             if (!currentlyHasFocus) {
-                this.setSegmentFocusOffsetToLastItem();
+                const hasActiveSelection =
+                    this._queryTextSelections.length > 0 ||
+                    this._querySelection !== null ||
+                    this._segmentSelection !== null;
+                if (!hasActiveSelection) {
+                    this.setSegmentFocusOffsetToLastItem();
+                }
             }
         } else {
             // Clear all selection states when focus is lost, unless the
@@ -701,6 +711,7 @@ export class StateManager implements PubSub<TopicPayloads> {
             queryItem,
             queryTextSelection: this._queryTextSelections[0],
             segmentIndex,
+            selectionMode: this._selectionMode,
         };
 
         this._pubSubDelegate.notifySubscribers(Topic.COMPLETION_CONTEXT);
@@ -918,7 +929,7 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     moveFocus(dx: number, selecting: boolean, keyHoldPressed: boolean): void {
-        if (this._selectionMode !== "text") {
+        if (this._selectionMode === "query") {
             const snapshot = this.makeQuerySelectionSnapshot();
             const result = this._querySelectionDelegate.moveFocus(snapshot, {
                 dx,
@@ -942,6 +953,41 @@ export class StateManager implements PubSub<TopicPayloads> {
             }
 
             if (result.kind === "hitBoundary") {
+                return;
+            }
+        }
+
+        if (this._selectionMode === "segment") {
+            const snapshot = this.makeSegmentSelectionSnapshot();
+            const result = this._segmentSelectionDelegate.moveFocus(snapshot, {
+                dx,
+                selecting,
+            });
+
+            if (result.kind === "moved") {
+                this.applyPatch(result.patch);
+                return;
+            }
+
+            if (result.kind === "hitBoundary") {
+                if (selecting || keyHoldPressed) {
+                    return;
+                }
+
+                const queryId = result.queryId;
+                const queryIndex =
+                    this._queriesStoreDelegate.getIndexById(queryId);
+                if (queryIndex === -1) {
+                    return;
+                }
+
+                this.applyPatch({
+                    selectionMode: "query",
+                    querySelection: {
+                        anchor: queryIndex,
+                        focus: queryIndex,
+                    },
+                });
                 return;
             }
         }
@@ -1149,21 +1195,71 @@ export class StateManager implements PubSub<TopicPayloads> {
         this.insertText(text, false);
     }
 
-    applyFocusedCompletion(insertText: string, range: Range): boolean {
+    applyFocusedCompletion(
+        insertText: string,
+        range: Range,
+        moveFocus?: boolean
+    ): boolean {
         if (this._selectionMode === "segment" && this._segmentSelection) {
-            if (
-                !this.updateQueryItem(
-                    this._segmentSelection.queryId,
-                    insertText,
-                    range
-                )
-            ) {
+            const { queryId, focus: segmentIndex } = this._segmentSelection;
+            if (!this.updateQueryItem(queryId, insertText, range)) {
                 return false;
             }
-            this.updateCompletionsContext();
+            if (moveFocus) {
+                const queryItem =
+                    this._queriesStoreDelegate.getItemById(queryId);
+                const parsedQuery = queryItem
+                    ? this.getParsedQuery(queryItem.query)
+                    : null;
+                const nextSegmentIndex = segmentIndex + 1;
+                if (
+                    parsedQuery &&
+                    nextSegmentIndex < parsedQuery.segments.length
+                ) {
+                    this.enterSegmentSelection(queryId, nextSegmentIndex);
+                } else {
+                    const nextQuery =
+                        this._queriesStoreDelegate.getNextItem(queryId);
+                    if (nextQuery) {
+                        this.enterSegmentSelection(nextQuery.id, 0);
+                    } else {
+                        this.updateCompletionsContext();
+                    }
+                }
+            } else {
+                this.updateCompletionsContext();
+            }
             return true;
         }
-        return this.updateFocusedQueryItem(insertText, range);
+
+        if (!this.updateFocusedQueryItem(insertText, range)) {
+            return false;
+        }
+
+        if (moveFocus && this._queryTextSelections.length === 1) {
+            const queryId = this._queryTextSelections[0].queryId;
+            const caretOffset = this._queryTextSelections[0].focus;
+            const queryItem = this._queriesStoreDelegate.getItemById(queryId);
+            const parsedQuery = queryItem
+                ? this.getParsedQuery(queryItem.query)
+                : null;
+            if (parsedQuery) {
+                const segmentIndex = parsedQuery.segments.findIndex(
+                    (s) =>
+                        caretOffset >= s.charRange.start &&
+                        caretOffset <= s.charRange.end
+                );
+                const nextIndex = segmentIndex + 1;
+                if (
+                    segmentIndex !== -1 &&
+                    nextIndex < parsedQuery.segments.length
+                ) {
+                    this.setTextFocusOffsetToEndOfSegment(queryId, nextIndex);
+                }
+            }
+        }
+
+        return true;
     }
 
     updateFocusedQueryItem(insertText: string, range?: Range): boolean {
@@ -1384,6 +1480,12 @@ export class StateManager implements PubSub<TopicPayloads> {
         };
     }
 
+    enterQuerySelectionAtIndex(index: number): void {
+        this.applyPatch({
+            querySelection: { anchor: index, focus: index },
+        });
+    }
+
     enterSegmentSelection(queryId: string, segmentIndex: number): void {
         this._segmentSelection = {
             queryId,
@@ -1398,15 +1500,15 @@ export class StateManager implements PubSub<TopicPayloads> {
         this.updateCompletionsContext();
     }
 
-    navigateSegment(direction: 1 | -1): void {
+    navigateSegment(direction: 1 | -1, keyHoldPressed: boolean): void {
         if (this._selectionMode !== "segment") {
             return;
         }
         const snapshot = this.makeSegmentSelectionSnapshot();
-        const result = this._segmentSelectionDelegate.navigateSegment(
-            snapshot,
-            { direction }
-        );
+        const result = this._segmentSelectionDelegate.moveFocus(snapshot, {
+            dx: direction,
+        });
+
         if (result.kind === "moved") {
             this.applyPatch(result.patch);
         }

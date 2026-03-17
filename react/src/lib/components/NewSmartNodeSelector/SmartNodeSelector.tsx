@@ -276,9 +276,10 @@ export function SmartNodeSelector(props: SmartNodeSelectorProps) {
         completionsState.updateCompletions(
             parsedQuery,
             completionContext.queryTextSelection?.focus ??
-                parsedQuery.segments[completionContext.segmentIndex]
-                    ?.charRange.end ??
+                parsedQuery.segments[completionContext.segmentIndex]?.charRange
+                    .end ??
                 0,
+            completionContext.selectionMode,
             currentSegmentSelections
         );
     }, [completionContext, completionsState, stateManager]);

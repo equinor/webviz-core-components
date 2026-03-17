@@ -40,6 +40,54 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
             SimpleCompletionSessionState
         >
     ): CompletionStrategyKeyResult<SimpleCompletionSessionState> {
+        if (args.selectionMode !== "segment") {
+            const syntaxCompletions = args.completions.filter(
+                (item) => item.kind !== "node" && item.kind !== "segment"
+            );
+
+            const nodeCompletions = args.completions.filter(
+                (item) => item.kind === "node"
+            );
+
+            const allCompletions = [...syntaxCompletions, ...nodeCompletions];
+
+            switch (event.key) {
+                case "ArrowDown":
+                    return {
+                        nextState: {
+                            ...args.state,
+                            highlightedId: moveHighlightedId(
+                                args.state.highlightedId,
+                                allCompletions,
+                                1
+                            ),
+                        },
+                    };
+
+                case "ArrowUp":
+                    return {
+                        nextState: {
+                            ...args.state,
+                            highlightedId: moveHighlightedId(
+                                args.state.highlightedId,
+                                allCompletions,
+                                -1
+                            ),
+                        },
+                    };
+
+                case "Enter":
+                case "Tab":
+                    return { accept: true };
+
+                case "Escape":
+                    return { close: true };
+
+                default:
+                    return {};
+            }
+        }
+
         const items = getSimpleItems(args.completions);
 
         switch (event.key) {
@@ -106,7 +154,50 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
             SimpleCompletionSessionState
         >
     ): SelectedCompletion | null {
-        const items = getSimpleItems(args.completions);
+        if (args.selectionMode === "segment") {
+            const items = getSimpleItems(args.completions);
+            const selectedItems = items.filter((item) =>
+                args.state.selectedIds.includes(getCompletionKey(item))
+            );
+
+            if (selectedItems.length === 0) {
+                return null;
+            }
+
+            const firstSelectedItem = selectedItems[0];
+
+            let text = selectedItems.map((item) => item.insertText).join("|");
+            if (
+                (args.caretContext?.segmentIndex ?? 0) ===
+                    args.queryContext.segmentCount - 1 &&
+                !(
+                    firstSelectedItem.origin.kind === "single" &&
+                    firstSelectedItem.origin.node.isLeaf
+                )
+            ) {
+                text = `${text}${args.delimiter}`;
+            }
+
+            return {
+                text,
+                range: args.caretContext?.segment.charRange ?? {
+                    start: 0,
+                    end: 0,
+                },
+                moveFocus: true,
+            };
+        }
+
+        const syntaxCompletions = args.completions.filter(
+            (item) => item.kind !== "node" && item.kind !== "segment"
+        );
+
+        const nodeCompletions = args.completions.filter(
+            (item) => item.kind === "node"
+        );
+
+        const items = [...syntaxCompletions, ...nodeCompletions];
+
         const selectedItems = items.filter((item) =>
             args.state.selectedIds.includes(getCompletionKey(item))
         );
@@ -115,17 +206,11 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
             return null;
         }
 
-        let text = selectedItems.map((item) => item.insertText).join("|");
-        if (
-            (args.caretContext?.segmentIndex ?? 0) ===
-            args.queryContext.segmentCount - 1
-        ) {
-            text = `${text}${args.delimiter}`;
-        }
+        const selectedItem = selectedItems[0];
 
         return {
-            text,
-            range: args.caretContext?.segment.charRange ?? { start: 0, end: 0 },
+            text: selectedItem.insertText,
+            range: selectedItem.replaceRange,
         };
     }
 }
@@ -194,7 +279,7 @@ function reconcileSimpleState<Node>(
 
 function moveHighlightedId<Node>(
     currentId: string | null,
-    items: Extract<CompletionItem<Node>, { kind: "segment" }>[],
+    items: CompletionItem<Node>[],
     direction: 1 | -1
 ): string | null {
     if (items.length === 0) {

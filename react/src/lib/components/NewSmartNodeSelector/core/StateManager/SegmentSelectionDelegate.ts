@@ -1,10 +1,15 @@
 import type { ParsedQuery } from "../query-language/parse";
 import type { QueryItem, SegmentSelection, StatePatch } from "./types";
 
-export type SegmentOperationResult =
+export type SegmentFocusMoveResult =
     | {
           kind: "moved";
           patch: StatePatch;
+      }
+    | {
+          kind: "hitBoundary";
+          boundary: "start" | "end";
+          queryId: string;
       }
     | {
           kind: "none";
@@ -19,10 +24,12 @@ export type SegmentSelectionDelegateSnapshot = {
 };
 
 export class SegmentSelectionDelegate {
-    navigateSegment(
+    moveFocus(
         snapshot: SegmentSelectionDelegateSnapshot,
-        payload: { direction: 1 | -1 }
-    ): SegmentOperationResult {
+        payload: { dx: number; selecting: boolean }
+    ): SegmentFocusMoveResult {
+        const { dx, selecting } = payload;
+
         const { segmentSelection } = snapshot;
         if (!segmentSelection) {
             return { kind: "none" };
@@ -36,31 +43,38 @@ export class SegmentSelectionDelegate {
 
         const parsedQuery = snapshot.getParsedQuery(queryItem.query);
         const segmentCount = parsedQuery?.segments.length ?? 1;
-        const newIndex = segmentIndex + payload.direction;
+        let newIndex = segmentIndex + dx;
 
-        if (newIndex < 0 || newIndex >= segmentCount) {
-            // Hit boundary → switch to query selection mode
-            const queryIndex = snapshot.getQueryIndexById(queryId);
-            if (queryIndex === -1) {
-                return { kind: "none" };
+        if (newIndex < 0) {
+            newIndex = 0;
+            if (!selecting) {
+                return {
+                    kind: "hitBoundary",
+                    boundary: "start",
+                    queryId,
+                };
             }
-            return {
-                kind: "moved",
-                patch: {
-                    selectionMode: "query",
-                    querySelection: { anchor: queryIndex, focus: queryIndex },
-                },
-            };
+        } else if (newIndex >= segmentCount) {
+            newIndex = segmentCount - 1;
+            if (!selecting) {
+                return {
+                    kind: "hitBoundary",
+                    boundary: "end",
+                    queryId,
+                };
+            }
         }
+
+        const newSelection: SegmentSelection = {
+            queryId,
+            anchor: selecting ? segmentSelection.anchor : newIndex,
+            focus: newIndex,
+        };
 
         return {
             kind: "moved",
             patch: {
-                segmentSelection: {
-                    queryId,
-                    anchor: newIndex,
-                    focus: newIndex,
-                },
+                segmentSelection: newSelection,
             },
         };
     }
@@ -68,7 +82,7 @@ export class SegmentSelectionDelegate {
     cycleSibling(
         snapshot: SegmentSelectionDelegateSnapshot,
         payload: { direction: 1 | -1 }
-    ): SegmentOperationResult {
+    ): SegmentFocusMoveResult {
         const { segmentSelection } = snapshot;
         if (!segmentSelection) {
             return { kind: "none" };
@@ -155,7 +169,7 @@ export class SegmentSelectionDelegate {
     remove(
         snapshot: SegmentSelectionDelegateSnapshot,
         payload: { direction: 1 | -1 }
-    ): SegmentOperationResult {
+    ): SegmentFocusMoveResult {
         const { segmentSelection } = snapshot;
         if (!segmentSelection) {
             return { kind: "none" };

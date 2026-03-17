@@ -1,3 +1,4 @@
+import type { CompletionsSelectionMode } from "../core/CompletionsState";
 import type { CaretContext } from "../core/query-language/completion/caretContext";
 import type { CompletionItem } from "../core/query-language/types/completion";
 import type { Range } from "../core/utils/range";
@@ -16,6 +17,7 @@ export type CompletionStrategyContext<Node> = {
     queryContext: QueryContext;
     delimiter: string;
     currentSegmentSelections: Node[];
+    selectionMode: CompletionsSelectionMode;
 };
 
 export type CompletionStrategyRuntimeArgs<Node, TState> =
@@ -38,6 +40,8 @@ export type CompletionStrategyKeyResult<TState> = {
 export type SelectedCompletion = {
     text: string;
     range: Range;
+    moveCaretTo?: number;
+    moveFocus?: boolean;
 };
 
 export type CompletionStrategyComponentProps<Node, TState> =

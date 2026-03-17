@@ -39,6 +39,11 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
         Topic.QUERY_SELECTION
     );
 
+    const segmentSelection = useSubscribeToTopic(
+        dataContext.stateManager,
+        Topic.SEGMENT_SELECTION
+    );
+
     const isSelected = React.useMemo(() => {
         if (!querySelection) {
             return false;
@@ -74,7 +79,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const isValid = matchedLeafNodes.length > 0;
     const isEditing =
         textSelections.find((pos) => pos.queryId === props.queryItem.id) !==
-        undefined;
+            undefined || segmentSelection?.queryId === props.queryItem.id;
 
     const parsedQuery = dataContext.stateManager.getParsedQuery(
         props.queryItem.query

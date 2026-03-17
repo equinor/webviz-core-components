@@ -1,3 +1,5 @@
+import type { CompletionsSelectionMode } from "../CompletionsState";
+
 export type QueryItem = {
     id: string;
     query: string;
@@ -30,7 +32,7 @@ export type QuerySegment = {
 export type SegmentSelection = {
     queryId: string;
     anchor: number; // segment index
-    focus: number;  // segment index (where cycling acts)
+    focus: number; // segment index (where cycling acts)
 };
 
 export type CompletionContext = {
@@ -38,6 +40,7 @@ export type CompletionContext = {
     queryItem: QueryItem;
     queryTextSelection: QueryTextSelection;
     segmentIndex: number;
+    selectionMode: CompletionsSelectionMode;
 };
 
 export type Segment = {

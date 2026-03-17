@@ -149,7 +149,8 @@ export function CompletionsPopover(
 
             stateManager.applyFocusedCompletion(
                 appliedCompletion.text,
-                appliedCompletion.range
+                appliedCompletion.range,
+                appliedCompletion.moveFocus
             );
             stateManager.setCompletionsPopoverFocused(false);
         },
@@ -186,7 +187,9 @@ export function CompletionsPopover(
                 caretContext,
                 queryContext: completionsState.getQueryContext(),
                 delimiter: completionsState.getDelimiter(),
-                currentSegmentSelections: completionsState.getCurrentSegmentSelections(),
+                selectionMode: completionsState.getSelectionMode(),
+                currentSegmentSelections:
+                    completionsState.getCurrentSegmentSelections(),
             });
 
             if (result.nextState !== undefined) {
@@ -278,6 +281,7 @@ export function CompletionsPopover(
                     setState={handleSetState}
                     accept={handleAccept}
                     close={handleClose}
+                    selectionMode={completionsState.getSelectionMode()}
                 />
             )}
         </div>
