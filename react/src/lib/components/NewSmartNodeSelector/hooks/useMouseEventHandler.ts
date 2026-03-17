@@ -13,10 +13,38 @@ export function useMouseEventHandler(
 ): void {
     React.useEffect(
         function setupMouseEventHandler() {
+            let mouseDownPosition: { x: number; y: number } | null = null;
+
             const abortController = new AbortController();
 
             function handleMouseDown(event: MouseEvent) {
                 if (event.button !== 0) return; // Only proceed for left mouse button
+
+                mouseDownPosition = { x: event.clientX, y: event.clientY };
+
+                window.addEventListener("mousemove", handleMouseMove, {
+                    signal: abortController.signal,
+                });
+                window.addEventListener("mouseup", handleMouseUp, {
+                    signal: abortController.signal,
+                    once: true,
+                });
+            }
+
+            function handleMouseUp(event: MouseEvent) {
+                if (event.button !== 0) return; // Only proceed for left mouse button
+
+                // If mouse moved significantly since mousedown, treat as drag and don't change selection
+                if (mouseDownPosition) {
+                    const deltaX = event.clientX - mouseDownPosition.x;
+                    const deltaY = event.clientY - mouseDownPosition.y;
+                    const distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                    const dragThreshold = 5 * 5; // 5 pixels threshold
+                    if (distanceSquared > dragThreshold) {
+                        mouseDownPosition = null;
+                        return;
+                    }
+                }
 
                 const target = event.target as HTMLElement;
                 const selection = event.shiftKey;
@@ -210,13 +238,7 @@ export function useMouseEventHandler(
 
                 event.preventDefault();
 
-                window.addEventListener("mousemove", handleMouseMove, {
-                    signal: abortController.signal,
-                });
-                window.addEventListener("mouseup", handleMouseUp, {
-                    signal: abortController.signal,
-                    once: true,
-                });
+                window.removeEventListener("mousemove", handleMouseMove);
             }
 
             function handleMouseMove(event: MouseEvent) {
@@ -355,10 +377,6 @@ export function useMouseEventHandler(
                 });
 
                 event.preventDefault();
-            }
-
-            function handleMouseUp() {
-                window.removeEventListener("mousemove", handleMouseMove);
             }
 
             ref.current?.addEventListener("mousedown", handleMouseDown, {
