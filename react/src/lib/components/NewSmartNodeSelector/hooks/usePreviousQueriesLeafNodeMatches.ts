@@ -14,6 +14,11 @@ export function usePreviousQueriesLeafNodeMatches(
         Topic.DATA_REVISION
     );
 
+    const queryItems = useSubscribeToTopic(
+        dataContext.stateManager,
+        Topic.QUERY_ITEMS
+    );
+
     const queryIndex = dataContext.stateManager.getQueryItemIndexById(
         beforeQueryItem.id
     );
@@ -44,7 +49,7 @@ export function usePreviousQueriesLeafNodeMatches(
         }
 
         return matchedLeafNodes;
-    }, [dataContext.stateManager, queryIndex, dataRevision]);
+    }, [dataContext.stateManager, queryIndex, dataRevision, queryItems]);
 
     return matchedLeafNodes;
 }

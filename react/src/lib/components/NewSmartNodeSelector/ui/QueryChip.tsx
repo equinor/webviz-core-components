@@ -58,12 +58,8 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     }, [querySelection, props.index]);
 
     const isDuplicate = React.useMemo(() => {
-        for (const match of matchedLeafNodes) {
-            if (previousQueriesMatchedLeafNodes.includes(match)) {
-                return true;
-            }
-        }
-        return false;
+        const previousIds = new Set(previousQueriesMatchedLeafNodes.map((n) => n.id));
+        return matchedLeafNodes.some((n) => previousIds.has(n.id));
     }, [matchedLeafNodes, previousQueriesMatchedLeafNodes]);
 
     const handleRemoveTagClick = React.useCallback(
