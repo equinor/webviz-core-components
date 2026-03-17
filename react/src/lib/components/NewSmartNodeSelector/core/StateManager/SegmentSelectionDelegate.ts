@@ -151,4 +151,93 @@ export class SegmentSelectionDelegate {
             },
         };
     }
+
+    remove(
+        snapshot: SegmentSelectionDelegateSnapshot,
+        payload: { direction: 1 | -1 }
+    ): SegmentOperationResult {
+        const { segmentSelection } = snapshot;
+        if (!segmentSelection) {
+            return { kind: "none" };
+        }
+
+        const { queryId, focus: segmentIndex } = segmentSelection;
+        const queryItem = snapshot.getQueryById(queryId);
+        if (!queryItem) {
+            return { kind: "none" };
+        }
+
+        const parsedQuery = snapshot.getParsedQuery(queryItem.query);
+        if (!parsedQuery) {
+            return { kind: "none" };
+        }
+
+        const segmentCount = parsedQuery.segments.length;
+
+        if (segmentCount <= 1) {
+            // Removing the only segment — remove the whole query item and
+            // fall back to query selection of a neighbouring chip.
+            const queryIndex = snapshot.getQueryIndexById(queryId);
+            // Prefer previous (backspace) or next (delete). When there is no
+            // previous chip (queryIndex === 0), fall back to the next chip,
+            // which slides into index 0 after the deletion.
+            const neighbourIndex =
+                payload.direction === -1 && queryIndex > 0
+                    ? queryIndex - 1
+                    : queryIndex;
+            return {
+                kind: "moved",
+                patch: {
+                    selectionMode: "query",
+                    queryItemUpdates: [{ kind: "remove", item: queryItem }],
+                    segmentSelection: null,
+                    querySelection: {
+                        anchor: neighbourIndex,
+                        focus: neighbourIndex,
+                    },
+                },
+            };
+        }
+
+        // Splice out the segment and its adjacent delimiter from the query string.
+        const segment = parsedQuery.segments[segmentIndex];
+        let removeStart: number;
+        let removeEnd: number;
+
+        if (segmentIndex < segmentCount - 1) {
+            // Not the last segment: remove the segment + the delimiter after it.
+            removeStart = segment.charRange.start;
+            removeEnd = parsedQuery.segments[segmentIndex + 1].charRange.start;
+        } else {
+            // Last segment: remove the delimiter before it + the segment.
+            removeStart = parsedQuery.segments[segmentIndex - 1].charRange.end;
+            removeEnd = segment.charRange.end;
+        }
+
+        const newQuery =
+            queryItem.query.slice(0, removeStart) +
+            queryItem.query.slice(removeEnd);
+
+        // direction=-1 (backspace): land on the segment before the deleted one.
+        // direction=+1 (delete): land on the same index (next segment slides in),
+        //   clamped to the new last segment.
+        const newSegmentIndex =
+            payload.direction === -1
+                ? Math.max(0, segmentIndex - 1)
+                : Math.min(segmentIndex, segmentCount - 2);
+
+        return {
+            kind: "moved",
+            patch: {
+                queryItemUpdates: [
+                    { kind: "update", item: { id: queryId, query: newQuery } },
+                ],
+                segmentSelection: {
+                    queryId,
+                    anchor: newSegmentIndex,
+                    focus: newSegmentIndex,
+                },
+            },
+        };
+    }
 }

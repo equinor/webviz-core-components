@@ -9,6 +9,7 @@ import type { CompletionItem } from "./query-language/types/completion";
 import type { TreeAccessor } from "./query-language/types/tree";
 import type {
     CompletionStrategy,
+    QueryContext,
     SelectedCompletion,
 } from "../completions-strategies/interface";
 
@@ -45,6 +46,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
 
     private _completions: CompletionItem<TNode>[] = [];
     private _caretContext: CaretContext | null = null;
+    private _queryContext: QueryContext = { segmentCount: 0 };
     private _sessionState: TState | null = null;
     private _currentSegmentSelections: TNode[] = [];
 
@@ -122,6 +124,10 @@ export class CompletionsState<TNode, TState> implements PubSub<
         return this._caretContext;
     }
 
+    getQueryContext(): QueryContext {
+        return this._queryContext;
+    }
+
     getCurrentSegmentSelections(): TNode[] {
         return this._currentSegmentSelections;
     }
@@ -142,12 +148,14 @@ export class CompletionsState<TNode, TState> implements PubSub<
 
         this._completions = completions;
         this._caretContext = caretContext;
+        this._queryContext = { segmentCount: parsedQuery.segments.length };
         this._currentSegmentSelections = currentSegmentSelections;
 
         this._sessionState = this._strategy.reconcileState({
             prevState: this._sessionState,
             completions: this._completions,
             caretContext: this._caretContext,
+            queryContext: this._queryContext,
             delimiter: this._delimiter,
             currentSegmentSelections: this._currentSegmentSelections,
         });
@@ -179,6 +187,7 @@ export class CompletionsState<TNode, TState> implements PubSub<
         return this._strategy.getAppliedCompletion({
             completions: this._completions,
             caretContext: this._caretContext,
+            queryContext: this._queryContext,
             delimiter: this._delimiter,
             currentSegmentSelections: this._currentSegmentSelections,
             state: this._sessionState,

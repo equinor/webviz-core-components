@@ -6,9 +6,14 @@ export type CompletionStrategyStateUpdater<TState> =
     | TState
     | ((prev: TState) => TState);
 
+export type QueryContext = {
+    segmentCount: number;
+};
+
 export type CompletionStrategyContext<Node> = {
     completions: CompletionItem<Node>[];
     caretContext: CaretContext | null;
+    queryContext: QueryContext;
     delimiter: string;
     currentSegmentSelections: Node[];
 };

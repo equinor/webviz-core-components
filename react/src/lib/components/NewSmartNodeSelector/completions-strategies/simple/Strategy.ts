@@ -26,7 +26,11 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
             SimpleCompletionSessionState
         >
     ): SimpleCompletionSessionState {
-        return reconcileSimpleState(args.prevState, args.completions, args.currentSegmentSelections);
+        return reconcileSimpleState(
+            args.prevState,
+            args.completions,
+            args.currentSegmentSelections
+        );
     }
 
     onKeyDown(
@@ -63,7 +67,7 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
                     },
                 };
 
-            case " ":{
+            case " ": {
                 const highlightedId = args.state.highlightedId;
                 if (!highlightedId) {
                     return {};
@@ -111,13 +115,17 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
             return null;
         }
 
-        const joined = selectedItems.map((item) => item.insertText).join("|");
-        const text =
-            `${joined}${args.delimiter}`;
+        let text = selectedItems.map((item) => item.insertText).join("|");
+        if (
+            (args.caretContext?.segmentIndex ?? 0) ===
+            args.queryContext.segmentCount - 1
+        ) {
+            text = `${text}${args.delimiter}`;
+        }
 
         return {
             text,
-            range: selectedItems[0].replaceRange,
+            range: args.caretContext?.segment.charRange ?? { start: 0, end: 0 },
         };
     }
 }
@@ -141,7 +149,10 @@ function isSimpleNodeCompletion<Node>(
 function getSimpleItems<Node>(
     completions: CompletionItem<Node>[]
 ): Extract<CompletionItem<Node>, { kind: "segment" }>[] {
-    return completions.filter(isSimpleNodeCompletion) as Extract<CompletionItem<Node>, { kind: "segment" }>[];
+    return completions.filter(isSimpleNodeCompletion) as Extract<
+        CompletionItem<Node>,
+        { kind: "segment" }
+    >[];
 }
 
 function reconcileSimpleState<Node>(
@@ -152,15 +163,21 @@ function reconcileSimpleState<Node>(
     const items = getSimpleItems(completions);
     const validIds = new Set(items.map(getCompletionKey));
 
-    const persistedIds = prevState?.selectedIds.filter((id) => validIds.has(id)) ?? [];
-    const selectedIds = persistedIds.length > 0
-        ? persistedIds
-        : (() => {
-            const selectionSet = new Set(currentSegmentSelections);
-            return items
-                .filter((item) => item.origin.kind === "single" && selectionSet.has(item.origin.node))
-                .map(getCompletionKey);
-        })();
+    const persistedIds =
+        prevState?.selectedIds.filter((id) => validIds.has(id)) ?? [];
+    const selectedIds =
+        persistedIds.length > 0
+            ? persistedIds
+            : (() => {
+                  const selectionSet = new Set(currentSegmentSelections);
+                  return items
+                      .filter(
+                          (item) =>
+                              item.origin.kind === "single" &&
+                              selectionSet.has(item.origin.node)
+                      )
+                      .map(getCompletionKey);
+              })();
 
     const highlightedId =
         prevState?.highlightedId && validIds.has(prevState.highlightedId)

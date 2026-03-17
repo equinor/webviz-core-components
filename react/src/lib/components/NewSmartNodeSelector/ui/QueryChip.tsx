@@ -234,10 +234,6 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                 }}
             >
                 {content}
-                <Placeholder
-                    isVisible={props.queryItem.query === ""}
-                    isLast={props.isLast}
-                />
             </div>
             {hasMoreThanOneSegment && (
                 <button onClick={handleRemoveTagClick} aria-label="Remove tag">
@@ -245,35 +241,6 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                 </button>
             )}
         </QueryChipComponent>
-    );
-}
-
-type PlaceholderProps = {
-    isVisible?: boolean;
-    isLast?: boolean;
-};
-
-function Placeholder(props: PlaceholderProps) {
-    const context = React.useContext(SmartNodeSelectorDataContext);
-
-    if (!props.isVisible) {
-        return null;
-    }
-
-    const placeholderText = props.isLast
-        ? context.placeholders.newTag
-        : context.placeholders.incompleteTag;
-
-    return (
-        <div
-            style={{
-                color: "black",
-                opacity: 0.3,
-                marginLeft: 2,
-            }}
-        >
-            {placeholderText}
-        </div>
     );
 }
 

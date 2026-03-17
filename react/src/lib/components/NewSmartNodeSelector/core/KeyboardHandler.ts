@@ -51,10 +51,6 @@ export class KeyboardHandler {
                     this._stateManager.setCompletionsPopoverFocused(true);
                     event.preventDefault();
                     return;
-                case "Escape":
-                    this._completionsState.clearCompletions();
-                    event.preventDefault();
-                    return;
             }
         }
 
@@ -85,6 +81,14 @@ export class KeyboardHandler {
                     this._stateManager.confirm();
                     event.preventDefault();
                     return;
+                case "Backspace":
+                    this._stateManager.removeCurrentSelection("backward");
+                    event.preventDefault();
+                    break;
+                case "Delete":
+                    this._stateManager.removeCurrentSelection("forward");
+                    event.preventDefault();
+                    break;
                 // Any other key falls through to handleInput → insertText,
                 // which auto-switches to text mode before inserting.
             }

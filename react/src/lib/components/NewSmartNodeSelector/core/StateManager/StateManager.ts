@@ -18,7 +18,10 @@ import {
     QueryTextSelectionsDelegate,
     type QueryTextSelectionsDelegateSnapshot,
 } from "./QueryTextSelectionsDelegate";
-import { SegmentSelectionDelegate } from "./SegmentSelectionDelegate";
+import {
+    SegmentSelectionDelegate,
+    type SegmentSelectionDelegateSnapshot,
+} from "./SegmentSelectionDelegate";
 import type {
     CompletionContext,
     QueryItem,
@@ -175,6 +178,11 @@ export class StateManager implements PubSub<TopicPayloads> {
             this._segmentSelection = patch.segmentSelection;
             if (patch.segmentSelection !== null) {
                 this.setSelectionMode("segment");
+                this._focusedSegment = {
+                    queryId: patch.segmentSelection.queryId,
+                    segmentIndex: patch.segmentSelection.focus,
+                };
+                this._pubSubDelegate.notifySubscribers(Topic.FOCUSED_SEGMENT);
                 this._pubSubDelegate.notifySubscribers(Topic.SEGMENT_SELECTION);
                 this._pubSubDelegate.notifySubscribers(Topic.HAS_FOCUS);
             }
@@ -777,18 +785,13 @@ export class StateManager implements PubSub<TopicPayloads> {
             if (!queryItem) {
                 return;
             }
-            // Non-empty chip → enter segment mode on last segment
-            if (queryItem.query.length > 0) {
-                const parsedQuery = this.getParsedQuery(queryItem.query);
-                const lastSegmentIndex = Math.max(
-                    0,
-                    (parsedQuery?.segments.length ?? 1) - 1
-                );
-                this.enterSegmentSelection(queryItem.id, lastSegmentIndex);
-                return;
-            }
-            // Empty chip → enter text mode (existing behaviour)
-            this.setTextFocusOffsetToEndOfQueryItem(queryItem.id);
+
+            const parsedQuery = this.getParsedQuery(queryItem.query);
+            const lastSegmentIndex = Math.max(
+                0,
+                (parsedQuery?.segments.length ?? 1) - 1
+            );
+            this.enterSegmentSelection(queryItem.id, lastSegmentIndex);
             return;
         }
 
@@ -1023,6 +1026,22 @@ export class StateManager implements PubSub<TopicPayloads> {
             return;
         }
 
+        if (this._selectionMode === "segment") {
+            if (!this._segmentSelection) {
+                return;
+            }
+            const snapshot = this.makeSegmentSelectionSnapshot();
+            const result = this._segmentSelectionDelegate.remove(snapshot, {
+                direction: direction === "backward" ? -1 : 1,
+            });
+
+            if (result.kind === "moved") {
+                this.applyPatch(result.patch);
+                return;
+            }
+            return;
+        }
+
         if (this._selectionMode === "text") {
             const snapshot = this.makeTextSelectionsSnapshot();
             const result =
@@ -1132,7 +1151,13 @@ export class StateManager implements PubSub<TopicPayloads> {
 
     applyFocusedCompletion(insertText: string, range: Range): boolean {
         if (this._selectionMode === "segment" && this._segmentSelection) {
-            if (!this.updateQueryItem(this._segmentSelection.queryId, insertText, range)) {
+            if (
+                !this.updateQueryItem(
+                    this._segmentSelection.queryId,
+                    insertText,
+                    range
+                )
+            ) {
                 return false;
             }
             this.updateCompletionsContext();
@@ -1346,7 +1371,7 @@ export class StateManager implements PubSub<TopicPayloads> {
         return this._segmentSelection;
     }
 
-    private makeSegmentSelectionSnapshot() {
+    private makeSegmentSelectionSnapshot(): SegmentSelectionDelegateSnapshot {
         return {
             segmentSelection: this._segmentSelection,
             getQueryById: (id: string) =>

@@ -33,8 +33,10 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
 
     const isSegmentSelected =
         segmentSelection?.queryId === props.queryId &&
-        props.segmentIndex >= Math.min(segmentSelection.anchor, segmentSelection.focus) &&
-        props.segmentIndex <= Math.max(segmentSelection.anchor, segmentSelection.focus);
+        props.segmentIndex >=
+            Math.min(segmentSelection.anchor, segmentSelection.focus) &&
+        props.segmentIndex <=
+            Math.max(segmentSelection.anchor, segmentSelection.focus);
 
     const textSelections = useSubscribeToTopic(
         dataContext.stateManager,
@@ -122,6 +124,13 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
         }, [props.tokens, isFocused, options.queryChips.truncation.enable]);
 
     function makeContent() {
+        if (props.segmentIndex === 0 && props.tokens.length === 0) {
+            return <Placeholder isVisible={true} isLast={true} />;
+        }
+        if (props.segmentIndex > 0 && props.tokens.length === 0) {
+            return <Placeholder isVisible={true} isLast={false} />;
+        }
+
         const Component = options.ui.inactiveSegmentRenderer?.(
             props.segmentIndex
         );
@@ -160,6 +169,35 @@ export function QuerySegment(props: QuerySegmentProps): React.ReactElement {
             }
         >
             {makeContent()}
+        </div>
+    );
+}
+
+type PlaceholderProps = {
+    isVisible?: boolean;
+    isLast?: boolean;
+};
+
+function Placeholder(props: PlaceholderProps) {
+    const context = React.useContext(SmartNodeSelectorDataContext);
+
+    if (!props.isVisible) {
+        return null;
+    }
+
+    const placeholderText = props.isLast
+        ? context.placeholders.newTag
+        : context.placeholders.incompleteTag;
+
+    return (
+        <div
+            style={{
+                color: "black",
+                opacity: 0.3,
+                marginLeft: 2,
+            }}
+        >
+            {placeholderText}
         </div>
     );
 }

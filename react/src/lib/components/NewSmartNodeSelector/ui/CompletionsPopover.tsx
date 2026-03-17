@@ -184,6 +184,7 @@ export function CompletionsPopover(
                 state: sessionState,
                 completions,
                 caretContext,
+                queryContext: completionsState.getQueryContext(),
                 delimiter: completionsState.getDelimiter(),
                 currentSegmentSelections: completionsState.getCurrentSegmentSelections(),
             });
@@ -268,6 +269,7 @@ export function CompletionsPopover(
                     state={sessionState}
                     completions={completions}
                     caretContext={caretContext}
+                    queryContext={completionsState.getQueryContext()}
                     delimiter={completionsState.getDelimiter()}
                     maxContainerHeight={maxHeight}
                     currentSegmentSelections={Array.from(
