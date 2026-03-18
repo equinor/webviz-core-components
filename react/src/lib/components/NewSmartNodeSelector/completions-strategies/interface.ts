@@ -57,6 +57,10 @@ export type CompletionStrategyComponentProps<Node, TState> =
 export interface CompletionStrategy<Node, TState> {
     reconcileState(args: CompletionStrategyReconcileArgs<Node, TState>): TState;
 
+    onFocus?(
+        args: CompletionStrategyRuntimeArgs<Node, TState>
+    ): CompletionStrategyKeyResult<TState>;
+
     onKeyDown(
         event: React.KeyboardEvent<HTMLElement>,
         args: CompletionStrategyRuntimeArgs<Node, TState>

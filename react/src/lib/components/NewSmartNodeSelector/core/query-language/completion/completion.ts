@@ -13,6 +13,7 @@ import type {
 } from "../types/completion";
 import type { TreeAccessor } from "../types/tree";
 import { getCaretContext, type CaretContext } from "./caretContext";
+import { filterPoolByTailSegments } from "./filterPoolByTailSegments";
 import { rankCompletions } from "./ranking";
 import { getTreeCompletions } from "./treeCompletions";
 
@@ -51,8 +52,35 @@ export function getCompletions<Node>(
         return { completions: all, caretContext: context };
     }
 
+    // Look-ahead: filter pool to only candidates that satisfy tail segments.
+    // Trim trailing empty spans first — an empty last segment (e.g. after typing "Well1/")
+    // has no text yet and would prune every candidate if included.
+    const tailSegments = parsed.ast.segments.slice(context.segmentIndex + 1);
+    while (tailSegments.length > 0) {
+        const spanIndex = context.segmentIndex + 1 + tailSegments.length - 1;
+        const span = parsed.segments[spanIndex];
+        if (span && span.charRange.start === span.charRange.end) {
+            tailSegments.pop();
+        } else {
+            break;
+        }
+    }
+    const effectivePool =
+        !context.insideAttributeFilter &&
+        tailSegments.length > 0 &&
+        context.segmentAst.kind === "expr"
+            ? filterPoolByTailSegments(
+                  pool,
+                  tailSegments,
+                  context.segmentAst.unionMode,
+                  tree,
+                  matchName,
+                  evaluateExpression
+              )
+            : pool;
+
     // Check if we have a full match in the current segment
-    const hasFullMatch = checkForFullMatch(context, pool, tree, opts);
+    const hasFullMatch = checkForFullMatch(context, effectivePool, tree, opts);
 
     // Handle attribute filter completions
     if (context.insideAttributeFilter && context.attributeFilterContext) {
@@ -83,7 +111,7 @@ export function getCompletions<Node>(
 
         // Added all nodes matching the current segment as completions, with tree-based matching and filtering
         all.push(
-            ...Array.from(pool).map((node) => {
+            ...Array.from(effectivePool).map((node) => {
                 const completionItem: SegmentCompletionItem<Node> = {
                     label: tree.getName(node),
                     insertText: tree.getName(node),
@@ -111,7 +139,7 @@ export function getCompletions<Node>(
         );
 
         // Add tree-based completions
-        all.push(...getTreeCompletions<Node>(context, pool, tree, opts));
+        all.push(...getTreeCompletions<Node>(context, effectivePool, tree, opts));
     }
 
     // Deduplicate completions - we can later rank them as well

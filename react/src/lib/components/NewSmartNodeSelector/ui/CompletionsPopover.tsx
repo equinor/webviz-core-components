@@ -101,11 +101,24 @@ export function CompletionsPopover(
         Topic.FOCUSED_SEGMENT
     );
 
+    const completionsPopoverFocused = useSubscribeToTopic(
+        stateManager,
+        Topic.COMPLETIONS_POPOVER_FOCUSED
+    );
+
     React.useEffect(
         function onFocusedAddressChange() {
             if (focusedSegment === null) {
-                popoverRef.current?.hidePopover();
-                setAnchorElement(null);
+                // When the popover has focus, focusedSegment can transiently
+                // become null mid-state-transition (e.g. segment mode moving
+                // between segments calls clearQueryTextSelections internally).
+                // Hiding the popover in that case moves DOM focus away and
+                // breaks the focus chain. Only hide when the popover is not
+                // focused, or when the state has genuinely settled to null.
+                if (!completionsPopoverFocused) {
+                    popoverRef.current?.hidePopover();
+                    setAnchorElement(null);
+                }
                 return;
             }
 
@@ -114,27 +127,30 @@ export function CompletionsPopover(
             ) as HTMLElement | null;
             if (inputElement) {
                 setAnchorElement(inputElement);
-                popoverRef.current?.showPopover();
+                // showPopover throws InvalidStateError in Chrome 120+ when
+                // already showing (e.g. after a caret move that creates a new
+                // focusedSegment object with the same values). Ignore safely.
+                try {
+                    popoverRef.current?.showPopover();
+                } catch {
+                    // already showing – no-op
+                }
             } else {
                 popoverRef.current?.hidePopover();
                 setAnchorElement(null);
             }
         },
-        [focusedSegment, props.mainRef]
-    );
-
-    const completionsPopoverFocused = useSubscribeToTopic(
-        stateManager,
-        Topic.COMPLETIONS_POPOVER_FOCUSED
+        [focusedSegment, props.mainRef, completionsPopoverFocused]
     );
 
     React.useEffect(
         function focusPopoverWhenActive() {
             if (completionsPopoverFocused) {
                 popoverRef.current?.focus({ preventScroll: true });
+                completionsState.focusStrategy();
             }
         },
-        [completionsPopoverFocused]
+        [completionsPopoverFocused, completionsState]
     );
 
     const strategy = completionsState.getStrategy();
@@ -178,6 +194,18 @@ export function CompletionsPopover(
     const handleKeyDown = React.useCallback(
         function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
             if (sessionState === null) {
+                return;
+            }
+
+            // Arrow left/right move the caret in the editor while keeping the
+            // popover focused so the user can keep navigating completions.
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                stateManager.moveFocus(
+                    e.key === "ArrowLeft" ? -1 : 1,
+                    e.shiftKey,
+                    false
+                );
+                e.preventDefault();
                 return;
             }
 

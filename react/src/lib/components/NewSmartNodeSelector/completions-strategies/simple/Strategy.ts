@@ -12,6 +12,7 @@ import { SimpleCompletionStrategyComponent } from "./Component";
 export type SimpleCompletionSessionState = {
     highlightedId: string | null;
     selectedIds: string[];
+    isFocused: boolean;
 };
 
 export class SimpleCompletionStrategy implements CompletionStrategy<
@@ -29,8 +30,52 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
         return reconcileSimpleState(
             args.prevState,
             args.completions,
+            args.selectionMode,
             args.currentSegmentSelections
         );
+    }
+
+    onFocus(
+        args: CompletionStrategyRuntimeArgs<
+            IndexedNode,
+            SimpleCompletionSessionState
+        >
+    ): CompletionStrategyKeyResult<SimpleCompletionSessionState> {
+        if (args.selectionMode === "segment") {
+            const items = getSimpleItems(args.completions);
+            const validIdSet = new Set(items.map(getCompletionKey));
+            const firstSelectedId =
+                args.state.selectedIds.find((id) => validIdSet.has(id)) ?? null;
+            const targetId =
+                firstSelectedId ??
+                (items.length > 0 ? getCompletionKey(items[0]) : null);
+            return {
+                nextState: {
+                    ...args.state,
+                    isFocused: true,
+                    highlightedId: targetId,
+                },
+            };
+        }
+
+        const syntaxCompletions = args.completions.filter(
+            (item) => item.kind !== "node" && item.kind !== "segment"
+        );
+        const nodeCompletions = args.completions.filter(
+            (item) => item.kind === "node"
+        );
+        const allCompletions = [...syntaxCompletions, ...nodeCompletions];
+        const firstId =
+            allCompletions.length > 0
+                ? getCompletionKey(allCompletions[0])
+                : null;
+        return {
+            nextState: {
+                ...args.state,
+                isFocused: true,
+                highlightedId: firstId,
+            },
+        };
     }
 
     onKeyDown(
@@ -136,7 +181,24 @@ export class SimpleCompletionStrategy implements CompletionStrategy<
                 };
             }
 
-            case "Enter":
+            case "Enter": {
+                const highlightedId = args.state.highlightedId;
+                if (!highlightedId) {
+                    return {};
+                }
+
+                if (args.state.selectedIds.length > 0) {
+                    return { accept: true };
+                }
+
+                return {
+                    nextState: {
+                        ...args.state,
+                        selectedIds: [...args.state.selectedIds, highlightedId],
+                    },
+                    accept: true,
+                };
+            }
             case "Tab":
                 return { accept: true };
 
@@ -243,37 +305,60 @@ function getSimpleItems<Node>(
 function reconcileSimpleState<Node>(
     prevState: SimpleCompletionSessionState | null,
     completions: CompletionItem<Node>[],
+    selectionMode: "segment" | "text",
     currentSegmentSelections: Node[] = []
 ): SimpleCompletionSessionState {
+    const isFocused = prevState?.isFocused ?? false;
+
     const items = getSimpleItems(completions);
     const validIds = new Set(items.map(getCompletionKey));
 
     const persistedIds =
         prevState?.selectedIds.filter((id) => validIds.has(id)) ?? [];
-    const selectedIds =
-        persistedIds.length > 0
-            ? persistedIds
-            : (() => {
-                  const selectionSet = new Set(currentSegmentSelections);
-                  return items
-                      .filter(
-                          (item) =>
-                              item.origin.kind === "single" &&
-                              selectionSet.has(item.origin.node)
-                      )
-                      .map(getCompletionKey);
-              })();
 
-    const highlightedId =
-        prevState?.highlightedId && validIds.has(prevState.highlightedId)
-            ? prevState.highlightedId
-            : items.length > 0
-              ? getCompletionKey(items[0])
-              : null;
+    const selectionSet = new Set(currentSegmentSelections);
+    const currentSelectionIds = items
+        .filter(
+            (item) =>
+                item.origin.kind === "single" &&
+                selectionSet.has(item.origin.node)
+        )
+        .map(getCompletionKey);
+
+    // Persist the user's previous selection only when it overlaps with the
+    // nodes currently matched by the segment text. If cycling moved to a
+    // different node the persisted IDs point to the old node (still a valid
+    // sibling, so still in validIds) and must be replaced.
+    const persistedAlignsCurrent =
+        persistedIds.length > 0 &&
+        currentSelectionIds.some((id) => persistedIds.includes(id));
+
+    const selectedIds = persistedAlignsCurrent
+        ? persistedIds
+        : currentSelectionIds;
+
+    // Only auto-highlight when already focused; no default highlight on fresh open
+    let highlightedId: string | null = null;
+    if (prevState !== null && !persistedAlignsCurrent && selectedIds.length > 0) {
+        // Cycling moved to a different node — follow the new selection.
+        highlightedId = selectedIds[0];
+    } else if (prevState?.highlightedId && validIds.has(prevState.highlightedId)) {
+        highlightedId = prevState.highlightedId;
+    } else if (isFocused) {
+        if (selectionMode === "segment") {
+            highlightedId =
+                selectedIds.find((id) => validIds.has(id)) ??
+                (items.length > 0 ? getCompletionKey(items[0]) : null);
+        } else {
+            highlightedId =
+                items.length > 0 ? getCompletionKey(items[0]) : null;
+        }
+    }
 
     return {
         highlightedId,
         selectedIds,
+        isFocused,
     };
 }
 

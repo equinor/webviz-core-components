@@ -58,7 +58,9 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     }, [querySelection, props.index]);
 
     const isDuplicate = React.useMemo(() => {
-        const previousIds = new Set(previousQueriesMatchedLeafNodes.map((n) => n.id));
+        const previousIds = new Set(
+            previousQueriesMatchedLeafNodes.map((n) => n.id)
+        );
         return matchedLeafNodes.some((n) => previousIds.has(n.id));
     }, [matchedLeafNodes, previousQueriesMatchedLeafNodes]);
 
@@ -80,7 +82,12 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
     const parsedQuery = dataContext.stateManager.getParsedQuery(
         props.queryItem.query
     );
-    const hasMoreThanOneSegment = (parsedQuery?.segments.length ?? 0) > 1;
+
+    // We show the remove button for all queries if there are multiple segments in the query,
+    // or if this is not the last query (since the last query can be easily edited to remove segments,
+    // while non-last queries require using the remove button)
+    const shouldShowRemoveButton =
+        (parsedQuery?.segments.length ?? 0) > 1 || !props.isLast;
 
     const content = React.useMemo(
         function makeContent() {
@@ -168,7 +175,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
                         tokens={segmentTokens}
                         diagnostics={diagnostics}
                         mayUseCustomRenderer={
-                            !(props.isLast && !hasMoreThanOneSegment)
+                            !(props.isLast && !shouldShowRemoveButton)
                         }
                     />
                 );
@@ -206,7 +213,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
             {...queryChipProps}
             data-querychip-id={props.queryItem.id}
             style={makeStyle(
-                props.isLast && !hasMoreThanOneSegment,
+                props.isLast && !shouldShowRemoveButton,
                 isValid || isEditing,
                 isSelected,
                 isDuplicate
@@ -220,7 +227,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
             }
         >
             <MatchesCounter
-                visible={hasMoreThanOneSegment}
+                visible={shouldShowRemoveButton}
                 matches={matchedLeafNodes}
             />
             <div
@@ -236,7 +243,7 @@ export function QueryChip(props: QueryChipProps): React.ReactElement {
             >
                 {content}
             </div>
-            {hasMoreThanOneSegment && (
+            {shouldShowRemoveButton && (
                 <button onClick={handleRemoveTagClick} aria-label="Remove tag">
                     &#x2715;
                 </button>

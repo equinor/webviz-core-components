@@ -29,6 +29,8 @@ export function useMouseEventHandler(
                     signal: abortController.signal,
                     once: true,
                 });
+
+                event.preventDefault();
             }
 
             function handleMouseUp(event: MouseEvent) {
@@ -125,7 +127,7 @@ export function useMouseEventHandler(
                         currentSeg?.queryId === queryId &&
                         currentSeg?.focus === segmentIndex;
                     if (!isActiveSegment) {
-                        // Different segment → enter segment mode for that one
+                        // Different segment -> enter segment mode for that one
                         stateManager.enterSegmentSelection(
                             queryId,
                             segmentIndex

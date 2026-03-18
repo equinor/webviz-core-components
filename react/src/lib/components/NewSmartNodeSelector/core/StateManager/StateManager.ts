@@ -1,9 +1,18 @@
 import type { InputModifier } from "../../input-modifiers/interface";
 import { PubSubDelegate, type PubSub } from "../PubSubDelegate";
+import { filterPoolByTailSegments } from "../query-language/completion/filterPoolByTailSegments";
+import {
+    collectAllChildren,
+    collectAllDescendants,
+    collectCommonChildren,
+} from "../query-language/evaluator/_utils";
+import { evaluateExpression } from "../query-language/evaluator/evaluateExpression";
+import { evaluatePrefix } from "../query-language/evaluator/evaluatePrefix";
 import {
     evaluateQuery,
     type EvaluationResult,
 } from "../query-language/evaluator/evaluateQuery";
+import { matchName } from "../query-language/matcher/matchName";
 import { parseQuery, type ParsedQuery } from "../query-language/parse";
 import type { TreeAccessor } from "../query-language/types/tree";
 import type { IndexedNode } from "../types";
@@ -918,6 +927,17 @@ export class StateManager implements PubSub<TopicPayloads> {
                 this.clearSegmentSelection();
                 return;
             }
+            const numQueries = this._queriesStoreDelegate.getNumItems();
+            if (queryIndex === numQueries - 1) {
+                const lastItem =
+                    this._queriesStoreDelegate.getItemByIndex(queryIndex);
+                if (lastItem && lastItem.query === "") {
+                    // The last placeholder query is not selectable in query mode;
+                    // exit directly to unfocused state.
+                    this.clearQuerySelection();
+                    return;
+                }
+            }
             this.applyPatch({
                 selectionMode: "query",
                 querySelection: { anchor: queryIndex, focus: queryIndex },
@@ -1481,8 +1501,22 @@ export class StateManager implements PubSub<TopicPayloads> {
     }
 
     enterQuerySelectionAtIndex(index: number): void {
+        const numQueries = this._queriesStoreDelegate.getNumItems();
+        let selectableIndex = index;
+        if (index === numQueries - 1) {
+            const lastItem = this._queriesStoreDelegate.getItemByIndex(index);
+            if (lastItem && lastItem.query === "") {
+                selectableIndex = index - 1;
+            }
+        }
+        if (selectableIndex < 0) {
+            return;
+        }
         this.applyPatch({
-            querySelection: { anchor: index, focus: index },
+            querySelection: {
+                anchor: selectableIndex,
+                focus: selectableIndex,
+            },
         });
     }
 
@@ -1589,40 +1623,69 @@ export class StateManager implements PubSub<TopicPayloads> {
             return [];
         }
 
-        if (segmentIndex === 0) {
-            const root = this._treeAccessor.getRoot();
-            const names = new Set<string>();
-            for (const child of this._treeAccessor.getChildren(root)) {
-                names.add(this._treeAccessor.getName(child));
-            }
-            return [...names].sort();
-        }
-
         const parsedQuery = this.getParsedQuery(queryItem.query);
         if (!parsedQuery) {
             return [];
         }
-        const prevSegment = parsedQuery.segments[segmentIndex - 1];
-        if (!prevSegment) {
+
+        // Build the child pool exactly as getCompletions does: use evaluatePrefix
+        // to get the same frontier + deepMode + unionMode, then apply the same
+        // pool-collection strategy. This keeps the sibling set in sync with the
+        // completions list (same intersection/union semantics).
+        const { frontier, deepMode, unionMode } = evaluatePrefix(
+            parsedQuery.ast,
+            segmentIndex,
+            this._treeAccessor,
+            matchName,
+            evaluateExpression
+        );
+
+        if (frontier.size === 0) {
             return [];
         }
 
-        const prefixText = queryItem.query.slice(0, prevSegment.charRange.end);
-        const parsedPrefix = parseQuery(prefixText, {
-            delimiter: this._options.segmentDelimiter,
-        });
-        const result = evaluateQuery(parsedPrefix, this._treeAccessor);
-        if (result.matches.size === 0) {
-            return [];
-        }
+        const childPool = deepMode
+            ? collectAllDescendants(frontier, this._treeAccessor)
+            : unionMode
+              ? collectAllChildren(frontier, this._treeAccessor)
+              : collectCommonChildren(frontier, this._treeAccessor);
 
-        const names = new Set<string>();
-        for (const node of result.matches) {
-            for (const child of this._treeAccessor.getChildren(node)) {
-                names.add(this._treeAccessor.getName(child));
+        // Look-ahead: filter pool to only candidates that satisfy tail segments.
+        // Trim trailing empty spans first — an empty last segment (e.g. after typing "Well1/")
+        // has no text yet and would prune every candidate if included.
+        const currentSegmentAst = parsedQuery.ast.segments[segmentIndex];
+        const tailSegments = parsedQuery.ast.segments.slice(segmentIndex + 1);
+        while (tailSegments.length > 0) {
+            const spanIndex = segmentIndex + 1 + tailSegments.length - 1;
+            const span = parsedQuery.segments[spanIndex];
+            if (span && span.charRange.start === span.charRange.end) {
+                tailSegments.pop();
+            } else {
+                break;
             }
         }
-        return [...names].sort();
+        const effectivePool =
+            tailSegments.length > 0 && currentSegmentAst?.kind === "expr"
+                ? filterPoolByTailSegments(
+                      childPool,
+                      tailSegments,
+                      currentSegmentAst.unionMode,
+                      this._treeAccessor,
+                      matchName,
+                      evaluateExpression
+                  )
+                : childPool;
+
+        // Collect unique names and sort by (length, alpha) to match the order
+        // that rankCompletions produces for segment-kind items (textPenalty ≈ length).
+        const nameSet = new Set<string>();
+        for (const node of effectivePool) {
+            nameSet.add(this._treeAccessor.getName(node));
+        }
+        return [...nameSet].sort((a, b) => {
+            if (a.length !== b.length) return a.length - b.length;
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
     }
 }
 

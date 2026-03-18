@@ -3,6 +3,7 @@ import type { SimpleCompletionSessionState } from "./Strategy";
 import type {
     CompletionItem,
     NodeCompletionItem,
+    SegmentCompletionItem,
     SyntaxCompletionItem,
 } from "../../core/query-language/types/completion";
 import type { CompletionStrategyComponentProps } from "../interface";
@@ -32,6 +33,45 @@ export function SimpleCompletionStrategyComponent(
     }
 }
 
+type SegmentCompletionContext = {
+    selectedIds: string[];
+};
+
+function renderSegmentItem(
+    item: SegmentCompletionItem<IndexedNode>,
+    isHighlighted: boolean,
+    context: SegmentCompletionContext
+): React.ReactNode {
+    const id = getCompletionKey(item);
+    const isChecked = context.selectedIds.includes(id);
+    return (
+        <div
+            style={{
+                display: "flex",
+                alignItems: "center",
+                padding: 4,
+                height: "100%",
+                boxSizing: "border-box",
+                backgroundColor: isHighlighted ? "#def" : undefined,
+                cursor: "pointer",
+            }}
+        >
+            <input
+                type="checkbox"
+                checked={isChecked}
+                readOnly
+                style={{ pointerEvents: "none" }}
+            />
+            <div style={{ fontWeight: 800, marginLeft: 4 }}>{item.label}</div>
+            <span style={{ marginLeft: 8 }}>
+                {item.origin.kind === "single"
+                    ? item.origin.node.description
+                    : `${item.origin.count} matching nodes`}
+            </span>
+        </div>
+    );
+}
+
 function SegmentCompletions(
     props: CompletionStrategyComponentProps<
         IndexedNode,
@@ -42,21 +82,54 @@ function SegmentCompletions(
         return props.completions.filter(isSimpleNodeCompletion);
     }, [props.completions]);
 
+    const highlightedIndex = React.useMemo(() => {
+        if (props.state.highlightedId === null) return null;
+        const idx = items.findIndex(
+            (item) => getCompletionKey(item) === props.state.highlightedId
+        );
+        return idx === -1 ? null : idx;
+    }, [props.state.highlightedId, items]);
+
+    // Scroll to first selected item when popover first opens (before focus).
+    // Captured once on mount via ref so it doesn't change on re-renders.
+    const initialScrollIndexRef = React.useRef<number | null>(null);
+    if (initialScrollIndexRef.current === null) {
+        for (const id of props.state.selectedIds) {
+            const idx = items.findIndex(
+                (item) => getCompletionKey(item) === id
+            );
+            if (idx !== -1) {
+                initialScrollIndexRef.current = idx;
+                break;
+            }
+        }
+    }
+    const initialScrollIndex = initialScrollIndexRef.current;
+
+    const context = React.useMemo(
+        () => ({ selectedIds: props.state.selectedIds }),
+        [props.state.selectedIds]
+    );
+
+    const ITEM_HEIGHT = 32;
+    const HEADER_HEIGHT = 41; // button row height
+
     return (
         <div
             style={{
                 maxHeight: props.maxContainerHeight,
-                overflow: "auto",
-                padding: 8,
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
             }}
         >
             <div
                 style={{
                     display: "flex",
                     gap: 8,
-                    paddingBottom: 8,
+                    padding: 8,
                     borderBottom: "1px solid #eee",
-                    marginBottom: 8,
+                    flexShrink: 0,
                 }}
             >
                 <button type="button" onClick={props.accept}>
@@ -65,58 +138,37 @@ function SegmentCompletions(
             </div>
 
             {items.length === 0 ? (
-                <div>No matching nodes</div>
+                <div style={{ padding: 8 }}>No matching nodes</div>
             ) : (
-                <div>
-                    {items.map((item) => {
+                <VirtualizedList
+                    items={items}
+                    itemHeight={ITEM_HEIGHT}
+                    maxHeight={Math.min(
+                        props.maxContainerHeight - HEADER_HEIGHT,
+                        ITEM_HEIGHT * 15
+                    )}
+                    renderItem={renderSegmentItem}
+                    context={context}
+                    selectedIndex={highlightedIndex}
+                    initialScrollIndex={initialScrollIndex}
+                    onItemClick={(item) => {
                         const id = getCompletionKey(item);
-                        const selected = props.state.selectedIds.includes(id);
-                        const highlighted = props.state.highlightedId === id;
-
-                        return (
-                            <div
-                                key={id}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: 4,
-                                    backgroundColor: highlighted
-                                        ? "#def"
-                                        : undefined,
-                                    cursor: "pointer",
-                                }}
-                                onMouseEnter={() =>
-                                    props.setState((prev) => ({
-                                        ...prev,
-                                        highlightedId: id,
-                                    }))
-                                }
-                            >
-                                <input
-                                    type="checkbox"
-                                    key={id}
-                                    id={id}
-                                    checked={selected}
-                                    onChange={() => {
-                                        props.setState((prev) => ({
-                                            ...prev,
-                                            highlightedId: id,
-                                            selectedIds:
-                                                prev.selectedIds.includes(id)
-                                                    ? prev.selectedIds.filter(
-                                                          (x) => x !== id
-                                                      )
-                                                    : [...prev.selectedIds, id],
-                                        }));
-                                    }}
-                                />
-                                <label style={{ marginLeft: 4 }} htmlFor={id}>
-                                    {item.label}
-                                </label>
-                            </div>
-                        );
-                    })}
-                </div>
+                        props.setState((prev) => ({
+                            ...prev,
+                            highlightedId: id,
+                            selectedIds: prev.selectedIds.includes(id)
+                                ? prev.selectedIds.filter((x) => x !== id)
+                                : [...prev.selectedIds, id],
+                        }));
+                    }}
+                    onItemHover={(item) => {
+                        const id = getCompletionKey(item);
+                        props.setState((prev) => ({
+                            ...prev,
+                            highlightedId: id,
+                        }));
+                    }}
+                />
             )}
         </div>
     );

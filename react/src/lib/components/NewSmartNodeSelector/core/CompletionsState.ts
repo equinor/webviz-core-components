@@ -194,6 +194,26 @@ export class CompletionsState<TNode, TState> implements PubSub<
         this._pubSubDelegate.notifySubscribers(CompletionsTopic.SESSION_STATE);
     }
 
+    focusStrategy(): void {
+        if (this._sessionState === null) {
+            return;
+        }
+
+        const result = this._strategy.onFocus?.({
+            state: this._sessionState,
+            completions: this._completions,
+            caretContext: this._caretContext,
+            queryContext: this._queryContext,
+            delimiter: this._delimiter,
+            selectionMode: this._selectionMode,
+            currentSegmentSelections: this._currentSegmentSelections,
+        });
+
+        if (result?.nextState !== undefined) {
+            this.setSessionState(result.nextState);
+        }
+    }
+
     getAppliedCompletion(): SelectedCompletion | null {
         if (this._sessionState === null) {
             return null;

@@ -11,8 +11,10 @@ export type VirtualizedListProps<TItem, TContext> = {
         context: TContext
     ) => React.ReactNode;
     onItemClick?: (item: TItem, index: number) => void;
+    onItemHover?: (item: TItem, index: number) => void;
     overscanCount?: number;
     selectedIndex?: number | null;
+    initialScrollIndex?: number | null;
 };
 
 const DEFAULT_PROPS: Partial<VirtualizedListProps<unknown, unknown>> = {
@@ -30,6 +32,7 @@ export function VirtualizedList<TItem, TContext>(
     const [scrollTop, setScrollTop] = React.useState<number>(0);
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
     const prevSelectedIndexRef = React.useRef<number | null>(null);
+    const didInitialScrollRef = React.useRef(false);
 
     const totalHeight = defaultedProps.items.length * defaultedProps.itemHeight;
     const containerHeight = Math.min(totalHeight, defaultedProps.maxHeight);
@@ -75,6 +78,21 @@ export function VirtualizedList<TItem, TContext>(
         defaultedProps.itemHeight,
         containerHeight,
     ]);
+
+    // Scroll to initialScrollIndex once on mount
+    React.useEffect(() => {
+        if (
+            didInitialScrollRef.current ||
+            defaultedProps.initialScrollIndex === null ||
+            defaultedProps.initialScrollIndex === undefined ||
+            !scrollContainerRef.current
+        ) {
+            return;
+        }
+        didInitialScrollRef.current = true;
+        scrollContainerRef.current.scrollTop =
+            defaultedProps.initialScrollIndex * defaultedProps.itemHeight;
+    });
 
     // Calculate visible range
     const startIndex = Math.max(
@@ -124,6 +142,9 @@ export function VirtualizedList<TItem, TContext>(
                             }}
                             onClick={() =>
                                 defaultedProps.onItemClick?.(item, itemIndex)
+                            }
+                            onMouseEnter={() =>
+                                defaultedProps.onItemHover?.(item, itemIndex)
                             }
                         >
                             <React.Fragment key={itemIndex}>
