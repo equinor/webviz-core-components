@@ -1179,7 +1179,10 @@ export class StateManager implements PubSub<TopicPayloads> {
             return false;
         }
 
-        const queries = text.split("\n");
+        const queries = text
+            .split("\n")
+            .map((q) => q.trim())
+            .filter((q) => q.length > 0);
         if (queries.length < 1) {
             return false;
         }

@@ -108,15 +108,14 @@ export class KeyboardHandler {
                 case "Backspace":
                     this._stateManager.removeCurrentSelection("backward");
                     event.preventDefault();
-                    break;
+                    return;
                 case "Delete":
                     this._stateManager.removeCurrentSelection("forward");
                     event.preventDefault();
-                    break;
+                    return;
                 // Any other key falls through to handleInput → insertText,
                 // which auto-switches to text mode before inserting.
             }
-            return;
         }
 
         // Default keyboard handling - route to StateManager operations
