@@ -9,20 +9,10 @@ import {
     useStore,
     StoreActions,
 } from "../WebvizContentManager/WebvizContentManager";
-import { View, ViewPropTypes } from "../../shared-types/webviz-content/webviz";
-import {
-    ContactPerson,
-    ContactPersonPropTypes,
-} from "../../shared-types/webviz-content/contact-person";
-import {
-    DeprecationWarning,
-    DeprecationWarningPropTypes,
-} from "../../shared-types/webviz-content/deprecation-warning";
-
-import {
-    TourStep,
-    TourStepPropTypes,
-} from "../../shared-types/webviz-content/tour-step";
+import { View } from "../../shared-types/webviz-content/webviz";
+import { ContactPerson } from "../../shared-types/webviz-content/contact-person";
+import { DeprecationWarning } from "../../shared-types/webviz-content/deprecation-warning";
+import { TourStep } from "../../shared-types/webviz-content/tour-step";
 
 import "./webviz-plugin-wrapper.css";
 
@@ -122,18 +112,36 @@ export const WebvizPluginWrapper: React.FC<WebvizPluginWrapperProps> = (
 WebvizPluginWrapper.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    views: PropTypes.arrayOf(PropTypes.shape(ViewPropTypes).isRequired)
+    views: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        group: PropTypes.string.isRequired,
+        showDownload: PropTypes.bool.isRequired,
+    }).isRequired)
         .isRequired,
     initiallyActiveViewId: PropTypes.string.isRequired,
     children: PropTypes.node,
     screenshotFilename: PropTypes.string,
-    contactPerson: PropTypes.shape(ContactPersonPropTypes),
+    contactPerson: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        email: PropTypes.string.isRequired,
+        phone: PropTypes.string.isRequired,
+    }),
     deprecationWarnings: PropTypes.arrayOf(
-        PropTypes.shape(DeprecationWarningPropTypes).isRequired
+        PropTypes.shape({
+            message: PropTypes.string.isRequired,
+            url: PropTypes.string.isRequired,
+        }).isRequired
     ),
     stretch: PropTypes.bool,
     feedbackUrl: PropTypes.string,
-    tourSteps: PropTypes.arrayOf(PropTypes.shape(TourStepPropTypes).isRequired),
+    tourSteps: PropTypes.arrayOf(PropTypes.shape({
+        elementId: PropTypes.string.isRequired,
+        viewId: PropTypes.string.isRequired,
+        settingsGroupId: PropTypes.string,
+        viewElementId: PropTypes.string,
+        content: PropTypes.string.isRequired,
+    }).isRequired),
     /**
      * Used to allow user interactions in this component to be persisted when
      * the component - or the page - is refreshed. If `persisted` is truthy and

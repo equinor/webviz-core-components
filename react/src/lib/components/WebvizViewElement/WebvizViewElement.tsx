@@ -14,7 +14,6 @@ import { WebvizDialog } from "../WebvizDialog";
 import PropTypes from "prop-types";
 import {
     DownloadData,
-    DownloadDataPropTypes,
 } from "../../shared-types/webviz-content/download-data";
 import html2canvas from "html2canvas";
 import downloadFile from "../../utils/downloadFile";
@@ -613,7 +612,11 @@ WebvizViewElement.propTypes = {
     hidden: PropTypes.bool,
     showDownload: PropTypes.bool,
     screenshotFilename: PropTypes.string,
-    download: PropTypes.shape(DownloadDataPropTypes),
+    download: PropTypes.shape({
+        filename: PropTypes.string.isRequired,
+        content: PropTypes.string.isRequired,
+        mime_type: PropTypes.string.isRequired,
+    }),
     setProps: PropTypes.func,
     children: PropTypes.node,
 };
