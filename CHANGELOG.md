@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED] - YYYY-MM-DD
 
 ### Changed
+-   [#310](https://github.com/equinor/webviz-core-components/pull/310) - Dash 3 and 4 compatibility.
 -   [#306](https://github.com/equinor/webviz-core-components/pull/306) - Support Python 3.12.
 
 ## [0.8.1] - 2025-01-30
