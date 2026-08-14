@@ -1,6 +1,6 @@
 interface Window {
     dash_clientside: {
-        set_props: (componentPath: string, props: Record<string, unknown>) => void;
+        set_props: (componentPath: Array<string | number>, props: Record<string, unknown>) => void;
     };
 }
 
