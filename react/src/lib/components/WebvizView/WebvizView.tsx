@@ -10,7 +10,6 @@ import downloadFile from "../../utils/downloadFile";
 
 import {
     DownloadData,
-    DownloadDataPropTypes,
 } from "../../shared-types/webviz-content/download-data";
 
 import "./webviz-view.css";
@@ -69,6 +68,10 @@ export const WebvizView: React.FC<WebvizViewProps> = (props) => {
 WebvizView.propTypes = {
     id: PropTypes.string.isRequired,
     children: PropTypes.node,
-    download: PropTypes.shape(DownloadDataPropTypes),
+    download: PropTypes.shape({
+        filename: PropTypes.string.isRequired,
+        content: PropTypes.string.isRequired,
+        mime_type: PropTypes.string.isRequired,
+    }),
     setProps: PropTypes.func,
 };
