@@ -13,12 +13,11 @@
 }
 
 .WebvizPluginWrapper__FullScreenContainer {
-    padding-top: 16px;
-    padding-bottom: 16px;
     border: 4px transparent solid;
     border-bottom-width: 1px;
     flex-grow: 4;
     display: flex;
+    overflow: auto;
 }
 
 .WebvizPluginWrapper__DashContent {
