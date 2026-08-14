@@ -1,3 +1,9 @@
+interface Window {
+    dash_clientside: {
+        set_props: (componentPath: string, props: Record<string, unknown>) => void;
+    };
+}
+
 declare module "*.svg" {
     // TODO: Fix this the next time the file is edited.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
