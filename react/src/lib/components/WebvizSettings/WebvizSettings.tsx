@@ -10,6 +10,12 @@ import {
 
 import "./webviz-settings.css";
 
+type DashChildProps = {
+    id?: string;
+    componentPath?: Array<string | number>;
+    onToggle?: (id: string) => void;
+};
+
 export type WebvizSettingsProps = {
     visible: boolean;
     width: number;
@@ -20,12 +26,6 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
     props: WebvizSettingsProps
 ) => {
     const store = useStore();
-
-    React.useEffect(() => {
-        if (store.state.openSettingsGroupIds.length !== 0) {
-            return;
-        }
-    }, [props.children]);
 
     const handleGroupToggle = React.useCallback(
         (id: string) => {
@@ -45,8 +45,26 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
                 });
             }
         },
-        [store.state]
+        [store]
     );
+
+    React.useEffect(() => {
+        React.Children.forEach(props.children, (child) => {
+            if (!React.isValidElement<DashChildProps>(child)) {
+                return;
+            }
+
+            const { componentPath, id } = child.props;
+
+            if (!componentPath || !id) {
+                return;
+            }
+
+            window.dash_clientside.set_props(componentPath, {
+                open: store.state.openSettingsGroupIds.includes(id),
+            });
+        });
+    }, [props.children, store.state.openSettingsGroupIds]);
 
     return (
         <div
@@ -60,24 +78,13 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
             <ScrollArea noScrollbarPadding={true}>
                 {props.children &&
                     React.Children.map(props.children, (child) => {
-                        if (React.isValidElement(child)) {
-                            return React.cloneElement(child, {
-                                // @ts-expect-error - this is proven to be a valid prop in Dash components
-                                _dashprivate_layout: {
-                                    ...child.props._dashprivate_layout,
-                                    props: {
-                                        ...child.props._dashprivate_layout
-                                            .props,
-                                        open: store.state.openSettingsGroupIds.includes(
-                                            child.props._dashprivate_layout
-                                                .props.id
-                                        ),
-                                        onToggle: handleGroupToggle,
-                                    },
-                                },
-                            });
+                        if (!React.isValidElement<DashChildProps>(child)) {
+                            return child;
                         }
-                        return child;
+
+                        return React.cloneElement(child, {
+                            onToggle: handleGroupToggle,
+                        });
                     })}
             </ScrollArea>
         </div>
