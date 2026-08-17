@@ -1,0 +1,71 @@
+import type { Range } from "../../utils/range";
+
+export type Expr =
+    | ConcatExpr
+    | BinaryExpr
+    | GroupExpr
+    | SetExpr
+    | PatternExpr
+    | AttributeFilterExpr
+    | ErrorExpr;
+
+export interface ConcatExpr {
+    kind: "concat";
+    parts: Expr[];
+    charRange: Range;
+}
+
+export interface BinaryExpr {
+    kind: "binary";
+    operator: "|" | "&";
+    left: Expr;
+    right: Expr;
+    charRange: Range;
+}
+
+export interface GroupExpr {
+    kind: "group";
+    expr: Expr;
+    closed: boolean;
+    charRange: Range;
+}
+
+export interface SetExpr {
+    kind: "set";
+    items: Expr[];
+    closed: boolean;
+    charRange: Range;
+}
+
+export interface PatternExpr {
+    kind: "pattern";
+    atoms: Atom[];
+    charRange: Range;
+}
+
+export interface AttributeFilterExpr {
+    kind: "attributeFilter";
+    attributeName: string;
+    values: Expr[];
+    closed: boolean;
+    charRange: Range;
+}
+
+export interface ErrorExpr {
+    kind: "error";
+    message: string;
+    charRange: Range;
+}
+
+export type Atom =
+    | { kind: "literal"; text: string; charRange: Range }
+    | { kind: "star"; charRange: Range }
+    | { kind: "qmark"; charRange: Range };
+
+export type Segment =
+    | { kind: "deep"; charRange: Range }
+    | { kind: "expr"; expr: Expr; charRange: Range; unionMode: boolean };
+
+export interface QueryAST {
+    segments: Segment[];
+}

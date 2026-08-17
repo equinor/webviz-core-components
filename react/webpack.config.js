@@ -24,10 +24,13 @@ module.exports = (env, argv) => {
 
     // Entry
 
-    const entry =
-        argv && argv.entry
-            ? argv.entry[0]
-            : path.join(__dirname, "src/demo/index.tsx");
+    let entry;
+    if (argv && argv.entry) {
+        // webpack-cli 5.x passes entry as an array, take the first one
+        entry = Array.isArray(argv.entry) ? argv.entry[0] : argv.entry;
+    } else {
+        entry = path.join(__dirname, "src/demo/index.tsx");
+    }
 
     // Output
 
@@ -39,11 +42,16 @@ module.exports = (env, argv) => {
 
     const filenameCss = demo ? "output.css" : `${dashLibraryName}.css`;
 
+    const demoOutputDir =
+        demo && env && env.outputDir
+            ? path.resolve(__dirname, env.outputDir)
+            : __dirname;
+
     // Devtool
 
     const devtool =
         argv.devtool ||
-        (mode === "development" ? "eval-source-map" : "source-map");
+        (mode === "development" ? "source-map" : "source-map");
 
     // Externals
 
@@ -64,11 +72,17 @@ module.exports = (env, argv) => {
         target: "web",
         output: {
             path: demo
-                ? __dirname
+                ? demoOutputDir
                 : path.resolve(__dirname, "..", dashLibraryName),
             filename: filenameJs,
             library: dashLibraryName,
             libraryTarget: "umd",
+        },
+        devServer: {
+            static: {
+                directory: __dirname,
+            },
+            hot: true,
         },
         module: {
             rules: [
