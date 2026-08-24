@@ -53,13 +53,14 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
             if (!React.isValidElement<DashChildProps>(child)) {
                 return;
             }
-
-            const { componentPath, id } = child.props;
-
+    
+            const componentPath = child.props._passedComponent?.componentPath;
+            const id = child.props._passedComponent?.props.id;
+    
             if (!componentPath || !id) {
                 return;
             }
-
+    
             window.dash_clientside.set_props(componentPath, {
                 open: store.state.openSettingsGroupIds.includes(id),
             });
