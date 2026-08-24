@@ -60,7 +60,7 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
             if (!componentPath || !id) {
                 return;
             }
-    
+
             window.dash_clientside.set_props(componentPath, {
                 open: store.state.openSettingsGroupIds.includes(id),
             });
