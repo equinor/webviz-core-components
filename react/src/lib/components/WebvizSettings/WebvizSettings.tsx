@@ -14,6 +14,12 @@ type DashChildProps = {
     id?: string;
     componentPath?: Array<string | number>;
     onToggle?: (id: string) => void;
+    _passedComponent?: {
+        componentPath?: Array<string | number>;
+        props: {
+            id?: string;
+        };
+    };
 };
 
 export type WebvizSettingsProps = {
