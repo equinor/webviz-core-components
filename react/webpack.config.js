@@ -73,7 +73,16 @@ module.exports = (env, argv) => {
         module: {
             rules: [
                 {
-                    test: /\.(t|j)sx?$/,
+                    test: /\.js$/,
+                    enforce: "pre",
+                    use: ["source-map-loader"],
+                    exclude: /node_modules/,
+                },
+                {
+                    // Only raw TS/JSX source (never plain compiled .js, so the
+                    // dist-entry build doesn't clobber the source-map-loader
+                    // chain from tsc back to src/**/*.tsx above).
+                    test: /\.(tsx?|jsx)$/,
                     use: [
                         {
                             loader: "ts-loader",

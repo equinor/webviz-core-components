@@ -89,6 +89,7 @@
         "prop-types": "^15.8.1",
         "react-docgen": "^5.4.2",
         "rimraf": "^5.0.0",
+        "source-map-loader": "^5.0.0",
         "style-loader": "^3.3.1",
         "ts-loader": "^9.3.1",
         "tsconfig.js": "^3.0.0",
