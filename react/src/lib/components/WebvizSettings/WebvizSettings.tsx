@@ -60,7 +60,7 @@ export const WebvizSettings: React.FC<WebvizSettingsProps> = (
                 return;
             }
     
-            const componentPath = child.props._passedComponent?.componentPath;
+            const componentPath = child.props.componentPath;
             const id = child.props._passedComponent?.props.id;
     
             if (!componentPath || !id) {
